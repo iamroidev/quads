@@ -35,6 +35,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         try {
           const response = await authService.getMe();
           setUser(response.data.user);
+          localStorage.setItem('user', JSON.stringify(response.data.user));
         } catch {
           // Token is invalid/expired
           localStorage.removeItem('token');
@@ -177,6 +178,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       const response = await authService.getMe();
       setUser(response.data.user);
+      localStorage.setItem('user', JSON.stringify(response.data.user));
     } catch {
       // Silently fail
     }

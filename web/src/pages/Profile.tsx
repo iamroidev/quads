@@ -130,6 +130,7 @@ const ProfilePage: React.FC = () => {
   const {
     register: rp,
     handleSubmit: hsp,
+    reset: rpReset,
     formState: { errors: pe },
   } = useForm<ProfileFormData>({
     resolver: zodResolver(profileSchema),
@@ -146,6 +147,23 @@ const ProfilePage: React.FC = () => {
       bio: user?.bio || '',
     },
   });
+
+  React.useEffect(() => {
+    if (user) {
+      rpReset({
+        name: user.name || '',
+        storeName: user.storeName || '',
+        brandName: user.brandName || '',
+        phone: user.phone || '',
+        studentId: user.studentId || '',
+        department: user.department || '',
+        residenceHall: user.residenceHall || '',
+        currentLevel: user.currentLevel || '',
+        location: user.location || '',
+        bio: user.bio || '',
+      });
+    }
+  }, [user, rpReset]);
 
   const {
     register: rpw,

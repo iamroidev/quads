@@ -442,7 +442,15 @@ const RegisterPage: React.FC = () => {
                     <p className="text-[11px] opacity-60 mb-5">Your account will use Google authentication. No password needed.</p>
                     <div className="flex gap-2 mt-5">
                       <button type="button" onClick={() => setStep(3)} className="flex-1 border border-black bg-white px-4 py-2.5 text-[9px] font-bold uppercase shadow-[2px_2px_0_0_rgba(0,0,0,1)] hover:shadow-[3px_3px_0_0_rgba(0,0,0,1)] transition-all">← Back</button>
-                      <button type="submit" disabled={isSubmitting} className="flex-[2] border border-black bg-black px-4 py-2.5 text-[10px] font-bold uppercase text-white shadow-[3px_3px_0_0_rgba(0,0,0,1)] hover:bg-white hover:text-black disabled:opacity-40 transition-all">
+                      <button 
+                        type="button" 
+                        onClick={() => {
+                          const data = watch() as RegisterFormData;
+                          onSubmit(data);
+                        }} 
+                        disabled={isSubmitting} 
+                        className="flex-[2] border border-black bg-black px-4 py-2.5 text-[10px] font-bold uppercase text-white shadow-[3px_3px_0_0_rgba(0,0,0,1)] hover:bg-white hover:text-black disabled:opacity-40 transition-all"
+                      >
                         {isSubmitting ? 'Creating...' : 'Complete with Google'}
                       </button>
                     </div>
