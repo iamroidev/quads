@@ -45,7 +45,13 @@ const CheckoutScreen = ({ route, navigation }: any) => {
         Alert.alert(
           'Order placed!',
           `Order #${res.data.order.orderNumber} is pending payment.`,
-          [{ text: 'View Order', onPress: () => navigation.replace('OrderDetail', { orderId: res.data.order._id }) }]
+          [{ 
+            text: 'View My Orders', 
+            onPress: () => {
+              navigation.popToTop(); // Reset the product browse stack
+              navigation.getParent()?.navigate('ProfileTab', { screen: 'Orders' });
+            } 
+          }]
         );
       }
     } catch (err: any) {

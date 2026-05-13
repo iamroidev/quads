@@ -143,6 +143,14 @@ const VerificationPage: React.FC = () => {
     <BulletinLayout title="Verification" subtitle="Trust & Safety" section="10">
       <BulletinSection bgColor="bg-[#faf8f5]">
         <div className="max-w-lg mx-auto">
+          {/* Back button at the top */}
+          <button
+            onClick={() => navigate('/profile')}
+            className="mb-6 flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-black opacity-60 hover:opacity-100 transition-opacity"
+          >
+            ← Back to Profile
+          </button>
+
           {/* Status cards */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
             <div className={`border p-4 ${emailVerified ? 'border-emerald-400 bg-emerald-50' : 'border-black/20 bg-white'}`}>
@@ -266,13 +274,22 @@ const VerificationPage: React.FC = () => {
               >
                 {verifying ? <><Loader2 className="inline-block h-3.5 w-3.5 animate-spin mr-1" /> Verifying...</> : 'Verify code'}
               </button>
-              <div className="mt-3 text-center">
+              <div className="mt-4 flex flex-col items-center gap-3">
                 <button
                   onClick={handleResend}
                   disabled={countdown > 0 || sending}
                   className="text-[11px] font-bold underline opacity-60 hover:opacity-100 disabled:opacity-30"
                 >
                   {countdown > 0 ? `Resend in ${countdown}s` : 'Resend code'}
+                </button>
+                <button
+                  onClick={() => {
+                    setStep('select');
+                    setCode('');
+                  }}
+                  className="text-[11px] font-bold uppercase tracking-wider opacity-40 hover:opacity-100"
+                >
+                  Change {method === 'email' ? 'Email' : 'Phone Number'}
                 </button>
               </div>
             </div>

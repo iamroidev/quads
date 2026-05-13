@@ -118,10 +118,10 @@ class VerificationService {
         Message: `Your CampusMarketplace verification code is: ${code}. Valid for 10 minutes.`,
         PhoneNumber: formattedPhone,
         MessageAttributes: {
-          'AWS.SNS.SMS.SenderID': {
-            DataType: 'String',
-            StringValue: env.AWS_SNS_SENDER_ID || 'CAMPUS',
-          },
+          // 'AWS.SNS.SMS.SenderID': {
+          //   DataType: 'String',
+          //   StringValue: env.AWS_SNS_SENDER_ID || 'CAMPUS',
+          // },
           'AWS.SNS.SMS.SMSType': {
             DataType: 'String',
             StringValue: 'Transactional',

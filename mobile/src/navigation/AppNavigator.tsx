@@ -2,8 +2,9 @@ import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { ActivityIndicator, Text, View } from 'react-native';
+import { ActivityIndicator, Text, View, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAuth } from '../context/AuthContext';
 
 import {
@@ -180,71 +181,76 @@ const ProfileStackScreen = () => (
 const tabIcon = (name: React.ComponentProps<typeof Ionicons>['name']) =>
   ({ color }: { color: string }) => <Ionicons name={name} size={19} color={color} />;
 
-const MainTabs = ({ role }: { role?: string }) => (
-  // Keep equal tab widths by role count.
-  <Tab.Navigator
-    screenOptions={{
-      headerShown: false,
-      tabBarActiveTintColor: colors.text,
-      tabBarInactiveTintColor: '#9f9382',
-      tabBarStyle: {
-        borderTopColor: colors.border,
-        backgroundColor: '#fffdf8',
-        height: 62,
-        paddingTop: 2,
-        paddingBottom: 4,
-        paddingHorizontal: 0,
-      },
-      tabBarLabelStyle: {
-        fontSize: 9,
-        fontWeight: '800',
-        textTransform: 'uppercase',
-        letterSpacing: 1,
-        marginBottom: 0,
-      },
-      tabBarItemStyle: {
-        flex: 1,
-        minWidth: 0,
-        justifyContent: 'center',
-        alignItems: 'center',
-        paddingHorizontal: 0,
-      },
-    }}
-  >
-    <Tab.Screen
-      name="HomeTab"
-      component={HomeScreen}
-      options={{ title: 'Home', tabBarIcon: tabIcon('home-outline') }}
-    />
-    <Tab.Screen
-      name="ProductsTab"
-      component={ProductsStackScreen}
-      options={{ title: 'Browse', tabBarIcon: tabIcon('grid-outline') }}
-      listeners={({ navigation }) => ({
-        tabPress: () => {
-          navigation.navigate('ProductsTab', { screen: 'ProductsHome' });
+const MainTabs = ({ role }: { role?: string }) => {
+  const isSeller = role === 'seller' || role === 'admin';
+  const insets = useSafeAreaInsets();
+
+  return (
+    <Tab.Navigator
+      screenOptions={{
+        headerShown: false,
+        tabBarActiveTintColor: colors.text,
+        tabBarInactiveTintColor: '#9f9382',
+        tabBarStyle: {
+          borderTopColor: colors.border,
+          backgroundColor: '#fffdf8',
+          height: 62 + (Platform.OS === 'ios' ? insets.bottom : 0),
+          paddingTop: 8,
+          paddingBottom: Math.max(insets.bottom, 8),
+          paddingHorizontal: 0,
         },
-      })}
-    />
-    <Tab.Screen
-      name="MessagesTab"
-      component={MessagesStackScreen}
-      options={{ title: 'Chat', tabBarIcon: tabIcon('chatbubble-ellipses-outline') }}
-    />
-    {(role === 'seller' || role === 'admin') && (
+        tabBarLabelStyle: {
+          fontSize: 9,
+          fontWeight: '800',
+          textTransform: 'uppercase',
+          letterSpacing: 1,
+          marginBottom: 0,
+        },
+        tabBarItemStyle: {
+          flex: 1,
+          minWidth: 0,
+          justifyContent: 'center',
+          alignItems: 'center',
+          paddingHorizontal: 0,
+        },
+      }}
+    >
+      {isSeller ? (
+        <Tab.Screen
+          name="SellerTab"
+          component={SellerStackScreen}
+          options={{ title: 'Dashboard', tabBarIcon: tabIcon('storefront-outline') }}
+        />
+      ) : (
+        <Tab.Screen
+          name="HomeTab"
+          component={HomeScreen}
+          options={{ title: 'Home', tabBarIcon: tabIcon('home-outline') }}
+        />
+      )}
       <Tab.Screen
-        name="SellerTab"
-        component={SellerStackScreen}
-        options={{ title: 'Sell', tabBarIcon: tabIcon('storefront-outline') }}
+        name="ProductsTab"
+        component={ProductsStackScreen}
+        options={{ title: 'Browse', tabBarIcon: tabIcon('grid-outline') }}
+        listeners={({ navigation }) => ({
+          tabPress: () => {
+            navigation.navigate('ProductsTab', { screen: 'ProductsHome' });
+          },
+        })}
       />
-    )}
-    <Tab.Screen
-      name="ProfileTab"
-      component={ProfileStackScreen}
-      options={{ title: 'Me', tabBarIcon: tabIcon('person-outline') }}
-    />
-  </Tab.Navigator>
-);
+      <Tab.Screen
+        name="MessagesTab"
+        component={MessagesStackScreen}
+        options={{ title: 'Chat', tabBarIcon: tabIcon('chatbubble-ellipses-outline') }}
+      />
+      <Tab.Screen
+        name="ProfileTab"
+        component={ProfileStackScreen}
+        options={{ title: 'Me', tabBarIcon: tabIcon('person-outline') }}
+      />
+    </Tab.Navigator>
+  );
+};
 
 // ── Root navigator ────────────────────────────────────────────────────────────
 const AppNavigator = () => {

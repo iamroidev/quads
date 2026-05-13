@@ -66,18 +66,21 @@ const ChatScreen = ({ route, navigation }: any) => {
       socketRef.current = socket;
 
       socket.on('connect', () => {
-        socket.emit('join_conversation', conversationId);
+        socket.emit('conversation:join', conversationId);
       });
 
-      socket.on('new_message', (message: Message) => {
+      socket.on('message:new', (message: Message) => {
         if (message.conversation === conversationId) {
-          setMessages((prev) => [...prev, message]);
+          setMessages((prev) => {
+            if (prev.some((m) => m._id === message._id)) return prev;
+            return [...prev, message];
+          });
           scrollToEnd();
           chatService.markAsRead(conversationId).catch(() => {});
         }
       });
 
-      socket.on('message_read', ({ userId }: { conversationId: string; userId: string }) => {
+      socket.on('message:read', ({ userId }: { conversationId: string; userId: string }) => {
         setMessages((prev) =>
           prev.map((m) =>
             !m.isRead && m.sender._id !== userId ? { ...m, isRead: true } : m
@@ -87,7 +90,7 @@ const ChatScreen = ({ route, navigation }: any) => {
     });
 
     return () => {
-      socketRef.current?.emit('leave_conversation', conversationId);
+      socketRef.current?.emit('conversation:leave', conversationId);
       socketRef.current?.disconnect();
     };
   }, [conversationId]);
@@ -107,15 +110,14 @@ const ChatScreen = ({ route, navigation }: any) => {
     setSending(true);
     setText('');
     try {
-      // Emit via socket first (real-time); REST fallback handled by server broadcast
-      if (socketRef.current?.connected) {
-        socketRef.current.emit('send_message', { conversationId, content: trimmed });
-      } else {
-        const res = await chatService.sendMessage(conversationId, trimmed);
-        if (res.success) {
-          setMessages((prev) => [...prev, res.data.message]);
-          scrollToEnd();
-        }
+      // ALWAYS use REST to guarantee delivery. The server will broadcast to other users via socket.
+      const res = await chatService.sendMessage(conversationId, trimmed);
+      if (res.success) {
+        setMessages((prev) => {
+          if (prev.some((m) => m._id === res.data.message._id)) return prev;
+          return [...prev, res.data.message];
+        });
+        scrollToEnd();
       }
     } finally {
       setSending(false);
@@ -127,7 +129,13 @@ const ChatScreen = ({ route, navigation }: any) => {
     setSending(true);
     try {
       const res = await chatService.sendMessage(conversationId, label, 'text', { quickReplyLabel: label });
-      if (res.success) { setMessages((prev) => [...prev, res.data.message]); scrollToEnd(); }
+      if (res.success) { 
+        setMessages((prev) => {
+          if (prev.some((m) => m._id === res.data.message._id)) return prev;
+          return [...prev, res.data.message];
+        });
+        scrollToEnd(); 
+      }
     } finally { setSending(false); setQuickReplyMode(false); }
   };
 
@@ -142,7 +150,13 @@ const ChatScreen = ({ route, navigation }: any) => {
         'text',
         { offer: { amount, status: 'pending' } }
       );
-      if (res.success) { setMessages((prev) => [...prev, res.data.message]); scrollToEnd(); }
+      if (res.success) { 
+        setMessages((prev) => {
+          if (prev.some((m) => m._id === res.data.message._id)) return prev;
+          return [...prev, res.data.message];
+        });
+        scrollToEnd(); 
+      }
       setOfferAmount('');
       setShowOfferPanel(false);
     } finally { setSending(false); }

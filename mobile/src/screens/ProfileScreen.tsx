@@ -18,7 +18,7 @@ const ProfileScreen = ({ navigation }: any) => {
       onPress: () => navigation.navigate('Settings'),
     },
     {
-      label: 'My Orders',
+      label: 'My Purchases', // Clarified for sellers
       onPress: () => navigation.navigate('Orders'),
     },
     {
@@ -98,26 +98,7 @@ const ProfileScreen = ({ navigation }: any) => {
         ))}
       </View>
 
-      {isSeller ? (
-        <View style={styles.sellerQuickCard}>
-          {!sellerOnboardingDone ? (
-            <TouchableOpacity style={styles.sellerOutlineBtn} onPress={() => navigation.navigate('SellerOnboarding')}>
-              <Text style={styles.sellerOutlineText}>Complete Seller Setup</Text>
-            </TouchableOpacity>
-          ) : null}
-          <TouchableOpacity style={styles.sellerPrimaryBtn} onPress={() => navigation.getParent()?.navigate('SellerTab', { screen: 'CreateListing' })}>
-            <Text style={styles.sellerPrimaryText}>+ Sell Something</Text>
-          </TouchableOpacity>
-          <View style={styles.sellerQuickRow}>
-            <TouchableOpacity style={styles.sellerQuickBtn} onPress={() => navigation.getParent()?.navigate('SellerTab', { screen: 'MyListings' })}>
-              <Text style={styles.sellerQuickText}>My Listings</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.sellerQuickBtn} onPress={() => navigation.getParent()?.navigate('SellerTab', { screen: 'SellerAnalytics' })}>
-              <Text style={styles.sellerQuickText}>Analytics</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      ) : null}
+      {/* Seller block removed to prevent UI clutter. Sellers use the Dashboard tab. */}
 
       <TouchableOpacity style={styles.logoutBtn} onPress={logout}>
         <Text style={styles.logoutText}>Sign Out</Text>
