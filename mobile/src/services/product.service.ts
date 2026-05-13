@@ -144,6 +144,11 @@ const productService = {
     return response.data;
   },
 
+  deleteProduct: async (id: string): Promise<{ success: boolean; message: string }> => {
+    const response = await api.delete(`/products/${id}`);
+    return response.data;
+  },
+
   updateProduct: async (id: string, payload: Partial<CreateProductPayload>): Promise<ProductResponse> => {
     const hasImages = Array.isArray(payload.images) && payload.images.length > 0;
     if (hasImages) {

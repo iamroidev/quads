@@ -223,14 +223,14 @@ const OrderDetailScreen = ({ route, navigation }: any) => {
       {/* Details */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Details</Text>
-        {[
+        {(([
           ['Delivery', order.deliveryMethod],
           order.pickupLocation ? ['Pickup at', order.pickupLocation] : null,
           order.deliveryAddress ? ['Deliver to', order.deliveryAddress] : null,
           order.note ? ['Note', order.note] : null,
           ['Placed', formatDate(order.createdAt)],
           [isSeller ? 'Buyer' : 'Seller', isSeller ? order.buyer?.name : order.seller?.name],
-        ].filter(Boolean).map(([key, val], i) => (
+        ].filter(Boolean)) as string[][]).map(([key, val], i) => (
           <View key={i} style={styles.detailRow}>
             <Text style={styles.detailKey}>{key}</Text>
             <Text style={styles.detailValue}>{val}</Text>

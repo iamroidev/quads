@@ -106,7 +106,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const googleLogin = useCallback(async (credential: string, role: 'buyer' | 'seller' | undefined = 'buyer') => {
-    const response = await authService.googleLogin(credential, role);
+    // 1. Exchange Google ID token for Supabase session
+    const { data: { session }, error } = await supabase.auth.signInWithIdToken({
+      provider: 'google',
+      token: credential,
+    });
+
+    if (error || !session?.access_token) {
+      throw new Error(error?.message || 'Supabase Google sign in failed');
+    }
+
+    // 2. Send Supabase access token to our backend
+    const response = await authService.googleLogin(session.access_token, role);
     const { user: newUser, token: newToken } = response.data;
 
     localStorage.setItem('token', newToken);
