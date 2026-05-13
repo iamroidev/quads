@@ -50,6 +50,25 @@ interface ProductDetailResponse {
   };
 }
 
+interface ProductCardFeedResponse {
+  success: boolean;
+  data: Product[];
+}
+
+interface PriceInsightsResponse {
+  success: boolean;
+  data: {
+    min: number;
+    max: number;
+    average: number;
+    median: number;
+    sampleSize: number;
+    q1: number;
+    q3: number;
+    dealLabel: 'great_deal' | 'fair_price' | 'premium';
+  };
+}
+
 const productService = {
   getProducts: async (params?: {
     page?: number;
@@ -65,6 +84,21 @@ const productService = {
 
   getProductById: async (id: string): Promise<ProductDetailResponse> => {
     const response = await api.get(`/products/${id}`);
+    return response.data;
+  },
+
+  getRelated: async (productId: string, limit = 6): Promise<ProductCardFeedResponse> => {
+    const response = await api.get(`/products/${productId}/related`, { params: { limit } });
+    return response.data;
+  },
+
+  getRecommendations: async (params?: { productId?: string; limit?: number }): Promise<ProductCardFeedResponse> => {
+    const response = await api.get('/products/recommendations', { params });
+    return response.data;
+  },
+
+  getPriceInsights: async (productId: string): Promise<PriceInsightsResponse> => {
+    const response = await api.get(`/products/${productId}/price-insights`);
     return response.data;
   },
 
@@ -112,6 +146,38 @@ const productService = {
 
   getSellerStats: async (): Promise<SellerStatsResponse> => {
     const response = await api.get('/orders/seller/stats');
+    return response.data;
+  },
+
+  getMyListings: async (params?: {
+    page?: number;
+    limit?: number;
+    search?: string;
+    sort?: string;
+    status?: string;
+  }): Promise<ProductListResponse> => {
+    const response = await api.get('/products/my/listings', { params });
+    return response.data;
+  },
+
+  importProductsCsv: async (csvFile: {
+    uri: string;
+    type?: string;
+    name?: string;
+  }): Promise<{ success: boolean; message: string; data?: any }> => {
+    const formData = new FormData();
+    formData.append('csvFile', {
+      uri: csvFile.uri,
+      type: csvFile.type || 'text/csv',
+      name: csvFile.name || `import-${Date.now()}.csv`,
+    } as any);
+    formData.append('withImages', 'true');
+
+    const response = await api.post('/products/bulk/csv', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
     return response.data;
   },
 };

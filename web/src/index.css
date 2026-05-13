@@ -232,3 +232,15 @@
 .dark .input {
   @apply bg-gray-800 border-gray-600 text-gray-100 placeholder-gray-500;
 }
+
+
+@layer utilities {
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+}

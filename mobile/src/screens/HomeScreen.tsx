@@ -18,6 +18,7 @@ import { Product } from '../types';
 import { useAuth } from '../context/AuthContext';
 import { colors } from '../theme';
 import ScreenHeader from '../components/ScreenHeader';
+import categoryService, { CategoryWithCount } from '../services/category.service';
 
 const CURATED_HERO_CARDS = [
   { id: 'study', title: 'Study essentials', subtitle: 'Textbooks, calculators, and practical kits', filter: 'books' },
@@ -64,6 +65,11 @@ const HomeScreen = ({ navigation }: any) => {
   const { user } = useAuth();
   const [featured, setFeatured] = useState<Product[]>([]);
   const [recent, setRecent] = useState<Product[]>([]);
+  const [trending, setTrending] = useState<Product[]>([]);
+  const [recentPage, setRecentPage] = useState(1);
+  const [hasMoreRecent, setHasMoreRecent] = useState(true);
+  const [loadingMoreRecent, setLoadingMoreRecent] = useState(false);
+  const [categories, setCategories] = useState<CategoryWithCount[]>([]);
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -72,12 +78,20 @@ const HomeScreen = ({ navigation }: any) => {
   const fetchData = useCallback(async (withLoader = true) => {
     if (withLoader) setLoading(true);
     try {
-      const [featuredRes, recentRes] = await Promise.all([
+      const [featuredRes, recentRes, trendingRes, categoryRes] = await Promise.all([
         productService.getProducts({ limit: 8, sort: 'featured' }),
-        productService.getProducts({ limit: 20, sort: 'newest' }),
+        productService.getProducts({ page: 1, limit: 20, sort: 'newest' }),
+        productService.getProducts({ limit: 8, sort: 'popular' }),
+        categoryService.getCategoriesWithCounts(),
       ]);
       if (featuredRes.success) setFeatured(featuredRes.data.filter((p) => p.isFeatured).slice(0, 6));
       if (recentRes.success) setRecent(recentRes.data);
+      if (recentRes.success) {
+        setRecentPage(1);
+        setHasMoreRecent((recentRes.pagination?.pages || 1) > 1);
+      }
+      if (trendingRes?.success) setTrending(trendingRes.data);
+      if (categoryRes?.success) setCategories(categoryRes.data.categories.slice(0, 8));
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -87,6 +101,22 @@ const HomeScreen = ({ navigation }: any) => {
   useEffect(() => {
     fetchData();
   }, [fetchData]);
+
+  const loadMoreRecent = async () => {
+    if (loadingMoreRecent || !hasMoreRecent) return;
+    setLoadingMoreRecent(true);
+    try {
+      const nextPage = recentPage + 1;
+      const recentRes = await productService.getProducts({ page: nextPage, limit: 20, sort: 'newest' });
+      if (recentRes.success) {
+        setRecent((prev) => [...prev, ...recentRes.data]);
+        setRecentPage(nextPage);
+        setHasMoreRecent((recentRes.pagination?.pages || 1) > nextPage);
+      }
+    } finally {
+      setLoadingMoreRecent(false);
+    }
+  };
 
   useEffect(() => {
     Animated.timing(fadeAnim, {
@@ -170,6 +200,27 @@ const HomeScreen = ({ navigation }: any) => {
         </ScrollView>
       </View>
 
+      {categories.length > 0 && (
+        <View style={styles.section}>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionLabel}>CATEGORY</Text>
+            <Text style={styles.sectionTitle}>Shop by category</Text>
+          </View>
+          <View style={styles.categoryGrid}>
+            {categories.map((cat) => (
+              <TouchableOpacity
+                key={cat._id}
+                style={styles.categoryTile}
+                onPress={() => navigation.navigate('ProductsTab', { screen: 'ProductsHome', params: { category: cat._id } })}
+              >
+                <Text style={styles.categoryTileTitle} numberOfLines={1}>{cat.name}</Text>
+                <Text style={styles.categoryTileCount}>{cat.productCount}</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </View>
+      )}
+
       {/* Featured */}
       {featured.length > 0 && (
         <View style={styles.section}>
@@ -217,8 +268,48 @@ const HomeScreen = ({ navigation }: any) => {
           ListEmptyComponent={
             <Text style={styles.emptyText}>No listings available yet. Check back shortly.</Text>
           }
+          ListFooterComponent={
+            hasMoreRecent ? (
+              <TouchableOpacity style={styles.loadMoreBtn} onPress={loadMoreRecent} disabled={loadingMoreRecent}>
+                <Text style={styles.loadMoreBtnText}>{loadingMoreRecent ? 'Loading...' : 'Load more'}</Text>
+              </TouchableOpacity>
+            ) : null
+          }
         />
       </View>
+
+      <View style={styles.section}>
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionLabel}>TRENDING</Text>
+          <Text style={styles.sectionTitle}>Most viewed</Text>
+        </View>
+        <FlatList
+          data={trending}
+          keyExtractor={(item) => item._id}
+          renderItem={({ item }) => (
+            <ProductCard item={item} onPress={() => goToProduct(item._id)} />
+          )}
+          numColumns={2}
+          columnWrapperStyle={styles.grid}
+          scrollEnabled={false}
+          ListEmptyComponent={<Text style={styles.emptyText}>No trending products yet.</Text>}
+        />
+      </View>
+
+      {user?.role === 'buyer' ? (
+        <TouchableOpacity style={styles.buyerCta} onPress={() => navigation.navigate('ProfileTab')}>
+          <Text style={styles.buyerCtaTop}>Got something to sell?</Text>
+          <Text style={styles.buyerCtaTitle}>Upgrade to seller account</Text>
+          <Text style={styles.buyerCtaSub}>Set up your seller profile and start listing campus items.</Text>
+        </TouchableOpacity>
+      ) : (
+        <TouchableOpacity style={styles.buyerCta} onPress={() => navigation.getParent()?.navigate('SellerTab', { screen: 'CreateListing' })}>
+          <Text style={styles.buyerCtaTop}>Seller workspace</Text>
+          <Text style={styles.buyerCtaTitle}>Create or manage listings</Text>
+          <Text style={styles.buyerCtaSub}>Post new products, manage stock, and track activity.</Text>
+        </TouchableOpacity>
+      )}
+
       </ScrollView>
     </SafeAreaView>
   );
@@ -273,6 +364,10 @@ const styles = StyleSheet.create({
   },
   curatedCardTitle: { fontSize: 14, fontWeight: '900', color: '#1f1a14', textTransform: 'uppercase', letterSpacing: 0.7 },
   curatedCardSubtitle: { marginTop: 6, fontSize: 12, color: '#7b6f61', lineHeight: 17 },
+  categoryGrid: { flexDirection: 'row', flexWrap: 'wrap', paddingHorizontal: 16, gap: 8 },
+  categoryTile: { width: '48%', borderWidth: 1, borderColor: colors.border, backgroundColor: '#fffdf8', paddingVertical: 12, paddingHorizontal: 10 },
+  categoryTileTitle: { fontSize: 11, fontWeight: '900', color: '#1f1a14', textTransform: 'uppercase', letterSpacing: 1 },
+  categoryTileCount: { marginTop: 4, fontSize: 11, color: '#8d7f6f' },
   featuredCard: {
     width: 200,
     height: 150,
@@ -314,6 +409,12 @@ const styles = StyleSheet.create({
   cardPrice: { marginTop: 4, fontSize: 14, fontWeight: '800', color: '#2f5d4f' },
   cardMeta: { marginTop: 2, fontSize: 10, color: '#9a8e7f', textTransform: 'uppercase', letterSpacing: 0.9 },
   emptyText: { textAlign: 'center', color: '#8f8478', padding: 24, textTransform: 'uppercase', letterSpacing: 1.1, fontWeight: '700', fontSize: 11 },
+  buyerCta: { marginTop: 14, marginHorizontal: 16, marginBottom: 20, borderWidth: 1, borderColor: '#2f2921', backgroundColor: '#1f1a14', padding: 14 },
+  buyerCtaTop: { fontSize: 10, color: 'rgba(255,255,255,0.5)', fontWeight: '800', textTransform: 'uppercase', letterSpacing: 1.2 },
+  buyerCtaTitle: { marginTop: 6, fontSize: 18, color: '#fff', fontWeight: '900', textTransform: 'uppercase' },
+  buyerCtaSub: { marginTop: 4, fontSize: 12, color: 'rgba(255,255,255,0.7)' },
+  loadMoreBtn: { marginTop: 6, alignSelf: 'center', borderWidth: 1, borderColor: colors.border, paddingHorizontal: 14, paddingVertical: 8, backgroundColor: '#fffdf8' },
+  loadMoreBtnText: { fontSize: 10, fontWeight: '800', color: '#6f6559', textTransform: 'uppercase', letterSpacing: 1.1 },
 });
 
 export default HomeScreen;

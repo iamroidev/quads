@@ -33,6 +33,7 @@ const OrdersScreen = ({ navigation }: any) => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [status, setStatus] = useState<string>('all');
 
   const fetchOrders = useCallback(
     async (withLoader = true) => {
@@ -40,15 +41,15 @@ const OrdersScreen = ({ navigation }: any) => {
       try {
         const res =
           tab === 'purchases'
-            ? await orderService.getMyPurchases()
-            : await orderService.getMySales();
+            ? await orderService.getMyPurchases({ status: status === 'all' ? undefined : status })
+            : await orderService.getMySales({ status: status === 'all' ? undefined : status });
         if (res.success) setOrders(res.data.orders);
       } finally {
         setLoading(false);
         setRefreshing(false);
       }
     },
-    [tab]
+    [tab, status]
   );
 
   useEffect(() => {
@@ -119,6 +120,14 @@ const OrdersScreen = ({ navigation }: any) => {
         )}
       </View>
 
+      <View style={styles.statusRow}>
+        {['all', 'pending', 'paid', 'confirmed', 'ready', 'completed', 'cancelled'].map((s) => (
+          <TouchableOpacity key={s} style={[styles.statusChip, status === s && styles.statusChipActive]} onPress={() => setStatus(s)}>
+            <Text style={[styles.statusChipText, status === s && styles.statusChipTextActive]}>{s === 'all' ? 'All' : s}</Text>
+          </TouchableOpacity>
+        ))}
+      </View>
+
       {loading ? (
         <View style={styles.centered}>
           <ActivityIndicator size="large" color="#2563eb" />
@@ -167,6 +176,11 @@ const styles = StyleSheet.create({
   tabActive: { borderBottomColor: '#1f1a14' },
   tabText: { fontSize: 11, fontWeight: '800', color: '#7b6f61', textTransform: 'uppercase', letterSpacing: 1.1 },
   tabTextActive: { color: '#1f1a14', fontWeight: '900' },
+  statusRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, paddingHorizontal: 12, paddingVertical: 10, backgroundColor: '#fffdf8', borderBottomWidth: 1, borderBottomColor: colors.border },
+  statusChip: { borderWidth: 1, borderColor: colors.border, paddingHorizontal: 10, paddingVertical: 6, backgroundColor: '#fff' },
+  statusChipActive: { backgroundColor: colors.text, borderColor: colors.text },
+  statusChipText: { fontSize: 10, fontWeight: '800', color: '#6f6559', textTransform: 'uppercase', letterSpacing: 1 },
+  statusChipTextActive: { color: '#fff' },
   centered: { flex: 1, justifyContent: 'center', alignItems: 'center' },
   list: { padding: 12, gap: 10 },
   card: {

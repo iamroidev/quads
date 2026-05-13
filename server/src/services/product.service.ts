@@ -695,6 +695,8 @@ class ProductService {
     average: number;
     median: number;
     sampleSize: number;
+    q1: number;
+    q3: number;
     dealLabel: 'great_deal' | 'fair_price' | 'premium';
   }> {
     const product = await Product.findById(productId).select('price category');
@@ -718,6 +720,8 @@ class ProductService {
         average: product.price,
         median: product.price,
         sampleSize: 1,
+        q1: product.price,
+        q3: product.price,
         dealLabel: 'fair_price',
       };
     }
@@ -727,10 +731,14 @@ class ProductService {
     const average = prices.reduce((sum, n) => sum + n, 0) / prices.length;
     const middle = Math.floor(prices.length / 2);
     const median = prices.length % 2 === 0 ? (prices[middle - 1] + prices[middle]) / 2 : prices[middle];
+    const q1Index = Math.floor((prices.length - 1) * 0.25);
+    const q3Index = Math.floor((prices.length - 1) * 0.75);
+    const q1 = prices[q1Index];
+    const q3 = prices[q3Index];
 
     let dealLabel: 'great_deal' | 'fair_price' | 'premium' = 'fair_price';
-    if (product.price <= average * 0.88) dealLabel = 'great_deal';
-    if (product.price >= average * 1.15) dealLabel = 'premium';
+    if (product.price <= q1) dealLabel = 'great_deal';
+    if (product.price >= q3) dealLabel = 'premium';
 
     return {
       productPrice: product.price,
@@ -739,6 +747,8 @@ class ProductService {
       average,
       median,
       sampleSize: prices.length,
+      q1,
+      q3,
       dealLabel,
     };
   }

@@ -10,6 +10,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import chatService, { Message } from '../services/chat.service';
 import { useAuth } from '../context/AuthContext';
 import { colors } from '../theme';
@@ -27,6 +28,7 @@ const ChatScreen = ({ route, navigation }: any) => {
   const [offerAmount, setOfferAmount] = useState('');
   const [quickReplyMode, setQuickReplyMode] = useState(false);
   const flatListRef = useRef<FlatList>(null);
+  const insets = useSafeAreaInsets();
 
   const fetchMessages = useCallback(async () => {
     try {
@@ -173,26 +175,30 @@ const ChatScreen = ({ route, navigation }: any) => {
             </TouchableOpacity>
           </View>
 
-          <TextInput
-            style={styles.input}
-            placeholder="Type a message..."
-          value={text}
-          onChangeText={setText}
-          multiline
-          returnKeyType="send"
-          blurOnSubmit={false}
-        />
-        <TouchableOpacity
-          style={[styles.sendBtn, (!text.trim() || sending) && styles.sendBtnDisabled]}
-          onPress={handleSend}
-          disabled={!text.trim() || sending}
-        >
-          {sending ? (
-            <ActivityIndicator size="small" color="#fff" />
-          ) : (
-            <Text style={styles.sendBtnText}>Send</Text>
-          )}
-        </TouchableOpacity>
+          <View style={styles.messageRow}>
+            <TextInput
+              style={styles.input}
+              placeholder="Type a message..."
+              placeholderTextColor="#9a8e7f"
+              value={text}
+              onChangeText={setText}
+              multiline
+              returnKeyType="send"
+              blurOnSubmit={false}
+            />
+            <TouchableOpacity
+              style={[styles.sendBtn, (!text.trim() || sending) && styles.sendBtnDisabled]}
+              onPress={handleSend}
+              disabled={!text.trim() || sending}
+            >
+              {sending ? (
+                <ActivityIndicator size="small" color="#fff" />
+              ) : (
+                <Text style={styles.sendBtnText}>Send</Text>
+              )}
+            </TouchableOpacity>
+          </View>
+          <View style={{ height: Math.max(insets.bottom - 8, 0) }} />
       </View>
     </KeyboardAvoidingView>
   );
@@ -237,15 +243,12 @@ const styles = StyleSheet.create({
   bubbleTimeThem: { color: '#9ca3af', textAlign: 'left' },
   emptyText: { textAlign: 'center', color: '#9ca3af', marginTop: 40 },
   inputRow: {
-    flexDirection: 'row',
-    alignItems: 'flex-end',
     paddingHorizontal: 12,
     paddingVertical: 10,
-    paddingBottom: 24,
+    paddingBottom: 8,
     backgroundColor: '#fffdf8',
     borderTopWidth: 1,
     borderTopColor: colors.border,
-    gap: 8,
   },
   quickReplyRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginBottom: 8 },
   quickChip: { borderWidth: 1, borderColor: colors.border, paddingHorizontal: 8, paddingVertical: 6, backgroundColor: '#fff' },
@@ -256,20 +259,22 @@ const styles = StyleSheet.create({
   offerBtnText: { color: '#fff', fontSize: 10, fontWeight: '800', textTransform: 'uppercase', letterSpacing: 1 },
   quickToggle: { borderWidth: 1, borderColor: colors.border, justifyContent: 'center', paddingHorizontal: 10, backgroundColor: '#fff' },
   quickToggleText: { color: '#5e5447', fontSize: 10, fontWeight: '800', textTransform: 'uppercase', letterSpacing: 1 },
+  messageRow: { flexDirection: 'row', alignItems: 'flex-end', gap: 8 },
   input: {
     flex: 1,
     backgroundColor: '#fff',
     borderWidth: 1,
     borderColor: colors.border,
-    borderRadius: 20,
+    borderRadius: 0,
     paddingHorizontal: 14,
     paddingVertical: 10,
     fontSize: 14,
     maxHeight: 100,
+    color: '#1f1a14',
   },
   sendBtn: {
     backgroundColor: '#1f1a14',
-    borderRadius: 20,
+    borderRadius: 0,
     paddingHorizontal: 18,
     paddingVertical: 10,
     justifyContent: 'center',

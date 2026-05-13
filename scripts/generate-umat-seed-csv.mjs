@@ -1,0 +1,27 @@
+import fs from 'fs';
+import path from 'path';
+
+const outDir = path.resolve(process.cwd(), 'scripts', 'generated');
+if (!fs.existsSync(outDir)) fs.mkdirSync(outDir, { recursive: true });
+
+const rows = [
+  ['title','description','price','category','condition','delivery_option','pickup_location','tags','image_url'],
+  ['Engineering Mathematics Textbook','Clean copy used for ENG 201 and tutorials.','120','books','good','pickup','Engineering Block','book,umat,engineering','https://images.unsplash.com/photo-1512820790803-83ca734da794'],
+  ['Scientific Calculator FX-991ES','Works perfectly for quizzes and exams.','160','electronics','like-new','pickup','Science Block','calculator,electronics,study','https://images.unsplash.com/photo-1564473185935-58113f86f4b2'],
+  ['Hostel Reading Lamp','USB lamp for late-night reading with warm light.','55','hostel','new','pickup','Unity Hall','hostel,lighting,room','https://images.unsplash.com/photo-1505693416388-ac5ce068fe85'],
+  ['HP EliteBook 840','Solid battery and charger included.','3400','electronics','good','both','Main Gate','laptop,hp,campus','https://images.unsplash.com/photo-1496181133206-80ce9b88a853'],
+  ['UMaT Branded Hoodie','Size M, very clean condition.','85','fashion','good','pickup','Student Center','fashion,hoodie,umat','https://images.unsplash.com/photo-1521572163474-6864f9cf17ab'],
+  ['Campus Delivery Service','Errand and item pickup around UMaT.','20','services','new','delivery','Main Gate','service,delivery,campus','https://images.unsplash.com/photo-1556740749-887f6717d7e4'],
+  ['Mini Fridge 50L','Perfect for hostel beverages and snacks.','760','hostel','good','pickup','Queens Hall','fridge,hostel,appliance','https://images.unsplash.com/photo-1586201375761-83865001e31c'],
+  ['Drawing Board A2','Used in technical drawing class.','95','books','good','pickup','Library','drawing,architecture,board','https://images.unsplash.com/photo-1452860606245-08befc0ff44b'],
+  ['Infinix Hot 30','Neat and no cracks, battery strong.','980','electronics','good','both','Esther Hall','phone,infinix,device','https://images.unsplash.com/photo-1511707171634-5f897ff02aa9'],
+  ['Power Extension 4-way','Heavy duty extension for hostel.','45','hostel','new','pickup','Independence Hall','extension,power,hostel','https://images.unsplash.com/photo-1585298723682-7115561c51b7'],
+  ['Lab Coat (White)','For practical sessions in science labs.','65','fashion','like-new','pickup','Science Block','labcoat,science,uniform','https://images.unsplash.com/photo-1582719478250-c89cae4dc85b'],
+  ['Python Tutoring (1hr)','One-on-one coding help for beginners.','40','services','new','delivery','Library','tutoring,python,services','https://images.unsplash.com/photo-1515879218367-8466d910aaa4'],
+];
+
+const csv = rows.map((r) => r.map((v) => `"${String(v).replaceAll('"', '""')}"`).join(',')).join('\n');
+const filePath = path.join(outDir, 'umat-products-seed.csv');
+fs.writeFileSync(filePath, csv, 'utf8');
+
+console.log(`Generated: ${filePath}`);

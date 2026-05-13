@@ -16,7 +16,10 @@
     ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.campusmarketplace.app"
+      "bundleIdentifier": "com.campusmarketplace.app",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -30,15 +33,18 @@
       "favicon": "./assets/favicon.png"
     },
     "extra": {
-      "apiUrl": "http://192.168.88.32:5000/api",
-      "socketUrl": "http://192.168.88.32:5000",
+      "apiUrl": "http://172.20.10.10:5000/api",
+      "socketUrl": "http://172.20.10.10:5000",
+      "supabaseUrl": "https://dbxeaqwjihgppffdcbdd.supabase.co",
+      "supabaseKey": "sb_publishable_J-MSyIozalEGlIPvevfLow_FwN682H6",
       "eas": {
-        "projectId": "your-eas-project-id"
+        "projectId": "59ecf4f8-6c74-4eca-b11f-e6e2b74c8619"
       }
     },
     "plugins": [
       "expo-secure-store",
       "expo-web-browser"
-    ]
+    ],
+    "owner": "richieroidev"
   }
 }

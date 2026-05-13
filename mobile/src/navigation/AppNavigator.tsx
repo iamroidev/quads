@@ -29,6 +29,22 @@ import {
 import { navigationRef } from './navigationRef';
 import { colors } from '../theme';
 
+const defaultStackHeader = {
+  headerShown: true,
+  headerBackTitle: 'Back',
+  headerTitleStyle: {
+    fontWeight: '900' as const,
+    fontSize: 15,
+    textTransform: 'uppercase' as const,
+    letterSpacing: 0.7,
+    color: '#1f1a14',
+  },
+  headerStyle: {
+    backgroundColor: '#fffdf8',
+  },
+  headerTintColor: '#1f1a14',
+};
+
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 
@@ -40,7 +56,7 @@ const ProductsStackScreen = () => (
     <ProductsStack.Screen
       name="ProductDetail"
       component={ProductDetailScreen}
-      options={{ headerShown: true, title: 'Product Details', headerBackTitle: 'Back' }}
+      options={{ ...defaultStackHeader, title: 'Product Details' }}
     />
   </ProductsStack.Navigator>
 );
@@ -53,7 +69,7 @@ const MessagesStackScreen = () => (
     <MessagesStack.Screen
       name="Chat"
       component={ChatScreen}
-      options={{ headerShown: true, headerBackTitle: 'Back' }}
+      options={{ ...defaultStackHeader }}
     />
   </MessagesStack.Navigator>
 );
@@ -61,17 +77,17 @@ const MessagesStackScreen = () => (
 // ── Seller tools stack ────────────────────────────────────────────────────────
 const SellerStack = createNativeStackNavigator();
 const SellerStackScreen = () => (
-  <SellerStack.Navigator initialRouteName="CreateListing" screenOptions={{ headerShown: false }}>
+  <SellerStack.Navigator initialRouteName="MyListings" screenOptions={{ headerShown: false }}>
     <SellerStack.Screen
       name="CreateListing"
       component={CreateListingScreen}
-      options={{ headerShown: true, title: 'New Listing', headerBackTitle: 'Back' }}
+      options={{ ...defaultStackHeader, title: 'New Listing' }}
     />
     <SellerStack.Screen name="MyListings" component={MyListingsScreen} />
     <SellerStack.Screen
       name="SellerAnalytics"
       component={SellerAnalyticsScreen}
-      options={{ headerShown: true, title: 'Seller Analytics', headerBackTitle: 'Back' }}
+      options={{ ...defaultStackHeader, title: 'Seller Dashboard' }}
     />
   </SellerStack.Navigator>
 );
@@ -84,7 +100,7 @@ const OrdersStackScreen = () => (
     <OrdersStack.Screen
       name="OrderDetail"
       component={OrderDetailScreen}
-      options={{ headerShown: true, title: 'Order Details', headerBackTitle: 'Back' }}
+      options={{ ...defaultStackHeader, title: 'Order Details' }}
     />
   </OrdersStack.Navigator>
 );
@@ -97,47 +113,47 @@ const ProfileStackScreen = () => (
     <ProfileStack.Screen
       name="ProfileEdit"
       component={ProfileEditScreen}
-      options={{ headerShown: true, title: 'Edit Profile', headerBackTitle: 'Back' }}
+      options={{ ...defaultStackHeader, title: 'Edit Profile' }}
     />
     <ProfileStack.Screen
       name="Settings"
       component={SettingsScreen}
-      options={{ headerShown: true, title: 'Settings', headerBackTitle: 'Back' }}
+      options={{ ...defaultStackHeader, title: 'Settings' }}
     />
     <ProfileStack.Screen
       name="SellerOnboarding"
       component={SellerOnboardingScreen}
-      options={{ headerShown: true, title: 'Seller Onboarding', headerBackTitle: 'Back' }}
+      options={{ ...defaultStackHeader, title: 'Seller Onboarding' }}
     />
     <ProfileStack.Screen
       name="SavedItems"
       component={SavedScreen}
-      options={{ headerShown: true, title: 'Saved Items', headerBackTitle: 'Back' }}
+      options={{ ...defaultStackHeader, title: 'Saved Items' }}
     />
     <ProfileStack.Screen
       name="Orders"
       component={OrdersScreen}
-      options={{ headerShown: true, title: 'Orders', headerBackTitle: 'Back' }}
+      options={{ ...defaultStackHeader, title: 'My Orders' }}
     />
     <ProfileStack.Screen
       name="OrderDetail"
       component={OrderDetailScreen}
-      options={{ headerShown: true, title: 'Order Details', headerBackTitle: 'Back' }}
+      options={{ ...defaultStackHeader, title: 'Order Details' }}
     />
     <ProfileStack.Screen
       name="Alerts"
       component={NotificationsScreen}
-      options={{ headerShown: true, title: 'Alerts', headerBackTitle: 'Back' }}
+      options={{ ...defaultStackHeader, title: 'Alerts' }}
     />
     <ProfileStack.Screen
       name="MessagesCenter"
       component={ConversationListScreen}
-      options={{ headerShown: true, title: 'Messages', headerBackTitle: 'Back' }}
+      options={{ ...defaultStackHeader, title: 'Messages' }}
     />
     <ProfileStack.Screen
       name="Chat"
       component={ChatScreen}
-      options={{ headerShown: true, headerBackTitle: 'Back' }}
+      options={{ ...defaultStackHeader }}
     />
   </ProfileStack.Navigator>
 );
@@ -186,6 +202,11 @@ const MainTabs = ({ role }: { role?: string }) => (
       name="ProductsTab"
       component={ProductsStackScreen}
       options={{ title: 'Browse', tabBarIcon: tabIcon('grid-outline') }}
+      listeners={({ navigation }) => ({
+        tabPress: () => {
+          navigation.navigate('ProductsTab', { screen: 'ProductsHome' });
+        },
+      })}
     />
     <Tab.Screen
       name="MessagesTab"
