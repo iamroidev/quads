@@ -1,32 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import {
-  BookOpen,
-  Smartphone,
-  Utensils,
-  Shirt,
-  Briefcase,
-  Home as HomeIcon,
-  PenTool,
-  Dumbbell,
-  Package,
-  ArrowRight,
-  Search,
-} from 'lucide-react';
+import { Package } from 'lucide-react';
 import categoryService, { CategoryWithCount } from '../services/category.service';
 import { LoadingSpinner } from '../components/ui';
-
-const iconMap: Record<string, React.ReactNode> = {
-  'book-open': <BookOpen className="h-6 w-6" />,
-  smartphone: <Smartphone className="h-6 w-6" />,
-  utensils: <Utensils className="h-6 w-6" />,
-  shirt: <Shirt className="h-6 w-6" />,
-  briefcase: <Briefcase className="h-6 w-6" />,
-  home: <HomeIcon className="h-6 w-6" />,
-  'pen-tool': <PenTool className="h-6 w-6" />,
-  dumbbell: <Dumbbell className="h-6 w-6" />,
-  package: <Package className="h-6 w-6" />,
-};
+import { BulletinLayout, BulletinSection } from '../components/layout/BulletinLayout';
 
 const Categories: React.FC = () => {
   const navigate = useNavigate();
@@ -53,66 +30,72 @@ const Categories: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="page-container">
-        <LoadingSpinner text="Loading categories..." />
-      </div>
+      <BulletinLayout title="Categories" subtitle="Browse" section="02">
+        <BulletinSection bgColor="bg-[#faf8f5]">
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            {[...Array(8)].map((_, i) => (
+              <div key={i} className="aspect-square animate-pulse border border-black bg-white" />
+            ))}
+          </div>
+        </BulletinSection>
+      </BulletinLayout>
     );
   }
 
   return (
-    <div className="page-container">
-      {/* Header */}
-      <div className="mb-10 pt-2">
-        <p className="text-xs font-bold uppercase tracking-[0.2em] text-earth-400 mb-3">Browse</p>
-        <h1 className="text-3xl md:text-4xl font-black text-earth-900 uppercase tracking-tight mb-3">
-          All Categories
-        </h1>
-        <div className="flex items-center gap-3">
-          <div className="h-px flex-1 bg-earth-200" />
-          <span className="text-sm text-earth-500">
-            {totalProducts} listing{totalProducts !== 1 ? 's' : ''} across {categories.length} categories
-          </span>
+    <BulletinLayout 
+      title="All Categories" 
+      subtitle={`${totalProducts} listings across ${categories.length} categories`}
+      section="02"
+    >
+      <BulletinSection bgColor="bg-[#faf8f5]">
+        <div className="flex gap-3 overflow-x-auto pb-4 scrollbar-hide">
+          {categories.map((cat, idx) => (
+            <Link
+              key={cat._id}
+              to={`/products?category=${cat.slug}`}
+              className="group flex-shrink-0"
+            >
+              <div 
+                className="border border-black bg-[#fefdfb] px-6 py-8 shadow-[3px_3px_0_0_rgba(0,0,0,1)] transition-all hover:shadow-[6px_6px_0_0_rgba(0,0,0,1)] hover:-translate-y-1"
+                style={{ 
+                  width: '180px',
+                  transform: `rotate(${(idx % 2) * 2 - 1}deg)`
+                }}
+              >
+                <div className="text-center">
+                  <div className="mb-3 text-3xl">{cat.icon || '📦'}</div>
+                  <div className="font-bold leading-tight">{cat.name}</div>
+                  <div className="mt-2 text-[10px] uppercase opacity-50">
+                    {cat.productCount} items
+                  </div>
+                </div>
+              </div>
+            </Link>
+          ))}
         </div>
-      </div>
+      </BulletinSection>
 
-      {/* Category Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-px bg-earth-200 border border-earth-200">
-        {categories.map((cat) => (
-          <Link
-            key={cat._id}
-            to={`/products?category=${cat.slug}`}
-            className="group flex items-center gap-4 p-6 bg-white hover:bg-earth-50 transition-colors"
+      {/* Browse all CTA */}
+      <BulletinSection bgColor="bg-black">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-6 py-4">
+          <div>
+            <div className="text-[10px] uppercase tracking-wider text-white/40 mb-2">
+              Can't find what you're looking for?
+            </div>
+            <div className="text-xl font-bold text-white">
+              Browse all products
+            </div>
+          </div>
+          <button
+            onClick={() => navigate('/products')}
+            className="flex-shrink-0 border border-white bg-white px-6 py-3 text-[11px] font-bold uppercase text-black transition-colors hover:bg-black hover:text-white"
           >
-            <div className="flex-shrink-0 text-earth-400 group-hover:text-earth-900 transition-colors">
-              {iconMap[cat.icon] || <Package className="h-6 w-6" />}
-            </div>
-            <div className="flex-1 min-w-0">
-              <h3 className="font-bold text-earth-900 uppercase tracking-wide text-sm mb-0.5">
-                {cat.name}
-              </h3>
-              <p className="text-xs text-earth-500">
-                {cat.productCount} listing{cat.productCount !== 1 ? 's' : ''}
-              </p>
-            </div>
-            <ArrowRight className="h-4 w-4 text-earth-300 group-hover:text-earth-700 group-hover:translate-x-1 transition-all flex-shrink-0" />
-          </Link>
-        ))}
-      </div>
-
-      {/* Browse All CTA */}
-      <div className="mt-12 pt-8 border-t border-earth-200 flex items-center justify-between">
-        <p className="text-sm text-earth-500 uppercase tracking-[0.15em]">
-          Can't find what you're looking for?
-        </p>
-        <button
-          onClick={() => navigate('/products')}
-          className="inline-flex items-center gap-2 px-6 py-3 bg-earth-900 text-white text-sm font-bold uppercase tracking-[0.12em] hover:bg-earth-700 transition-colors"
-        >
-          <Search className="h-4 w-4" />
-          Browse All Products
-        </button>
-      </div>
-    </div>
+            View all listings →
+          </button>
+        </div>
+      </BulletinSection>
+    </BulletinLayout>
   );
 };
 

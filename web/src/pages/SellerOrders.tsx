@@ -18,6 +18,7 @@ import {
   ORDER_STATUS_LABELS,
   PaginationInfo,
 } from '../types';
+import { BulletinLayout, BulletinSection, BulletinCard } from '../components/layout/BulletinLayout';
 
 const TRACKING_PIPELINE: { status: string; label: string }[] = [
   { status: 'pending', label: 'Placed' },
@@ -43,14 +44,13 @@ const NEXT_STATUS: Record<string, { status: string; label: string }> = {
   ready: { status: 'completed', label: 'Mark Complete' },
 };
 
-// Flat status badge colors using earth/semantic palette
-const STATUS_BADGE: Record<string, string> = {
-  paid: 'bg-earth-100 text-earth-800',
-  confirmed: 'bg-earth-200 text-earth-900',
-  ready: 'bg-earth-900 text-white',
-  completed: 'bg-earth-900 text-white',
-  cancelled: 'bg-red-50 text-red-700',
-  pending: 'bg-earth-100 text-earth-600',
+const STATUS_STYLES: Record<string, string> = {
+  paid: 'bg-[#e0f2f7] text-black',
+  confirmed: 'bg-[#f0e8f4] text-black',
+  ready: 'bg-[#fff5e1] text-black',
+  completed: 'bg-[#fffacd] text-black',
+  cancelled: 'bg-[#fce4ec] text-black',
+  pending: 'bg-[#f0e8f4] text-black',
 };
 
 interface SellerStats {
@@ -139,243 +139,228 @@ const SellerOrders: React.FC = () => {
   };
 
   return (
-    <div className="page-container max-w-5xl">
-      {/* Page header */}
-      <p className="text-xs font-bold uppercase tracking-[0.2em] text-earth-400 mb-2">Dashboard</p>
-      <div className="flex items-end justify-between mb-1">
-        <h1 className="text-3xl font-black text-earth-900 uppercase tracking-tight">
-          Seller Orders
-        </h1>
-        <Link
-          to="/seller/analytics"
-          className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.18em] text-earth-400 hover:text-earth-900 border border-earth-200 hover:border-earth-400 px-3 py-2 transition-colors"
-        >
-          <BarChart2 className="h-3.5 w-3.5" />
-          Analytics
-        </Link>
-      </div>
-      <div className="h-px bg-earth-200 mb-8" />
-
-      {/* Stats mosaic */}
-      {stats && (
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-px bg-earth-200 mb-8">
-          <div className="bg-white p-5">
-            <p className="text-xs font-bold uppercase tracking-[0.15em] text-earth-400 mb-3 flex items-center gap-1.5">
-              <Package className="h-3.5 w-3.5" />
-              Total
-            </p>
-            <p className="text-3xl font-black text-earth-900">{stats.totalOrders}</p>
+    <BulletinLayout title="Seller Orders" subtitle="Dashboard" section="15">
+      <BulletinSection bgColor="bg-[#faf8f5]">
+        {/* Header */}
+        <div className="flex items-end justify-between mb-6">
+          <div className="text-[10px] uppercase tracking-wider opacity-60">
+            {pagination ? `${pagination.total} order${pagination.total !== 1 ? 's' : ''}` : ''}
           </div>
-          <div className="bg-white p-5">
-            <p className="text-xs font-bold uppercase tracking-[0.15em] text-earth-400 mb-3 flex items-center gap-1.5">
-              <Clock className="h-3.5 w-3.5" />
-              Pending
-            </p>
-            <p className="text-3xl font-black text-earth-900">{stats.pendingOrders}</p>
-          </div>
-          <div className="bg-white p-5">
-            <p className="text-xs font-bold uppercase tracking-[0.15em] text-earth-400 mb-3 flex items-center gap-1.5">
-              <CheckCircle className="h-3.5 w-3.5" />
-              Completed
-            </p>
-            <p className="text-3xl font-black text-earth-900">{stats.completedOrders}</p>
-          </div>
-          <div className="bg-white p-5">
-            <p className="text-xs font-bold uppercase tracking-[0.15em] text-earth-400 mb-3 flex items-center gap-1.5">
-              <TrendingUp className="h-3.5 w-3.5" />
-              Revenue
-            </p>
-            <p className="text-2xl font-black text-earth-900">
-              GHS {stats.totalRevenue.toLocaleString('en-GH', { minimumFractionDigits: 2 })}
-            </p>
-          </div>
-        </div>
-      )}
-
-      {/* Status tabs — underline style */}
-      <div className="flex gap-0 border-b border-earth-200 mb-6 overflow-x-auto">
-        {STATUS_TABS.map((tab) => (
-          <button
-            key={tab.value}
-            onClick={() => handleTabChange(tab.value as OrderStatus | '')}
-            className={`px-4 py-2.5 text-xs font-bold uppercase tracking-[0.12em] whitespace-nowrap border-b-2 -mb-px transition-colors ${
-              statusFilter === tab.value
-                ? 'border-earth-900 text-earth-900'
-                : 'border-transparent text-earth-400 hover:text-earth-700'
-            }`}
+          <Link
+            to="/seller/analytics"
+            className="border border-black bg-white px-3 py-1.5 text-[10px] font-bold uppercase shadow-[2px_2px_0_0_rgba(0,0,0,1)] hover:shadow-[3px_3px_0_0_rgba(0,0,0,1)] transition-all"
           >
-            {tab.label}
-          </button>
-        ))}
-      </div>
-
-      {/* Orders list */}
-      {loading ? (
-        <LoadingSpinner text="Loading orders..." />
-      ) : orders.length === 0 ? (
-        <div className="border border-earth-200 py-20 text-center">
-          <Package className="h-14 w-14 text-earth-200 mx-auto mb-4" />
-          <p className="text-xs font-bold uppercase tracking-[0.2em] text-earth-400 mb-1">No results</p>
-          <p className="text-sm text-earth-500">
-            {statusFilter ? `No ${statusFilter} orders` : 'No incoming orders yet'}
-          </p>
+            <BarChart2 className="inline-block h-3.5 w-3.5 mr-1" />
+            Analytics
+          </Link>
         </div>
-      ) : (
-        <div className="border border-earth-200 divide-y divide-earth-100">
-          {orders.map((order) => {
-            const item = order.items[0];
-            const nextAction = NEXT_STATUS[order.status];
-            const isUpdating = updatingId === order._id;
-            const canSellerCancel = ['paid', 'confirmed'].includes(order.status);
-            const badgeClass = STATUS_BADGE[order.status] ?? 'bg-earth-100 text-earth-700';
 
-            return (
-              <div key={order._id} className="p-4">
-                <div className="flex items-start gap-4">
-                  {/* Product image — square */}
-                  <div className="w-16 h-16 bg-earth-100 flex-shrink-0 overflow-hidden">
-                    {item?.image ? (
-                      <img src={item.image} alt={item.title} className="w-full h-full object-cover" />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center text-earth-300">
-                        <Package className="h-6 w-6" />
+        {/* Stats mosaic */}
+        {stats && (
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+            <BulletinCard rotation={-0.3} bgColor="bg-white">
+              <div className="text-[10px] uppercase tracking-wider opacity-60 mb-2 flex items-center gap-1.5">
+                <Package className="h-3.5 w-3.5" /> Total
+              </div>
+              <div className="text-2xl font-bold">{stats.totalOrders}</div>
+            </BulletinCard>
+            <BulletinCard rotation={0.3} bgColor="bg-white">
+              <div className="text-[10px] uppercase tracking-wider opacity-60 mb-2 flex items-center gap-1.5">
+                <Clock className="h-3.5 w-3.5" /> Pending
+              </div>
+              <div className="text-2xl font-bold">{stats.pendingOrders}</div>
+            </BulletinCard>
+            <BulletinCard rotation={-0.3} bgColor="bg-white">
+              <div className="text-[10px] uppercase tracking-wider opacity-60 mb-2 flex items-center gap-1.5">
+                <CheckCircle className="h-3.5 w-3.5" /> Completed
+              </div>
+              <div className="text-2xl font-bold">{stats.completedOrders}</div>
+            </BulletinCard>
+            <BulletinCard rotation={0.3} bgColor="bg-white">
+              <div className="text-[10px] uppercase tracking-wider opacity-60 mb-2 flex items-center gap-1.5">
+                <TrendingUp className="h-3.5 w-3.5" /> Revenue
+              </div>
+              <div className="text-xl font-bold">
+                GHS {stats.totalRevenue.toLocaleString('en-GH', { minimumFractionDigits: 2 })}
+              </div>
+            </BulletinCard>
+          </div>
+        )}
+
+        {/* Status tabs */}
+        <div className="flex gap-0 border-b border-black mb-6 overflow-x-auto scrollbar-hide">
+          {STATUS_TABS.map((tab) => (
+            <button
+              key={tab.value}
+              onClick={() => handleTabChange(tab.value as OrderStatus | '')}
+              className={`px-4 py-2 text-[10px] font-bold uppercase tracking-wider whitespace-nowrap border-b-2 -mb-px transition-colors ${
+                statusFilter === tab.value
+                  ? 'border-black text-black'
+                  : 'border-transparent opacity-40 hover:opacity-70'
+              }`}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+
+        {/* Orders */}
+        {loading ? (
+          <LoadingSpinner text="Loading orders..." />
+        ) : orders.length === 0 ? (
+          <div className="border border-black bg-[#fffacd] p-12 text-center shadow-[4px_4px_0_0_rgba(0,0,0,1)]">
+            <Package className="h-12 w-12 mx-auto opacity-40 mb-4" />
+            <div className="text-[10px] uppercase tracking-wider opacity-60 mb-2">Empty</div>
+            <div className="font-bold">
+              {statusFilter ? `No ${statusFilter} orders` : 'No incoming orders yet'}
+            </div>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {orders.map((order) => {
+              const item = order.items[0];
+              const nextAction = NEXT_STATUS[order.status];
+              const isUpdating = updatingId === order._id;
+              const canSellerCancel = ['paid', 'confirmed'].includes(order.status);
+
+              return (
+                <div key={order._id} className="border border-black bg-white p-4 shadow-[3px_3px_0_0_rgba(0,0,0,1)]"
+                     style={{ transform: `rotate(${Math.random() * 0.4 - 0.2}deg)` }}>
+                  <div className="flex items-start gap-4">
+                    <div className="w-16 h-16 border border-black bg-[#f8f7f4] flex-shrink-0 overflow-hidden">
+                      {item?.image ? (
+                        <img src={item.image} alt={item.title} className="w-full h-full object-cover" />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center opacity-40">
+                          <Package className="h-6 w-6" />
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-start justify-between gap-2 mb-1">
+                        <div>
+                          <div className="text-[12px] font-bold truncate">{item?.title || 'Unknown'}</div>
+                          <div className="text-[10px] opacity-60 mt-0.5">
+                            #{order.orderNumber} &middot; {order.buyer.name}
+                          </div>
+                        </div>
+                        <div className="text-base font-bold whitespace-nowrap">
+                          GHS {order.totalAmount.toLocaleString('en-GH', { minimumFractionDigits: 2 })}
+                        </div>
                       </div>
-                    )}
+
+                      <div className="flex items-center gap-2 mb-3">
+                        <span className={`border border-black px-1.5 py-0.5 text-[9px] font-bold uppercase ${STATUS_STYLES[order.status] || 'bg-white'}`}>
+                          {ORDER_STATUS_LABELS[order.status]}
+                        </span>
+                        <span className="text-[10px] opacity-50 capitalize">{order.deliveryMethod}</span>
+                      </div>
+
+                      <div className="flex items-center gap-2 flex-wrap">
+                        {nextAction && (
+                          <button
+                            onClick={() => handleUpdateStatus(order._id, nextAction.status)}
+                            disabled={isUpdating}
+                            className="border border-black bg-black px-3 py-1.5 text-[9px] font-bold uppercase text-white shadow-[2px_2px_0_0_rgba(0,0,0,1)] hover:bg-white hover:text-black disabled:opacity-50 transition-all"
+                          >
+                            {isUpdating ? '...' : nextAction.label}
+                          </button>
+                        )}
+                        {canSellerCancel && (
+                          <button
+                            onClick={() => handleCancelOrder(order._id)}
+                            disabled={isUpdating}
+                            className="border border-black bg-[#fce4ec] px-3 py-1.5 text-[9px] font-bold uppercase shadow-[1px_1px_0_0_rgba(0,0,0,1)] hover:shadow-[2px_2px_0_0_rgba(0,0,0,1)] disabled:opacity-50 transition-all"
+                          >
+                            <XCircle className="inline-block h-3 w-3 mr-0.5" />
+                            Cancel
+                          </button>
+                        )}
+                        <Link
+                          to={`/orders/${order._id}`}
+                          className="ml-auto border border-black bg-white px-2 py-1 text-[8px] font-bold uppercase shadow-[1px_1px_0_0_rgba(0,0,0,1)] hover:shadow-[2px_2px_0_0_rgba(0,0,0,1)] transition-all"
+                        >
+                          Details
+                          <ArrowUpRight className="inline-block h-3 w-3 ml-0.5" />
+                        </Link>
+                      </div>
+                    </div>
                   </div>
 
-                  {/* Details */}
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-start justify-between gap-2 mb-1">
-                      <div>
-                        <h3 className="font-bold text-earth-900 text-sm truncate uppercase tracking-tight">
-                          {item?.title || 'Unknown Product'}
-                        </h3>
-                        <p className="text-xs text-earth-400 font-mono mt-0.5">
-                          #{order.orderNumber} &middot; {order.buyer.name}
-                        </p>
+                  {order.note && (
+                    <div className="mt-3 pt-3 border-t border-black text-[11px]">
+                      <span className="font-bold uppercase text-[10px] opacity-60">Note: </span>
+                      {order.note}
+                    </div>
+                  )}
+
+                  {/* Mini tracking strip */}
+                  {!['cancelled', 'disputed'].includes(order.status) && (
+                    <div className="mt-3 pt-3 border-t border-black">
+                      <div className="flex items-center gap-0">
+                        {TRACKING_PIPELINE.map((step, idx) => {
+                          const stepIdx = PIPELINE_ORDER.indexOf(order.status);
+                          const isDone = idx < stepIdx;
+                          const isCurrent = idx === stepIdx;
+                          return (
+                            <React.Fragment key={step.status}>
+                              <div className="flex flex-col items-center">
+                                <div className={`w-4 h-4 border border-black flex items-center justify-center ${
+                                  isDone || isCurrent ? 'bg-black' : 'bg-white'
+                                }`}>
+                                  {isDone && <CheckCircle className="h-2.5 w-2.5 text-white" />}
+                                </div>
+                                <span className={`text-[7px] font-bold uppercase mt-0.5 ${
+                                  isDone || isCurrent ? '' : 'opacity-30'
+                                }`}>
+                                  {step.label}
+                                </span>
+                              </div>
+                              {idx < TRACKING_PIPELINE.length - 1 && (
+                                <div className={`flex-1 h-px mx-0.5 mb-3.5 ${idx < stepIdx ? 'bg-black' : 'bg-black/20'}`} />
+                              )}
+                            </React.Fragment>
+                          );
+                        })}
                       </div>
-                      <span className="font-black text-earth-900 text-sm whitespace-nowrap">
-                        GHS {order.totalAmount.toLocaleString('en-GH', { minimumFractionDigits: 2 })}
-                      </span>
                     </div>
+                  )}
 
-                    <div className="flex items-center gap-2 mb-3">
-                      <span className={`px-2 py-0.5 text-xs font-bold uppercase tracking-wide ${badgeClass}`}>
-                        {ORDER_STATUS_LABELS[order.status]}
-                      </span>
-                      <span className="text-xs text-earth-400 capitalize">{order.deliveryMethod}</span>
-                    </div>
-
-                    {/* Actions */}
-                    <div className="flex items-center gap-2 flex-wrap">
-                      {nextAction && (
-                        <button
-                          onClick={() => handleUpdateStatus(order._id, nextAction.status)}
-                          disabled={isUpdating}
-                          className="px-3 py-1.5 bg-earth-900 text-white text-xs font-bold uppercase tracking-[0.1em] hover:bg-earth-700 disabled:opacity-50 transition-colors"
-                        >
-                          {isUpdating ? '...' : nextAction.label}
-                        </button>
-                      )}
-                      {canSellerCancel && (
-                        <button
-                          onClick={() => handleCancelOrder(order._id)}
-                          disabled={isUpdating}
-                          className="px-3 py-1.5 border border-red-300 text-red-600 text-xs font-bold uppercase tracking-[0.1em] hover:bg-red-50 disabled:opacity-50 transition-colors flex items-center gap-1"
-                        >
-                          <XCircle className="h-3 w-3" />
-                          Cancel
-                        </button>
-                      )}
-                      <Link
-                        to={`/orders/${order._id}`}
-                        className="ml-auto text-xs font-bold uppercase tracking-[0.1em] text-earth-500 hover:text-earth-900 flex items-center gap-0.5 transition-colors"
-                      >
-                        Details
-                        <ArrowUpRight className="h-3 w-3" />
-                      </Link>
-                    </div>
+                  <div className="text-[10px] opacity-40 mt-2">
+                    {new Date(order.createdAt).toLocaleDateString('en-GH', {
+                      year: 'numeric', month: 'short', day: 'numeric',
+                      hour: '2-digit', minute: '2-digit',
+                    })}
                   </div>
                 </div>
+              );
+            })}
+          </div>
+        )}
 
-                {order.note && (
-                  <div className="mt-3 pt-3 border-t border-earth-100 text-xs text-earth-600">
-                    <span className="font-bold text-earth-700 uppercase tracking-wide">Note: </span>
-                    {order.note}
-                  </div>
-                )}
-
-                {/* Mini tracking strip — only for active orders */}
-                {!['cancelled', 'disputed'].includes(order.status) && (
-                  <div className="mt-3 pt-3 border-t border-earth-100">
-                    <div className="flex items-center gap-0">
-                      {TRACKING_PIPELINE.map((step, idx) => {
-                        const stepIdx = PIPELINE_ORDER.indexOf(order.status);
-                        const isDone = idx < stepIdx;
-                        const isCurrent = idx === stepIdx;
-                        return (
-                          <React.Fragment key={step.status}>
-                            <div className="flex flex-col items-center">
-                              <div className={`w-4 h-4 flex items-center justify-center ${
-                                isDone
-                                  ? 'bg-earth-900'
-                                  : isCurrent
-                                  ? 'bg-earth-900 ring-2 ring-earth-200'
-                                  : 'bg-earth-100'
-                              }`}>
-                                {isDone && <CheckCircle className="h-2.5 w-2.5 text-white" />}
-                              </div>
-                              <span className={`text-[8px] font-bold uppercase tracking-wide mt-0.5 ${
-                                isDone || isCurrent ? 'text-earth-700' : 'text-earth-300'
-                              }`}>
-                                {step.label}
-                              </span>
-                            </div>
-                            {idx < TRACKING_PIPELINE.length - 1 && (
-                              <div className={`flex-1 h-px mx-0.5 mb-3.5 ${idx < stepIdx ? 'bg-earth-900' : 'bg-earth-100'}`} />
-                            )}
-                          </React.Fragment>
-                        );
-                      })}
-                    </div>
-                  </div>
-                )}
-
-                <p className="text-xs text-earth-300 font-mono mt-2">
-                  {new Date(order.createdAt).toLocaleDateString('en-GH', {
-                    year: 'numeric', month: 'short', day: 'numeric',
-                    hour: '2-digit', minute: '2-digit',
-                  })}
-                </p>
-              </div>
-            );
-          })}
-        </div>
-      )}
-
-      {/* Pagination */}
-      {pagination && pagination.pages > 1 && (
-        <div className="flex items-center justify-center gap-3 mt-8">
-          <button
-            onClick={() => setPage((p) => Math.max(1, p - 1))}
-            disabled={page === 1}
-            className="px-5 py-2 border border-earth-300 text-xs font-bold uppercase tracking-[0.15em] text-earth-700 hover:border-earth-900 hover:text-earth-900 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-          >
-            Previous
-          </button>
-          <span className="text-xs font-bold uppercase tracking-[0.15em] text-earth-400">
-            {page} / {pagination.pages}
-          </span>
-          <button
-            onClick={() => setPage((p) => Math.min(pagination.pages, p + 1))}
-            disabled={page === pagination.pages}
-            className="px-5 py-2 border border-earth-300 text-xs font-bold uppercase tracking-[0.15em] text-earth-700 hover:border-earth-900 hover:text-earth-900 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-          >
-            Next
-          </button>
-        </div>
-      )}
-    </div>
+        {/* Pagination */}
+        {pagination && pagination.pages > 1 && (
+          <div className="flex justify-center items-center gap-4 mt-8 pt-6 border-t border-black">
+            <button
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+              disabled={page === 1}
+              className="border border-black bg-white px-4 py-2 text-[10px] font-bold uppercase shadow-[2px_2px_0_0_rgba(0,0,0,1)] hover:shadow-[3px_3px_0_0_rgba(0,0,0,1)] disabled:opacity-40 transition-all"
+            >
+              Previous
+            </button>
+            <span className="text-[10px] font-bold uppercase opacity-60">{page} / {pagination.pages}</span>
+            <button
+              onClick={() => setPage((p) => Math.min(pagination.pages, p + 1))}
+              disabled={page === pagination.pages}
+              className="border border-black bg-white px-4 py-2 text-[10px] font-bold uppercase shadow-[2px_2px_0_0_rgba(0,0,0,1)] hover:shadow-[3px_3px_0_0_rgba(0,0,0,1)] disabled:opacity-40 transition-all"
+            >
+              Next
+            </button>
+          </div>
+        )}
+      </BulletinSection>
+    </BulletinLayout>
   );
 };
 

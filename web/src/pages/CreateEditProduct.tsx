@@ -4,12 +4,14 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import toast from 'react-hot-toast';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, ShieldOff } from 'lucide-react';
 import productService from '../services/product.service';
 import growthService from '../services/growth.service';
 import categoryService from '../services/category.service';
 import { ImageUpload } from '../components/product';
 import { Category, ProductPopulated } from '../types';
+import { BulletinLayout, BulletinSection, BulletinCard } from '../components/layout/BulletinLayout';
+import { useAuth } from '../context/AuthContext';
 
 const productSchema = z.object({
   title: z.string().min(3, 'Title must be at least 3 characters').max(120, 'Title too long'),
@@ -31,14 +33,23 @@ const CAMPUS_LOCATIONS = [
   'Sports Complex', 'Admin Block', 'ICT Center', 'Tarkwa Market',
 ];
 
-// Shared underline field classes
-const fieldBase = 'w-full bg-transparent border-0 border-b border-earth-300 focus:border-earth-900 focus:ring-0 text-earth-900 text-sm py-2 px-0 outline-none transition-colors placeholder:text-earth-300';
-const fieldError = 'border-red-400';
+const fieldBase = 'w-full border border-black bg-[#fefdfb] p-2 text-[12px] font-bold focus:outline-none focus:ring-2 focus:ring-black placeholder:text-black/30';
+const fieldError = 'border-red-500';
+const labelBase = 'block text-[10px] font-bold uppercase tracking-wider opacity-60 mb-1';
 
 const CreateEditProduct: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const isEdit = !!id;
+  const { user } = useAuth();
+
+  // Block unverified sellers from creating new listings (edit is allowed)
+  const isUnverifiedSeller =
+    !isEdit &&
+    user?.role === 'seller' &&
+    !user?.isVerified &&
+    !user?.emailVerified &&
+    !user?.phoneVerified;
 
   const [categories, setCategories] = useState<Category[]>([]);
   const [images, setImages] = useState<File[]>([]);
@@ -173,246 +184,246 @@ const CreateEditProduct: React.FC = () => {
   };
 
   if (loadingProduct) {
+    return <BulletinLayout title="Loading..." subtitle={isEdit ? 'Edit' : 'New'} section="14">
+      <BulletinSection bgColor="bg-[#faf8f5]">
+        <div className="flex items-center justify-center py-20">
+          <div className="animate-spin h-8 w-8 border-b-2 border-black" />
+        </div>
+      </BulletinSection>
+    </BulletinLayout>;
+  }
+
+  // Verification gate — shown before the form for new listings only
+  if (isUnverifiedSeller) {
     return (
-      <div className="page-container flex items-center justify-center py-20">
-        <div className="animate-spin h-8 w-8 border-b-2 border-earth-900" />
-      </div>
+      <BulletinLayout title="Verification Required" subtitle="Seller" section="14">
+        <BulletinSection bgColor="bg-[#faf8f5]">
+          <div className="max-w-lg mx-auto text-center py-16">
+            <div className="inline-flex items-center justify-center h-16 w-16 border-2 border-black bg-[#fce4ec] mb-6">
+              <ShieldOff className="h-8 w-8 text-black/60" />
+            </div>
+            <div className="text-[10px] font-bold uppercase tracking-[3px] opacity-50 mb-3">Action Required</div>
+            <h2 className="text-2xl font-bold mb-3">Verify before listing</h2>
+            <p className="text-[13px] opacity-60 mb-2">
+              Sellers must verify their <strong>email</strong> or <strong>phone</strong> before creating listings.
+            </p>
+            <p className="text-[12px] opacity-50 mb-8">
+              Use your <strong>@st.umat.edu.gh</strong> email to confirm you're a UMaT student, or verify your phone via SMS.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+              <button
+                onClick={() => navigate('/verification')}
+                className="border border-black bg-black px-6 py-3 text-[11px] font-bold uppercase text-white shadow-[3px_3px_0_0_rgba(0,0,0,1)] hover:bg-white hover:text-black transition-colors"
+              >
+                Verify My Account
+              </button>
+              <button
+                onClick={() => navigate(-1)}
+                className="border border-black bg-white px-6 py-3 text-[11px] font-bold uppercase shadow-[3px_3px_0_0_rgba(0,0,0,1)] hover:shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition-all"
+              >
+                Go Back
+              </button>
+            </div>
+          </div>
+        </BulletinSection>
+      </BulletinLayout>
     );
   }
 
   return (
-    <div className="page-container max-w-3xl mx-auto">
-      {/* Back */}
-      <button
-        onClick={() => navigate(-1)}
-        className="flex items-center gap-1 text-xs font-bold uppercase tracking-[0.12em] text-earth-500 hover:text-earth-900 mb-6 transition-colors"
-      >
-        <ArrowLeft className="h-3.5 w-3.5" />
-        Back
-      </button>
-
-      {/* Page header */}
-      <p className="text-xs font-bold uppercase tracking-[0.2em] text-earth-400 mb-2">
-        {isEdit ? 'Edit listing' : 'New listing'}
-      </p>
-      <h1 className="text-3xl font-black text-earth-900 uppercase tracking-tight mb-1">
-        {isEdit ? 'Edit Listing' : 'Create Listing'}
-      </h1>
-      <div className="h-px bg-earth-200 mb-8" />
-
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
-        {/* Images */}
-        <div>
-          <p className="text-xs font-bold uppercase tracking-[0.15em] text-earth-500 mb-3">Photos</p>
-          <ImageUpload
-            images={images}
-            existingImages={existingImages}
-            onChange={setImages}
-            onRemoveExisting={handleRemoveExistingImage}
-            maxImages={5}
-          />
-        </div>
-
-        {/* Title */}
-        <div>
-          <label className="block text-xs font-bold uppercase tracking-[0.15em] text-earth-500 mb-1">
-            Title
-          </label>
-          <input
-            type="text"
-            placeholder="e.g., Samsung Galaxy S24 Ultra — 256GB"
-            className={`${fieldBase} ${errors.title ? fieldError : ''}`}
-            {...register('title')}
-          />
-          {errors.title && (
-            <p className="mt-1 text-xs text-red-500">{errors.title.message}</p>
-          )}
-        </div>
-
-        {/* Description */}
-        <div>
-          <label className="block text-xs font-bold uppercase tracking-[0.15em] text-earth-500 mb-1">
-            Description
-          </label>
-          <textarea
-            placeholder="Describe your item — condition details, why you're selling, any defects, etc."
-            rows={5}
-            className={`${fieldBase} resize-none ${errors.description ? fieldError : ''}`}
-            {...register('description')}
-          />
-          {errors.description && (
-            <p className="mt-1 text-xs text-red-500">{errors.description.message}</p>
-          )}
-        </div>
-
-        {/* Price + Condition */}
-        <div className="grid grid-cols-2 gap-6">
-          <div>
-            <label className="block text-xs font-bold uppercase tracking-[0.15em] text-earth-500 mb-1">
-              Price (GHS)
-            </label>
-            <input
-              type="number"
-              step="0.01"
-              min="0.5"
-              max="100000"
-              placeholder="0.00"
-              className={`${fieldBase} ${errors.price ? fieldError : ''}`}
-              {...register('price', { valueAsNumber: true })}
-            />
-            {errors.price && (
-              <p className="mt-1 text-xs text-red-500">{errors.price.message}</p>
-            )}
-          </div>
-
-          <div>
-            <label className="block text-xs font-bold uppercase tracking-[0.15em] text-earth-500 mb-1">
-              Condition
-            </label>
-            <select
-              className={`${fieldBase} ${errors.condition ? fieldError : ''}`}
-              {...register('condition')}
-            >
-              <option value="">Select condition</option>
-              <option value="new">Brand New</option>
-              <option value="like-new">Like New</option>
-              <option value="good">Good</option>
-              <option value="fair">Fair</option>
-              <option value="poor">Poor</option>
-            </select>
-            {errors.condition && (
-              <p className="mt-1 text-xs text-red-500">{errors.condition.message}</p>
-            )}
-          </div>
-        </div>
-
-        {pricingInsights && (
-          <div className="border border-earth-200 bg-earth-50 p-4">
-            <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-earth-400">Smart pricing assistant</p>
-            <p className="mt-2 text-xs text-earth-700">
-              Recommended band: <span className="font-bold">GHS {pricingInsights.recommendedMin}</span> - <span className="font-bold">GHS {pricingInsights.recommendedMax}</span>
-            </p>
-            <p className="mt-1 text-xs text-earth-500">
-              Sell-through probability: {Math.round((pricingInsights.sellThroughProbability || 0) * 100)}% · Confidence: {(pricingInsights.confidence || 'low').toUpperCase()}
-            </p>
-          </div>
-        )}
-
-        {/* Category */}
-        <div>
-          <label className="block text-xs font-bold uppercase tracking-[0.15em] text-earth-500 mb-1">
-            Category
-          </label>
-          <select
-            className={`${fieldBase} ${errors.category ? fieldError : ''}`}
-            {...register('category')}
-          >
-            <option value="">Select a category</option>
-            {categories.map((cat) => (
-              <option key={cat._id} value={cat._id}>
-                {cat.name}
-              </option>
-            ))}
-          </select>
-          {errors.category && (
-            <p className="mt-1 text-xs text-red-500">{errors.category.message}</p>
-          )}
-        </div>
-
-        {/* Delivery + Pickup */}
-        <div className="grid grid-cols-2 gap-6">
-          <div>
-            <label className="block text-xs font-bold uppercase tracking-[0.15em] text-earth-500 mb-1">
-              Delivery Option
-            </label>
-            <select className={fieldBase} {...register('deliveryOption')}>
-              <option value="pickup">Campus Pickup</option>
-              <option value="delivery">Delivery Available</option>
-              <option value="both">Pickup or Delivery</option>
-            </select>
-          </div>
-
-          {(deliveryOption === 'pickup' || deliveryOption === 'both') && (
-            <div>
-              <label className="block text-xs font-bold uppercase tracking-[0.15em] text-earth-500 mb-1">
-                Pickup Location
-              </label>
-              <select className={fieldBase} {...register('pickupLocation')}>
-                <option value="">Select location</option>
-                {CAMPUS_LOCATIONS.map((loc) => (
-                  <option key={loc} value={loc}>{loc}</option>
-                ))}
-              </select>
-            </div>
-          )}
-        </div>
-
-        {/* Tags */}
-        <div>
-          <label className="block text-xs font-bold uppercase tracking-[0.15em] text-earth-500 mb-1">
-            Tags
-          </label>
-          <input
-            type="text"
-            placeholder="e.g., samsung, phone, electronics"
-            className={fieldBase}
-            {...register('tags')}
-          />
-          <p className="mt-1 text-xs text-earth-400 tracking-wide">
-            Comma-separated — helps buyers find your item (max 10)
-          </p>
-        </div>
-
-        {/* Status */}
-        <div>
-          <label className="block text-xs font-bold uppercase tracking-[0.15em] text-earth-500 mb-3">
-            Listing Status
-          </label>
-          <div className="flex gap-6">
-            <label className="flex items-center gap-2.5 cursor-pointer group">
-              <input
-                type="radio"
-                value="active"
-                {...register('status')}
-                className="w-4 h-4 border-2 border-earth-400 text-earth-900 focus:ring-earth-900 accent-earth-900"
-              />
-              <span className="text-sm text-earth-700 group-hover:text-earth-900 font-medium">
-                Publish Now
-              </span>
-            </label>
-            <label className="flex items-center gap-2.5 cursor-pointer group">
-              <input
-                type="radio"
-                value="draft"
-                {...register('status')}
-                className="w-4 h-4 border-2 border-earth-400 text-earth-900 focus:ring-earth-900 accent-earth-900"
-              />
-              <span className="text-sm text-earth-700 group-hover:text-earth-900 font-medium">
-                Save as Draft
-              </span>
-            </label>
-          </div>
-        </div>
-
-        {/* Submit */}
-        <div className="flex gap-3 pt-6 border-t border-earth-100">
+    <BulletinLayout
+      title={isEdit ? 'Edit Listing' : 'Create Listing'}
+      subtitle={isEdit ? 'Edit listing' : 'New listing'}
+      section="14"
+    >
+      <div className="border-b border-black bg-[#faf8f5] p-4 md:p-6">
+        <div className="mx-auto max-w-[1400px]">
           <button
-            type="button"
             onClick={() => navigate(-1)}
-            className="flex-1 py-3 border border-earth-300 text-xs font-bold uppercase tracking-[0.15em] text-earth-700 hover:border-earth-900 hover:text-earth-900 transition-colors"
+            className="flex items-center gap-1 text-[12px] font-bold hover:underline"
           >
-            Cancel
-          </button>
-          <button
-            type="submit"
-            disabled={submitting}
-            className="flex-1 py-3 bg-earth-900 text-white text-xs font-bold uppercase tracking-[0.15em] hover:bg-earth-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-          >
-            {submitting ? 'Saving...' : isEdit ? 'Update Listing' : 'Post Listing'}
+            <ArrowLeft className="h-4 w-4" />
+            Back
           </button>
         </div>
-      </form>
-    </div>
+      </div>
+
+      <BulletinSection bgColor="bg-[#f5f9fa]">
+        <form onSubmit={handleSubmit(onSubmit)} className="max-w-2xl mx-auto space-y-8">
+          {/* Images */}
+          <BulletinCard rotation={-0.3} bgColor="bg-white">
+            <div className={labelBase}>Photos</div>
+            <div className="mt-3">
+              <ImageUpload
+                images={images}
+                existingImages={existingImages}
+                onChange={setImages}
+                onRemoveExisting={handleRemoveExistingImage}
+                maxImages={5}
+              />
+            </div>
+          </BulletinCard>
+
+          {/* Title */}
+          <BulletinCard rotation={0.3} bgColor="bg-white">
+            <label className={labelBase}>Title</label>
+            <input
+              type="text"
+              placeholder="e.g., Samsung Galaxy S24 Ultra — 256GB"
+              className={`${fieldBase} mt-2 ${errors.title ? fieldError : ''}`}
+              {...register('title')}
+            />
+            {errors.title && <p className="mt-1 text-[11px] text-red-600 font-bold">{errors.title.message}</p>}
+          </BulletinCard>
+
+          {/* Description */}
+          <BulletinCard rotation={-0.3} bgColor="bg-white">
+            <label className={labelBase}>Description</label>
+            <textarea
+              placeholder="Describe your item — condition details, why you're selling, any defects, etc."
+              rows={5}
+              className={`${fieldBase} mt-2 resize-none ${errors.description ? fieldError : ''}`}
+              {...register('description')}
+            />
+            {errors.description && <p className="mt-1 text-[11px] text-red-600 font-bold">{errors.description.message}</p>}
+          </BulletinCard>
+
+          {/* Price + Condition */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <BulletinCard rotation={0.3} bgColor="bg-white">
+              <label className={labelBase}>Price (GHS)</label>
+              <input
+                type="number"
+                step="0.01"
+                min="0.5"
+                max="100000"
+                placeholder="0.00"
+                className={`${fieldBase} mt-2 ${errors.price ? fieldError : ''}`}
+                {...register('price', { valueAsNumber: true })}
+              />
+              {errors.price && <p className="mt-1 text-[11px] text-red-600 font-bold">{errors.price.message}</p>}
+            </BulletinCard>
+
+            <BulletinCard rotation={-0.3} bgColor="bg-white">
+              <label className={labelBase}>Condition</label>
+              <select className={`${fieldBase} mt-2 ${errors.condition ? fieldError : ''}`} {...register('condition')}>
+                <option value="">Select condition</option>
+                <option value="new">Brand New</option>
+                <option value="like-new">Like New</option>
+                <option value="good">Good</option>
+                <option value="fair">Fair</option>
+                <option value="poor">Poor</option>
+              </select>
+              {errors.condition && <p className="mt-1 text-[11px] text-red-600 font-bold">{errors.condition.message}</p>}
+            </BulletinCard>
+          </div>
+
+          {/* Pricing insights */}
+          {pricingInsights && (
+            <BulletinCard rotation={0} bgColor="bg-[#fffacd]">
+              <div className="text-[10px] font-bold uppercase tracking-wider opacity-60">Smart pricing assistant</div>
+              <div className="mt-2 text-[12px]">
+                Recommended band: <span className="font-bold">GHS {pricingInsights.recommendedMin}</span> - <span className="font-bold">GHS {pricingInsights.recommendedMax}</span>
+              </div>
+              <div className="mt-1 text-[11px] opacity-70">
+                Sell-through: {Math.round((pricingInsights.sellThroughProbability || 0) * 100)}% · Confidence: {(pricingInsights.confidence || 'low').toUpperCase()}
+              </div>
+            </BulletinCard>
+          )}
+
+          {/* Category */}
+          <BulletinCard rotation={0.3} bgColor="bg-white">
+            <label className={labelBase}>Category</label>
+            <select className={`${fieldBase} mt-2 ${errors.category ? fieldError : ''}`} {...register('category')}>
+              <option value="">Select a category</option>
+              {categories.map((cat) => (
+                <option key={cat._id} value={cat._id}>{cat.name}</option>
+              ))}
+            </select>
+            {errors.category && <p className="mt-1 text-[11px] text-red-600 font-bold">{errors.category.message}</p>}
+          </BulletinCard>
+
+          {/* Delivery + Pickup */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <BulletinCard rotation={-0.3} bgColor="bg-white">
+              <label className={labelBase}>Delivery Option</label>
+              <select className={`${fieldBase} mt-2`} {...register('deliveryOption')}>
+                <option value="pickup">Campus Pickup</option>
+                <option value="delivery">Delivery Available</option>
+                <option value="both">Pickup or Delivery</option>
+              </select>
+            </BulletinCard>
+
+            {(deliveryOption === 'pickup' || deliveryOption === 'both') && (
+              <BulletinCard rotation={0.3} bgColor="bg-white">
+                <label className={labelBase}>Pickup Location</label>
+                <select className={`${fieldBase} mt-2`} {...register('pickupLocation')}>
+                  <option value="">Select location</option>
+                  {CAMPUS_LOCATIONS.map((loc) => (
+                    <option key={loc} value={loc}>{loc}</option>
+                  ))}
+                </select>
+              </BulletinCard>
+            )}
+          </div>
+
+          {/* Tags */}
+          <BulletinCard rotation={-0.3} bgColor="bg-white">
+            <label className={labelBase}>Tags</label>
+            <input
+              type="text"
+              placeholder="e.g., samsung, phone, electronics"
+              className={`${fieldBase} mt-2`}
+              {...register('tags')}
+            />
+            <div className="mt-1 text-[10px] opacity-50">Comma-separated — max 10</div>
+          </BulletinCard>
+
+          {/* Status */}
+          <BulletinCard rotation={0.3} bgColor="bg-white">
+            <div className={labelBase}>Listing Status</div>
+            <div className="flex gap-6 mt-3">
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="radio"
+                  value="active"
+                  {...register('status')}
+                  className="h-4 w-4 accent-black"
+                />
+                <span className="text-[12px] font-bold">Publish Now</span>
+              </label>
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="radio"
+                  value="draft"
+                  {...register('status')}
+                  className="h-4 w-4 accent-black"
+                />
+                <span className="text-[12px] font-bold">Save as Draft</span>
+              </label>
+            </div>
+          </BulletinCard>
+
+          {/* Submit */}
+          <div className="flex gap-3 pt-4">
+            <button
+              type="button"
+              onClick={() => navigate(-1)}
+              className="flex-1 border border-black bg-white px-4 py-2 text-[10px] font-bold uppercase shadow-[2px_2px_0_0_rgba(0,0,0,1)] hover:shadow-[3px_3px_0_0_rgba(0,0,0,1)] transition-all"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={submitting}
+              className="flex-1 border border-black bg-black px-4 py-2 text-[10px] font-bold uppercase text-white shadow-[2px_2px_0_0_rgba(0,0,0,1)] hover:bg-white hover:text-black disabled:opacity-40 transition-all"
+            >
+              {submitting ? 'Saving...' : isEdit ? 'Update Listing' : 'Post Listing'}
+            </button>
+          </div>
+        </form>
+      </BulletinSection>
+    </BulletinLayout>
   );
 };
 

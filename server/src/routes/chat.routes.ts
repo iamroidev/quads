@@ -7,6 +7,7 @@ import {
   markAsRead,
   getUnreadCount,
   deleteConversation,
+  respondToOffer,
 } from '../controllers/chat.controller';
 import { authenticate } from '../middleware/auth';
 
@@ -35,5 +36,8 @@ router.put('/:id/read', markAsRead);
 
 // DELETE /api/conversations/:id — delete conversation
 router.delete('/:id', deleteConversation);
+
+// PATCH /api/conversations/:id/messages/:msgId/offer — accept/reject/counter an offer
+router.patch('/:id/messages/:msgId/offer', respondToOffer);
 
 export default router;

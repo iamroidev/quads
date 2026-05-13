@@ -13,6 +13,9 @@ export interface IUser {
   role: UserRole;
   avatar?: string;
   studentId?: string;
+  department?: string;
+  residenceHall?: string;
+  currentLevel?: string;
   isVerified: boolean;
   isBanned: boolean;
   location?: string;
@@ -28,6 +31,9 @@ export interface IRegisterPayload {
   password: string;
   role: UserRole.BUYER | UserRole.SELLER;
   studentId?: string;
+  department?: string;
+  residenceHall?: string;
+  currentLevel?: string;
   location?: string;
 }
 
@@ -41,6 +47,9 @@ export interface IUpdateProfilePayload {
   phone?: string;
   avatar?: string;
   studentId?: string;
+  department?: string;
+  residenceHall?: string;
+  currentLevel?: string;
   location?: string;
   bio?: string;
 }

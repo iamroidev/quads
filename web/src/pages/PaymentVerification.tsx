@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import paymentService from '../services/payment.service';
 import { OrderPopulated, ORDER_STATUS_LABELS } from '../types';
+import { BulletinLayout, BulletinSection, BulletinCard } from '../components/layout/BulletinLayout';
 
 const PaymentVerification: React.FC = () => {
   const [searchParams] = useSearchParams();
@@ -51,138 +52,139 @@ const PaymentVerification: React.FC = () => {
 
   if (verifying) {
     return (
-      <div className="page-container max-w-lg mx-auto text-center py-24">
-        <Loader2 className="h-10 w-10 animate-spin text-earth-400 mx-auto mb-6" />
-        <p className="text-xs font-bold uppercase tracking-[0.2em] text-earth-400 mb-2">Please wait</p>
-        <h2 className="text-2xl font-black text-earth-900 uppercase tracking-tight mb-2">Verifying Payment</h2>
-        <p className="text-sm text-earth-500">Confirming your payment with our processor...</p>
-      </div>
+      <BulletinLayout title="Verifying Payment" subtitle="Payment" section="12">
+        <BulletinSection bgColor="bg-[#faf8f5]">
+          <div className="border border-black bg-white p-12 text-center shadow-[4px_4px_0_0_rgba(0,0,0,1)] max-w-lg mx-auto">
+            <Loader2 className="h-10 w-10 animate-spin mx-auto mb-6" />
+            <div className="text-[10px] uppercase tracking-wider opacity-60 mb-2">Please wait</div>
+            <div className="text-lg font-bold mb-2">Verifying Payment</div>
+            <div className="text-[12px] opacity-60">Confirming your payment with our processor...</div>
+          </div>
+        </BulletinSection>
+      </BulletinLayout>
     );
   }
 
   if (error && !verified) {
     return (
-      <div className="page-container max-w-lg mx-auto text-center py-24">
-        <XCircle className="h-14 w-14 text-earth-300 mx-auto mb-6" />
-        <p className="text-xs font-bold uppercase tracking-[0.2em] text-earth-400 mb-2">Payment failed</p>
-        <h2 className="text-2xl font-black text-earth-900 uppercase tracking-tight mb-3">Something went wrong</h2>
-        <p className="text-sm text-earth-500 mb-8 max-w-sm mx-auto">{error}</p>
-        <div className="flex gap-3 justify-center">
-          <Link
-            to="/orders"
-            className="px-6 py-3 border border-earth-300 text-xs font-bold uppercase tracking-[0.15em] text-earth-700 hover:border-earth-900 hover:text-earth-900 transition-colors"
-          >
-            View Orders
-          </Link>
-          <Link
-            to="/products"
-            className="px-6 py-3 bg-earth-900 text-white text-xs font-bold uppercase tracking-[0.15em] hover:bg-earth-700 transition-colors"
-          >
-            Browse Products
-          </Link>
-        </div>
-      </div>
+      <BulletinLayout title="Payment Failed" subtitle="Payment" section="12">
+        <BulletinSection bgColor="bg-[#faf8f5]">
+          <div className="border border-black bg-[#fce4ec] p-12 text-center shadow-[8px_8px_0_0_rgba(0,0,0,1)] max-w-lg mx-auto"
+               style={{ transform: 'rotate(-0.5deg)' }}>
+            <XCircle className="h-12 w-12 mx-auto mb-4 opacity-60" />
+            <div className="text-[10px] uppercase tracking-wider opacity-60 mb-2">Payment failed</div>
+            <div className="text-lg font-bold mb-3">Something went wrong</div>
+            <div className="text-[12px] opacity-70 mb-8">{error}</div>
+            <div className="flex gap-3 justify-center">
+              <Link
+                to="/orders"
+                className="border border-black bg-white px-4 py-2 text-[10px] font-bold uppercase shadow-[2px_2px_0_0_rgba(0,0,0,1)] hover:shadow-[3px_3px_0_0_rgba(0,0,0,1)] transition-all"
+              >
+                View Orders
+              </Link>
+              <Link
+                to="/products"
+                className="border border-black bg-black px-4 py-2 text-[10px] font-bold uppercase text-white shadow-[2px_2px_0_0_rgba(0,0,0,1)] hover:bg-white hover:text-black transition-all"
+              >
+                Browse Products
+              </Link>
+            </div>
+          </div>
+        </BulletinSection>
+      </BulletinLayout>
     );
   }
 
   return (
-    <div className="page-container max-w-lg mx-auto py-16">
-      {/* Success header */}
-      <div className="text-center mb-10">
-        <CheckCircle className="h-14 w-14 text-earth-400 mx-auto mb-6" />
-        <p className="text-xs font-bold uppercase tracking-[0.2em] text-earth-400 mb-2">Order confirmed</p>
-        <h2 className="text-3xl font-black text-earth-900 uppercase tracking-tight mb-3">
-          Payment Successful
-        </h2>
-        <p className="text-sm text-earth-500">
-          Your order has been placed and the seller has been notified.
-        </p>
-      </div>
-
-      {/* Order details */}
-      {order && (
-        <div className="border border-earth-200 mb-8">
-          <div className="px-5 py-3 border-b border-earth-200 bg-earth-50">
-            <p className="text-xs font-bold uppercase tracking-[0.15em] text-earth-500">Order Details</p>
+    <BulletinLayout title="Payment Successful" subtitle="Order confirmed" section="12">
+      <BulletinSection bgColor="bg-[#f5f9fa]">
+        {/* Success header */}
+        <div className="border border-black bg-[#fffacd] p-8 text-center shadow-[8px_8px_0_0_rgba(0,0,0,1)] max-w-lg mx-auto mb-8"
+             style={{ transform: 'rotate(0.5deg)' }}>
+          <CheckCircle className="h-12 w-12 mx-auto mb-4" />
+          <div className="text-[10px] uppercase tracking-wider opacity-60 mb-2">Order confirmed</div>
+          <div className="text-2xl font-bold mb-2">Payment Successful</div>
+          <div className="text-[12px] opacity-70">
+            Your order has been placed and the seller has been notified.
           </div>
-          <div className="px-5 py-4 space-y-3 text-sm">
-            <div className="flex justify-between items-center">
-              <span className="text-xs font-bold uppercase tracking-[0.12em] text-earth-400">Order #</span>
-              <span className="font-mono font-bold text-earth-900">{order.orderNumber}</span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="text-xs font-bold uppercase tracking-[0.12em] text-earth-400">Status</span>
-              <span className="px-2 py-0.5 bg-earth-100 text-earth-800 text-xs font-bold uppercase tracking-wide">
-                {ORDER_STATUS_LABELS[order.status] || order.status}
-              </span>
-            </div>
-            {order.items[0] && (
-              <div className="flex justify-between items-center gap-4">
-                <span className="text-xs font-bold uppercase tracking-[0.12em] text-earth-400 flex-shrink-0">Item</span>
-                <span className="font-medium text-earth-900 truncate text-right">
-                  {order.items[0].title}
+        </div>
+
+        {/* Order details */}
+        {order && (
+          <BulletinCard rotation={-0.3} bgColor="bg-white" className="max-w-lg mx-auto mb-6">
+            <div className="text-[10px] uppercase tracking-wider opacity-60 mb-4">Order Details</div>
+            <div className="space-y-3 text-[12px]">
+              <div className="flex justify-between">
+                <span className="font-bold uppercase opacity-60 text-[10px]">Order #</span>
+                <span className="font-bold">{order.orderNumber}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="font-bold uppercase opacity-60 text-[10px]">Status</span>
+                <span className="border border-black px-2 py-0.5 text-[9px] font-bold uppercase bg-[#fffacd]">
+                  {ORDER_STATUS_LABELS[order.status] || order.status}
                 </span>
               </div>
-            )}
-            <div className="flex justify-between items-center">
-              <span className="text-xs font-bold uppercase tracking-[0.12em] text-earth-400">Delivery</span>
-              <span className="font-medium text-earth-900 capitalize">{order.deliveryMethod}</span>
+              {order.items[0] && (
+                <div className="flex justify-between">
+                  <span className="font-bold uppercase opacity-60 text-[10px]">Item</span>
+                  <span className="font-bold truncate max-w-[200px]">{order.items[0].title}</span>
+                </div>
+              )}
+              <div className="flex justify-between">
+                <span className="font-bold uppercase opacity-60 text-[10px]">Delivery</span>
+                <span className="font-bold capitalize">{order.deliveryMethod}</span>
+              </div>
+              <div className="border-t border-black pt-3 flex justify-between font-bold text-base">
+                <span>Total Paid</span>
+                <span>GHS {order.totalAmount.toLocaleString('en-GH', { minimumFractionDigits: 2 })}</span>
+              </div>
             </div>
-            <div className="h-px bg-earth-100" />
-            <div className="flex justify-between items-center">
-              <span className="text-xs font-bold uppercase tracking-[0.12em] text-earth-700">Total Paid</span>
-              <span className="text-lg font-black text-earth-900">
-                GHS {order.totalAmount.toLocaleString('en-GH', { minimumFractionDigits: 2 })}
-              </span>
-            </div>
-          </div>
-        </div>
-      )}
+          </BulletinCard>
+        )}
 
-      {/* What's next */}
-      <div className="border border-earth-200 mb-10">
-        <div className="px-5 py-3 border-b border-earth-200 bg-earth-50">
-          <p className="text-xs font-bold uppercase tracking-[0.15em] text-earth-500 flex items-center gap-1.5">
+        {/* What's next */}
+        <BulletinCard rotation={0.3} bgColor="bg-[#e0f2f7]" className="max-w-lg mx-auto mb-8">
+          <div className="text-[10px] uppercase tracking-wider opacity-60 mb-4 flex items-center gap-1.5">
             <Clock className="h-3.5 w-3.5" />
             What happens next
-          </p>
-        </div>
-        <ol className="px-5 py-4 space-y-3">
-          {[
-            'The seller will confirm your order',
-            `You'll be notified when it's ready for ${order?.deliveryMethod === 'delivery' ? 'delivery' : 'pickup'}`,
-            'Meet up or receive your item and mark as completed',
-          ].map((step, i) => (
-            <li key={i} className="flex items-start gap-3 text-sm text-earth-700">
-              <span className="flex-shrink-0 w-5 h-5 border border-earth-300 text-xs font-black text-earth-400 flex items-center justify-center mt-0.5">
-                {i + 1}
-              </span>
-              {step}
-            </li>
-          ))}
-        </ol>
-      </div>
+          </div>
+          <ol className="space-y-3">
+            {[
+              'The seller will confirm your order',
+              `You'll be notified when it's ready for ${order?.deliveryMethod === 'delivery' ? 'delivery' : 'pickup'}`,
+              'Meet up or receive your item and mark as completed',
+            ].map((step, i) => (
+              <li key={i} className="flex items-start gap-3 text-[12px]">
+                <span className="flex-shrink-0 w-5 h-5 border border-black text-[10px] font-black flex items-center justify-center mt-0.5">
+                  {i + 1}
+                </span>
+                {step}
+              </li>
+            ))}
+          </ol>
+        </BulletinCard>
 
-      {/* Actions */}
-      <div className="flex gap-3 justify-center">
-        {order && (
+        {/* Actions */}
+        <div className="flex gap-3 justify-center">
+          {order && (
+            <Link
+              to={`/orders/${order._id}`}
+              className="border border-black bg-black px-4 py-2 text-[10px] font-bold uppercase text-white shadow-[3px_3px_0_0_rgba(0,0,0,1)] hover:bg-white hover:text-black transition-all"
+            >
+              <Package className="inline-block h-4 w-4 mr-1" />
+              View Order
+            </Link>
+          )}
           <Link
-            to={`/orders/${order._id}`}
-            className="px-6 py-3 bg-earth-900 text-white text-xs font-bold uppercase tracking-[0.15em] hover:bg-earth-700 transition-colors flex items-center gap-2"
+            to="/orders"
+            className="border border-black bg-white px-4 py-2 text-[10px] font-bold uppercase shadow-[3px_3px_0_0_rgba(0,0,0,1)] hover:shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition-all"
           >
-            <Package className="h-4 w-4" />
-            View Order
+            My Orders
+            <ArrowRight className="inline-block h-4 w-4 ml-1" />
           </Link>
-        )}
-        <Link
-          to="/orders"
-          className="px-6 py-3 border border-earth-300 text-xs font-bold uppercase tracking-[0.15em] text-earth-700 hover:border-earth-900 hover:text-earth-900 transition-colors flex items-center gap-2"
-        >
-          My Orders
-          <ArrowRight className="h-4 w-4" />
-        </Link>
-      </div>
-    </div>
+        </div>
+      </BulletinSection>
+    </BulletinLayout>
   );
 };
 

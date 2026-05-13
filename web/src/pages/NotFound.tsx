@@ -1,39 +1,44 @@
+
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Home, ArrowLeft } from 'lucide-react';
+import { BulletinLayout, BulletinSection } from '../components/layout/BulletinLayout';
 
 const NotFoundPage: React.FC = () => {
   return (
-    <div className="min-h-[calc(100vh-56px)] flex items-center justify-center px-4">
-      <div className="text-center">
-        <p className="text-xs font-bold uppercase tracking-[0.3em] text-earth-300 mb-4">Error</p>
-        <h1 className="text-[10rem] leading-none font-black text-earth-100 mb-0 select-none">
-          404
-        </h1>
-        <h2 className="text-2xl font-black text-earth-900 uppercase tracking-tight mb-3 -mt-2">
-          Page Not Found
-        </h2>
-        <p className="text-sm text-earth-500 mb-10 max-w-sm mx-auto leading-relaxed">
-          The page you're looking for doesn't exist or has been moved.
-        </p>
-        <div className="flex items-center justify-center gap-3">
-          <Link
-            to="/"
-            className="px-6 py-3 bg-earth-900 text-white text-xs font-bold uppercase tracking-[0.15em] hover:bg-earth-700 transition-colors flex items-center gap-2"
-          >
-            <Home className="h-4 w-4" />
-            Go Home
-          </Link>
-          <button
-            onClick={() => window.history.back()}
-            className="px-6 py-3 border border-earth-300 text-xs font-bold uppercase tracking-[0.15em] text-earth-700 hover:border-earth-900 hover:text-earth-900 transition-colors flex items-center gap-2"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Go Back
-          </button>
+    <BulletinLayout title="Page Not Found" subtitle="Error 404" section="XX">
+      <BulletinSection bgColor="bg-[#faf8f5]">
+        <div className="border border-black bg-[#fffacd] p-12 text-center shadow-[8px_8px_0_0_rgba(0,0,0,1)]"
+             style={{ transform: 'rotate(-0.5deg)' }}>
+          <div className="text-[10px] uppercase tracking-wider opacity-40 mb-4">Error</div>
+          <div className="text-[8rem] leading-none font-bold opacity-20 select-none">
+            404
+          </div>
+          <div className="text-2xl font-bold mb-4 -mt-4">
+            Page Not Found
+          </div>
+          <div className="text-[12px] opacity-60 mb-8 max-w-sm mx-auto">
+            The page you're looking for doesn't exist or has been moved.
+          </div>
+          <div className="flex items-center justify-center gap-3">
+            <Link
+              to="/"
+              className="border border-black bg-black px-4 py-2 text-[10px] font-bold uppercase text-white shadow-[3px_3px_0_0_rgba(0,0,0,1)] transition-all hover:bg-white hover:text-black"
+            >
+              <Home className="inline-block h-4 w-4 mr-1" />
+              Go Home
+            </Link>
+            <button
+              onClick={() => window.history.back()}
+              className="border border-black bg-white px-4 py-2 text-[10px] font-bold uppercase shadow-[3px_3px_0_0_rgba(0,0,0,1)] transition-all hover:shadow-[4px_4px_0_0_rgba(0,0,0,1)]"
+            >
+              <ArrowLeft className="inline-block h-4 w-4 mr-1" />
+              Go Back
+            </button>
+          </div>
         </div>
-      </div>
-    </div>
+      </BulletinSection>
+    </BulletinLayout>
   );
 };
 

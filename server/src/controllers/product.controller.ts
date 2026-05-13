@@ -17,6 +17,15 @@ export const createProduct = async (
   next: NextFunction
 ): Promise<void> => {
   try {
+    // Check seller is verified before listing
+    if (!req.user!.isVerified && !req.user!.emailVerified && !req.user!.phoneVerified) {
+      res.status(403).json({
+        success: false,
+        message: 'You must verify your email or phone before creating a listing. Go to Profile > Verification.',
+      });
+      return;
+    }
+
     const files = req.files as Express.Multer.File[] | undefined;
 
     // Parse tags from string if sent as comma-separated

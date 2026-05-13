@@ -73,7 +73,14 @@ const ProfileScreen = ({ navigation }: any) => {
         ) : null}
         <View style={styles.infoRow}>
           <Text style={styles.infoKey}>Account</Text>
-          <Text style={styles.infoValue}>{user?.isVerified ? 'Verified' : 'Unverified'}</Text>
+          <TouchableOpacity
+            onPress={() => !user?.isVerified && navigation.navigate('Verification')}
+            style={[styles.verifyBadge, user?.isVerified ? styles.verifyBadgeVerified : styles.verifyBadgePending]}
+          >
+            <Text style={[styles.verifyBadgeText, user?.isVerified ? styles.verifyBadgeTextVerified : styles.verifyBadgeTextPending]}>
+              {user?.isVerified ? '✓ Verified' : '! Tap to Verify'}
+            </Text>
+          </TouchableOpacity>
         </View>
       </View>
 
@@ -163,6 +170,12 @@ const styles = StyleSheet.create({
   },
   infoKey: { fontSize: 13, color: '#6b7280' },
   infoValue: { fontSize: 13, fontWeight: '600', color: '#111827' },
+  verifyBadge: { borderWidth: 1, paddingHorizontal: 10, paddingVertical: 4 },
+  verifyBadgeVerified: { borderColor: colors.accent, backgroundColor: '#d6ede7' },
+  verifyBadgePending: { borderColor: '#c8b48c', backgroundColor: '#fffacd' },
+  verifyBadgeText: { fontSize: 10, fontWeight: '800', textTransform: 'uppercase', letterSpacing: 1 },
+  verifyBadgeTextVerified: { color: colors.accent },
+  verifyBadgeTextPending: { color: '#7b5e1a' },
   menu: {
     backgroundColor: '#fffdf8',
     borderWidth: 1,

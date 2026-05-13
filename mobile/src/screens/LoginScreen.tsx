@@ -210,6 +210,10 @@ const LoginScreen = ({ navigation }: any) => {
                 <Text style={styles.buttonText}>{isLoading ? 'Signing in...' : 'Login'}</Text>
               </TouchableOpacity>
 
+              <TouchableOpacity style={styles.forgotBtn} onPress={() => navigation.navigate('ForgotPassword')}>
+                <Text style={styles.forgotText}>Forgot password?</Text>
+              </TouchableOpacity>
+
               <View style={styles.dividerRow}>
                 <View style={styles.divider} />
                 <Text style={styles.dividerText}>or</Text>
@@ -305,6 +309,8 @@ const styles = StyleSheet.create({
   footer: { flexDirection: 'row', justifyContent: 'center', marginTop: 20 },
   footerText: { fontSize: 13, color: '#7f7467' },
   link: { fontSize: 13, color: '#2f5d4f', fontWeight: '800', textTransform: 'uppercase', letterSpacing: 1.1 },
+  forgotBtn: { alignItems: 'center', paddingVertical: 8 },
+  forgotText: { fontSize: 12, color: '#7b6f61', fontWeight: '700', textTransform: 'uppercase', letterSpacing: 1 },
 });
 
 export default LoginScreen;

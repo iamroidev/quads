@@ -23,15 +23,15 @@ import orderService from '../services/order.service';
 import chatService from '../services/chat.service';
 import reviewService from '../services/review.service';
 import api from '../services/api';
-import { Button, LoadingSpinner } from '../components/ui';
+import { LoadingSpinner } from '../components/ui';
 import { useAuth } from '../context/AuthContext';
 import {
   OrderPopulated,
   ORDER_STATUS_LABELS,
-  ORDER_STATUS_COLORS,
   OrderStatus,
   ReviewPopulated,
 } from '../types';
+import { BulletinLayout, BulletinSection, BulletinCard } from '../components/layout/BulletinLayout';
 
 interface TrackingStep {
   status: OrderStatus;
@@ -74,6 +74,16 @@ const TRACKING_STEPS: TrackingStep[] = [
 ];
 
 const statusOrder: OrderStatus[] = ['pending', 'paid', 'confirmed', 'ready', 'completed'];
+
+const statusStyles: Record<string, string> = {
+  pending: 'bg-[#fffacd] text-black',
+  paid: 'bg-[#e0f2f7] text-black',
+  confirmed: 'bg-[#f0e8f4] text-black',
+  ready: 'bg-[#fff5e1] text-black',
+  completed: 'bg-[#fffacd] text-black',
+  cancelled: 'bg-[#fce4ec] text-black',
+  disputed: 'bg-[#fce4ec] text-black',
+};
 
 const OrderDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -184,7 +194,8 @@ const OrderDetail: React.FC = () => {
     }
   };
 
-  const handleSubmitReview = async () => {    if (!id) return;
+  const handleSubmitReview = async () => {
+    if (!id) return;
     if (!reviewComment.trim()) { toast.error('Please add a comment'); return; }
     setSubmittingReview(true);
     try {
@@ -207,12 +218,20 @@ const OrderDetail: React.FC = () => {
 
   if (!order) {
     return (
-      <div className="page-container text-center py-20">
-        <h2 className="text-xl font-bold text-earth-800 mb-4">Order Not Found</h2>
-        <Link to="/orders" className="inline-block px-6 py-3 bg-earth-900 text-white text-xs font-bold uppercase tracking-[0.15em]">
-          View Orders
-        </Link>
-      </div>
+      <BulletinLayout title="Order Not Found" subtitle="Error" section="XX">
+        <BulletinSection bgColor="bg-[#faf8f5]">
+          <div className="border border-black bg-[#fffacd] p-8 text-center">
+            <div className="text-[10px] uppercase tracking-wider opacity-60 mb-2">Missing</div>
+            <div className="font-bold mb-4">This order could not be found.</div>
+            <Link
+              to="/orders"
+              className="inline-block border border-black bg-black px-4 py-2 text-[11px] font-bold uppercase text-white transition-colors hover:bg-white hover:text-black"
+            >
+              View Orders
+            </Link>
+          </div>
+        </BulletinSection>
+      </BulletinLayout>
     );
   }
 
@@ -231,440 +250,481 @@ const OrderDetail: React.FC = () => {
   const item = order.items[0];
 
   return (
-    <div className="page-container max-w-3xl">
-      {/* Back */}
-      <button
-        onClick={() => navigate(-1)}
-        className="flex items-center gap-1.5 text-xs text-earth-500 hover:text-earth-900 mb-8 uppercase tracking-[0.12em] font-bold transition-colors"
-      >
-        <ArrowLeft className="h-3.5 w-3.5" />
-        Back
-      </button>
-
-      {/* Header */}
-      <div className="flex items-start justify-between mb-8">
-        <div>
-          <p className="text-xs font-bold uppercase tracking-[0.2em] text-earth-400 mb-1">Order</p>
-          <h1 className="text-2xl font-black text-earth-900 uppercase tracking-tight">
-            #{order.orderNumber}
-          </h1>
-          <p className="text-xs text-earth-500 mt-1">
-            {new Date(order.createdAt).toLocaleDateString('en-GH', {
-              year: 'numeric', month: 'long', day: 'numeric',
-            })}
-          </p>
+    <BulletinLayout
+      title={`Order #${order.orderNumber}`}
+      subtitle="Order detail"
+      section="06"
+    >
+      {/* Back button */}
+      <div className="border-b border-black bg-[#faf8f5] p-4 md:p-6">
+        <div className="mx-auto max-w-[1400px]">
+          <button
+            onClick={() => navigate(-1)}
+            className="flex items-center gap-1 text-[12px] font-bold hover:underline"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Back
+          </button>
         </div>
-        <span className={`px-3 py-1 text-xs font-bold uppercase tracking-wide ${ORDER_STATUS_COLORS[order.status]}`}>
-          {ORDER_STATUS_LABELS[order.status]}
-        </span>
       </div>
 
-      {/* Delivery tracking timeline */}
-      {order.status !== 'cancelled' && order.status !== 'disputed' && (
-        <div className="border border-earth-200 bg-white p-6 mb-6">
-          <p className="text-[9px] font-bold uppercase tracking-[0.28em] text-earth-400 mb-6">
-            Delivery tracking
-          </p>
-          <div className="relative">
-            {/* Vertical connector line */}
-            <div className="absolute left-3.5 top-4 bottom-4 w-px bg-earth-100" />
-
-            <div className="space-y-0">
-              {TRACKING_STEPS.map((step, index) => {
-                const stepIndex = statusOrder.indexOf(step.status);
-                const isDone = stepIndex < currentStepIndex;
-                const isCurrent = stepIndex === currentStepIndex;
-                const isFuture = stepIndex > currentStepIndex;
-
-                return (
-                  <div key={step.status} className="flex gap-4 pb-6 last:pb-0">
-                    {/* Dot */}
-                    <div className={`relative z-10 flex-shrink-0 w-7 h-7 flex items-center justify-center ${
-                      isDone
-                        ? 'bg-earth-900 text-white'
-                        : isCurrent
-                        ? 'bg-earth-900 text-white ring-4 ring-earth-100'
-                        : 'bg-white border-2 border-earth-200 text-earth-300'
-                    }`}>
-                      {isDone ? (
-                        <CheckCircle className="h-3.5 w-3.5" />
-                      ) : isCurrent ? (
-                        step.icon
-                      ) : (
-                        <Circle className="h-3.5 w-3.5" />
-                      )}
-                    </div>
-
-                    {/* Content */}
-                    <div className={`flex-1 pt-0.5 ${isFuture ? 'opacity-40' : ''}`}>
-                      <div className="flex items-center justify-between">
-                        <p className={`text-sm font-bold uppercase tracking-wide ${
-                          isCurrent ? 'text-earth-900' : isDone ? 'text-earth-700' : 'text-earth-400'
-                        }`}>
-                          {step.label}
-                        </p>
-                        {isCurrent && (
-                          <span className="px-2 py-0.5 text-[9px] font-bold uppercase tracking-[0.18em] bg-earth-900 text-white">
-                            Current
-                          </span>
-                        )}
-                      </div>
-                      <p className="text-xs text-earth-500 mt-0.5">{step.desc}</p>
-                    </div>
-                  </div>
-                );
+      <BulletinSection bgColor="bg-[#f5f9fa]">
+        {/* Header */}
+        <div className="flex items-start justify-between mb-6 border-b border-black pb-4">
+          <div>
+            <div className="text-[10px] uppercase tracking-wider opacity-60 mb-1">Order</div>
+            <div className="text-lg font-bold">#{order.orderNumber}</div>
+            <div className="text-[11px] opacity-60 mt-1">
+              {new Date(order.createdAt).toLocaleDateString('en-GH', {
+                year: 'numeric', month: 'long', day: 'numeric',
               })}
             </div>
           </div>
+          <span className={`border border-black px-2 py-1 text-[10px] font-bold uppercase ${statusStyles[order.status] || 'bg-white'}`}>
+            {ORDER_STATUS_LABELS[order.status]}
+          </span>
         </div>
-      )}
 
-      {/* Cancelled notice */}
-      {order.status === 'cancelled' && (
-        <div className="bg-red-50 border border-red-200 p-4 mb-6 flex items-start gap-3">
-          <XCircle className="h-4 w-4 text-red-500 flex-shrink-0 mt-0.5" />
-          <div>
-            <p className="text-sm font-bold text-red-800">Order cancelled</p>
-            {order.cancelReason && (
-              <p className="text-sm text-red-600 mt-1">Reason: {order.cancelReason}</p>
-            )}
+        {/* Delivery tracking timeline */}
+        {order.status !== 'cancelled' && order.status !== 'disputed' && (
+          <BulletinCard rotation={0.5} bgColor="bg-[#fefdfb]" className="mb-6">
+            <div className="text-[10px] font-bold uppercase tracking-wider opacity-60 mb-6">
+              Delivery tracking
+            </div>
+            <div className="relative">
+              {/* Vertical connector line */}
+              <div className="absolute left-3.5 top-4 bottom-4 w-px bg-black/20" />
+
+              <div className="space-y-0">
+                {TRACKING_STEPS.map((step, index) => {
+                  const stepIndex = statusOrder.indexOf(step.status);
+                  const isDone = stepIndex < currentStepIndex;
+                  const isCurrent = stepIndex === currentStepIndex;
+                  const isFuture = stepIndex > currentStepIndex;
+
+                  return (
+                    <div key={step.status} className="flex gap-4 pb-6 last:pb-0">
+                      {/* Dot */}
+                      <div className={`relative z-10 flex-shrink-0 w-7 h-7 flex items-center justify-center border border-black ${
+                        isDone
+                          ? 'bg-black text-white'
+                          : isCurrent
+                          ? 'bg-black text-white'
+                          : 'bg-white text-black opacity-40'
+                      }`}>
+                        {isDone ? (
+                          <CheckCircle className="h-3.5 w-3.5" />
+                        ) : isCurrent ? (
+                          step.icon
+                        ) : (
+                          <Circle className="h-3.5 w-3.5" />
+                        )}
+                      </div>
+
+                      {/* Content */}
+                      <div className={`flex-1 pt-0.5 ${isFuture ? 'opacity-40' : ''}`}>
+                        <div className="flex items-center justify-between">
+                          <div className={`text-[12px] font-bold ${
+                            isCurrent ? '' : isDone ? '' : 'opacity-60'
+                          }`}>
+                            {step.label}
+                          </div>
+                          {isCurrent && (
+                            <span className="border border-black bg-black text-white px-2 py-0.5 text-[8px] font-bold uppercase">
+                              Current
+                            </span>
+                          )}
+                        </div>
+                        <div className="text-[11px] opacity-60 mt-0.5">{step.desc}</div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </BulletinCard>
+        )}
+
+        {/* Cancelled notice */}
+        {order.status === 'cancelled' && (
+          <div className="border border-black bg-[#fce4ec] p-4 mb-6 flex items-start gap-3 shadow-[3px_3px_0_0_rgba(0,0,0,1)]">
+            <XCircle className="h-4 w-4 flex-shrink-0 mt-0.5" />
+            <div>
+              <div className="text-[12px] font-bold">Order cancelled</div>
+              {order.cancelReason && (
+                <div className="text-[12px] mt-1">Reason: {order.cancelReason}</div>
+              )}
+            </div>
           </div>
-        </div>
-      )}
+        )}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-        {/* Item */}
-        <div className="border border-earth-200 bg-white p-5">
-          <p className="text-xs font-bold uppercase tracking-[0.15em] text-earth-500 mb-4 flex items-center gap-1.5">
-            <Package className="h-3.5 w-3.5" /> Item
-          </p>
-          <div className="flex gap-3">
-            <div className="w-14 h-14 overflow-hidden bg-earth-100 flex-shrink-0">
-              {item?.image ? (
-                <img src={item.image} alt={item.title} className="w-full h-full object-cover" />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center text-earth-300">
-                  <Package className="h-5 w-5" />
+        {/* Details grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+          {/* Item */}
+          <BulletinCard rotation={-0.3} bgColor="bg-white">
+            <div className="text-[10px] font-bold uppercase tracking-wider opacity-60 mb-4 flex items-center gap-1.5">
+              <Package className="h-3.5 w-3.5" /> Item
+            </div>
+            <div className="flex gap-3">
+              <div className="w-14 h-14 border border-black bg-[#f8f7f4] flex-shrink-0 overflow-hidden">
+                {item?.image ? (
+                  <img src={item.image} alt={item.title} className="w-full h-full object-cover" />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center opacity-40">
+                    <Package className="h-5 w-5" />
+                  </div>
+                )}
+              </div>
+              <div>
+                <div className="text-[12px] font-bold">{item?.title}</div>
+                <div className="text-[11px] opacity-60 mt-0.5">Qty: {item?.quantity || 1}</div>
+                <div className="text-[13px] font-bold mt-1">
+                  GHS {item?.price.toLocaleString('en-GH', { minimumFractionDigits: 2 })}
+                </div>
+              </div>
+            </div>
+          </BulletinCard>
+
+          {/* Delivery */}
+          <BulletinCard rotation={0.3} bgColor="bg-white">
+            <div className="text-[10px] font-bold uppercase tracking-wider opacity-60 mb-4 flex items-center gap-1.5">
+              <Truck className="h-3.5 w-3.5" /> Delivery
+            </div>
+            <div className="space-y-2 text-[12px]">
+              <div className="flex justify-between">
+                <span className="opacity-60 text-[10px] uppercase tracking-wider">Method</span>
+                <span className="font-bold capitalize">{order.deliveryMethod}</span>
+              </div>
+              {order.deliveryAddress && (
+                <div className="flex justify-between">
+                  <span className="opacity-60 text-[10px] uppercase tracking-wider">Address</span>
+                  <span className="font-bold">{order.deliveryAddress}</span>
                 </div>
               )}
             </div>
-            <div>
-              <p className="font-semibold text-earth-900 text-sm">{item?.title}</p>
-              <p className="text-xs text-earth-500 mt-0.5">Qty: {item?.quantity || 1}</p>
-              <p className="text-sm font-bold text-earth-900 mt-1">
-                GHS {item?.price.toLocaleString('en-GH', { minimumFractionDigits: 2 })}
-              </p>
-            </div>
-          </div>
-        </div>
+          </BulletinCard>
 
-        {/* Delivery */}
-        <div className="border border-earth-200 bg-white p-5">
-          <p className="text-xs font-bold uppercase tracking-[0.15em] text-earth-500 mb-4 flex items-center gap-1.5">
-            <Truck className="h-3.5 w-3.5" /> Delivery
-          </p>
-          <div className="space-y-2 text-sm">
-            <div className="flex justify-between">
-              <span className="text-earth-500 text-xs uppercase tracking-wide">Method</span>
-              <span className="font-medium text-earth-900 capitalize">{order.deliveryMethod}</span>
+          {/* Payment */}
+          <BulletinCard rotation={-0.3} bgColor="bg-white">
+            <div className="text-[10px] font-bold uppercase tracking-wider opacity-60 mb-4 flex items-center gap-1.5">
+              <CreditCard className="h-3.5 w-3.5" /> Payment
             </div>
-            {order.deliveryAddress && (
+            <div className="space-y-2 text-[12px]">
               <div className="flex justify-between">
-                <span className="text-earth-500 text-xs uppercase tracking-wide">Address</span>
-                <span className="font-medium text-earth-900">{order.deliveryAddress}</span>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Payment */}
-        <div className="border border-earth-200 bg-white p-5">
-          <p className="text-xs font-bold uppercase tracking-[0.15em] text-earth-500 mb-4 flex items-center gap-1.5">
-            <CreditCard className="h-3.5 w-3.5" /> Payment
-          </p>
-          <div className="space-y-2 text-sm">
-            <div className="flex justify-between">
-              <span className="text-earth-500 text-xs uppercase tracking-wide">Item</span>
-              <span className="text-earth-900">
-                GHS {(item?.price * (item?.quantity || 1)).toLocaleString('en-GH', { minimumFractionDigits: 2 })}
-              </span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-earth-500 text-xs uppercase tracking-wide">Delivery</span>
-              <span className={order.deliveryFee > 0 ? 'text-earth-900' : 'text-green-600'}>
-                {order.deliveryFee > 0 ? `GHS ${order.deliveryFee.toFixed(2)}` : 'Free'}
-              </span>
-            </div>
-            <div className="h-px bg-earth-100" />
-            <div className="flex justify-between font-bold">
-              <span className="text-earth-900 text-xs uppercase tracking-wide">Total</span>
-              <span className="text-earth-900">
-                GHS {order.totalAmount.toLocaleString('en-GH', { minimumFractionDigits: 2 })}
-              </span>
-            </div>
-            {order.payment && (
-              <div className="flex justify-between">
-                <span className="text-earth-500 text-xs uppercase tracking-wide">Status</span>
-                <span className={`font-medium text-sm ${
-                  order.payment.status === 'success' ? 'text-green-600' :
-                  order.payment.status === 'failed' ? 'text-red-600' : 'text-yellow-600'
-                }`}>
-                  {order.payment.status === 'success' ? 'Paid' :
-                   order.payment.status === 'failed' ? 'Failed' : 'Pending'}
+                <span className="opacity-60 text-[10px] uppercase tracking-wider">Item</span>
+                <span className="font-bold">
+                  GHS {(item?.price * (item?.quantity || 1)).toLocaleString('en-GH', { minimumFractionDigits: 2 })}
                 </span>
               </div>
-            )}
-          </div>
-        </div>
+              <div className="flex justify-between">
+                <span className="opacity-60 text-[10px] uppercase tracking-wider">Delivery</span>
+                <span className={order.deliveryFee > 0 ? 'font-bold' : 'font-bold'}>
+                  {order.deliveryFee > 0 ? `GHS ${order.deliveryFee.toFixed(2)}` : 'Free'}
+                </span>
+              </div>
+              <div className="border-t border-black/20" />
+              <div className="flex justify-between font-bold">
+                <span className="text-[10px] uppercase tracking-wider">Total</span>
+                <span>
+                  GHS {order.totalAmount.toLocaleString('en-GH', { minimumFractionDigits: 2 })}
+                </span>
+              </div>
+              {order.payment && (
+                <div className="flex justify-between">
+                  <span className="opacity-60 text-[10px] uppercase tracking-wider">Status</span>
+                  <span className={`font-bold ${
+                    order.payment.status === 'success' ? 'text-green-700' :
+                    order.payment.status === 'failed' ? 'text-red-700' : 'text-yellow-700'
+                  }`}>
+                    {order.payment.status === 'success' ? 'Paid' :
+                     order.payment.status === 'failed' ? 'Failed' : 'Pending'}
+                  </span>
+                </div>
+              )}
+            </div>
+          </BulletinCard>
 
-        {/* Seller / Buyer */}
-        <div className="border border-earth-200 bg-white p-5">
-          <p className="text-xs font-bold uppercase tracking-[0.15em] text-earth-500 mb-4 flex items-center gap-1.5">
-            <UserIcon className="h-3.5 w-3.5" /> {isBuyer ? 'Seller' : 'Buyer'}
-          </p>
-          {isBuyer ? (
-            <div className="space-y-2 text-sm">
-              <p className="font-semibold text-earth-900">
-                {(order.seller as any).storeName || (order.seller as any).brandName || order.seller.name}
-                {order.seller.isVerified && (
-                  <span className="text-moss-500 text-xs ml-2">Verified</span>
+          {/* Seller / Buyer */}
+          <BulletinCard rotation={0.3} bgColor="bg-white">
+            <div className="text-[10px] font-bold uppercase tracking-wider opacity-60 mb-4 flex items-center gap-1.5">
+              <UserIcon className="h-3.5 w-3.5" /> {isBuyer ? 'Seller' : 'Buyer'}
+            </div>
+            {isBuyer ? (
+              <div className="space-y-2 text-[12px]">
+                <div className="font-bold">
+                  {(order.seller as any).storeName || (order.seller as any).brandName || order.seller.name}
+                  {order.seller.isVerified && (
+                    <span className="text-[10px] ml-2 opacity-60">Verified</span>
+                  )}
+                </div>
+                {order.seller.phone && (
+                  <div className="flex items-center gap-1.5 text-[11px] opacity-70">
+                    <Phone className="h-3.5 w-3.5" />
+                    {order.seller.phone}
+                  </div>
                 )}
-              </p>
-              {order.seller.phone && (
-                <p className="text-earth-600 flex items-center gap-1.5 text-xs">
-                  <Phone className="h-3.5 w-3.5 text-earth-400" />
-                  {order.seller.phone}
-                </p>
-              )}
-            </div>
-          ) : (
-            <div className="space-y-2 text-sm">
-              <p className="font-semibold text-earth-900">{order.buyer.name}</p>
-              {order.buyer.phone && (
-                <p className="text-earth-600 flex items-center gap-1.5 text-xs">
-                  <Phone className="h-3.5 w-3.5 text-earth-400" />
-                  {order.buyer.phone}
-                </p>
-              )}
-              {order.buyer.email && (
-                <p className="text-earth-600 flex items-center gap-1.5 text-xs">
-                  <Mail className="h-3.5 w-3.5 text-earth-400" />
-                  {order.buyer.email}
-                </p>
-              )}
-            </div>
+              </div>
+            ) : (
+              <div className="space-y-2 text-[12px]">
+                <div className="font-bold">{order.buyer.name}</div>
+                {order.buyer.phone && (
+                  <div className="flex items-center gap-1.5 text-[11px] opacity-70">
+                    <Phone className="h-3.5 w-3.5" />
+                    {order.buyer.phone}
+                  </div>
+                )}
+                {order.buyer.email && (
+                  <div className="flex items-center gap-1.5 text-[11px] opacity-70">
+                    <Mail className="h-3.5 w-3.5" />
+                    {order.buyer.email}
+                  </div>
+                )}
+              </div>
+            )}
+          </BulletinCard>
+        </div>
+
+        {/* Note */}
+        {order.note && (
+          <BulletinCard rotation={0} bgColor="bg-[#fffacd]" className="mb-4">
+            <div className="text-[10px] font-bold uppercase tracking-wider opacity-60 mb-1">Note</div>
+            <div className="text-[12px]">{order.note}</div>
+          </BulletinCard>
+        )}
+
+        {/* Actions */}
+        <div className="flex flex-wrap gap-3 mt-6">
+          <button
+            onClick={handleContactSeller}
+            disabled={contacting}
+            className="border border-black bg-white px-4 py-2 text-[10px] font-bold uppercase shadow-[2px_2px_0_0_rgba(0,0,0,1)] hover:shadow-[3px_3px_0_0_rgba(0,0,0,1)] transition-all disabled:opacity-40"
+          >
+            <MessageCircle className="inline-block h-4 w-4 mr-1" />
+            {isBuyer ? 'Message Seller' : 'Message Buyer'}
+          </button>
+          {canCancel && (
+            <button
+              onClick={() => setShowCancelModal(true)}
+              className="border border-black bg-white px-4 py-2 text-[10px] font-bold uppercase shadow-[2px_2px_0_0_rgba(0,0,0,1)] hover:shadow-[3px_3px_0_0_rgba(0,0,0,1)] transition-all"
+            >
+              <XCircle className="inline-block h-4 w-4 mr-1" />
+              Cancel Order
+            </button>
+          )}
+          {canLeaveReview && (
+            <button
+              onClick={() => setShowReviewModal(true)}
+              className="border border-black bg-black px-4 py-2 text-[10px] font-bold uppercase text-white shadow-[2px_2px_0_0_rgba(0,0,0,1)] hover:bg-white hover:text-black transition-all"
+            >
+              <Star className="inline-block h-4 w-4 mr-1" />
+              Leave Review
+            </button>
+          )}
+          {canRaiseDispute && (
+            <button
+              onClick={() => setShowDisputeModal(true)}
+              className="border border-black bg-[#fce4ec] px-4 py-2 text-[10px] font-bold uppercase shadow-[2px_2px_0_0_rgba(0,0,0,1)] hover:shadow-[3px_3px_0_0_rgba(0,0,0,1)] transition-all"
+            >
+              <AlertTriangle className="inline-block h-4 w-4 mr-1" />
+              Raise Dispute
+            </button>
           )}
         </div>
-      </div>
 
-      {/* Note */}
-      {order.note && (
-        <div className="border border-earth-200 bg-earth-50 p-4 mb-6">
-          <p className="text-xs font-bold uppercase tracking-[0.15em] text-earth-500 mb-1">Note to Seller</p>
-          <p className="text-sm text-earth-700">{order.note}</p>
-        </div>
-      )}
+        {/* Review card */}
+        {orderReview && (
+          <BulletinCard rotation={-0.5} bgColor="bg-white" className="mt-6">
+            <div className="text-[10px] font-bold uppercase tracking-wider opacity-60 mb-3">Your Review</div>
+            <div className="flex items-center gap-1 mb-2">
+              {[1, 2, 3, 4, 5].map((star) => (
+                <Star
+                  key={star}
+                  className={`h-4 w-4 ${star <= orderReview.rating ? 'fill-yellow-400 text-yellow-400' : 'text-black opacity-20'}`}
+                />
+              ))}
+            </div>
+            <div className="text-[12px]">{orderReview.comment}</div>
+            {orderReview.reply && (
+              <div className="mt-3 border border-black bg-[#f8f7f4] p-3 ml-4 shadow-[2px_2px_0_0_rgba(0,0,0,1)]">
+                <div className="text-[10px] font-bold uppercase tracking-wider opacity-60 mb-1">Seller reply</div>
+                <div className="text-[12px]">{orderReview.reply}</div>
+              </div>
+            )}
+          </BulletinCard>
+        )}
 
-      {/* Actions */}
-      <div className="flex gap-3 mt-6 flex-wrap">
-        <button
-          onClick={handleContactSeller}
-          disabled={contacting}
-          className="inline-flex items-center gap-2 px-5 py-2.5 border border-earth-300 text-xs font-bold uppercase tracking-[0.12em] text-earth-700 hover:bg-earth-100 transition-colors disabled:opacity-50"
-        >
-          <MessageCircle className="h-4 w-4" />
-          {isBuyer ? 'Message Seller' : 'Message Buyer'}
-        </button>
-        {canCancel && (
-          <button
-            onClick={() => setShowCancelModal(true)}
-            className="inline-flex items-center gap-2 px-5 py-2.5 border border-red-300 text-xs font-bold uppercase tracking-[0.12em] text-red-600 hover:bg-red-50 transition-colors"
-          >
-            <XCircle className="h-4 w-4" />
-            Cancel Order
-          </button>
-        )}
-        {canLeaveReview && (
-          <button
-            onClick={() => setShowReviewModal(true)}
-            className="inline-flex items-center gap-2 px-5 py-2.5 bg-earth-900 text-xs font-bold uppercase tracking-[0.12em] text-white hover:bg-earth-700 transition-colors"
-          >
-            <Star className="h-4 w-4" />
-            Leave Review
-          </button>
-        )}
-        {canRaiseDispute && (
-          <button
-            onClick={() => setShowDisputeModal(true)}
-            className="inline-flex items-center gap-2 px-5 py-2.5 border border-red-300 text-xs font-bold uppercase tracking-[0.12em] text-red-600 hover:bg-red-50 transition-colors"
-          >
-            <AlertTriangle className="h-4 w-4" />
-            Raise Dispute
-          </button>
-        )}
-      </div>
-
-      {/* Review card */}
-      {orderReview && (
-        <div className="border border-earth-200 bg-white p-5 mt-6">
-          <p className="text-xs font-bold uppercase tracking-[0.15em] text-earth-500 mb-3">Your Review</p>
-          <div className="flex items-center gap-1 mb-2">
-            {[1, 2, 3, 4, 5].map((star) => (
-              <Star
-                key={star}
-                className={`h-4 w-4 ${star <= orderReview.rating ? 'text-yellow-500 fill-yellow-500' : 'text-earth-200'}`}
+        {/* Cancel modal */}
+        {showCancelModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+            <div className="border border-black bg-[#fefdfb] shadow-[8px_8px_0_0_rgba(0,0,0,1)] max-w-md w-full p-6">
+              <div className="flex items-center justify-between mb-4 border-b border-black pb-3">
+                <div>
+                  <div className="text-[10px] uppercase tracking-wider opacity-60">Confirm</div>
+                  <div className="text-lg font-bold mt-1">Cancel Order</div>
+                </div>
+                <button
+                  onClick={() => { setShowCancelModal(false); setCancelReason(''); }}
+                  className="border border-black bg-white p-1.5 shadow-[2px_2px_0_0_rgba(0,0,0,1)] hover:shadow-[3px_3px_0_0_rgba(0,0,0,1)] transition-all"
+                >
+                  <XCircle className="h-4 w-4" />
+                </button>
+              </div>
+              <div className="text-[12px] mb-4">This action cannot be undone.</div>
+              <textarea
+                value={cancelReason}
+                onChange={(e) => setCancelReason(e.target.value)}
+                placeholder="Reason for cancellation (optional)..."
+                className="w-full h-20 resize-none border border-black bg-white p-2 text-[12px] font-bold focus:outline-none focus:ring-2 focus:ring-black mb-4"
               />
-            ))}
-          </div>
-          <p className="text-sm text-earth-700">{orderReview.comment}</p>
-          {orderReview.reply && (
-            <div className="mt-3 bg-earth-50 border border-earth-100 p-3">
-              <p className="text-xs font-bold text-earth-500 uppercase tracking-wide mb-1">Seller reply</p>
-              <p className="text-sm text-earth-700">{orderReview.reply}</p>
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* Cancel modal */}
-      {showCancelModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
-          <div className="bg-white max-w-md w-full p-6">
-            <h3 className="text-lg font-black text-earth-900 uppercase tracking-tight mb-2">Cancel Order</h3>
-            <p className="text-sm text-earth-500 mb-4">
-              Are you sure? This action cannot be undone.
-            </p>
-            <textarea
-              value={cancelReason}
-              onChange={(e) => setCancelReason(e.target.value)}
-              placeholder="Reason for cancellation (optional)..."
-              className="w-full h-20 resize-none border border-earth-200 p-3 text-sm focus:outline-none focus:border-earth-500 mb-4"
-            />
-            <div className="flex gap-3">
-              <button
-                onClick={() => { setShowCancelModal(false); setCancelReason(''); }}
-                className="flex-1 px-4 py-2.5 border border-earth-300 text-xs font-bold uppercase tracking-[0.12em] text-earth-700 hover:bg-earth-50 transition-colors"
-              >
-                Keep Order
-              </button>
-              <button
-                onClick={handleCancel}
-                disabled={cancelling}
-                className="flex-1 px-4 py-2.5 bg-red-600 text-xs font-bold uppercase tracking-[0.12em] text-white hover:bg-red-700 transition-colors disabled:opacity-50"
-              >
-                {cancelling ? 'Cancelling...' : 'Cancel Order'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Review modal */}
-      {showReviewModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
-          <div className="bg-white max-w-md w-full p-6">
-            <h3 className="text-lg font-black text-earth-900 uppercase tracking-tight mb-2">Leave a Review</h3>
-            <p className="text-sm text-earth-500 mb-5">Share your experience with this order.</p>
-            <div className="mb-4">
-              <p className="text-xs font-bold uppercase tracking-[0.15em] text-earth-500 mb-2">Rating</p>
-              <div className="flex items-center gap-1">
-                {[1, 2, 3, 4, 5].map((star) => (
-                  <button key={star} type="button" onClick={() => setReviewRating(star)} className="p-1">
-                    <Star className={`h-6 w-6 ${star <= reviewRating ? 'text-yellow-500 fill-yellow-500' : 'text-earth-300'}`} />
-                  </button>
-                ))}
+              <div className="flex gap-3">
+                <button
+                  onClick={() => { setShowCancelModal(false); setCancelReason(''); }}
+                  className="flex-1 border border-black bg-white px-4 py-2 text-[10px] font-bold uppercase shadow-[2px_2px_0_0_rgba(0,0,0,1)] hover:shadow-[3px_3px_0_0_rgba(0,0,0,1)] transition-all"
+                >
+                  Keep Order
+                </button>
+                <button
+                  onClick={handleCancel}
+                  disabled={cancelling}
+                  className="flex-1 border border-black bg-black px-4 py-2 text-[10px] font-bold uppercase text-white shadow-[2px_2px_0_0_rgba(0,0,0,1)] hover:bg-white hover:text-black disabled:opacity-50 transition-all"
+                >
+                  {cancelling ? 'Cancelling...' : 'Cancel Order'}
+                </button>
               </div>
             </div>
-            <textarea
-              value={reviewComment}
-              onChange={(e) => setReviewComment(e.target.value)}
-              placeholder="Write your review..."
-              className="w-full h-28 resize-none border border-earth-200 p-3 text-sm focus:outline-none focus:border-earth-500 mb-4"
-            />
-            <div className="flex gap-3">
-              <button
-                onClick={() => { setShowReviewModal(false); setReviewComment(''); setReviewRating(5); }}
-                className="flex-1 px-4 py-2.5 border border-earth-300 text-xs font-bold uppercase tracking-[0.12em] text-earth-700 hover:bg-earth-50 transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleSubmitReview}
-                disabled={submittingReview}
-                className="flex-1 px-4 py-2.5 bg-earth-900 text-xs font-bold uppercase tracking-[0.12em] text-white hover:bg-earth-700 transition-colors disabled:opacity-50"
-              >
-                {submittingReview ? 'Submitting...' : 'Submit Review'}
-              </button>
-            </div>
           </div>
-        </div>
-      )}
-      {/* Dispute modal */}
-      {showDisputeModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
-          <div className="bg-white max-w-lg w-full p-6">
-            <h3 className="text-lg font-black text-earth-900 uppercase tracking-tight mb-1">Raise a Dispute</h3>
-            <p className="text-sm text-earth-500 mb-5">
-              Describe your issue. Our moderation team will review within 24–48 hours.
-            </p>
-            <div className="mb-4">
-              <p className="text-[9px] font-bold uppercase tracking-[0.22em] text-earth-400 mb-2">Reason</p>
-              <select
-                value={disputeReason}
-                onChange={(e) => setDisputeReason(e.target.value)}
-                className="w-full bg-transparent border-0 border-b border-earth-300 focus:border-earth-900 focus:ring-0 text-sm py-2 outline-none text-earth-900"
-              >
-                {[
-                  ['item_not_received', 'Item not received'],
-                  ['item_not_as_described', 'Item not as described'],
-                  ['wrong_item', 'Wrong item sent'],
-                  ['damaged_item', 'Item arrived damaged'],
-                  ['seller_unresponsive', 'Seller unresponsive'],
-                  ['fraud', 'Fraud / scam'],
-                  ['other', 'Other'],
-                ].map(([val, label]) => (
-                  <option key={val} value={val}>{label}</option>
-                ))}
-              </select>
-            </div>
-            <div className="mb-5">
-              <p className="text-[9px] font-bold uppercase tracking-[0.22em] text-earth-400 mb-2">Description</p>
+        )}
+
+        {/* Review modal */}
+        {showReviewModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+            <div className="border border-black bg-[#fefdfb] shadow-[8px_8px_0_0_rgba(0,0,0,1)] max-w-md w-full p-6">
+              <div className="flex items-center justify-between mb-4 border-b border-black pb-3">
+                <div>
+                  <div className="text-[10px] uppercase tracking-wider opacity-60">Review</div>
+                  <div className="text-lg font-bold mt-1">Leave a Review</div>
+                </div>
+                <button
+                  onClick={() => { setShowReviewModal(false); setReviewComment(''); setReviewRating(5); }}
+                  className="border border-black bg-white p-1.5 shadow-[2px_2px_0_0_rgba(0,0,0,1)] hover:shadow-[3px_3px_0_0_rgba(0,0,0,1)] transition-all"
+                >
+                  <XCircle className="h-4 w-4" />
+                </button>
+              </div>
+              <div className="text-[12px] opacity-60 mb-5">Share your experience with this order.</div>
+              <div className="mb-4">
+                <div className="text-[10px] font-bold uppercase tracking-wider opacity-60 mb-2">Rating</div>
+                <div className="flex items-center gap-1">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <button key={star} type="button" onClick={() => setReviewRating(star)} className="p-1">
+                      <Star className={`h-6 w-6 ${star <= reviewRating ? 'fill-yellow-400 text-yellow-400' : 'text-black opacity-20'}`} />
+                    </button>
+                  ))}
+                </div>
+              </div>
               <textarea
-                value={disputeDescription}
-                onChange={(e) => setDisputeDescription(e.target.value)}
-                placeholder="Describe what happened in detail..."
-                className="w-full h-28 resize-none border border-earth-200 p-3 text-sm focus:outline-none focus:border-earth-500"
+                value={reviewComment}
+                onChange={(e) => setReviewComment(e.target.value)}
+                placeholder="Write your review..."
+                className="w-full h-28 resize-none border border-black bg-white p-2 text-[12px] font-bold focus:outline-none focus:ring-2 focus:ring-black mb-4"
               />
-              <p className="text-[10px] text-earth-400 mt-1">{disputeDescription.length}/2000</p>
-            </div>
-            <div className="mb-5">
-              <p className="text-[9px] font-bold uppercase tracking-[0.22em] text-earth-400 mb-2">Evidence links</p>
-              <input
-                value={disputeEvidence}
-                onChange={(e) => setDisputeEvidence(e.target.value)}
-                placeholder="Paste screenshot/photo links separated by commas"
-                className="w-full border border-earth-200 p-3 text-sm focus:outline-none focus:border-earth-500"
-              />
-            </div>
-            <div className="flex gap-3">
-              <button
-                onClick={() => { setShowDisputeModal(false); setDisputeDescription(''); setDisputeEvidence(''); }}
-                className="flex-1 px-4 py-2.5 border border-earth-300 text-xs font-bold uppercase tracking-[0.12em] text-earth-700 hover:bg-earth-50 transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleRaiseDispute}
-                disabled={submittingDispute || disputeDescription.trim().length < 10}
-                className="flex-1 px-4 py-2.5 bg-red-600 text-xs font-bold uppercase tracking-[0.12em] text-white hover:bg-red-700 transition-colors disabled:opacity-50"
-              >
-                {submittingDispute ? 'Submitting...' : 'Submit Dispute'}
-              </button>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => { setShowReviewModal(false); setReviewComment(''); setReviewRating(5); }}
+                  className="flex-1 border border-black bg-white px-4 py-2 text-[10px] font-bold uppercase shadow-[2px_2px_0_0_rgba(0,0,0,1)] hover:shadow-[3px_3px_0_0_rgba(0,0,0,1)] transition-all"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleSubmitReview}
+                  disabled={submittingReview}
+                  className="flex-1 border border-black bg-black px-4 py-2 text-[10px] font-bold uppercase text-white shadow-[2px_2px_0_0_rgba(0,0,0,1)] hover:bg-white hover:text-black disabled:opacity-50 transition-all"
+                >
+                  {submittingReview ? 'Submitting...' : 'Submit Review'}
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-      )}
-    </div>
+        )}
+
+        {/* Dispute modal */}
+        {showDisputeModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+            <div className="border border-black bg-[#fefdfb] shadow-[8px_8px_0_0_rgba(0,0,0,1)] max-w-lg w-full p-6">
+              <div className="flex items-center justify-between mb-4 border-b border-black pb-3">
+                <div>
+                  <div className="text-[10px] uppercase tracking-wider opacity-60">Dispute</div>
+                  <div className="text-lg font-bold mt-1">Raise a Dispute</div>
+                </div>
+                <button
+                  onClick={() => { setShowDisputeModal(false); setDisputeDescription(''); setDisputeEvidence(''); }}
+                  className="border border-black bg-white p-1.5 shadow-[2px_2px_0_0_rgba(0,0,0,1)] hover:shadow-[3px_3px_0_0_rgba(0,0,0,1)] transition-all"
+                >
+                  <XCircle className="h-4 w-4" />
+                </button>
+              </div>
+              <div className="text-[12px] opacity-60 mb-5">
+                Describe your issue. Our moderation team will review within 24–48 hours.
+              </div>
+              <div className="mb-4">
+                <div className="text-[10px] font-bold uppercase tracking-wider opacity-60 mb-2">Reason</div>
+                <select
+                  value={disputeReason}
+                  onChange={(e) => setDisputeReason(e.target.value)}
+                  className="w-full border border-black bg-[#fefdfb] p-2 text-[12px] font-bold focus:outline-none focus:ring-2 focus:ring-black"
+                >
+                  {[
+                    ['item_not_received', 'Item not received'],
+                    ['item_not_as_described', 'Item not as described'],
+                    ['wrong_item', 'Wrong item sent'],
+                    ['damaged_item', 'Item arrived damaged'],
+                    ['seller_unresponsive', 'Seller unresponsive'],
+                    ['fraud', 'Fraud / scam'],
+                    ['other', 'Other'],
+                  ].map(([val, label]) => (
+                    <option key={val} value={val}>{label}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="mb-5">
+                <div className="text-[10px] font-bold uppercase tracking-wider opacity-60 mb-2">Description</div>
+                <textarea
+                  value={disputeDescription}
+                  onChange={(e) => setDisputeDescription(e.target.value)}
+                  placeholder="Describe what happened in detail..."
+                  className="w-full h-28 resize-none border border-black bg-white p-2 text-[12px] font-bold focus:outline-none focus:ring-2 focus:ring-black"
+                />
+                <div className="text-[10px] opacity-40 mt-1">{disputeDescription.length}/2000</div>
+              </div>
+              <div className="mb-5">
+                <div className="text-[10px] font-bold uppercase tracking-wider opacity-60 mb-2">Evidence links</div>
+                <input
+                  value={disputeEvidence}
+                  onChange={(e) => setDisputeEvidence(e.target.value)}
+                  placeholder="Paste screenshot/photo links separated by commas"
+                  className="w-full border border-black bg-white p-2 text-[12px] font-bold focus:outline-none focus:ring-2 focus:ring-black"
+                />
+              </div>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => { setShowDisputeModal(false); setDisputeDescription(''); setDisputeEvidence(''); }}
+                  className="flex-1 border border-black bg-white px-4 py-2 text-[10px] font-bold uppercase shadow-[2px_2px_0_0_rgba(0,0,0,1)] hover:shadow-[3px_3px_0_0_rgba(0,0,0,1)] transition-all"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleRaiseDispute}
+                  disabled={submittingDispute || disputeDescription.trim().length < 10}
+                  className="flex-1 border border-black bg-[#fce4ec] px-4 py-2 text-[10px] font-bold uppercase shadow-[2px_2px_0_0_rgba(0,0,0,1)] hover:shadow-[3px_3px_0_0_rgba(0,0,0,1)] disabled:opacity-50 transition-all"
+                >
+                  {submittingDispute ? 'Submitting...' : 'Submit Dispute'}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+      </BulletinSection>
+    </BulletinLayout>
   );
 };
 

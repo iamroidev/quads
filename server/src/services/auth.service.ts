@@ -9,6 +9,9 @@ interface RegisterData {
   phone: string;
   role: 'buyer' | 'seller';
   studentId?: string;
+  department?: string;
+  residenceHall?: string;
+  currentLevel?: string;
   location?: string;
 }
 
@@ -75,8 +78,13 @@ class AuthService {
       phone: data.phone || '',
       role: data.role || 'buyer',
       studentId: data.studentId || '',
+      department: data.department || '',
+      residenceHall: data.residenceHall || '',
+      currentLevel: data.currentLevel || '',
       location: data.location || '',
-      isVerified: true,
+      isVerified: false, // Not verified yet until they verify email/phone
+      emailVerified: false,
+      phoneVerified: false,
       avatar: metadataAvatar,
       password: this.randomPassword(),
     });
@@ -128,6 +136,19 @@ class AuthService {
   /**
    * Update user profile
    */
+  async switchRole(userId: string, newRole: 'buyer' | 'seller'): Promise<AuthResult> {
+    const user = await User.findById(userId);
+    if (!user) {
+      throw ApiError.notFound('User not found.');
+    }
+
+    user.role = newRole;
+    await user.save();
+
+    const token = this.buildToken(user);
+    return { user, token };
+  }
+
   async updateProfile(
     userId: string,
     data: Partial<{
@@ -135,6 +156,9 @@ class AuthService {
       phone: string;
       avatar: string;
       studentId: string;
+      department: string;
+      residenceHall: string;
+      currentLevel: string;
       location: string;
       bio: string;
       storeName: string;
@@ -215,17 +239,19 @@ class AuthService {
         throw ApiError.badRequest('New Google accounts must sign up first and choose a role.');
       }
 
-      user = await User.create({
-        supabaseId,
-        name: profileName || 'User',
-        email,
-        phone: '',
-        role: normalizedRole,
-        isVerified: true,
-        avatar: profileAvatar || fallbackAvatar,
-        password: this.randomPassword(),
-      });
-      isNewUser = true;
+    user = await User.create({
+      supabaseId,
+      name: profileName || 'User',
+      email,
+      phone: '',
+      role: normalizedRole,
+      isVerified: true,
+      emailVerified: true, // Google OAuth verifies the email
+      phoneVerified: false,
+      avatar: profileAvatar || fallbackAvatar,
+      password: this.randomPassword(),
+    });
+    isNewUser = true;
     } else {
       if (user.isBanned) {
         throw ApiError.forbidden('Your account has been suspended.');
@@ -240,6 +266,12 @@ class AuthService {
         user.supabaseId = supabaseId;
         shouldSave = true;
       }
+      // Google OAuth verifies the email
+      if (!user.emailVerified) {
+        user.emailVerified = true;
+        user.isVerified = true;
+        shouldSave = true;
+      }
       if (shouldSave) {
         await user.save();
       }
@@ -251,7 +283,7 @@ class AuthService {
     }
 
     const token = this.buildToken(user);
-    const needsProfileCompletion = !user.phone || user.phone.trim().length < 10;
+    const needsProfileCompletion = !user.phone || user.phone.trim().length < 10 || !user.department || !user.residenceHall;
 
     return { user, token, isNewUser, needsProfileCompletion };
   }

@@ -11,6 +11,7 @@ import notificationRoutes from './notification.routes';
 import adminRoutes from './admin.routes';
 import disputeRoutes from './dispute.routes';
 import growthRoutes from './growth.routes';
+import verificationRoutes from './verification.routes';
 
 const router = Router();
 
@@ -36,5 +37,6 @@ router.use('/notifications', notificationRoutes);
 router.use('/admin', adminRoutes);
 router.use('/disputes', disputeRoutes);
 router.use('/growth', growthRoutes);
+router.use('/verification', verificationRoutes);
 
 export default router;

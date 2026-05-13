@@ -17,9 +17,9 @@ import {
 import toast from 'react-hot-toast';
 import adminService, { AdminDashboardStats, DisputePopulated } from '../services/admin.service';
 import orderService from '../services/order.service';
-import { Button, Input, LoadingSpinner } from '../components/ui';
 import { OrderPopulated, ProductPopulated, User } from '../types';
 import { Link } from 'react-router-dom';
+import { BulletinLayout, BulletinSection, BulletinCard } from '../components/layout/BulletinLayout';
 
 type AdminTab = 'overview' | 'users' | 'products' | 'orders' | 'disputes' | 'ops';
 
@@ -33,11 +33,13 @@ const TABS: { value: AdminTab; label: string }[] = [
 ];
 
 const DISPUTE_STATUS_COLORS: Record<string, string> = {
-  open: 'bg-red-100 text-red-700',
-  under_review: 'bg-yellow-100 text-yellow-700',
-  resolved: 'bg-green-100 text-green-700',
-  closed: 'bg-earth-200 text-earth-700',
+  open: 'bg-[#fce4ec] text-black',
+  under_review: 'bg-[#fffacd] text-black',
+  resolved: 'bg-[#fffacd] text-black',
+  closed: 'bg-[#f0e8f4] text-black',
 };
+
+const fieldBase = 'w-full border border-black bg-[#fefdfb] p-2 text-[12px] font-bold focus:outline-none focus:ring-2 focus:ring-black placeholder:text-black/30';
 
 const AdminDashboard: React.FC = () => {
   const [activeTab, setActiveTab] = useState<AdminTab>('overview');
@@ -204,17 +206,17 @@ const AdminDashboard: React.FC = () => {
   const statCards = useMemo(() => {
     if (!stats) return [];
     return [
-      { label: 'Users', value: stats.totalUsers, icon: Users, color: 'text-earth-600' },
-      { label: 'Sellers', value: stats.totalSellers, icon: UserCheck, color: 'text-moss-600' },
-      { label: 'Banned Users', value: stats.bannedUsers, icon: Ban, color: 'text-red-600' },
-      { label: 'Products', value: stats.totalProducts, icon: Package, color: 'text-earth-700' },
-      { label: 'Flagged Products', value: stats.flaggedProducts, icon: Flag, color: 'text-orange-600' },
-      { label: 'Featured Products', value: stats.featuredProducts, icon: Star, color: 'text-yellow-600' },
-      { label: 'Orders', value: stats.totalOrders, icon: ShoppingCart, color: 'text-purple-600' },
-      { label: 'Pending Orders', value: stats.pendingOrders, icon: Clock, color: 'text-amber-600' },
-      { label: 'Completed Orders', value: stats.completedOrders, icon: CheckCircle, color: 'text-green-600' },
-      { label: 'Revenue (GHS)', value: stats.totalRevenue.toFixed(2), icon: TrendingUp, color: 'text-earth-600' },
-      { label: 'Open Disputes', value: stats.openDisputes, icon: AlertTriangle, color: 'text-orange-600' },
+      { label: 'Users', value: stats.totalUsers, icon: Users },
+      { label: 'Sellers', value: stats.totalSellers, icon: UserCheck },
+      { label: 'Banned', value: stats.bannedUsers, icon: Ban },
+      { label: 'Products', value: stats.totalProducts, icon: Package },
+      { label: 'Flagged', value: stats.flaggedProducts, icon: Flag },
+      { label: 'Featured', value: stats.featuredProducts, icon: Star },
+      { label: 'Orders', value: stats.totalOrders, icon: ShoppingCart },
+      { label: 'Pending', value: stats.pendingOrders, icon: Clock },
+      { label: 'Completed', value: stats.completedOrders, icon: CheckCircle },
+      { label: 'Revenue', value: `GHS ${stats.totalRevenue.toFixed(2)}`, icon: TrendingUp },
+      { label: 'Disputes', value: stats.openDisputes, icon: AlertTriangle },
     ];
   }, [stats]);
 
@@ -305,484 +307,409 @@ const AdminDashboard: React.FC = () => {
   };
 
   if (loading) {
-    return <LoadingSpinner text="Loading admin dashboard..." fullScreen />;
+    return (
+      <BulletinLayout title="Admin Dashboard" subtitle="Administration" section="18">
+        <BulletinSection bgColor="bg-[#faf8f5]">
+          <div className="flex items-center justify-center py-20">
+            <div className="animate-spin h-8 w-8 border-b-2 border-black" />
+          </div>
+        </BulletinSection>
+      </BulletinLayout>
+    );
   }
 
   return (
-    <div className="page-container max-w-7xl relative pb-20">
-      {/* Header */}
-      <div className="mb-8 pt-2">
-        <p className="text-xs font-bold uppercase tracking-[0.2em] text-earth-400 mb-2 flex items-center gap-2">
-          <Shield className="h-3.5 w-3.5" />
-          Administration
-        </p>
-        <h1 className="text-3xl font-black text-earth-900 uppercase tracking-tight">Admin Dashboard</h1>
-        <div className="h-px bg-earth-200 mt-4" />
-      </div>
-
+    <BulletinLayout title="Admin Dashboard" subtitle="Administration" section="18">
       {/* Tab bar */}
-      <div className="flex gap-0 overflow-x-auto mb-8 border-b border-earth-200">
-        {TABS.map((tab) => (
-          <button
-            key={tab.value}
-            onClick={() => setActiveTab(tab.value)}
-            className={`px-5 py-3 text-xs font-bold uppercase tracking-[0.15em] whitespace-nowrap border-b-2 -mb-px transition-colors ${
-              activeTab === tab.value
-                ? 'border-earth-900 text-earth-900'
-                : 'border-transparent text-earth-400 hover:text-earth-700'
-            }`}
-          >
-            {tab.label}
-          </button>
-        ))}
+      <div className="border-b border-black bg-white">
+        <div className="mx-auto max-w-[1400px] px-6">
+          <div className="flex gap-0 overflow-x-auto">
+            {TABS.map((tab) => (
+              <button
+                key={tab.value}
+                onClick={() => setActiveTab(tab.value)}
+                className={`px-5 py-3 text-[10px] font-bold uppercase tracking-wider whitespace-nowrap border-b-2 -mb-px transition-colors ${
+                  activeTab === tab.value
+                    ? 'border-black text-black'
+                    : 'border-transparent opacity-40 hover:opacity-70'
+                }`}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+        </div>
       </div>
 
-      {/* Overview */}
-      {activeTab === 'overview' && (
-        <div className="space-y-8">
-          <div className="grid grid-cols-2 gap-px border border-earth-200 bg-earth-200 md:grid-cols-3 lg:grid-cols-5">
-            {statCards.map((card) => (
-              <div key={card.label} className="bg-white p-5">
-                <div className="mb-2 flex items-center gap-2 text-xs uppercase tracking-[0.12em] text-earth-500">
-                  <card.icon className={`h-3.5 w-3.5 ${card.color}`} />
-                  {card.label}
-                </div>
-                <p className="text-2xl font-black text-earth-900">{card.value}</p>
-              </div>
-            ))}
-          </div>
-
-          <div className="grid gap-6 lg:grid-cols-2">
-            <div className="border border-earth-200 bg-white">
-              <div className="flex items-center justify-between border-b border-earth-100 px-5 py-4">
-                <div>
-                  <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-earth-400">Moderation queue</p>
-                  <h2 className="mt-1 text-sm font-black uppercase tracking-[0.12em] text-earth-900">Flagged listings</h2>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Button size="sm" variant="outline" onClick={runAutomationSweep} disabled={runningAutomation}>
-                    {runningAutomation ? 'Running...' : 'Run sweep'}
-                  </Button>
-                  <Button size="sm" variant="outline" onClick={fetchModerationQueue}>Refresh</Button>
-                </div>
-              </div>
-              <div className="divide-y divide-earth-100">
-                {moderationQueue.products.length === 0 ? (
-                  <p className="p-5 text-sm text-earth-500">No flagged listings waiting.</p>
-                ) : moderationQueue.products.map((product) => (
-                  <div key={product._id} className="p-5">
-                    <div className="flex items-start justify-between gap-4">
-                      <div>
-                        <p className="text-sm font-semibold text-earth-900">{product.title}</p>
-                        <p className="mt-1 text-xs text-earth-500">{typeof product.seller === 'string' ? 'Seller' : product.seller.name}</p>
-                        {product.flagReason && (
-                          <p className="mt-2 text-xs text-orange-700">Reason: {product.flagReason}</p>
-                        )}
-                      </div>
-                      <Button size="sm" variant="secondary" onClick={() => setActiveTab('products')}>Review</Button>
-                    </div>
+      <BulletinSection bgColor="bg-[#faf8f5]">
+        {/* Overview */}
+        {activeTab === 'overview' && (
+          <div className="space-y-8">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-px border border-black bg-black">
+              {statCards.map((card) => (
+                <div key={card.label} className="bg-white p-5">
+                  <div className="mb-2 flex items-center gap-2 text-[10px] uppercase tracking-wider opacity-50">
+                    <card.icon className="h-3.5 w-3.5" />
+                    {card.label}
                   </div>
-                ))}
-              </div>
+                  <p className="text-2xl font-bold">{card.value}</p>
+                </div>
+              ))}
             </div>
 
-            <div className="border border-earth-200 bg-white">
-              <div className="border-b border-earth-100 px-5 py-4">
-                <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-earth-400">Moderation queue</p>
-                <h2 className="mt-1 text-sm font-black uppercase tracking-[0.12em] text-earth-900">Open disputes</h2>
-              </div>
-              <div className="divide-y divide-earth-100">
-                {moderationQueue.disputes.length === 0 ? (
-                  <p className="p-5 text-sm text-earth-500">No active disputes in queue.</p>
-                ) : moderationQueue.disputes.map((dispute) => (
-                  <div key={dispute._id} className="p-5">
-                    <div className="flex items-start justify-between gap-4">
-                      <div>
-                        <p className="text-sm font-semibold text-earth-900">#{dispute.order.orderNumber}</p>
-                        <p className="mt-1 text-xs text-earth-500">{dispute.reason.replace(/_/g, ' ')}</p>
-                        <p className="mt-2 text-xs text-earth-600 line-clamp-2">{dispute.description}</p>
-                      </div>
-                      <Button size="sm" variant="secondary" onClick={() => setActiveTab('disputes')}>Review</Button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Users */}
-      {activeTab === 'users' && (
-        <div>
-          <div className="flex flex-col md:flex-row gap-3 md:items-center md:justify-between mb-6">
-            <h2 className="text-sm font-bold text-earth-900 uppercase tracking-[0.15em]">User Management</h2>
-            <div className="flex gap-2">
-              <div className="w-64">
-                <Input
-                  value={userSearch}
-                  onChange={(e) => setUserSearch(e.target.value)}
-                  placeholder="Search users"
-                  icon={<Search className="h-4 w-4" />}
-                />
-              </div>
-              <Button variant="outline" onClick={fetchUsers}>Search</Button>
-            </div>
-          </div>
-          <div className="border border-earth-200 divide-y divide-earth-100">
-            {users.map((user) => (
-              <div key={user._id} className="bg-white p-4 flex items-center justify-between gap-3">
-                <div>
-                  <p className="font-semibold text-earth-900 text-sm">{user.name}</p>
-                  <p className="text-xs text-earth-500 mt-0.5">{user.email} &middot; {user.role}</p>
-                  <div className="flex gap-2 mt-1.5">
-                    {user.isVerified && (
-                      <span className="text-xs px-2 py-0.5 bg-moss-100 text-moss-700 font-medium uppercase tracking-wide">
-                        Verified
-                      </span>
-                    )}
-                    {user.isBanned && (
-                      <span className="text-xs px-2 py-0.5 bg-red-100 text-red-700 font-medium uppercase tracking-wide">
-                        Banned
-                      </span>
-                    )}
-                  </div>
-                </div>
-                <div className="flex gap-2">
-                  {user.role === 'seller' && (
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => handleToggleVerifySeller(user)}
-                      isLoading={busyId === user._id}
-                    >
-                      {user.isVerified ? 'Unverify' : 'Verify'}
-                    </Button>
-                  )}
-                  <Button
-                    size="sm"
-                    variant={user.isBanned ? 'secondary' : 'danger'}
-                    onClick={() => handleToggleBan(user)}
-                    isLoading={busyId === user._id}
-                  >
-                    {user.isBanned ? 'Unban' : 'Ban'}
-                  </Button>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Products */}
-      {activeTab === 'products' && (
-        <div>
-          <div className="flex flex-col md:flex-row gap-3 md:items-center md:justify-between mb-6">
-            <h2 className="text-sm font-bold text-earth-900 uppercase tracking-[0.15em]">Product Moderation</h2>
-            <div className="flex gap-2">
-              <div className="w-64">
-                <Input
-                  value={productSearch}
-                  onChange={(e) => setProductSearch(e.target.value)}
-                  placeholder="Search products"
-                  icon={<Search className="h-4 w-4" />}
-                />
-              </div>
-              <Button variant="outline" onClick={fetchProducts}>Search</Button>
-            </div>
-          </div>
-          <div className="border border-earth-200 divide-y divide-earth-100">
-            {products.map((product) => (
-              <div key={product._id} className="bg-white p-4 flex items-center justify-between gap-3">
-                <div>
-                  <p className="font-semibold text-earth-900 text-sm">{product.title}</p>
-                  <p className="text-xs text-earth-500 mt-0.5">
-                    GHS {product.price.toLocaleString('en-GH', { minimumFractionDigits: 2 })} &middot;{' '}
-                    {typeof product.seller === 'string' ? 'Seller' : product.seller.name}
-                  </p>
-                  <div className="flex gap-2 mt-1.5">
-                    {product.isFlagged && (
-                      <span className="text-xs px-2 py-0.5 bg-orange-100 text-orange-700 font-medium uppercase tracking-wide">
-                        Flagged
-                      </span>
-                    )}
-                    {product.isFeatured && (
-                      <span className="text-xs px-2 py-0.5 bg-yellow-100 text-yellow-700 font-medium uppercase tracking-wide">
-                        Featured
-                      </span>
-                    )}
-                    <span className="text-xs px-2 py-0.5 bg-earth-100 text-earth-700 font-medium uppercase tracking-wide capitalize">
-                      {product.status}
-                    </span>
-                  </div>
-                </div>
-                <div className="flex gap-2">
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => handleToggleFeatured(product)}
-                    isLoading={busyId === product._id}
-                  >
-                    {product.isFeatured ? 'Unfeature' : 'Feature'}
-                  </Button>
-                  {product.isFlagged && (
-                     <Button
-                      size="sm"
-                      variant="secondary"
-                      onClick={() => handleClearFlag(product)}
-                      isLoading={busyId === product._id}
-                    >
-                      Clear Flag
-                    </Button>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Orders */}
-      {activeTab === 'orders' && (
-        <div>
-          <div className="flex flex-col md:flex-row gap-3 md:items-center md:justify-between mb-6">
-            <h2 className="text-sm font-bold text-earth-900 uppercase tracking-[0.15em]">Order Monitoring</h2>
-            <div className="flex gap-2">
-              <div className="w-64">
-                <Input
-                  value={orderSearch}
-                  onChange={(e) => setOrderSearch(e.target.value)}
-                  placeholder="Search order number"
-                  icon={<Search className="h-4 w-4" />}
-                />
-              </div>
-              <Button variant="outline" onClick={fetchOrders}>Search</Button>
-            </div>
-          </div>
-          <div className="border border-earth-200 divide-y divide-earth-100">
-            {orders.map((order) => (
-              <div key={order._id} className="bg-white p-4">
-                <div className="flex items-center justify-between gap-2">
+            <div className="grid gap-6 lg:grid-cols-2">
+              <BulletinCard rotation={-0.3} bgColor="bg-white" className="!p-0 shadow-[3px_3px_0_0_rgba(0,0,0,1)]">
+                <div className="flex items-center justify-between border-b border-black px-5 py-4">
                   <div>
-                    <Link to={`/orders/${order._id}`} className="font-semibold text-earth-900 text-sm hover:underline">#{order.orderNumber}</Link>
-                    <p className="text-xs text-earth-500 mt-0.5">
-                      Buyer: {order.buyer.name} &middot; Seller: {order.seller.name}
-                    </p>
+                    <p className="text-[10px] uppercase tracking-wider opacity-50">Moderation queue</p>
+                    <div className="mt-1 text-sm font-bold">Flagged listings</div>
                   </div>
-                  <div className="text-right">
-                    <p className="font-bold text-earth-900 text-sm">
-                      GHS {order.totalAmount.toLocaleString('en-GH', { minimumFractionDigits: 2 })}
-                    </p>
-                    <p className="text-xs text-earth-500 capitalize mt-0.5">{order.status.replace('_', ' ')}</p>
+                  <div className="flex gap-2">
+                    <button onClick={runAutomationSweep} disabled={runningAutomation} className="border border-black bg-white px-2.5 py-1.5 text-[9px] font-bold uppercase shadow-[1px_1px_0_0_rgba(0,0,0,1)] hover:shadow-[2px_2px_0_0_rgba(0,0,0,1)] disabled:opacity-40 transition-all">
+                      {runningAutomation ? 'Running...' : 'Run sweep'}
+                    </button>
+                    <button onClick={fetchModerationQueue} className="border border-black bg-white px-2.5 py-1.5 text-[9px] font-bold uppercase shadow-[1px_1px_0_0_rgba(0,0,0,1)] hover:shadow-[2px_2px_0_0_rgba(0,0,0,1)] transition-all">
+                      Refresh
+                    </button>
                   </div>
                 </div>
-              </div>
-            ))}
-            {orders.length === 0 && <p className="p-4 text-sm text-earth-500">No orders found.</p>}
-          </div>
-        </div>
-      )}
-
-      {/* Disputes */}
-      {activeTab === 'disputes' && (
-        <div>
-          <div className="flex flex-col md:flex-row gap-3 md:items-center md:justify-between mb-6">
-            <h2 className="text-sm font-bold text-earth-900 uppercase tracking-[0.15em]">Dispute Center</h2>
-            <Button variant="outline" onClick={fetchDisputes}>Refresh</Button>
-          </div>
-          <div className="border border-earth-200 divide-y divide-earth-100">
-            {disputes.map((dispute) => (
-              <div key={dispute._id} className="bg-white p-4 flex flex-col md:flex-row gap-4 justify-between items-start md:items-center">
-                <div className="flex-1">
-                  <div className="flex items-center gap-3 mb-1">
-                    <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 ${DISPUTE_STATUS_COLORS[dispute.status] || 'bg-earth-100 text-earth-700'}`}>
-                      {dispute.status.replace('_', ' ')}
-                    </span>
-                    <Link to={`/orders/${dispute.order._id}`} className="text-xs font-bold text-earth-900 hover:underline flex items-center gap-1">
-                      Order #{dispute.order.orderNumber}
-                    </Link>
-                  </div>
-                  <p className="text-sm font-medium text-earth-900 mt-2">Reason: {dispute.reason}</p>
-                  <p className="text-sm text-earth-600 mt-1 line-clamp-2">{dispute.description}</p>
-                  <p className="text-xs text-earth-500 mt-2">
-                    Raised by <span className="font-semibold">{dispute.raisedBy.name}</span> against <span className="font-semibold">{dispute.against.name}</span>
-                    <br/>
-                    <span className="text-[10px] uppercase tracking-wider mt-1 block">
-                      {new Date(dispute.createdAt).toLocaleString()}
-                    </span>
-                  </p>
-                  {dispute.adminNote && (
-                    <div className="mt-3 p-3 bg-earth-50 border-l-2 border-earth-400 text-sm">
-                      <p className="text-xs font-bold uppercase tracking-wider text-earth-500 mb-1">Admin Note</p>
-                      <p className="text-earth-800">{dispute.adminNote}</p>
+                <div className="divide-y divide-black/20">
+                  {moderationQueue.products.length === 0 ? (
+                    <p className="p-5 text-[12px] opacity-50">No flagged listings waiting.</p>
+                  ) : moderationQueue.products.map((product) => (
+                    <div key={product._id} className="p-5">
+                      <div className="flex items-start justify-between gap-4">
+                        <div>
+                          <p className="text-[12px] font-bold">{product.title}</p>
+                          <p className="mt-1 text-[11px] opacity-50">{typeof product.seller === 'string' ? 'Seller' : product.seller.name}</p>
+                          {product.flagReason && (
+                            <p className="mt-2 text-[11px] text-red-600">Reason: {product.flagReason}</p>
+                          )}
+                        </div>
+                        <button onClick={() => setActiveTab('products')} className="border border-black bg-black px-2.5 py-1 text-[9px] font-bold uppercase text-white transition-colors hover:bg-white hover:text-black">
+                          Review
+                        </button>
+                      </div>
                     </div>
-                  )}
-                  {dispute.evidence && dispute.evidence.length > 0 && (
-                    <div className="mt-3 flex flex-wrap gap-2">
-                      {dispute.evidence.map((item, index) => (
-                        <a
-                          key={`${dispute._id}-evidence-${index}`}
-                          href={item}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="inline-flex items-center gap-1 border border-earth-200 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.16em] text-earth-500 hover:border-earth-900 hover:text-earth-900"
-                        >
-                          Evidence <AlertTriangle className="h-3 w-3" />
-                        </a>
-                      ))}
-                    </div>
-                  )}
+                  ))}
                 </div>
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  onClick={() => {
-                    setSelectedDispute(dispute);
-                    setDisputeStatus(dispute.status);
-                    setAdminNote(dispute.adminNote || '');
-                  }}
-                >
-                  Manage Dispute
-                </Button>
-              </div>
-            ))}
-            {disputes.length === 0 && <p className="p-4 text-sm text-earth-500">No disputes found.</p>}
-          </div>
-        </div>
-      )}
+              </BulletinCard>
 
-      {activeTab === 'ops' && (
-        <div className="space-y-8">
-          <div className="border border-earth-200 bg-white p-5">
-            <h2 className="text-sm font-bold text-earth-900 uppercase tracking-[0.15em] mb-3">Queue Retry Job</h2>
-            <div className="grid gap-2 sm:grid-cols-3">
-              <select value={newRetryType} onChange={(e) => setNewRetryType(e.target.value as any)} className="border border-earth-200 px-3 py-2 text-sm">
-                <option value="notification">notification</option>
-                <option value="import">import</option>
-                <option value="payment">payment</option>
-                <option value="moderation">moderation</option>
-              </select>
-              <input value={newRetryPayload} onChange={(e) => setNewRetryPayload(e.target.value)} className="border border-earth-200 px-3 py-2 text-sm sm:col-span-2" />
+              <BulletinCard rotation={0.3} bgColor="bg-white" className="!p-0 shadow-[3px_3px_0_0_rgba(0,0,0,1)]">
+                <div className="border-b border-black px-5 py-4">
+                  <p className="text-[10px] uppercase tracking-wider opacity-50">Moderation queue</p>
+                  <div className="mt-1 text-sm font-bold">Open disputes</div>
+                </div>
+                <div className="divide-y divide-black/20">
+                  {moderationQueue.disputes.length === 0 ? (
+                    <p className="p-5 text-[12px] opacity-50">No active disputes in queue.</p>
+                  ) : moderationQueue.disputes.map((dispute) => (
+                    <div key={dispute._id} className="p-5">
+                      <div className="flex items-start justify-between gap-4">
+                        <div>
+                          <p className="text-[12px] font-bold">#{dispute.order.orderNumber}</p>
+                          <p className="mt-1 text-[11px] opacity-50">{dispute.reason.replace(/_/g, ' ')}</p>
+                          <p className="mt-2 text-[11px] opacity-70 line-clamp-2">{dispute.description}</p>
+                        </div>
+                        <button onClick={() => setActiveTab('disputes')} className="border border-black bg-black px-2.5 py-1 text-[9px] font-bold uppercase text-white transition-colors hover:bg-white hover:text-black">
+                          Review
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </BulletinCard>
             </div>
-            <Button className="mt-3" onClick={queueRetryJob} isLoading={busyId === 'retry-queue'}>Queue Job</Button>
           </div>
+        )}
 
-          <div className="grid gap-6 lg:grid-cols-2">
-            <div className="border border-earth-200 bg-white">
-              <div className="border-b border-earth-100 px-5 py-4">
-                <h3 className="text-sm font-bold uppercase tracking-[0.12em] text-earth-900">Retry Jobs</h3>
+        {/* Users */}
+        {activeTab === 'users' && (
+          <div>
+            <div className="flex flex-col md:flex-row gap-3 md:items-center md:justify-between mb-6">
+              <div className="text-sm font-bold uppercase tracking-wider opacity-60">User Management</div>
+              <div className="flex gap-2">
+                <input value={userSearch} onChange={(e) => setUserSearch(e.target.value)} placeholder="Search users" className={fieldBase} />
+                <button onClick={fetchUsers} className="border border-black bg-black px-3 py-1.5 text-[9px] font-bold uppercase text-white transition-colors hover:bg-white hover:text-black">Search</button>
               </div>
-              <div className="divide-y divide-earth-100">
-                {retryJobs.length === 0 ? (
-                  <p className="p-4 text-sm text-earth-500">No retry jobs yet.</p>
-                ) : retryJobs.map((job) => (
-                  <div key={job._id} className="p-4 flex items-center justify-between gap-2">
+            </div>
+            <div className="border border-black divide-y divide-black/20 bg-white">
+              {users.map((user) => (
+                <div key={user._id} className="p-4 flex items-center justify-between gap-3">
+                  <div>
+                    <p className="text-[12px] font-bold">{user.name}</p>
+                    <p className="text-[10px] opacity-50 mt-0.5">{user.email} &middot; {user.role}</p>
+                    <div className="flex gap-2 mt-1.5">
+                      {user.isVerified && (
+                        <span className="text-[9px] border border-black px-1.5 py-0.5 bg-[#fffacd] font-bold uppercase">Verified</span>
+                      )}
+                      {user.isBanned && (
+                        <span className="text-[9px] border border-black px-1.5 py-0.5 bg-[#fce4ec] font-bold uppercase">Banned</span>
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex gap-2">
+                    {user.role === 'seller' && (
+                      <button onClick={() => handleToggleVerifySeller(user)} disabled={busyId === user._id} className="border border-black bg-black px-2.5 py-1.5 text-[8px] font-bold uppercase text-white transition-colors hover:bg-white hover:text-black disabled:opacity-40">
+                        {busyId === user._id ? '...' : user.isVerified ? 'Unverify' : 'Verify'}
+                      </button>
+                    )}
+                    <button onClick={() => handleToggleBan(user)} disabled={busyId === user._id} className="border border-black bg-[#fce4ec] px-2.5 py-1.5 text-[8px] font-bold uppercase shadow-[1px_1px_0_0_rgba(0,0,0,1)] hover:shadow-[2px_2px_0_0_rgba(0,0,0,1)] disabled:opacity-40 transition-all">
+                      {busyId === user._id ? '...' : user.isBanned ? 'Unban' : 'Ban'}
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Products */}
+        {activeTab === 'products' && (
+          <div>
+            <div className="flex flex-col md:flex-row gap-3 md:items-center md:justify-between mb-6">
+              <div className="text-sm font-bold uppercase tracking-wider opacity-60">Product Moderation</div>
+              <div className="flex gap-2">
+                <input value={productSearch} onChange={(e) => setProductSearch(e.target.value)} placeholder="Search products" className={fieldBase} />
+                <button onClick={fetchProducts} className="border border-black bg-black px-3 py-1.5 text-[9px] font-bold uppercase text-white transition-colors hover:bg-white hover:text-black">Search</button>
+              </div>
+            </div>
+            <div className="border border-black divide-y divide-black/20 bg-white">
+              {products.map((product) => (
+                <div key={product._id} className="p-4 flex items-center justify-between gap-3">
+                  <div>
+                    <p className="text-[12px] font-bold">{product.title}</p>
+                    <p className="text-[10px] opacity-50 mt-0.5">
+                      GHS {product.price.toLocaleString('en-GH', { minimumFractionDigits: 2 })} &middot;{' '}
+                      {typeof product.seller === 'string' ? 'Seller' : product.seller.name}
+                    </p>
+                    <div className="flex gap-2 mt-1.5">
+                      {product.isFlagged && (
+                        <span className="text-[9px] border border-black px-1.5 py-0.5 bg-[#fce4ec] font-bold uppercase">Flagged</span>
+                      )}
+                      {product.isFeatured && (
+                        <span className="text-[9px] border border-black px-1.5 py-0.5 bg-[#fffacd] font-bold uppercase">Featured</span>
+                      )}
+                      <span className="text-[9px] border border-black px-1.5 py-0.5 bg-[#f0e8f4] font-bold uppercase capitalize">{product.status}</span>
+                    </div>
+                  </div>
+                  <div className="flex gap-2">
+                    <button onClick={() => handleToggleFeatured(product)} disabled={busyId === product._id} className="border border-black bg-black px-2.5 py-1.5 text-[8px] font-bold uppercase text-white transition-colors hover:bg-white hover:text-black disabled:opacity-40">
+                      {busyId === product._id ? '...' : product.isFeatured ? 'Unfeature' : 'Feature'}
+                    </button>
+                    {product.isFlagged && (
+                      <button onClick={() => handleClearFlag(product)} disabled={busyId === product._id} className="border border-black bg-white px-2.5 py-1.5 text-[8px] font-bold uppercase shadow-[1px_1px_0_0_rgba(0,0,0,1)] hover:shadow-[2px_2px_0_0_rgba(0,0,0,1)] disabled:opacity-40 transition-all">
+                        {busyId === product._id ? '...' : 'Clear'}
+                      </button>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Orders */}
+        {activeTab === 'orders' && (
+          <div>
+            <div className="flex flex-col md:flex-row gap-3 md:items-center md:justify-between mb-6">
+              <div className="text-sm font-bold uppercase tracking-wider opacity-60">Order Monitoring</div>
+              <div className="flex gap-2">
+                <input value={orderSearch} onChange={(e) => setOrderSearch(e.target.value)} placeholder="Search order number" className={fieldBase} />
+                <button onClick={fetchOrders} className="border border-black bg-black px-3 py-1.5 text-[9px] font-bold uppercase text-white transition-colors hover:bg-white hover:text-black">Search</button>
+              </div>
+            </div>
+            <div className="border border-black divide-y divide-black/20 bg-white">
+              {orders.map((order) => (
+                <div key={order._id} className="p-4">
+                  <div className="flex items-center justify-between gap-2">
                     <div>
-                      <p className="text-xs font-bold uppercase tracking-[0.12em] text-earth-700">{job.type}</p>
-                      <p className="text-xs text-earth-500 mt-0.5">{job.status} · attempts {job.attempts}/{job.maxAttempts}</p>
+                      <Link to={`/orders/${order._id}`} className="text-[12px] font-bold hover:underline">#{order.orderNumber}</Link>
+                      <p className="text-[10px] opacity-50 mt-0.5">
+                        Buyer: {order.buyer.name} &middot; Seller: {order.seller.name}
+                      </p>
                     </div>
-                    <Button size="sm" variant="outline" onClick={() => runRetry(job._id)} isLoading={busyId === job._id}>Run</Button>
+                    <div className="text-right">
+                      <p className="text-sm font-bold">
+                        GHS {order.totalAmount.toLocaleString('en-GH', { minimumFractionDigits: 2 })}
+                      </p>
+                      <p className="text-[10px] opacity-50 capitalize mt-0.5">{order.status.replace('_', ' ')}</p>
+                    </div>
                   </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="border border-earth-200 bg-white">
-              <div className="border-b border-earth-100 px-5 py-4">
-                <h3 className="text-sm font-bold uppercase tracking-[0.12em] text-earth-900">Audit Logs</h3>
-              </div>
-              <div className="divide-y divide-earth-100 max-h-[480px] overflow-auto">
-                {opsAuditLogs.length === 0 ? (
-                  <p className="p-4 text-sm text-earth-500">No audit logs yet.</p>
-                ) : opsAuditLogs.map((log) => (
-                  <div key={log._id} className="p-4">
-                    <p className="text-xs font-bold uppercase tracking-[0.12em] text-earth-800">{log.action}</p>
-                    <p className="text-xs text-earth-500 mt-1">{log.scope} · {log.status} · {new Date(log.createdAt).toLocaleString()}</p>
-                  </div>
-                ))}
-              </div>
+                </div>
+              ))}
+              {orders.length === 0 && <p className="p-4 text-[12px] opacity-50">No orders found.</p>}
             </div>
           </div>
-        </div>
-      )}
+        )}
+
+        {/* Disputes */}
+        {activeTab === 'disputes' && (
+          <div>
+            <div className="flex flex-col md:flex-row gap-3 md:items-center md:justify-between mb-6">
+              <div className="text-sm font-bold uppercase tracking-wider opacity-60">Dispute Center</div>
+              <button onClick={fetchDisputes} className="border border-black bg-white px-3 py-1.5 text-[9px] font-bold uppercase shadow-[1px_1px_0_0_rgba(0,0,0,1)] hover:shadow-[2px_2px_0_0_rgba(0,0,0,1)] transition-all">Refresh</button>
+            </div>
+            <div className="border border-black divide-y divide-black/20 bg-white">
+              {disputes.map((dispute) => (
+                <div key={dispute._id} className="p-4 flex flex-col md:flex-row gap-4 justify-between items-start md:items-center">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-3 mb-1">
+                      <span className={`text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 border border-black ${DISPUTE_STATUS_COLORS[dispute.status] || 'bg-white'}`}>
+                        {dispute.status.replace('_', ' ')}
+                      </span>
+                      <Link to={`/orders/${dispute.order._id}`} className="text-[11px] font-bold hover:underline">
+                        Order #{dispute.order.orderNumber}
+                      </Link>
+                    </div>
+                    <p className="text-[12px] font-bold mt-2">Reason: {dispute.reason}</p>
+                    <p className="text-[12px] opacity-70 mt-1 line-clamp-2">{dispute.description}</p>
+                    <p className="text-[10px] opacity-50 mt-2">
+                      Raised by {dispute.raisedBy.name} against {dispute.against.name}
+                      <br/>
+                      <span className="text-[9px] uppercase tracking-wider mt-1 block">
+                        {new Date(dispute.createdAt).toLocaleString()}
+                      </span>
+                    </p>
+                    {dispute.adminNote && (
+                      <div className="mt-3 p-3 bg-[#faf8f5] border-l-2 border-black text-[11px]">
+                        <p className="text-[9px] font-bold uppercase tracking-wider opacity-50 mb-1">Admin Note</p>
+                        <p>{dispute.adminNote}</p>
+                      </div>
+                    )}
+                    {dispute.evidence && dispute.evidence.length > 0 && (
+                      <div className="mt-3 flex flex-wrap gap-2">
+                        {dispute.evidence.map((item, index) => (
+                          <a key={`${dispute._id}-evidence-${index}`} href={item} target="_blank" rel="noreferrer"
+                            className="inline-flex items-center gap-1 border border-black px-2 py-1 text-[9px] font-bold uppercase hover:bg-[#f0e8f4] transition-colors">
+                            Evidence <AlertTriangle className="h-3 w-3" />
+                          </a>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                  <button onClick={() => { setSelectedDispute(dispute); setDisputeStatus(dispute.status); setAdminNote(dispute.adminNote || ''); }}
+                    className="border border-black bg-black px-3 py-1.5 text-[9px] font-bold uppercase text-white transition-colors hover:bg-white hover:text-black flex-shrink-0">
+                    Manage
+                  </button>
+                </div>
+              ))}
+              {disputes.length === 0 && <p className="p-4 text-[12px] opacity-50">No disputes found.</p>}
+            </div>
+          </div>
+        )}
+
+        {/* Ops */}
+        {activeTab === 'ops' && (
+          <div className="space-y-8">
+            <BulletinCard rotation={-0.3} bgColor="bg-white">
+              <div className="text-sm font-bold uppercase tracking-wider mb-3">Queue Retry Job</div>
+              <div className="grid gap-2 sm:grid-cols-3">
+                <select value={newRetryType} onChange={(e) => setNewRetryType(e.target.value as any)} className={fieldBase}>
+                  <option value="notification">notification</option>
+                  <option value="import">import</option>
+                  <option value="payment">payment</option>
+                  <option value="moderation">moderation</option>
+                </select>
+                <input value={newRetryPayload} onChange={(e) => setNewRetryPayload(e.target.value)} className={`${fieldBase} sm:col-span-2`} />
+              </div>
+              <button onClick={queueRetryJob} disabled={busyId === 'retry-queue'} className="mt-3 border border-black bg-black px-3 py-1.5 text-[9px] font-bold uppercase text-white transition-colors hover:bg-white hover:text-black disabled:opacity-40">
+                {busyId === 'retry-queue' ? '...' : 'Queue Job'}
+              </button>
+            </BulletinCard>
+
+            <div className="grid gap-6 lg:grid-cols-2">
+              <BulletinCard rotation={0.3} bgColor="bg-white" className="!p-0 shadow-[3px_3px_0_0_rgba(0,0,0,1)]">
+                <div className="border-b border-black px-5 py-4">
+                  <div className="text-sm font-bold uppercase tracking-wider">Retry Jobs</div>
+                </div>
+                <div className="divide-y divide-black/20">
+                  {retryJobs.length === 0 ? (
+                    <p className="p-4 text-[12px] opacity-50">No retry jobs yet.</p>
+                  ) : retryJobs.map((job) => (
+                    <div key={job._id} className="p-4 flex items-center justify-between gap-2">
+                      <div>
+                        <p className="text-[11px] font-bold uppercase">{job.type}</p>
+                        <p className="text-[10px] opacity-50 mt-0.5">{job.status} · attempts {job.attempts}/{job.maxAttempts}</p>
+                      </div>
+                      <button onClick={() => runRetry(job._id)} disabled={busyId === job._id} className="border border-black bg-white px-2.5 py-1 text-[8px] font-bold uppercase shadow-[1px_1px_0_0_rgba(0,0,0,1)] hover:shadow-[2px_2px_0_0_rgba(0,0,0,1)] disabled:opacity-40 transition-all">
+                        {busyId === job._id ? '...' : 'Run'}
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </BulletinCard>
+
+              <BulletinCard rotation={-0.3} bgColor="bg-white" className="!p-0 shadow-[3px_3px_0_0_rgba(0,0,0,1)]">
+                <div className="border-b border-black px-5 py-4">
+                  <div className="text-sm font-bold uppercase tracking-wider">Audit Logs</div>
+                </div>
+                <div className="divide-y divide-black/20 max-h-[480px] overflow-auto">
+                  {opsAuditLogs.length === 0 ? (
+                    <p className="p-4 text-[12px] opacity-50">No audit logs yet.</p>
+                  ) : opsAuditLogs.map((log) => (
+                    <div key={log._id} className="p-4">
+                      <p className="text-[11px] font-bold uppercase">{log.action}</p>
+                      <p className="text-[10px] opacity-50 mt-1">{log.scope} · {log.status} · {new Date(log.createdAt).toLocaleString()}</p>
+                    </div>
+                  ))}
+                </div>
+              </BulletinCard>
+            </div>
+          </div>
+        )}
+      </BulletinSection>
 
       {/* Dispute Management Modal */}
       {selectedDispute && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-          <div className="bg-white border border-earth-200 w-full max-w-lg shadow-xl flex flex-col max-h-[90vh]">
-            <div className="p-5 border-b border-earth-100 flex justify-between items-center">
-              <h3 className="text-lg font-black text-earth-900 uppercase tracking-tight flex items-center gap-2">
-                <AlertTriangle className="w-5 h-5 text-earth-900" />
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
+          <div className="border border-black bg-white w-full max-w-lg shadow-[8px_8px_0_0_rgba(0,0,0,1)]">
+            <div className="p-5 border-b border-black flex justify-between items-center">
+              <div className="flex items-center gap-2 text-base font-bold uppercase">
+                <AlertTriangle className="w-5 h-5" />
                 Manage Dispute
-              </h3>
-              <button 
-                onClick={() => setSelectedDispute(null)}
-                className="text-earth-400 hover:text-earth-900 transition-colors"
-              >
-                ✕
-              </button>
+              </div>
+              <button onClick={() => setSelectedDispute(null)} className="opacity-40 hover:opacity-100 transition-opacity">✕</button>
             </div>
             
-            <div className="p-5 overflow-y-auto">
-              <div className="mb-6 bg-earth-50 p-4 border border-earth-200">
-                <p className="text-xs font-bold uppercase tracking-wider text-earth-500 mb-2">Order Info</p>
-                <p className="text-sm font-semibold text-earth-900">Order #{selectedDispute.order.orderNumber}</p>
-                <p className="text-sm text-earth-600">Amount: GHS {selectedDispute.order.totalAmount.toFixed(2)}</p>
-                <div className="h-px bg-earth-200 my-3" />
-                <p className="text-sm text-earth-900"><span className="text-earth-500">Raised By:</span> {selectedDispute.raisedBy.name} ({selectedDispute.raisedBy.email})</p>
-                <p className="text-sm text-earth-900 mt-1"><span className="text-earth-500">Against:</span> {selectedDispute.against.name} ({selectedDispute.against.email})</p>
+            <div className="p-5">
+              <div className="mb-6 bg-[#faf8f5] p-4 border border-black">
+                <p className="text-[9px] font-bold uppercase tracking-wider opacity-50 mb-2">Order Info</p>
+                <p className="text-[12px] font-bold">Order #{selectedDispute.order.orderNumber}</p>
+                <p className="text-[12px] opacity-70">Amount: GHS {selectedDispute.order.totalAmount.toFixed(2)}</p>
+                <div className="h-px bg-black/20 my-3" />
+                <p className="text-[12px]"><span className="opacity-50">Raised By:</span> {selectedDispute.raisedBy.name}</p>
+                <p className="text-[12px] mt-1"><span className="opacity-50">Against:</span> {selectedDispute.against.name}</p>
               </div>
 
               <div className="mb-5">
-                <label className="block text-[10px] font-bold uppercase tracking-[0.2em] text-earth-500 mb-2">
-                  Update Status
-                </label>
-                <div className="relative">
-                  <select
-                    value={disputeStatus}
-                    onChange={(e) => setDisputeStatus(e.target.value)}
-                    className="w-full appearance-none bg-transparent border-b border-earth-200 py-3 pl-3 pr-8 text-sm focus:border-earth-900 focus:outline-none transition-colors cursor-pointer text-earth-900"
-                  >
-                    <option value="open">Open</option>
-                    <option value="under_review">Under Review</option>
-                    <option value="resolved">Resolved</option>
-                    <option value="closed">Closed (No Action)</option>
-                  </select>
-                  <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-earth-400">
-                    <svg className="h-4 w-4 fill-current" viewBox="0 0 20 20">
-                      <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" />
-                    </svg>
-                  </div>
-                </div>
+                <label className="block text-[9px] font-bold uppercase tracking-wider opacity-50 mb-2">Update Status</label>
+                <select value={disputeStatus} onChange={(e) => setDisputeStatus(e.target.value)} className="w-full border border-black bg-[#fefdfb] p-2 text-[12px] font-bold focus:outline-none focus:ring-2 focus:ring-black">
+                  <option value="open">Open</option>
+                  <option value="under_review">Under Review</option>
+                  <option value="resolved">Resolved</option>
+                  <option value="closed">Closed (No Action)</option>
+                </select>
               </div>
 
               <div className="mb-2">
-                <label className="block text-[10px] font-bold uppercase tracking-[0.2em] text-earth-500 mb-2">
-                  Admin Note (Visible to users)
-                </label>
-                <textarea
-                  value={adminNote}
-                  onChange={(e) => setAdminNote(e.target.value)}
-                  className="w-full bg-transparent border-b border-earth-200 py-3 px-3 text-sm focus:border-earth-900 focus:outline-none transition-colors text-earth-900 resize-none min-h-[100px]"
-                  placeholder="Enter resolution details, instructions, or outcome..."
-                />
+                <label className="block text-[9px] font-bold uppercase tracking-wider opacity-50 mb-2">Admin Note</label>
+                <textarea value={adminNote} onChange={(e) => setAdminNote(e.target.value)}
+                  className="w-full border border-black bg-[#fefdfb] p-2 text-[12px] font-bold focus:outline-none focus:ring-2 focus:ring-black resize-none min-h-[100px]"
+                  placeholder="Enter resolution details..." />
               </div>
             </div>
 
-            <div className="p-5 border-t border-earth-100 flex justify-end gap-3 bg-earth-50">
-              <Button variant="outline" onClick={() => setSelectedDispute(null)}>Cancel</Button>
-              <Button 
-                onClick={handleUpdateDispute} 
-                isLoading={busyId === 'dispute-update'}
-                disabled={busyId === 'dispute-update'}
-              >
-                Save Changes
-              </Button>
+            <div className="p-5 border-t border-black flex justify-end gap-3 bg-[#faf8f5]">
+              <button onClick={() => setSelectedDispute(null)} className="border border-black bg-white px-4 py-2 text-[10px] font-bold uppercase shadow-[1px_1px_0_0_rgba(0,0,0,1)] hover:shadow-[2px_2px_0_0_rgba(0,0,0,1)] transition-all">Cancel</button>
+              <button onClick={handleUpdateDispute} disabled={busyId === 'dispute-update'} className="border border-black bg-black px-4 py-2 text-[10px] font-bold uppercase text-white transition-colors hover:bg-white hover:text-black disabled:opacity-40">
+                {busyId === 'dispute-update' ? '...' : 'Save Changes'}
+              </button>
             </div>
           </div>
         </div>
       )}
-    </div>
+    </BulletinLayout>
   );
 };
 

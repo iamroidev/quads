@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect, useCallback } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import {
   Bell,
   Shield,
@@ -20,85 +20,133 @@ import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
 import notificationService from '../services/notification.service';
 import toast from 'react-hot-toast';
+import { BulletinLayout, BulletinSection, BulletinCard } from '../components/layout/BulletinLayout';
 
 type Tab = 'notifications' | 'privacy' | 'account';
 
-const labelBase = 'text-[9px] font-bold uppercase tracking-[0.22em] text-earth-400';
-const descBase = 'text-xs text-earth-500 mt-0.5';
+const labelBase = 'text-[10px] font-bold uppercase tracking-wider opacity-60';
+const descBase = 'text-[11px] opacity-60 mt-0.5';
 
 interface NotifPrefs {
-  orderUpdates: boolean;
-  messages: boolean;
-  reviews: boolean;
-  promotions: boolean;
-  systemAlerts: boolean;
+  newMessage: boolean;
+  newOrder: boolean;
+  orderUpdate: boolean;
+  promotion: boolean;
+  newFollower: boolean;
+  featuredListings: boolean;
+  [key: string]: boolean;
 }
 
-interface PrivacyPrefs {
-  showPhone: boolean;
-  showLocation: boolean;
-  allowMessages: boolean;
-  showOnlineStatus: boolean;
-}
-
-interface RoleSettingsItem {
-  key: keyof NotifPrefs;
+interface TabConfig {
+  id: Tab;
   label: string;
-  desc: string;
+  icon: React.ReactNode;
+}
+
+const TABS: TabConfig[] = [
+  { id: 'notifications', label: 'Notifications', icon: <Bell className="h-3.5 w-3.5" /> },
+  { id: 'privacy', label: 'Privacy & Security', icon: <Lock className="h-3.5 w-3.5" /> },
+  { id: 'account', label: 'Account', icon: <Shield className="h-3.5 w-3.5" /> },
+];
+
+async function registerServiceWorker() {
+  if (!('serviceWorker' in navigator) || !('PushManager' in window)) return;
+  try {
+    const existing = await navigator.serviceWorker.getRegistration('/sw.js');
+    if (existing) return existing;
+    const reg = await navigator.serviceWorker.register('/sw.js', { scope: '/' });
+    return reg;
+  } catch {
+    // Not supported
+  }
 }
 
 const SettingsPage: React.FC = () => {
-  const { user, logout } = useAuth();
+  const { user, refreshUser, changePassword } = useAuth();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<Tab>('notifications');
-
-  /* ── Notification prefs ── */
   const [notifPrefs, setNotifPrefs] = useState<NotifPrefs>({
-    orderUpdates: true,
-    messages: true,
-    reviews: true,
-    promotions: false,
-    systemAlerts: true,
+    newMessage: true,
+    newOrder: true,
+    orderUpdate: true,
+    promotion: false,
+    newFollower: false,
+    featuredListings: false,
   });
   const [savingNotif, setSavingNotif] = useState(false);
-  
-  const [pushEnabled, setPushEnabled] = useState(false);
+  const [pushEnabled, setPushEnabled] = useState(Notification.permission === 'granted');
   const [togglingPush, setTogglingPush] = useState(false);
   const [testingPush, setTestingPush] = useState(false);
-  const isSellerView = user?.role === 'seller' || user?.role === 'admin';
-  const roleBadge = isSellerView ? 'Seller settings' : 'Buyer settings';
 
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deleteConfirmation, setDeleteConfirmation] = useState('');
+  const [deleting, setDeleting] = useState(false);
+
+  const isSeller = user?.role === 'seller' || user?.role === 'admin';
+  const isSellerView = isSeller;
+
+  // Load saved prefs
   useEffect(() => {
-    // Check if currently subscribed
-    if ('serviceWorker' in navigator && 'PushManager' in window) {
-      navigator.serviceWorker.ready.then((reg) => {
-        reg.pushManager.getSubscription().then((sub) => {
-          setPushEnabled(!!sub);
-        });
-      });
+    const stored = localStorage.getItem('notifPrefs');
+    if (stored) {
+      try {
+        const parsed = JSON.parse(stored);
+        setNotifPrefs((p) => ({ ...p, ...parsed }));
+      } catch {}
     }
   }, []);
+
+  const notificationItems = [
+    ...(isSellerView
+      ? [
+          { key: 'newOrder', label: 'New orders', desc: 'Alert when a buyer places an order' },
+          { key: 'promotion', label: 'Promotions', desc: 'Feature discounts and campaign opportunities' },
+          { key: 'featuredListings', label: 'Featured opportunities', desc: 'Get notified about featured slot availability' },
+        ]
+      : [
+          { key: 'orderUpdate', label: 'Order updates', desc: 'Status changes on your purchases' },
+          { key: 'promotion', label: 'Deals & offers', desc: 'Promotional offers from sellers' },
+        ]),
+    { key: 'newMessage', label: 'New messages', desc: 'When someone sends you a chat' },
+    ...(isSellerView ? [{ key: 'newFollower', label: 'New followers', desc: 'When someone follows your store' }] : []),
+  ];
+
+  const saveNotifPrefs = async () => {
+    setSavingNotif(true);
+    try {
+      localStorage.setItem('notifPrefs', JSON.stringify(notifPrefs));
+      // Save prefs to server via notifications endpoint
+      await api.put('/notifications/preferences', notifPrefs);
+      toast.success('Notification preferences saved');
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || 'Failed to save preferences');
+    } finally {
+      setSavingNotif(false);
+    }
+  };
 
   const handleTogglePush = async () => {
     setTogglingPush(true);
     try {
       if (pushEnabled) {
-        await notificationService.unsubscribeFromPush();
         setPushEnabled(false);
         toast.success('Push notifications disabled');
       } else {
-        // Request permission if not granted yet
         const permission = await Notification.requestPermission();
         if (permission === 'granted') {
-          await notificationService.subscribeToPush();
-          setPushEnabled(true);
-          toast.success('Push notifications enabled');
+          const registration = await registerServiceWorker();
+          if (registration) {
+            setPushEnabled(true);
+            toast.success('Push notifications enabled');
+          } else {
+            toast.error('Could not register service worker');
+          }
         } else {
-          toast.error('Permission denied for push notifications');
+          toast.error('Permission denied');
         }
       }
-    } catch (err: any) {
-      toast.error(err.message || 'Failed to toggle push notifications');
+    } catch {
+      toast.error('Failed to toggle push notifications');
     } finally {
       setTogglingPush(false);
     }
@@ -108,69 +156,23 @@ const SettingsPage: React.FC = () => {
     setTestingPush(true);
     try {
       await notificationService.sendTestPush();
-      toast.success('Test push sent');
+      toast.success('Test push sent!');
     } catch (err: any) {
-      toast.error(err.message || 'Failed to send test push');
+      toast.error(err.response?.data?.message || 'Failed to send test push');
     } finally {
       setTestingPush(false);
     }
   };
 
-  /* ── Privacy prefs ── */
-  const [privacyPrefs, setPrivacyPrefs] = useState<PrivacyPrefs>({
-    showPhone: false,
-    showLocation: true,
-    allowMessages: true,
-    showOnlineStatus: true,
-  });
-  const [savingPrivacy, setSavingPrivacy] = useState(false);
-
-  /* ── Account deletion ── */
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const [deleteInput, setDeleteInput] = useState('');
-  const [showDeletePassword, setShowDeletePassword] = useState(false);
-  const [deletePassword, setDeletePassword] = useState('');
-  const [deleting, setDeleting] = useState(false);
-
-  const saveNotifPrefs = async () => {
-    setSavingNotif(true);
-    try {
-      await api.put('/auth/settings/notifications', notifPrefs);
-      toast.success('Notification preferences saved');
-    } catch {
-      toast.error('Failed to save preferences');
-    } finally {
-      setSavingNotif(false);
-    }
-  };
-
-  const savePrivacyPrefs = async () => {
-    setSavingPrivacy(true);
-    try {
-      await api.put('/auth/settings/privacy', privacyPrefs);
-      toast.success('Privacy settings saved');
-    } catch {
-      toast.error('Failed to save settings');
-    } finally {
-      setSavingPrivacy(false);
-    }
-  };
-
   const handleDeleteAccount = async () => {
-    if (deleteInput !== 'DELETE') {
-      toast.error('Type DELETE to confirm');
-      return;
-    }
-    if (!deletePassword) {
-      toast.error('Enter your password');
-      return;
-    }
+    if (deleteConfirmation !== 'DELETE') return;
     setDeleting(true);
     try {
-      await api.delete('/auth/account', { data: { password: deletePassword } });
-      await logout();
-      navigate('/');
-      toast.success('Account deleted');
+      await api.delete('/auth/account');
+      toast.success('Account deleted. Redirecting...');
+      setTimeout(() => {
+        window.location.href = '/login';
+      }, 1000);
     } catch (err: any) {
       toast.error(err.response?.data?.message || 'Failed to delete account');
     } finally {
@@ -178,65 +180,26 @@ const SettingsPage: React.FC = () => {
     }
   };
 
-  const TABS: { id: Tab; label: string; icon: React.ReactNode }[] = [
-    { id: 'notifications', label: 'Notifications', icon: <Bell className="h-4 w-4" /> },
-    { id: 'privacy', label: 'Privacy', icon: <Eye className="h-4 w-4" /> },
-    { id: 'account', label: 'Account', icon: <Shield className="h-4 w-4" /> },
-  ];
-
-  const notificationItems: RoleSettingsItem[] = isSellerView
-    ? [
-        { key: 'orderUpdates', label: 'Sales & order events', desc: 'New purchases, cancellations, fulfillment, and payout-related updates.' },
-        { key: 'messages', label: 'Buyer messages', desc: 'When buyers ask about your listings or negotiate.' },
-        { key: 'reviews', label: 'Seller feedback', desc: 'New reviews on your store and listing quality updates.' },
-        { key: 'promotions', label: 'Boost opportunities', desc: 'Featured slots, campaign invites, and merchandising opportunities.' },
-        { key: 'systemAlerts', label: 'Compliance & system alerts', desc: 'Moderation, policy issues, account health, and security notices.' },
-      ]
-    : [
-        { key: 'orderUpdates', label: 'Order updates', desc: 'Payment, confirmation, ready-for-pickup, and delivery status changes.' },
-        { key: 'messages', label: 'Seller replies', desc: 'When sellers respond to your inquiries and offers.' },
-        { key: 'reviews', label: 'Review reminders', desc: 'Reminders to review completed orders and review responses.' },
-        { key: 'promotions', label: 'Deals & promotions', desc: 'Price drops, featured deals, and curated campus campaigns.' },
-        { key: 'systemAlerts', label: 'Security alerts', desc: 'Important account security events and platform notices.' },
-      ];
-
-  const privacyItems: { key: keyof PrivacyPrefs; label: string; desc: string }[] = isSellerView
-    ? [
-        { key: 'showPhone', label: 'Show seller phone', desc: 'Let buyers contact you directly for fast pickup coordination.' },
-        { key: 'showLocation', label: 'Show pickup area', desc: 'Display your preferred campus pickup zone on listings.' },
-        { key: 'allowMessages', label: 'Allow buyer messages', desc: 'Enable new buyer chat requests from listing pages.' },
-        { key: 'showOnlineStatus', label: 'Show response availability', desc: 'Show online/last active status to signal response speed.' },
-      ]
-    : [
-        { key: 'showPhone', label: 'Show phone number', desc: 'Your phone number will be visible on your profile.' },
-        { key: 'showLocation', label: 'Show location', desc: 'Your campus area appears on your profile and order context.' },
-        { key: 'allowMessages', label: 'Allow messages', desc: 'Sellers can start chats with you when needed.' },
-        { key: 'showOnlineStatus', label: 'Show online status', desc: 'Others can see when you were last active in chats.' },
-      ];
+  const fieldBase = 'w-full border border-black bg-[#fefdfb] p-2 text-[12px] font-bold focus:outline-none focus:ring-2 focus:ring-black placeholder:text-black/30';
 
   return (
-    <div className="min-h-[calc(100vh-56px)] bg-white">
-
-      {/* ── Hero ── */}
-      <div className="bg-[#0a0a0a] px-6 pt-14 pb-16 lg:px-8">
-        <div className="mx-auto max-w-4xl">
-          <p className="text-[9px] font-bold uppercase tracking-[0.35em] text-white/20 mb-4">
-            Account / Settings
-          </p>
-          <h1 className="text-4xl font-black uppercase tracking-tight text-white">Settings</h1>
-          <p className="mt-2 text-sm text-white/35">Manage your preferences, privacy, and account.</p>
-          <div className="mt-5 inline-flex items-center gap-2 border border-white/15 bg-white/5 px-3 py-2 text-[10px] font-bold uppercase tracking-[0.2em] text-white/60">
-            {isSellerView ? <Store className="h-3.5 w-3.5" /> : <ShoppingBag className="h-3.5 w-3.5" />}
-            {roleBadge}
+    <BulletinLayout subtitle="Settings" section="10">
+      {/* Dark header with tabs (no title to avoid redundancy) */}
+      <div className="border-b border-black bg-black">
+        <div className="mx-auto max-w-[1400px] px-6 py-10">
+          <div className="flex items-end justify-between">
+            <div>
+              <p className="text-[10px] uppercase tracking-wider text-white/30">Settings</p>
+              <h1 className="mt-1 text-2xl font-bold text-white">Account & preferences</h1>
+            </div>
           </div>
 
-          {/* Tabs at bottom of hero */}
-          <div className="flex border-t border-white/[0.07] mt-10">
+          <div className="flex border-t border-white/[0.12] mt-8">
             {TABS.map((t) => (
               <button
                 key={t.id}
                 onClick={() => setActiveTab(t.id)}
-                className={`flex items-center gap-2 px-5 py-4 text-[10px] font-bold uppercase tracking-[0.22em] border-t-2 -mt-px transition-colors ${
+                className={`flex items-center gap-2 px-5 py-3 text-[10px] font-bold uppercase tracking-wider border-t-2 -mt-px transition-colors ${
                   activeTab === t.id
                     ? 'border-white text-white'
                     : 'border-transparent text-white/30 hover:text-white/60'
@@ -250,186 +213,158 @@ const SettingsPage: React.FC = () => {
         </div>
       </div>
 
-      {/* ── Content ── */}
-      <div className="mx-auto max-w-4xl px-6 py-12 lg:px-8">
-
+      <BulletinSection bgColor="bg-[#faf8f5]">
         {/* ══ NOTIFICATIONS ══ */}
         {activeTab === 'notifications' && (
           <div>
-            <div className="mb-10">
-              <p className="text-[9px] font-bold uppercase tracking-[0.28em] text-earth-400">Preferences</p>
-              <h2 className="mt-1 text-2xl font-black uppercase tracking-tight text-earth-900">Notification settings</h2>
-              <div className="mt-3 h-px bg-earth-200" />
+            <div className="mb-6">
+              <div className="text-[10px] uppercase tracking-wider opacity-60">Preferences</div>
+              <h2 className="mt-1 text-lg font-bold">Notification settings</h2>
+              <div className="mt-3 border-t border-black" />
             </div>
 
-            <p className="text-sm text-earth-500 mb-8 max-w-lg">
+            <p className="text-[12px] opacity-70 mb-6 max-w-lg">
               {isSellerView
                 ? 'Control sales alerts, buyer messages, and promotion opportunities for your store.'
                 : 'Control order, chat, and deal alerts for your buying activity.'}
             </p>
 
-            <div className="divide-y divide-earth-100 border border-earth-200 mb-10">
+            <BulletinCard rotation={0} bgColor="bg-white" className="mb-6 p-0">
               {notificationItems.map((item) => (
-                <div key={item.key} className="flex items-center justify-between px-6 py-5">
-                  <div>
-                    <p className="text-sm font-semibold text-earth-900">{item.label}</p>
-                    <p className={descBase}>{item.desc}</p>
+                <div key={item.key} className="flex items-center justify-between px-5 py-4 border-b border-black last:border-b-0">
+                  <div className="pr-4">
+                    <div className="text-[12px] font-bold">{item.label}</div>
+                    <div className={descBase}>{item.desc}</div>
                   </div>
                   <button
                     onClick={() => setNotifPrefs((p) => ({ ...p, [item.key]: !p[item.key] }))}
-                    className={`relative h-6 w-11 flex-shrink-0 transition-colors ${
-                      notifPrefs[item.key] ? 'bg-earth-900' : 'bg-earth-200'
+                    className={`relative h-6 w-10 flex-shrink-0 border border-black transition-colors ${
+                      notifPrefs[item.key] ? 'bg-black' : 'bg-white'
                     }`}
                     role="switch"
                     aria-checked={notifPrefs[item.key]}
                   >
                     <span
-                      className={`absolute top-1 h-4 w-4 bg-white transition-transform ${
-                        notifPrefs[item.key] ? 'translate-x-6' : 'translate-x-1'
+                      className={`absolute top-0.5 h-[18px] w-[18px] border border-black bg-white transition-transform ${
+                        notifPrefs[item.key] ? 'translate-x-[22px]' : 'translate-x-[2px]'
                       }`}
                     />
                   </button>
                 </div>
               ))}
-            </div>
+            </BulletinCard>
 
-            <div className="flex justify-end mb-12">
+            <div className="flex justify-end mb-8">
               <button
                 onClick={saveNotifPrefs}
                 disabled={savingNotif}
-                className="flex items-center gap-2 bg-earth-900 text-white px-8 py-3 text-[10px] font-bold uppercase tracking-[0.2em] hover:bg-earth-700 disabled:opacity-40 transition-colors"
+                className="border border-black bg-black px-6 py-2 text-[10px] font-bold uppercase text-white shadow-[2px_2px_0_0_rgba(0,0,0,1)] hover:bg-white hover:text-black transition-colors disabled:opacity-40"
               >
-                {savingNotif ? (
-                  <span className="h-3.5 w-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                ) : (
-                  <Check className="h-3.5 w-3.5" />
-                )}
-                Save preferences
+                {savingNotif ? 'Saving...' : 'Save preferences'}
               </button>
             </div>
 
-            {/* Browser Push Notifications Section */}
+            {/* Push Notifications */}
             <div>
-              <p className="text-[9px] font-bold uppercase tracking-[0.28em] text-earth-400">This Device</p>
-              <h3 className="mt-1 text-lg font-black uppercase tracking-tight text-earth-900">Push Notifications</h3>
-              <div className="mt-3 h-px bg-earth-200 mb-6" />
+              <div className="text-[10px] uppercase tracking-wider opacity-60">This Device</div>
+              <h3 className="mt-1 text-base font-bold">Push Notifications</h3>
+              <div className="mt-3 border-t border-black mb-6" />
 
-              <div className="border border-earth-200 px-6 py-5 flex items-center justify-between bg-earth-50">
-                <div className="flex items-start gap-4">
-                  <Smartphone className="h-5 w-5 text-earth-900 flex-shrink-0 mt-0.5" />
-                  <div>
-                    <p className="text-sm font-semibold text-earth-900">Enable browser notifications</p>
-                    <p className="text-xs text-earth-500 mt-0.5 max-w-sm">
-                      {isSellerView
-                        ? 'Get real-time sales and buyer chat alerts for this browser.'
-                        : 'Get instant order and seller reply alerts for this browser.'}
-                    </p>
+              <BulletinCard rotation={0} bgColor="bg-[#fefdfb]" className="mb-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-start gap-3">
+                    <Smartphone className="h-5 w-5 flex-shrink-0 mt-0.5" />
+                    <div>
+                      <div className="text-[12px] font-bold">Enable browser notifications</div>
+                      <div className={descBase}>
+                        {isSellerView
+                          ? 'Get real-time sales and buyer chat alerts for this browser.'
+                          : 'Get instant order and seller reply alerts for this browser.'}
+                      </div>
+                    </div>
                   </div>
-                </div>
-                
-                <button
-                  onClick={handleTogglePush}
-                  disabled={togglingPush}
-                  className={`relative h-6 w-11 flex-shrink-0 transition-colors disabled:opacity-50 ${
-                    pushEnabled ? 'bg-earth-900' : 'bg-earth-200'
-                  }`}
-                  role="switch"
-                  aria-checked={pushEnabled}
-                >
-                  <span
-                    className={`absolute top-1 h-4 w-4 bg-white transition-transform ${
-                      pushEnabled ? 'translate-x-6' : 'translate-x-1'
+                  <button
+                    onClick={handleTogglePush}
+                    disabled={togglingPush}
+                    className={`relative h-6 w-10 flex-shrink-0 border border-black transition-colors disabled:opacity-50 ${
+                      pushEnabled ? 'bg-black' : 'bg-white'
                     }`}
-                  />
-                </button>
-              </div>
+                    role="switch"
+                    aria-checked={pushEnabled}
+                  >
+                    <span
+                      className={`absolute top-0.5 h-[18px] w-[18px] border border-black bg-white transition-transform ${
+                        pushEnabled ? 'translate-x-[22px]' : 'translate-x-[2px]'
+                      }`}
+                    />
+                  </button>
+                </div>
+              </BulletinCard>
 
-              <div className="mt-4 flex justify-end">
+              <div className="flex justify-end">
                 <button
                   onClick={handleTestPush}
                   disabled={!pushEnabled || testingPush}
-                  className="flex items-center gap-2 border border-earth-300 px-5 py-2.5 text-[10px] font-bold uppercase tracking-[0.16em] text-earth-700 hover:bg-earth-100 disabled:opacity-40 transition-colors"
+                  className="border border-black bg-white px-4 py-2 text-[9px] font-bold uppercase shadow-[1px_1px_0_0_rgba(0,0,0,1)] hover:shadow-[2px_2px_0_0_rgba(0,0,0,1)] disabled:opacity-40 transition-all"
                 >
-                  {testingPush ? (
-                    <span className="h-3.5 w-3.5 border-2 border-earth-300 border-t-earth-900 rounded-full animate-spin" />
-                  ) : (
-                    <Bell className="h-3.5 w-3.5" />
-                  )}
-                  Send test push
+                  <Bell className="inline-block h-3 w-3 mr-1" />
+                  {testingPush ? 'Sending...' : 'Send test push'}
                 </button>
               </div>
             </div>
           </div>
         )}
 
-        {/* ══ PRIVACY ══ */}
+        {/* ══ PRIVACY & SECURITY ══ */}
         {activeTab === 'privacy' && (
           <div>
-            <div className="mb-10">
-              <p className="text-[9px] font-bold uppercase tracking-[0.28em] text-earth-400">Data & visibility</p>
-              <h2 className="mt-1 text-2xl font-black uppercase tracking-tight text-earth-900">Privacy settings</h2>
-              <div className="mt-3 h-px bg-earth-200" />
+            <div className="mb-6">
+              <div className="text-[10px] uppercase tracking-wider opacity-60">Privacy</div>
+              <h2 className="mt-1 text-lg font-bold">Privacy & Security</h2>
+              <div className="mt-3 border-t border-black" />
             </div>
 
-            <p className="text-sm text-earth-500 mb-8 max-w-lg">
-              {isSellerView
-                ? 'Control what buyers see on your store profile and how they can reach you.'
-                : 'Control what sellers and other students can see about you.'}
-            </p>
-
-            <div className="divide-y divide-earth-100 border border-earth-200 mb-10">
-              {privacyItems.map((item) => (
-                <div key={item.key} className="flex items-center justify-between px-6 py-5">
+            <div className="max-w-lg space-y-5">
+              <BulletinCard rotation={-0.3} bgColor="bg-white">
+                <div className="flex items-start gap-3">
+                  <Lock className="h-5 w-5 flex-shrink-0 mt-0.5" />
                   <div>
-                    <p className="text-sm font-semibold text-earth-900">{item.label}</p>
-                    <p className={descBase}>{item.desc}</p>
+                    <div className="text-[12px] font-bold">Password</div>
+                    <div className={descBase}>
+                      Update your password from your profile page.
+                    </div>
+                    <Link to="/profile" className="mt-2 inline-block border border-black bg-black px-3 py-1.5 text-[9px] font-bold uppercase text-white transition-colors hover:bg-white hover:text-black">
+                      Go to Profile →
+                    </Link>
                   </div>
-                  <button
-                    onClick={() => setPrivacyPrefs((p) => ({ ...p, [item.key]: !p[item.key] }))}
-                    className={`relative h-6 w-11 flex-shrink-0 transition-colors ${
-                      privacyPrefs[item.key] ? 'bg-earth-900' : 'bg-earth-200'
-                    }`}
-                    role="switch"
-                    aria-checked={privacyPrefs[item.key]}
-                  >
-                    <span
-                      className={`absolute top-1 h-4 w-4 bg-white transition-transform ${
-                        privacyPrefs[item.key] ? 'translate-x-6' : 'translate-x-1'
-                      }`}
-                    />
-                  </button>
                 </div>
-              ))}
-            </div>
+              </BulletinCard>
 
-            {/* Data download notice */}
-            <div className="border border-earth-200 p-6 mb-8">
-              <div className="flex items-start gap-4">
-                <Lock className="h-5 w-5 text-earth-400 flex-shrink-0 mt-0.5" />
-                <div>
-                  <p className="text-sm font-semibold text-earth-900 mb-1">Your data is yours</p>
-                  <p className="text-xs text-earth-500 leading-relaxed">
-                    We never sell your personal data to third parties. {isSellerView
-                      ? 'Store metrics and listing data are used only for marketplace operations and seller analytics.'
-                      : 'Buyer activity is used only to run your account experience and recommendations.'}
-                  </p>
+              <BulletinCard rotation={0.3} bgColor="bg-white">
+                <div className="flex items-start gap-3">
+                  <Shield className="h-5 w-5 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <div className="text-[12px] font-bold">Account security</div>
+                    <div className={descBase}>
+                      Your account is protected by email authentication. 
+                      Password changes are handled securely via your profile settings.
+                    </div>
+                  </div>
                 </div>
-              </div>
-            </div>
+              </BulletinCard>
 
-            <div className="flex justify-end">
-              <button
-                onClick={savePrivacyPrefs}
-                disabled={savingPrivacy}
-                className="flex items-center gap-2 bg-earth-900 text-white px-8 py-3 text-[10px] font-bold uppercase tracking-[0.2em] hover:bg-earth-700 disabled:opacity-40 transition-colors"
-              >
-                {savingPrivacy ? (
-                  <span className="h-3.5 w-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                ) : (
-                  <Check className="h-3.5 w-3.5" />
-                )}
-                Save settings
-              </button>
+              <BulletinCard rotation={-0.3} bgColor="bg-[#e0f2f7]">
+                <div className="flex items-start gap-3">
+                  <Smartphone className="h-5 w-5 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <div className="text-[12px] font-bold">Session management</div>
+                    <div className={descBase}>
+                      You are currently logged in on this device. 
+                      Sign out from any device via your account settings.
+                    </div>
+                  </div>
+                </div>
+              </BulletinCard>
             </div>
           </div>
         )}
@@ -437,143 +372,63 @@ const SettingsPage: React.FC = () => {
         {/* ══ ACCOUNT ══ */}
         {activeTab === 'account' && (
           <div>
-            <div className="mb-10">
-              <p className="text-[9px] font-bold uppercase tracking-[0.28em] text-earth-400">Danger zone</p>
-              <h2 className="mt-1 text-2xl font-black uppercase tracking-tight text-earth-900">Account management</h2>
-              <div className="mt-3 h-px bg-earth-200" />
+            <div className="mb-6">
+              <div className="text-[10px] uppercase tracking-wider opacity-60">Danger zone</div>
+              <h2 className="mt-1 text-lg font-bold">Delete account</h2>
+              <div className="mt-3 border-t border-black" />
             </div>
 
-            {/* Account summary */}
-            <div className="border border-earth-200 p-6 mb-8">
-              <div className="flex items-center justify-between">
+            <BulletinCard rotation={0.5} bgColor="bg-[#fce4ec]" className="max-w-lg">
+              <div className="flex items-start gap-3 mb-4">
+                <AlertTriangle className="h-5 w-5 flex-shrink-0 mt-0.5" />
                 <div>
-                  <p className={labelBase}>Signed in as</p>
-                  <p className="mt-1 text-sm font-semibold text-earth-900">{user?.name}</p>
-                  <p className="text-xs text-earth-500">{user?.email}</p>
-                </div>
-                <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-earth-400 border border-earth-200 px-2.5 py-1">
-                  {user?.role}
-                </span>
-              </div>
-            </div>
-
-            {/* Actions */}
-            <div className="space-y-3 mb-12">
-              {isSellerView && (
-                <button
-                  onClick={() => navigate('/seller/analytics')}
-                  className="w-full flex items-center justify-between border border-earth-200 px-6 py-4 text-sm text-earth-700 hover:border-earth-400 transition-colors"
-                >
-                  <span>Seller analytics</span>
-                  <Megaphone className="h-4 w-4 text-earth-400" />
-                </button>
-              )}
-              {isSellerView && (
-                <button
-                  onClick={() => navigate('/my-listings')}
-                  className="w-full flex items-center justify-between border border-earth-200 px-6 py-4 text-sm text-earth-700 hover:border-earth-400 transition-colors"
-                >
-                  <span>Manage listings</span>
-                  <Package className="h-4 w-4 text-earth-400" />
-                </button>
-              )}
-              <button
-                onClick={() => navigate('/profile')}
-                className="w-full flex items-center justify-between border border-earth-200 px-6 py-4 text-sm text-earth-700 hover:border-earth-400 transition-colors"
-              >
-                <span>Edit profile information</span>
-                <ChevronRight className="h-4 w-4 text-earth-400" />
-              </button>
-              <button
-                onClick={() => navigate('/profile')}
-                className="w-full flex items-center justify-between border border-earth-200 px-6 py-4 text-sm text-earth-700 hover:border-earth-400 transition-colors"
-              >
-                <span>Change password</span>
-                <ChevronRight className="h-4 w-4 text-earth-400" />
-              </button>
-            </div>
-
-            {/* Delete account */}
-            <div className="border border-red-200 bg-red-50">
-              <div className="px-6 py-5 border-b border-red-200">
-                <div className="flex items-center gap-3">
-                  <AlertTriangle className="h-5 w-5 text-red-500 flex-shrink-0" />
-                  <div>
-                    <p className="text-sm font-bold text-red-800">Delete account</p>
-                    <p className="text-xs text-red-600 mt-0.5">
-                      This permanently removes your account, all your listings, orders, and messages. This action cannot be undone.
-                    </p>
+                  <div className="text-[12px] font-bold">Permanently delete your account</div>
+                  <div className={descBase}>
+                    This will remove all your listings, orders, and data. This action cannot be undone.
                   </div>
                 </div>
               </div>
 
               {!showDeleteConfirm ? (
-                <div className="px-6 py-5">
-                  <button
-                    onClick={() => setShowDeleteConfirm(true)}
-                    className="flex items-center gap-2 border border-red-300 px-5 py-2.5 text-[10px] font-bold uppercase tracking-[0.16em] text-red-700 hover:bg-red-100 transition-colors"
-                  >
-                    <Trash2 className="h-3.5 w-3.5" />
-                    Delete my account
-                  </button>
-                </div>
+                <button
+                  onClick={() => setShowDeleteConfirm(true)}
+                  className="border border-black bg-white px-4 py-2 text-[10px] font-bold uppercase shadow-[2px_2px_0_0_rgba(0,0,0,1)] hover:shadow-[3px_3px_0_0_rgba(0,0,0,1)] transition-all"
+                >
+                  <Trash2 className="inline-block h-3.5 w-3.5 mr-1" />
+                  Delete my account
+                </button>
               ) : (
-                <div className="px-6 py-5 space-y-4">
-                  <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-red-700">
-                    Type <span className="font-black">DELETE</span> to confirm
-                  </p>
+                <div className="space-y-3">
+                  <p className="text-[11px] font-bold uppercase">Type DELETE to confirm</p>
                   <input
                     type="text"
-                    value={deleteInput}
-                    onChange={(e) => setDeleteInput(e.target.value)}
-                    placeholder="Type DELETE"
-                    className="w-full max-w-xs bg-transparent border-0 border-b border-red-300 focus:border-red-600 focus:ring-0 text-sm py-2 px-0 outline-none text-earth-900 placeholder:text-red-300"
+                    value={deleteConfirmation}
+                    onChange={(e) => setDeleteConfirmation(e.target.value)}
+                    placeholder="DELETE"
+                    className={fieldBase}
                   />
-                  <div className="relative flex items-center max-w-xs">
-                    <input
-                      type={showDeletePassword ? 'text' : 'password'}
-                      value={deletePassword}
-                      onChange={(e) => setDeletePassword(e.target.value)}
-                      placeholder="Your password"
-                      className="flex-1 pr-10 bg-transparent border-0 border-b border-red-300 focus:border-red-600 focus:ring-0 text-sm py-2 px-0 outline-none text-earth-900 placeholder:text-red-300"
-                    />
+                  <div className="flex gap-2">
                     <button
-                      type="button"
-                      onClick={() => setShowDeletePassword((p) => !p)}
-                      className="absolute right-0 text-red-300 hover:text-red-600 transition-colors"
-                    >
-                      {showDeletePassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                    </button>
-                  </div>
-                  <div className="flex items-center gap-3 pt-2">
-                    <button
-                      onClick={handleDeleteAccount}
-                      disabled={deleting || deleteInput !== 'DELETE' || !deletePassword}
-                      className="flex items-center gap-2 bg-red-600 text-white px-6 py-2.5 text-[10px] font-bold uppercase tracking-[0.16em] hover:bg-red-700 disabled:opacity-40 transition-colors"
-                    >
-                      {deleting ? (
-                        <span className="h-3.5 w-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                      ) : (
-                        <Trash2 className="h-3.5 w-3.5" />
-                      )}
-                      Confirm delete
-                    </button>
-                    <button
-                      onClick={() => { setShowDeleteConfirm(false); setDeleteInput(''); setDeletePassword(''); }}
-                      className="text-[10px] font-bold uppercase tracking-[0.16em] text-earth-400 hover:text-earth-700 transition-colors"
+                      onClick={() => { setShowDeleteConfirm(false); setDeleteConfirmation(''); }}
+                      className="border border-black bg-white px-4 py-2 text-[10px] font-bold uppercase shadow-[1px_1px_0_0_rgba(0,0,0,1)] hover:shadow-[2px_2px_0_0_rgba(0,0,0,1)] transition-all"
                     >
                       Cancel
+                    </button>
+                    <button
+                      onClick={handleDeleteAccount}
+                      disabled={deleteConfirmation !== 'DELETE' || deleting}
+                      className="border border-black bg-black px-4 py-2 text-[10px] font-bold uppercase text-white transition-colors hover:bg-red-600 disabled:opacity-40"
+                    >
+                      {deleting ? 'Deleting...' : 'Confirm delete'}
                     </button>
                   </div>
                 </div>
               )}
-            </div>
-
+            </BulletinCard>
           </div>
         )}
-
-      </div>
-    </div>
+      </BulletinSection>
+    </BulletinLayout>
   );
 };
 

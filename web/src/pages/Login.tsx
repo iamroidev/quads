@@ -3,11 +3,11 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Eye, EyeOff, ArrowRight } from 'lucide-react';
+import { Eye, EyeOff, Pin, ArrowRight } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import toast from 'react-hot-toast';
 import { GoogleLogin } from '@react-oauth/google';
-import { supabase } from '../services/supabase';
+import BrandMark from '../components/layout/BrandMark';
 
 const loginSchema = z.object({
   email: z.string().email('Please enter a valid email'),
@@ -15,6 +15,52 @@ const loginSchema = z.object({
 });
 
 type LoginFormData = z.infer<typeof loginSchema>;
+
+const fieldBase = 'w-full border border-black bg-[#fefdfb] px-4 py-3 text-[13px] font-bold focus:outline-none focus:ring-2 focus:ring-black placeholder:text-black/30';
+
+/* Zigzag SVG divider */
+const ZigzagDivider = () => (
+  <svg
+    className="absolute top-0 right-0 h-full w-5 hidden md:block"
+    viewBox="0 0 16 100"
+    preserveAspectRatio="none"
+    fill="none"
+  >
+    <path
+      d="M0 0 L16 2 L0 4 L16 6 L0 8 L16 10 L0 12 L16 14 L0 16 L16 18 L0 20 L16 22 L0 24 L16 26 L0 28 L16 30 L0 32 L16 34 L0 36 L16 38 L0 40 L16 42 L0 44 L16 46 L0 48 L16 50 L0 52 L16 54 L0 56 L16 58 L0 60 L16 62 L0 64 L16 66 L0 68 L16 70 L0 72 L16 74 L0 76 L16 78 L0 80 L16 82 L0 84 L16 86 L0 88 L16 90 L0 92 L16 94 L0 96 L16 98 L0 100"
+      stroke="#f8f7f4"
+      strokeWidth="2"
+      fill="none"
+    />
+  </svg>
+);
+
+/* A pinned note card component */
+const PinnedNote: React.FC<{
+  bg: string;
+  rotation: number;
+  top?: string;
+  left?: string;
+  right?: string;
+  bottom?: string;
+  children: React.ReactNode;
+  w?: string;
+}> = ({ bg, rotation, children, top, left, right, bottom, w = '180px' }) => (
+  <div
+    className={`absolute border border-black/20 ${bg} shadow-[3px_3px_0_0_rgba(0,0,0,0.3)] p-4`}
+    style={{
+      transform: `rotate(${rotation}deg)`,
+      top,
+      left,
+      right,
+      bottom,
+      width: w,
+    }}
+  >
+    <Pin className="absolute -top-2 left-1/2 -translate-x-1/2 h-3 w-3 text-red-500/70" />
+    {children}
+  </div>
+);
 
 const LoginPage: React.FC = () => {
   const { login, googleLogin } = useAuth();
@@ -46,190 +92,190 @@ const LoginPage: React.FC = () => {
   };
 
   const handleGoogleSuccess = async (credentialResponse: any) => {
-    if (credentialResponse.credential) {
-      setIsSubmitting(true);
-      try {
-        const { data: authData, error } = await supabase.auth.signInWithIdToken({
-          provider: 'google',
-          token: credentialResponse.credential,
-        });
-
-        const accessToken = authData.session?.access_token;
-        if (error || !accessToken) {
-          throw new Error(error?.message || 'Supabase Google session failed.');
-        }
-
-        const result = await googleLogin(accessToken, undefined);
-        if (result.isNewUser) {
-          toast.error('No account found. Please sign up with Google and choose a role.');
-          setTimeout(() => navigate('/register'), 700);
-          setIsSubmitting(false);
-          return;
-        }
-        if (result.needsProfileCompletion) {
-          toast('Profile incomplete. Continue, then update phone/store details in Profile.');
-          navigate(from, { replace: true });
-        } else {
-          navigate(from, { replace: true });
-        }
-      } catch (err: any) {
-        const message = err?.response?.data?.message || err?.message || '';
-        if (message.toLowerCase().includes('sign up first')) {
-          toast.error('No account found. Please sign up with Google and choose a role.');
-          setTimeout(() => navigate('/register'), 700);
-        } else {
-          toast.error(message || 'Google sign-in failed. Please try again.');
-        }
-      } finally {
-        setIsSubmitting(false);
+    if (!credentialResponse.credential) return;
+    setIsSubmitting(true);
+    try {
+      // First try: attempt Google login directly (handles existing accounts)
+      const result = await googleLogin(credentialResponse.credential);
+      
+      if (result.needsProfileCompletion) {
+        // New or incomplete user — redirect to register to complete profile
+        sessionStorage.setItem('google_credential', credentialResponse.credential);
+        navigate('/register?google=1');
+      } else {
+        // Existing user with complete profile — login succeeded
+        navigate(from, { replace: true });
       }
+    } catch (err: any) {
+      // If googleLogin threw "No account found", redirect to register
+      const msg = err.response?.data?.message || err.message || '';
+      if (msg.toLowerCase().includes('no account found') || msg.toLowerCase().includes('sign up first')) {
+        sessionStorage.setItem('google_credential', credentialResponse.credential);
+        navigate('/register?google=1');
+      } else {
+        toast.error(msg || 'Google sign-in failed. Please try again.');
+      }
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   return (
-    <div className="flex min-h-[calc(100vh-56px)] overflow-hidden">
-
-      {/* ── LEFT: black typographic panel ── */}
-      <div className="relative hidden w-[52%] flex-col justify-between overflow-hidden bg-[#0a0a0a] p-14 lg:flex">
-        {/* background grid */}
-        <div
-          className="pointer-events-none absolute inset-0 opacity-[0.035]"
+    <div className="flex min-h-screen flex-col md:flex-row bg-[#f8f7f4] font-mono text-[13px] leading-tight overflow-hidden">
+      
+      {/* ── LEFT: Dark bulletin board with pinned notes ── */}
+      <div className="hidden md:block w-[48%] bg-[#1a1a1a] relative overflow-hidden">
+        {/* Cork texture feel with dots */}
+        <div className="absolute inset-0 opacity-[0.08]"
           style={{
-            backgroundImage:
-              'linear-gradient(to right,#fff 1px,transparent 1px),linear-gradient(to bottom,#fff 1px,transparent 1px)',
-            backgroundSize: '48px 48px',
+            backgroundImage: 'radial-gradient(circle, #fff 1px, transparent 1px)',
+            backgroundSize: '24px 24px',
           }}
         />
+        
+        {/* Scattered pinned notes */}
+        <PinnedNote bg="bg-[#fffacd]" rotation={-3} top="8%" left="8%" w="160px">
+          <div className="text-[9px] font-bold uppercase tracking-wider opacity-50">📌 Notice</div>
+          <div className="mt-1 text-[13px] font-bold">2,400+ listings</div>
+          <div className="mt-1 text-[11px] opacity-70 leading-relaxed">Browse textbooks, gadgets & fashion from students.</div>
+        </PinnedNote>
 
-        {/* Top: eyebrow */}
-        <span className="relative z-10 text-[10px] font-bold uppercase tracking-[0.3em] text-white/25">
-          CampusMarketplace
-        </span>
+        <PinnedNote bg="bg-[#e0f2f7]" rotation={2} top="12%" right="12%" w="140px">
+          <div className="text-[9px] font-bold uppercase tracking-wider opacity-50">💬 Chat</div>
+          <div className="mt-1 text-[13px] font-bold">Real-time</div>
+          <div className="mt-1 text-[11px] opacity-70">Message sellers directly on campus.</div>
+        </PinnedNote>
 
-        {/* Center: giant headline */}
-        <div className="relative z-10">
-          <h1 className="text-[clamp(3.5rem,5.5vw,6rem)] font-black leading-[0.88] tracking-[-0.05em] text-white">
-            Good deals<br />
-            don't wait.
-          </h1>
-          <p className="mt-6 max-w-xs text-sm leading-7 text-white/40">
-            Sign in to access saved items, ongoing chats, and listings you've been watching.
-          </p>
+        <PinnedNote bg="bg-[#fce4ec]" rotation={-1.5} top="38%" left="15%" w="150px">
+          <div className="text-[9px] font-bold uppercase tracking-wider opacity-50">🛡️ Safe</div>
+          <div className="mt-1 text-[13px] font-bold">Buyer protection</div>
+          <div className="mt-1 text-[11px] opacity-70">Payments held securely until you confirm.</div>
+        </PinnedNote>
+
+        {/* Large polaroid-style ID card */}
+        <div
+          className="absolute top-[45%] right-[10%] border border-white/20 bg-[#2a2a2a] p-4 shadow-[6px_6px_0_0_rgba(0,0,0,0.5)]"
+          style={{ transform: 'rotate(4deg)', width: '200px' }}
+        >
+          <div className="border border-white/10 bg-[#333] h-24 flex items-center justify-center mb-3">
+            <div className="h-12 w-12 border-2 border-white/30 flex items-center justify-center">
+              <span className="text-2xl">👤</span>
+            </div>
+          </div>
+          <div className="text-center">
+            <div className="text-[10px] uppercase tracking-wider text-white/40">Member Access</div>
+            <div className="text-sm font-bold text-white mt-0.5">UMaT Marketplace</div>
+          </div>
+          {/* Tape effect */}
+          <div className="absolute -top-3 left-1/2 -translate-x-1/2 h-5 w-20 bg-[#ffd700]/20 rotate-1" />
         </div>
 
-        {/* Bottom: two floating product-style tiles */}
-        <div className="relative z-10 flex gap-3">
-          <div className="flex-1 rounded-lg border border-white/8 bg-white/4 p-4 backdrop-blur-sm">
-            <p className="text-[9px] font-bold uppercase tracking-[0.22em] text-white/25">Saved items</p>
-            <p className="mt-1.5 text-sm font-semibold text-white/70">Pick up where you left off</p>
-          </div>
-          <div className="flex-1 rounded-lg border border-white/8 bg-white/4 p-4 backdrop-blur-sm">
-            <p className="text-[9px] font-bold uppercase tracking-[0.22em] text-white/25">Messages</p>
-            <p className="mt-1.5 text-sm font-semibold text-white/70">Jump back into ongoing deals</p>
+        <PinnedNote bg="bg-[#f0e8f4]" rotation={2.5} bottom="18%" left="10%" w="170px">
+          <div className="text-[9px] font-bold uppercase tracking-wider opacity-50">💰 Free</div>
+          <div className="mt-1 text-[13px] font-bold">0% platform fee</div>
+          <div className="mt-1 text-[11px] opacity-70">Students keep 100% of every sale.</div>
+        </PinnedNote>
+
+        <PinnedNote bg="bg-[#fffacd]" rotation={-2} bottom="10%" right="15%" w="130px">
+          <div className="text-[9px] font-bold uppercase tracking-wider opacity-50">⭐ New</div>
+          <div className="mt-1 text-[13px] font-bold">Just listed</div>
+          <div className="mt-1 text-[11px] opacity-70">Fresh items posted daily.</div>
+        </PinnedNote>
+
+        {/* Bottom brand */}
+        <div className="absolute bottom-6 left-6">
+          <div className="inline-flex items-center gap-2 border border-white/20 px-3 py-1.5">
+            <BrandMark className="h-4 w-4 text-white" />
+            <span className="text-[9px] font-bold uppercase tracking-wider text-white/60">CampusMarket</span>
           </div>
         </div>
+
+        {/* Zigzag divider on right edge */}
+        <ZigzagDivider />
       </div>
 
-      {/* ── RIGHT: bare white form ── */}
-      <div className="flex flex-1 flex-col justify-center px-8 py-14 sm:px-12 lg:px-16 xl:px-24">
-        <div className="mx-auto w-full max-w-sm">
-
-          {/* Mobile only: back link */}
-          <Link
-            to="/"
-            className="mb-8 block text-[10px] font-bold uppercase tracking-[0.25em] text-earth-400 hover:text-earth-900 lg:hidden"
-          >
-            ← Home
+      {/* ── RIGHT: Form panel ── */}
+      <div className="flex flex-1 flex-col relative">
+        {/* Mobile header */}
+        <div className="flex md:hidden items-stretch border-b border-black bg-[#f8f7f4]">
+          <Link to="/" className="flex-1 border-r border-black bg-[#fff5e1] px-3 py-2">
+            <span className="block text-[10px] uppercase tracking-wider opacity-40">UMaT</span>
+            <span className="block font-bold">Campus Market</span>
           </Link>
+          <div className="flex-1 bg-[#f0e8f4] px-3 py-2 flex items-center justify-end">
+            <Link to="/register" className="text-[9px] font-bold uppercase tracking-wider underline">Register</Link>
+          </div>
+        </div>
 
-          <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-earth-400">Sign in</p>
-          <h2 className="mt-3 text-4xl font-black leading-[0.95] tracking-[-0.04em] text-earth-900">
-            Welcome<br />back.
-          </h2>
-
-          <form onSubmit={handleSubmit(onSubmit)} className="mt-10 space-y-0">
-            {/* Email field */}
-            <div className="border-b border-earth-200 pb-6">
-              <label className="block text-[10px] font-bold uppercase tracking-[0.25em] text-earth-400 mb-3">
-                Email
-              </label>
-              <input
-                type="email"
-                placeholder="you@example.com"
-                autoComplete="email"
-                className="w-full bg-transparent text-base text-earth-900 placeholder:text-earth-300 focus:outline-none"
-                {...register('email')}
-              />
-              {errors.email && (
-                <p className="mt-2 text-xs text-red-500">{errors.email.message}</p>
-              )}
+        <div className="flex flex-1 items-center justify-center p-6 md:p-12">
+          <div className="w-full max-w-sm">
+            <div className="mb-8">
+              <Link to="/" className="hidden md:inline-flex items-center gap-2 mb-6">
+                <BrandMark className="h-5 w-5" />
+                <span className="text-xs font-black uppercase">CampusMarket</span>
+              </Link>
+              <h1 className="text-3xl font-bold mt-2">Welcome back.</h1>
+              <p className="text-[12px] opacity-60 mt-2">Sign in to your account.</p>
             </div>
 
-            {/* Password field */}
-            <div className="border-b border-earth-200 py-6">
-              <label className="block text-[10px] font-bold uppercase tracking-[0.25em] text-earth-400 mb-3">
-                Password
-              </label>
-              <div className="flex items-center">
-                <input
-                  type={showPassword ? 'text' : 'password'}
-                  placeholder="Your password"
-                  autoComplete="current-password"
-                  className="flex-1 bg-transparent text-base text-earth-900 placeholder:text-earth-300 focus:outline-none"
-                  {...register('password')}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword((p) => !p)}
-                  className="ml-3 text-earth-400 transition-colors hover:text-earth-900"
-                >
-                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                </button>
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+              <div>
+                <label className="block text-[10px] font-bold uppercase tracking-wider opacity-60 mb-1">Email</label>
+                <input type="email" placeholder="you@example.com" autoComplete="email" autoFocus className={fieldBase} {...register('email')} />
+                {errors.email && <p className="mt-1 text-[11px] text-red-600 font-bold">{errors.email.message}</p>}
               </div>
-              {errors.password && (
-                <p className="mt-2 text-xs text-red-500">{errors.password.message}</p>
-              )}
-            </div>
-
-            {/* Submit */}
-            <div className="pt-8">
-              <button
-                type="submit"
-                disabled={isSubmitting}
-                className="group flex w-full items-center justify-between border border-earth-900 bg-earth-900 px-6 py-4 text-sm font-bold uppercase tracking-[0.18em] text-white transition-all hover:bg-white hover:text-earth-900 disabled:opacity-40"
-              >
-                <span>{isSubmitting ? 'Signing in...' : 'Continue'}</span>
-                <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+              <div>
+                <label className="block text-[10px] font-bold uppercase tracking-wider opacity-60 mb-1">Password</label>
+                <div className="relative flex items-center">
+                  <input type={showPassword ? 'text' : 'password'} placeholder="Your password" autoComplete="current-password" className={`flex-1 pr-12 ${fieldBase}`} {...register('password')} />
+                  <button type="button" onClick={() => setShowPassword((p) => !p)} className="absolute right-3 text-black/40 hover:text-black transition-colors">
+                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
+                {errors.password && <p className="mt-1 text-[11px] text-red-600 font-bold">{errors.password.message}</p>}
+                <div className="mt-1.5 flex justify-end">
+                  <Link
+                    to="/forgot-password"
+                    className="text-[10px] font-bold opacity-50 hover:opacity-100 hover:underline transition-opacity"
+                  >
+                    Forgot password?
+                  </Link>
+                </div>
+              </div>
+              <button type="submit" disabled={isSubmitting}
+                className="w-full border border-black bg-black px-6 py-3 text-[11px] font-bold uppercase text-white shadow-[3px_3px_0_0_rgba(0,0,0,1)] hover:bg-white hover:text-black disabled:opacity-40 transition-all">
+                {isSubmitting ? 'Signing in...' : 'Continue'}
               </button>
+            </form>
+
+            <div className="flex items-center gap-4 my-8">
+              <div className="flex-1 h-px bg-black/20" />
+              <span className="text-[10px] font-bold uppercase tracking-widest opacity-40">Or</span>
+              <div className="flex-1 h-px bg-black/20" />
             </div>
-          </form>
 
-          <div className="mt-8 flex items-center gap-4">
-            <div className="flex-1 h-px bg-earth-200" />
-            <span className="text-[10px] font-bold uppercase tracking-widest text-earth-400">Or</span>
-            <div className="flex-1 h-px bg-earth-200" />
+            <div className="flex justify-center">
+              <div className="border border-black bg-white shadow-[2px_2px_0_0_rgba(0,0,0,1)] hover:shadow-[3px_3px_0_0_rgba(0,0,0,1)] transition-all overflow-hidden">
+                <GoogleLogin
+                  onSuccess={handleGoogleSuccess}
+                  onError={() => toast.error('Google sign-in could not start.')}
+                  useOneTap={false}
+                  shape="rectangular"
+                  theme="outline"
+                  size="large"
+                />
+              </div>
+            </div>
+
+            <div className="mt-8 border-t border-black/20 pt-6 text-center">
+              <p className="text-[12px] opacity-60">
+                No account?{' '}
+                <Link to="/register" className="font-bold text-black underline hover:no-underline">Create one</Link>
+              </p>
+            </div>
           </div>
-
-          <div className="mt-6 flex justify-center">
-            <GoogleLogin
-              onSuccess={handleGoogleSuccess}
-              onError={() => toast.error('Google sign-in could not start. Check browser/origin settings and try again.')}
-              useOneTap={false}
-              shape="rectangular"
-              theme="outline"
-              size="large"
-            />
-          </div>
-
-          <p className="mt-8 border-t border-earth-100 pt-6 text-sm text-earth-400">
-            No account?{' '}
-            <Link to="/register" className="font-semibold text-earth-900 hover:underline">
-              Create one
-            </Link>
-          </p>
         </div>
       </div>
-
     </div>
   );
 };

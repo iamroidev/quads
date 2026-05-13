@@ -19,7 +19,7 @@ export const register = async (
   next: NextFunction
 ): Promise<void> => {
   try {
-    const { name, phone, role, studentId, location, supabaseAccessToken } = req.body;
+    const { name, phone, role, studentId, department, residenceHall, currentLevel, location, supabaseAccessToken } = req.body;
 
     const { user, token } = await authService.register({
       supabaseAccessToken,
@@ -27,6 +27,9 @@ export const register = async (
       phone,
       role: role || 'buyer',
       studentId,
+      department,
+      residenceHall,
+      currentLevel,
       location,
     });
 
@@ -49,7 +52,10 @@ export const register = async (
       data: { user, token },
     });
 
-    await growthService.captureEvent(user._id.toString(), 'signup', { method: 'email' });
+    // Fire analytics asynchronously — don't block response or throw after headers sent
+    growthService.captureEvent(user._id.toString(), 'signup', { method: 'email' }).catch((err) => {
+      console.error('Analytics signup capture failed:', err);
+    });
   } catch (error) {
     next(error);
   }
@@ -84,7 +90,10 @@ export const login = async (
       data: { user, token },
     });
 
-    await growthService.captureEvent(user._id.toString(), 'login', { method: 'email' });
+    // Fire analytics asynchronously — don't block response or throw after headers sent
+    growthService.captureEvent(user._id.toString(), 'login', { method: 'email' }).catch((err) => {
+      console.error('Analytics login capture failed:', err);
+    });
   } catch (error) {
     next(error);
   }
@@ -118,19 +127,64 @@ export const getMe = async (
  * @desc    Update user profile
  * @access  Private
  */
+/**
+ * @route   PUT /api/auth/switch-role
+ * @desc    Switch user role between buyer and seller
+ * @access  Private
+ */
+export const switchRole = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const { role } = req.body;
+    if (!role || !['buyer', 'seller'].includes(role)) {
+      res.status(400).json({ success: false, message: 'Role must be "buyer" or "seller".' });
+      return;
+    }
+
+    const { user, token } = await authService.switchRole(req.user!._id.toString(), role);
+
+    // Set cookie
+    res.cookie('token', token, {
+      httpOnly: true,
+      secure: env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    });
+
+    res.status(200).json({
+      success: true,
+      message: `Role switched to ${role}.`,
+      data: { user, token },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * @route   PUT /api/auth/profile
+ * @desc    Update user profile
+ * @access  Private
+ */
 export const updateProfile = async (
   req: Request,
   res: Response,
   next: NextFunction
 ): Promise<void> => {
   try {
-    const { name, phone, avatar, studentId, location, bio, storeName, brandName } = req.body;
+    const { name, phone, avatar, studentId, department, residenceHall, currentLevel, location, bio, storeName, brandName } = req.body;
 
     const user = await authService.updateProfile(req.user!._id.toString(), {
       name,
       phone,
       avatar,
       studentId,
+      department,
+      residenceHall,
+      currentLevel,
       location,
       bio,
       storeName,
@@ -397,7 +451,10 @@ export const googleLogin = async (
       data: { user, token, isNewUser, needsProfileCompletion },
     });
 
-    await growthService.captureEvent(user._id.toString(), isNewUser ? 'signup' : 'login', { method: 'google' });
+    // Fire analytics asynchronously — don't block response or throw after headers sent
+    growthService.captureEvent(user._id.toString(), isNewUser ? 'signup' : 'login', { method: 'google' }).catch((err) => {
+      console.error('Analytics google capture failed:', err);
+    });
   } catch (error) {
     next(error);
   }

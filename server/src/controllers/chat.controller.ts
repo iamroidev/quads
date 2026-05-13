@@ -192,3 +192,78 @@ export const deleteConversation = async (
     next(error);
   }
 };
+/**
+ * @route   PATCH /api/conversations/:id/messages/:msgId/offer
+ * @desc    Accept, reject, or counter a price offer in a message
+ * @access  Private (the OTHER participant — not the sender)
+ */
+export const respondToOffer = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const { id: conversationId, msgId } = req.params;
+    const { status, counterAmount } = req.body as {
+      status: 'accepted' | 'rejected' | 'countered';
+      counterAmount?: number;
+    };
+
+    if (!['accepted', 'rejected', 'countered'].includes(status)) {
+      res.status(400).json({ success: false, message: 'status must be accepted | rejected | countered' });
+      return;
+    }
+    if (status === 'countered' && (!counterAmount || counterAmount <= 0)) {
+      res.status(400).json({ success: false, message: 'counterAmount is required when countering' });
+      return;
+    }
+
+    const Message = (await import('../models/Message')).default;
+    const Conversation = (await import('../models/Conversation')).default;
+
+    const conv = await Conversation.findById(conversationId);
+    if (!conv) { res.status(404).json({ success: false, message: 'Conversation not found' }); return; }
+
+    const userId = req.user!._id.toString();
+    const isParticipant = conv.participants.some((p) => p.toString() === userId);
+    if (!isParticipant) { res.status(403).json({ success: false, message: 'Forbidden' }); return; }
+
+    const msg = await Message.findById(msgId);
+    if (!msg || msg.conversation.toString() !== conversationId) {
+      res.status(404).json({ success: false, message: 'Message not found' }); return;
+    }
+    if (!msg.offer) {
+      res.status(400).json({ success: false, message: 'This message does not contain an offer' }); return;
+    }
+    // Only the RECIPIENT (not sender) may respond
+    if (msg.sender.toString() === userId) {
+      res.status(403).json({ success: false, message: 'You cannot respond to your own offer' }); return;
+    }
+    if (msg.offer.status !== 'pending') {
+      res.status(400).json({ success: false, message: `Offer already ${msg.offer.status}` }); return;
+    }
+
+    msg.offer.status = status;
+    await msg.save();
+
+    // If countered — create a new offer message from the responder
+    let counterMessage = null;
+    if (status === 'countered' && counterAmount) {
+      counterMessage = await chatService.sendMessage(
+        conversationId,
+        `Counter-offer: GHS ${Number(counterAmount).toFixed(2)}`,
+        req.user!._id.toString(),
+        'text',
+        { offer: { amount: counterAmount, status: 'pending' } }
+      );
+    }
+
+    res.status(200).json({
+      success: true,
+      message: `Offer ${status}`,
+      data: { message: msg, counterMessage },
+    });
+  } catch (error) {
+    next(error);
+  }
+};

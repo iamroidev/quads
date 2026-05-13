@@ -19,6 +19,15 @@ interface EnvConfig {
   GOOGLE_CLIENT_ID: string;
   SUPABASE_URL: string;
   CLIENT_URL: string;
+  AWS_ACCESS_KEY_ID: string;
+  AWS_SECRET_ACCESS_KEY: string;
+  AWS_REGION: string;
+  AWS_SNS_SENDER_ID: string;
+  SMTP_HOST: string;
+  SMTP_PORT: string;
+  SMTP_USER: string;
+  SMTP_PASS: string;
+  SMTP_FROM: string;
 }
 
 const env: EnvConfig = {
@@ -36,6 +45,15 @@ const env: EnvConfig = {
   GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID || '',
   SUPABASE_URL: process.env.SUPABASE_URL || '',
   CLIENT_URL: process.env.CLIENT_URL || 'http://localhost:5173',
+  AWS_ACCESS_KEY_ID: process.env.AWS_ACCESS_KEY_ID || '',
+  AWS_SECRET_ACCESS_KEY: process.env.AWS_SECRET_ACCESS_KEY || '',
+  AWS_REGION: process.env.AWS_REGION || 'us-east-1',
+  AWS_SNS_SENDER_ID: process.env.AWS_SNS_SENDER_ID || 'CAMPUS',
+  SMTP_HOST: process.env.SMTP_HOST || 'smtp.ethereal.email',
+  SMTP_PORT: process.env.SMTP_PORT || '587',
+  SMTP_USER: process.env.SMTP_USER || '',
+  SMTP_PASS: process.env.SMTP_PASS || '',
+  SMTP_FROM: process.env.SMTP_FROM || 'noreply@campusmarketplace.com',
 };
 
 export default env;

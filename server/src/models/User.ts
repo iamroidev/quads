@@ -11,7 +11,12 @@ export interface IUserDocument extends Document {
   role: 'buyer' | 'seller' | 'admin';
   avatar: string;
   studentId: string;
+  department: string;
+  residenceHall: string;
+  currentLevel: string;
   isVerified: boolean;
+  emailVerified: boolean;
+  phoneVerified: boolean;
   isBanned: boolean;
   location: string;
   bio: string;
@@ -104,10 +109,33 @@ const userSchema = new Schema<IUserDocument>(
     },
     studentId: {
       type: String,
-      default: '',
       trim: true,
+      default: '',
+    },
+    department: {
+      type: String,
+      trim: true,
+      default: '',
+    },
+    residenceHall: {
+      type: String,
+      trim: true,
+      default: '',
+    },
+    currentLevel: {
+      type: String,
+      trim: true,
+      default: '',
     },
     isVerified: {
+      type: Boolean,
+      default: false,
+    },
+    emailVerified: {
+      type: Boolean,
+      default: false,
+    },
+    phoneVerified: {
       type: Boolean,
       default: false,
     },

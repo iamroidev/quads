@@ -16,6 +16,7 @@ import chatService from '../services/chat.service';
 import { MessagePopulated, Conversation } from '../types';
 import { LoadingSpinner } from '../components/ui';
 import toast from 'react-hot-toast';
+import { BulletinLayout, BulletinSection, BulletinCard } from '../components/layout/BulletinLayout';
 
 const ChatRoom: React.FC = () => {
   const { id: conversationId } = useParams<{ id: string }>();
@@ -46,7 +47,9 @@ const ChatRoom: React.FC = () => {
   const [page, setPage] = useState(1);
   const [loadingMore, setLoadingMore] = useState(false);
   const [offerAmount, setOfferAmount] = useState('');
-  const [attachmentUrl, setAttachmentUrl] = useState('');
+  const [showOfferPanel, setShowOfferPanel] = useState(false);
+  const [counterAmounts, setCounterAmounts] = useState<Record<string, string>>({});
+  const [respondingOffer, setRespondingOffer] = useState<string | null>(null);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
@@ -185,22 +188,47 @@ const ChatRoom: React.FC = () => {
         offer: { amount, status: 'pending' },
       });
       setOfferAmount('');
-      toast.success('Offer sent');
+      setShowOfferPanel(false);
+      toast.success('Offer sent!');
     } catch {
       toast.error('Failed to send offer');
     }
   };
 
-  const sendAttachment = async () => {
-    if (!conversationId || !attachmentUrl.trim()) return;
+  const handleRespondToOffer = async (
+    msgId: string,
+    status: 'accepted' | 'rejected' | 'countered'
+  ) => {
+    if (!conversationId || respondingOffer) return;
+    const counterAmount =
+      status === 'countered' ? Number(counterAmounts[msgId] || 0) : undefined;
+    if (status === 'countered' && (!counterAmount || counterAmount <= 0)) {
+      toast.error('Enter a valid counter amount');
+      return;
+    }
+    setRespondingOffer(msgId);
     try {
-      await chatService.sendMessage(conversationId, 'Attachment shared', 'image', {
-        attachments: [{ url: attachmentUrl.trim(), mimeType: 'image/*', name: 'Shared attachment' }],
-      });
-      setAttachmentUrl('');
-      toast.success('Attachment sent');
-    } catch {
-      toast.error('Failed to send attachment');
+      await chatService.respondToOffer(conversationId, msgId, status, counterAmount);
+      // Optimistically update the message offer status in state
+      setMessages((prev) =>
+        prev.map((m) =>
+          m._id === msgId && m.offer
+            ? { ...m, offer: { ...m.offer, status } }
+            : m
+        )
+      );
+      toast.success(
+        status === 'accepted'
+          ? '✅ Offer accepted!'
+          : status === 'rejected'
+          ? 'Offer declined'
+          : 'Counter-offer sent!'
+      );
+      setCounterAmounts((prev) => { const n = { ...prev }; delete n[msgId]; return n; });
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || 'Failed to respond to offer');
+    } finally {
+      setRespondingOffer(null);
     }
   };
 
@@ -251,126 +279,104 @@ const ChatRoom: React.FC = () => {
   };
 
   if (loading) {
-    return (
-      <div className="page-container">
-        <LoadingSpinner text="Loading conversation..." />
-      </div>
-    );
+    return <LoadingSpinner text="Loading conversation..." fullScreen />;
   }
 
   return (
-    <div className="flex flex-col h-[calc(100vh-56px)] max-w-3xl mx-auto">
-      {/* Chat Header */}
-      <div className="flex items-center gap-3 px-4 py-3 border-b border-earth-200 bg-white">
-        <button
-          onClick={() => navigate('/messages')}
-          className="p-1.5 hover:bg-earth-100 transition-colors"
-        >
-          <ArrowLeft className="h-5 w-5 text-earth-600" />
-        </button>
-
-        {otherParticipant && (
-          <div className="flex items-center gap-3 flex-1 min-w-0">
-            <div className="relative flex-shrink-0">
+    <div className="min-h-screen bg-[#f8f7f4]">
+      {/* Bulletin Sticky Header */}
+      <div className="sticky top-0 z-50 flex items-stretch border-b border-black bg-[#f8f7f4]">
+        <div className="flex-1 border-r border-black bg-[#fff5e1] px-3 py-2">
+          <div className="flex items-center gap-2">
+            <button onClick={() => navigate('/messages')} className="hover:underline">
+              <ArrowLeft className="h-5 w-5" />
+            </button>
+            <span className="text-[10px] uppercase tracking-wider opacity-40">Chat</span>
+          </div>
+        </div>
+        <div className="flex-1 border-r border-black bg-[#e8f4f8] px-3 py-2">
+          {otherParticipant && (
+            <div className="flex items-center gap-2">
               {otherParticipant.avatar ? (
-                <img src={otherParticipant.avatar} alt={otherParticipant.name} className="w-9 h-9 object-cover" />
+                <div className="w-6 h-6 border border-black overflow-hidden flex-shrink-0">
+                  <img src={otherParticipant.avatar} alt="" className="w-full h-full object-cover" />
+                </div>
               ) : (
-                <div className="w-9 h-9 bg-earth-200 text-earth-700 flex items-center justify-center font-bold text-sm">
-                  {otherParticipant.name.charAt(0).toUpperCase()}
+                <div className="w-6 h-6 border border-black bg-[#f8f7f4] flex items-center justify-center text-[9px] font-bold flex-shrink-0">
+                  {otherParticipant.name.charAt(0)}
                 </div>
               )}
-              {isOtherOnline && (
-                <Circle className="absolute bottom-0 right-0 h-2.5 w-2.5 fill-green-500 text-white stroke-2" />
-              )}
-            </div>
-            <div className="min-w-0">
-              <h3 className="font-bold text-earth-900 text-sm truncate">
+              <span className="overflow-hidden text-ellipsis whitespace-nowrap font-bold text-[12px]">
                 {otherParticipant.name}
-                {otherParticipant.isVerified && <span className="ml-1 text-xs text-moss-500">&#10003;</span>}
-              </h3>
-              <p className="text-xs text-earth-400">
-                {typingUser ? (
-                  <span className="text-earth-600">typing...</span>
-                ) : isOtherOnline ? 'Online' : 'Offline'}
-              </p>
-            </div>
-          </div>
-        )}
-
-        {/* Product reference */}
-        {conversation?.product && (
-          <Link
-            to={`/products/${conversation.product._id}`}
-            className="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-earth-50 border border-earth-200 hover:bg-earth-100 transition-colors text-xs"
-          >
-            {conversation.product.images?.[0] && (
-              <img src={conversation.product.images[0].url} alt="" className="w-5 h-5 object-cover" />
-            )}
-            <span className="text-earth-600 truncate max-w-[120px]">{conversation.product.title}</span>
-            <ExternalLink className="h-3 w-3 text-earth-400" />
-          </Link>
-        )}
-
-        {/* More menu */}
-        <div className="relative" ref={menuRef}>
-          <button onClick={() => setShowMenu(!showMenu)} className="p-1.5 hover:bg-earth-100 transition-colors">
-            <MoreVertical className="h-5 w-5 text-earth-500" />
-          </button>
-          {showMenu && (
-            <div className="absolute right-0 top-full mt-1 w-48 bg-white border border-earth-200 shadow-lg py-1 z-50">
-              {conversation?.product && (
-                <Link
-                  to={`/products/${conversation.product._id}`}
-                  className="flex items-center gap-2 px-4 py-2 text-sm text-earth-700 hover:bg-earth-50 sm:hidden"
-                  onClick={() => setShowMenu(false)}
-                >
-                  <Package className="h-4 w-4" /> View Product
-                </Link>
-              )}
-              <button
-                onClick={handleDelete}
-                className="flex items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50 w-full"
-              >
-                <Trash2 className="h-4 w-4" /> Delete Conversation
-              </button>
+              </span>
+              {isOtherOnline && <div className="h-2 w-2 border border-black bg-green-400 flex-shrink-0" />}
             </div>
           )}
         </div>
+        <div className="flex-1 bg-[#f0e8f4] px-3 py-2">
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] uppercase tracking-wider opacity-40">
+              {typingUser ? 'typing...' : isOtherOnline ? 'Online' : 'Offline'}
+            </span>
+            <div className="relative" ref={menuRef}>
+              <button onClick={() => setShowMenu(!showMenu)} className="p-1 hover:opacity-60">
+                <MoreVertical className="h-4 w-4" />
+              </button>
+              {showMenu && (
+                <div className="absolute right-0 top-full mt-1 border border-black bg-white shadow-[4px_4px_0_0_rgba(0,0,0,1)] z-50 py-1 min-w-[160px]">
+                  {conversation?.product && (
+                    <Link
+                      to={`/products/${conversation.product._id}`}
+                      className="flex items-center gap-2 px-3 py-1.5 text-[10px] font-bold uppercase hover:bg-[#e0f2f7]"
+                      onClick={() => setShowMenu(false)}
+                    >
+                      <Package className="h-3 w-3" /> View Product
+                    </Link>
+                  )}
+                  <button
+                    onClick={handleDelete}
+                    className="flex items-center gap-2 px-3 py-1.5 text-[10px] font-bold uppercase hover:bg-[#fce4ec] w-full"
+                  >
+                    <Trash2 className="h-3 w-3" /> Delete
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
       </div>
 
-      {/* Product banner (mobile) */}
+      {/* Product banner */}
       {conversation?.product && (
         <Link
           to={`/products/${conversation.product._id}`}
-          className="flex sm:hidden items-center gap-3 px-4 py-2 bg-earth-50 border-b border-earth-100"
+          className="flex items-center gap-3 px-4 py-2 border-b border-black bg-[#fefdfb]"
         >
           {conversation.product.images?.[0] && (
-            <img src={conversation.product.images[0].url} alt="" className="w-9 h-9 object-cover" />
+            <div className="w-8 h-8 border border-black overflow-hidden flex-shrink-0">
+              <img src={conversation.product.images[0].url} alt="" className="w-full h-full object-cover" />
+            </div>
           )}
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium text-earth-800 truncate">{conversation.product.title}</p>
-            <p className="text-xs text-earth-600 font-bold">
+            <div className="text-[11px] font-bold truncate">{conversation.product.title}</div>
+            <div className="text-[10px] font-bold">
               GHS {conversation.product.price.toFixed(2)}
-            </p>
+            </div>
           </div>
-          <ExternalLink className="h-4 w-4 text-earth-400 flex-shrink-0" />
+          <ExternalLink className="h-4 w-4 opacity-40 flex-shrink-0" />
         </Link>
       )}
 
       {/* Messages Area */}
-      <div ref={messagesContainerRef} className="flex-1 overflow-y-auto px-4 py-4 space-y-1">
+      <div ref={messagesContainerRef} className="flex-1 overflow-y-auto p-4 space-y-1" style={{ height: 'calc(100vh - 56px - 56px - 140px)' }}>
         {hasMore && (
           <div className="text-center mb-4">
             <button
               onClick={loadMore}
               disabled={loadingMore}
-              className="text-xs text-earth-500 hover:text-earth-900 font-bold uppercase tracking-[0.12em] disabled:opacity-50"
+              className="border border-black bg-white px-3 py-1.5 text-[9px] font-bold uppercase shadow-[1px_1px_0_0_rgba(0,0,0,1)] hover:shadow-[2px_2px_0_0_rgba(0,0,0,1)] disabled:opacity-40 transition-all"
             >
-              {loadingMore ? (
-                <span className="inline-flex items-center gap-1">
-                  <Loader2 className="h-3 w-3 animate-spin" /> Loading...
-                </span>
-              ) : 'Load older messages'}
+              {loadingMore ? 'Loading...' : 'Load older'}
             </button>
           </div>
         )}
@@ -387,55 +393,114 @@ const ChatRoom: React.FC = () => {
             <React.Fragment key={msg._id}>
               {showDate && (
                 <div className="flex items-center gap-3 py-3">
-                  <div className="flex-1 h-px bg-earth-200" />
-                  <span className="text-[10px] text-earth-400 font-bold uppercase tracking-[0.12em]">
+                  <div className="flex-1 border-t border-black/20" />
+                  <span className="text-[9px] font-bold uppercase tracking-wider opacity-50">
                     {getDateLabel(msg.createdAt)}
                   </span>
-                  <div className="flex-1 h-px bg-earth-200" />
+                  <div className="flex-1 border-t border-black/20" />
                 </div>
               )}
 
               {isSystem ? (
                 <div className="text-center py-2">
-                  <span className="text-xs text-earth-400 bg-earth-50 px-3 py-1">
+                  <span className="text-[10px] opacity-50 border border-black bg-white px-2 py-1">
                     {msg.content}
                   </span>
                 </div>
               ) : (
                 <div className={`flex ${isMe ? 'justify-end' : 'justify-start'} mb-1`}>
                   <div className={`max-w-[75%]`}>
-                    <div className={`px-4 py-2.5 ${
+                    <div className={`px-3 py-2 border border-black ${
                       isMe
-                        ? 'bg-earth-900 text-white'
-                        : 'bg-earth-100 text-earth-800'
-                    }`}>
-                      <p className="text-sm whitespace-pre-wrap break-words">{msg.content}</p>
+                        ? 'bg-black text-white'
+                        : 'bg-white text-black'
+                    } shadow-[2px_2px_0_0_rgba(0,0,0,1)]`}>
+                      <p className="text-[12px] whitespace-pre-wrap break-words">{msg.content}</p>
+
+                      {/* Offer bubble */}
                       {msg.offer && (
-                        <p className={`mt-1 text-[10px] font-bold uppercase tracking-[0.12em] ${isMe ? 'text-white/70' : 'text-earth-500'}`}>
-                          Offer GHS {msg.offer.amount.toFixed(2)} · {msg.offer.status}
-                        </p>
+                        <div className={`mt-2 border-t ${ isMe ? 'border-white/20' : 'border-black/10'} pt-2`}>
+                          <div className={`flex items-center justify-between gap-2 flex-wrap`}>
+                            <span className={`text-[11px] font-bold ${ isMe ? 'text-white/80' : '' }`}>
+                              GHS {msg.offer.amount.toFixed(2)}
+                            </span>
+                            <span className={`text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 border border-black ${
+                              msg.offer.status === 'pending'
+                                ? isMe ? 'bg-black/20 text-white/70' : 'bg-[#fffacd]'
+                                : msg.offer.status === 'accepted'
+                                ? 'bg-[#e0f2f7]'
+                                : msg.offer.status === 'rejected'
+                                ? 'bg-[#fce4ec]'
+                                : 'bg-[#f0e8f4]'
+                            }`}>
+                              {msg.offer.status}
+                            </span>
+                          </div>
+
+                          {/* Accept / Reject / Counter — only shown to the RECIPIENT when pending */}
+                          {!isMe && msg.offer.status === 'pending' && (
+                            <div className="mt-2 space-y-1.5">
+                              <div className="flex gap-1">
+                                <button
+                                  onClick={() => handleRespondToOffer(msg._id, 'accepted')}
+                                  disabled={respondingOffer === msg._id}
+                                  className="flex-1 border border-black bg-[#e0f2f7] px-2 py-1 text-[9px] font-bold uppercase hover:shadow-[2px_2px_0_0_rgba(0,0,0,1)] disabled:opacity-40 transition-all"
+                                >
+                                  ✓ Accept
+                                </button>
+                                <button
+                                  onClick={() => handleRespondToOffer(msg._id, 'rejected')}
+                                  disabled={respondingOffer === msg._id}
+                                  className="flex-1 border border-black bg-[#fce4ec] px-2 py-1 text-[9px] font-bold uppercase hover:shadow-[2px_2px_0_0_rgba(0,0,0,1)] disabled:opacity-40 transition-all"
+                                >
+                                  ✕ Decline
+                                </button>
+                              </div>
+                              <div className="flex gap-1">
+                                <input
+                                  type="number"
+                                  min="0"
+                                  step="0.01"
+                                  placeholder="Counter (GHS)"
+                                  value={counterAmounts[msg._id] || ''}
+                                  onChange={(e) =>
+                                    setCounterAmounts((prev) => ({ ...prev, [msg._id]: e.target.value }))
+                                  }
+                                  className="flex-1 border border-black bg-white px-2 py-1 text-[10px] font-bold focus:outline-none focus:ring-1 focus:ring-black"
+                                />
+                                <button
+                                  onClick={() => handleRespondToOffer(msg._id, 'countered')}
+                                  disabled={respondingOffer === msg._id}
+                                  className="border border-black bg-[#fefdfb] px-2 py-1 text-[9px] font-bold uppercase hover:shadow-[2px_2px_0_0_rgba(0,0,0,1)] disabled:opacity-40 transition-all"
+                                >
+                                  Counter
+                                </button>
+                              </div>
+                            </div>
+                          )}
+                        </div>
                       )}
                       {msg.attachments && msg.attachments.length > 0 && (
                         <div className="mt-2 space-y-1">
                           {msg.attachments.map((a, i) => (
-                            <a key={`${a.url}-${i}`} href={a.url} target="_blank" rel="noreferrer" className={`block text-[11px] underline ${isMe ? 'text-white/70' : 'text-earth-600'}`}>
+                            <a key={`${a.url}-${i}`} href={a.url} target="_blank" rel="noreferrer" className={`block text-[10px] underline ${isMe ? 'text-white/70' : 'opacity-70'}`}>
                               {a.name || 'Attachment'}
                             </a>
                           ))}
                         </div>
                       )}
                       {msg.quickReplyLabel && (
-                        <p className={`mt-1 text-[10px] uppercase tracking-[0.12em] ${isMe ? 'text-white/60' : 'text-earth-500'}`}>Quick reply</p>
+                        <div className={`mt-1 text-[9px] uppercase tracking-wider ${isMe ? 'text-white/50' : 'opacity-50'}`}>Quick reply</div>
                       )}
                     </div>
                     <div className={`flex items-center gap-1 mt-0.5 px-1 ${isMe ? 'justify-end' : 'justify-start'}`}>
-                      <span className="text-[10px] text-earth-400">
+                      <span className="text-[9px] opacity-40">
                         {new Date(msg.createdAt).toLocaleTimeString('en-US', {
                           hour: 'numeric', minute: '2-digit',
                         })}
                       </span>
                       {isMe && msg.readBy.length > 1 && (
-                        <span className="text-[10px] text-moss-500">&#10003;&#10003;</span>
+                        <span className="text-[9px] opacity-60">&#10003;&#10003;</span>
                       )}
                     </div>
                   </div>
@@ -447,11 +512,9 @@ const ChatRoom: React.FC = () => {
 
         {typingUser && (
           <div className="flex justify-start mb-1">
-            <div className="bg-earth-100 px-4 py-2.5">
-              <div className="flex items-center gap-1">
-                <div className="w-2 h-2 bg-earth-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                <div className="w-2 h-2 bg-earth-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                <div className="w-2 h-2 bg-earth-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+            <div className="border border-black bg-white px-3 py-2 shadow-[2px_2px_0_0_rgba(0,0,0,1)]">
+              <div className="flex items-center gap-1.5">
+                <div className="text-[10px] opacity-60">{typingUser} is typing</div>
               </div>
             </div>
           </div>
@@ -460,36 +523,46 @@ const ChatRoom: React.FC = () => {
       </div>
 
       {/* Input Area */}
-      <div className="px-4 py-3 border-t border-earth-200 bg-white">
+      <div className="border-t border-black bg-white p-3">
+        {/* Quick replies */}
         <div className="mb-2 flex flex-wrap items-center gap-2">
           {['Available now', 'Can negotiate', 'Meet at main gate'].map((q) => (
-            <button key={q} onClick={() => sendQuickReply(q)} className="border border-earth-200 px-2 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-earth-500 hover:border-earth-400 hover:text-earth-700">
+            <button key={q} onClick={() => sendQuickReply(q)} className="border border-black bg-[#fefdfb] px-2 py-1 text-[8px] font-bold uppercase shadow-[1px_1px_0_0_rgba(0,0,0,1)] hover:shadow-[2px_2px_0_0_rgba(0,0,0,1)] transition-all">
               {q}
             </button>
           ))}
+          <button
+            onClick={() => setShowOfferPanel((v) => !v)}
+            className={`border border-black px-2 py-1 text-[8px] font-bold uppercase shadow-[1px_1px_0_0_rgba(0,0,0,1)] hover:shadow-[2px_2px_0_0_rgba(0,0,0,1)] transition-all ${
+              showOfferPanel ? 'bg-black text-white' : 'bg-[#fffacd]'
+            }`}
+          >
+            💰 Make Offer
+          </button>
         </div>
 
-        <div className="mb-2 grid grid-cols-1 gap-2 sm:grid-cols-[1fr_auto_auto]">
-          <input
-            type="number"
-            value={offerAmount}
-            onChange={(e) => setOfferAmount(e.target.value)}
-            placeholder="Offer amount (GHS)"
-            className="border border-earth-200 px-3 py-2 text-xs"
-          />
-          <button onClick={sendOffer} className="border border-earth-200 px-3 py-2 text-[10px] font-bold uppercase tracking-[0.12em] text-earth-700 hover:bg-earth-50">Send offer</button>
-          <input
-            type="url"
-            value={attachmentUrl}
-            onChange={(e) => setAttachmentUrl(e.target.value)}
-            placeholder="Attachment URL"
-            className="border border-earth-200 px-3 py-2 text-xs"
-          />
-        </div>
-
-        <div className="mb-3 flex justify-end">
-          <button onClick={sendAttachment} className="border border-earth-200 px-3 py-2 text-[10px] font-bold uppercase tracking-[0.12em] text-earth-700 hover:bg-earth-50">Share attachment</button>
-        </div>
+        {/* Collapsible offer panel */}
+        {showOfferPanel && (
+          <div className="mb-2 flex items-center gap-2 border border-black bg-[#fffacd] p-2">
+            <span className="text-[9px] font-bold uppercase opacity-60 whitespace-nowrap">Offer (GHS)</span>
+            <input
+              type="number"
+              min="0"
+              step="0.01"
+              value={offerAmount}
+              onChange={(e) => setOfferAmount(e.target.value)}
+              placeholder="e.g. 80.00"
+              className="flex-1 border border-black bg-white px-2 py-1.5 text-[11px] font-bold focus:outline-none focus:ring-2 focus:ring-black"
+            />
+            <button
+              onClick={sendOffer}
+              disabled={!offerAmount || Number(offerAmount) <= 0}
+              className="border border-black bg-black px-3 py-1.5 text-[9px] font-bold uppercase text-white hover:bg-white hover:text-black disabled:opacity-40 transition-colors"
+            >
+              Send
+            </button>
+          </div>
+        )}
 
         <div className="flex items-center gap-3">
           <input
@@ -499,13 +572,13 @@ const ChatRoom: React.FC = () => {
             value={inputValue}
             onChange={handleInputChange}
             onKeyDown={handleKeyDown}
-            className="flex-1 border-b border-earth-300 bg-transparent py-2 text-sm focus:outline-none focus:border-earth-900 placeholder:text-earth-300"
+            className="flex-1 border border-black bg-[#fefdfb] p-2 text-[12px] font-bold focus:outline-none focus:ring-2 focus:ring-black placeholder:text-black/30"
             autoFocus
           />
           <button
             onClick={handleSend}
             disabled={!inputValue.trim() || sending}
-            className="p-2.5 bg-earth-900 text-white hover:bg-earth-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+            className="border border-black bg-black px-3 py-2 text-white font-bold hover:bg-white hover:text-black transition-colors disabled:opacity-40 shadow-[2px_2px_0_0_rgba(0,0,0,1)]"
           >
             <Send className="h-4 w-4" />
           </button>

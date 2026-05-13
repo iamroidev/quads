@@ -13,6 +13,7 @@ import {
   updatePrivacySettings,
   deleteAccount,
   updateSellerOnboarding,
+  switchRole,
 } from '../controllers/auth.controller';
 import { authenticate } from '../middleware/auth';
 import { validate } from '../middleware/validate';
@@ -129,6 +130,19 @@ router.put('/settings/privacy', authenticate, updatePrivacySettings);
 
 // @route   DELETE /api/auth/account
 router.delete('/account', authenticate, deleteAccount);
+
+// @route   PUT /api/auth/switch-role
+router.put(
+  '/switch-role',
+  authenticate,
+  [
+    body('role')
+      .isIn(['buyer', 'seller'])
+      .withMessage('Role must be buyer or seller'),
+    validate,
+  ],
+  switchRole
+);
 
 // @route   PUT /api/auth/seller-onboarding
 router.put('/seller-onboarding', authenticate, updateSellerOnboarding);

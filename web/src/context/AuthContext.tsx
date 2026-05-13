@@ -16,6 +16,7 @@ interface AuthContextType {
   updateProfile: (data: UpdateProfileData) => Promise<void>;
   changePassword: (data: ChangePasswordData) => Promise<void>;
   refreshUser: () => Promise<void>;
+  switchRole: (role: 'buyer' | 'seller') => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -70,6 +71,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       phone: data.phone,
       role: data.role,
       studentId: data.studentId,
+      department: data.department,
+      residenceHall: data.residenceHall,
+      currentLevel: data.currentLevel,
       location: data.location,
     });
     const { user: newUser, token: newToken } = response.data;
@@ -101,7 +105,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     toast.success(`Welcome back, ${newUser.name}!`, { duration: 1200 });
   }, []);
 
-  const googleLogin = useCallback(async (credential: string, role: 'buyer' | 'seller' = 'buyer') => {
+  const googleLogin = useCallback(async (credential: string, role: 'buyer' | 'seller' | undefined = 'buyer') => {
     const response = await authService.googleLogin(credential, role);
     const { user: newUser, token: newToken } = response.data;
 
@@ -148,6 +152,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     toast.success('Password changed successfully', { duration: 1200 });
   }, []);
 
+  const switchRole = useCallback(async (role: 'buyer' | 'seller') => {
+    const response = await authService.switchRole(role);
+    const { user: updatedUser, token: newToken } = response.data;
+    localStorage.setItem('token', newToken);
+    localStorage.setItem('user', JSON.stringify(updatedUser));
+    setToken(newToken);
+    setUser(updatedUser);
+    toast.success(`Switched to ${role} mode`, { duration: 1200 });
+  }, []);
+
   const refreshUser = useCallback(async () => {
     try {
       const response = await authService.getMe();
@@ -171,6 +185,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         updateProfile,
         changePassword,
         refreshUser,
+        switchRole,
       }}
     >
       {children}

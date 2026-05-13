@@ -6,6 +6,9 @@ export interface RegisterData {
   phone: string;
   role: 'buyer' | 'seller';
   studentId?: string;
+  department?: string;
+  residenceHall?: string;
+  currentLevel?: string;
   location?: string;
 }
 
@@ -20,6 +23,9 @@ export interface UpdateProfileData {
   phone?: string;
   avatar?: string;
   studentId?: string;
+  department?: string;
+  residenceHall?: string;
+  currentLevel?: string;
   location?: string;
   bio?: string;
 }
@@ -81,6 +87,11 @@ const authService = {
 
   changePassword: async (data: ChangePasswordData) => {
     const response = await api.put('/auth/change-password', data);
+    return response.data;
+  },
+
+  switchRole: async (role: 'buyer' | 'seller') => {
+    const response = await api.put('/auth/switch-role', { role });
     return response.data;
   },
 

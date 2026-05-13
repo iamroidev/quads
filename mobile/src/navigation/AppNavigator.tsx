@@ -25,6 +25,9 @@ import {
   MyListingsScreen,
   SettingsScreen,
   SellerOnboardingScreen,
+  VerificationScreen,
+  ForgotPasswordScreen,
+  CheckoutScreen,
 } from '../screens';
 import { navigationRef } from './navigationRef';
 import { colors } from '../theme';
@@ -57,6 +60,11 @@ const ProductsStackScreen = () => (
       name="ProductDetail"
       component={ProductDetailScreen}
       options={{ ...defaultStackHeader, title: 'Product Details' }}
+    />
+    <ProductsStack.Screen
+      name="Checkout"
+      component={CheckoutScreen}
+      options={{ ...defaultStackHeader, title: 'Checkout' }}
     />
   </ProductsStack.Navigator>
 );
@@ -155,6 +163,16 @@ const ProfileStackScreen = () => (
       component={ChatScreen}
       options={{ ...defaultStackHeader }}
     />
+    <ProfileStack.Screen
+      name="Verification"
+      component={VerificationScreen}
+      options={{ ...defaultStackHeader, title: 'Verify Account' }}
+    />
+    <ProfileStack.Screen
+      name="Checkout"
+      component={CheckoutScreen}
+      options={{ ...defaultStackHeader, title: 'Checkout' }}
+    />
   </ProfileStack.Navigator>
 );
 
@@ -251,6 +269,11 @@ const AppNavigator = () => {
           <>
             <Stack.Screen name="Login" component={LoginScreen} />
             <Stack.Screen name="Register" component={RegisterScreen} />
+            <Stack.Screen
+              name="ForgotPassword"
+              component={ForgotPasswordScreen}
+              options={{ ...defaultStackHeader, title: 'Reset Password', headerShown: true }}
+            />
           </>
         )}
       </Stack.Navigator>

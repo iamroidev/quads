@@ -44,10 +44,14 @@ const CAMPUS_LOCATIONS = [
   'Cafeteria',
 ];
 
-const CreateListingScreen = ({ navigation }: any) => {
+const CreateListingScreen = ({ navigation, route }: any) => {
+  const { productId, mode } = route.params ?? {};
+  const isEditMode = mode === 'edit' && !!productId;
+
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(false);
   const [catLoading, setCatLoading] = useState(true);
+  const [prefilling, setPrefilling] = useState(isEditMode);
 
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -61,11 +65,28 @@ const CreateListingScreen = ({ navigation }: any) => {
   const [images, setImages] = useState<Array<{ uri: string; type?: string; name?: string }>>([]);
 
   useEffect(() => {
-    navigation.setOptions({ headerShown: true, title: 'New Listing', headerBackTitle: 'Back' });
+    navigation.setOptions({ headerShown: true, title: isEditMode ? 'Edit Listing' : 'New Listing', headerBackTitle: 'Back' });
     api.get('/categories/with-counts').then((res) => {
       if (res.data.success) setCategories(res.data.data.categories ?? res.data.data ?? []);
     }).catch(() => {}).finally(() => setCatLoading(false));
-  }, [navigation]);
+
+    if (isEditMode) {
+      productService.getProductById(productId).then((res) => {
+        if (res.success) {
+          const p = res.data.product;
+          setTitle(p.title ?? '');
+          setDescription(p.description ?? '');
+          setPrice(String(p.price ?? ''));
+          setCategory(typeof p.category === 'object' ? p.category._id : p.category ?? '');
+          setCondition(p.condition ?? 'good');
+          setDeliveryOption(p.deliveryOption ?? 'pickup');
+          setPickupLocation(p.pickupLocation ?? '');
+          setTags((p as any).tags?.join(', ') ?? '');
+          setStatus(p.status === 'draft' ? 'draft' : 'active');
+        }
+      }).catch(() => {}).finally(() => setPrefilling(false));
+    }
+  }, [navigation, isEditMode, productId]);
 
   const handleSubmit = async () => {
     if (!title.trim()) return Alert.alert('Required', 'Please enter a title.');
@@ -73,27 +94,32 @@ const CreateListingScreen = ({ navigation }: any) => {
     if (!category) return Alert.alert('Required', 'Please select a category.');
 
     setLoading(true);
+    const payload = {
+      title: title.trim(),
+      description: description.trim(),
+      price: Number(price),
+      category,
+      condition,
+      deliveryOption,
+      pickupLocation: pickupLocation.trim() || 'UMaT Campus',
+      status,
+      tags: tags.split(',').map((item) => item.trim()).filter(Boolean),
+      ...(images.length > 0 ? { images } : {}),
+    };
     try {
-      const res = await productService.createProduct({
-        title: title.trim(),
-        description: description.trim(),
-        price: Number(price),
-        category,
-        condition,
-        deliveryOption,
-        pickupLocation: pickupLocation.trim() || 'UMaT Campus',
-        status,
-        tags: tags.split(',').map((item) => item.trim()).filter(Boolean),
-        images,
-      });
-
+      let res;
+      if (isEditMode) {
+        res = await productService.updateProduct(productId, payload);
+      } else {
+        res = await productService.createProduct({ ...payload, images });
+      }
       if (res.success) {
-        Alert.alert('Success', 'Listing created!', [
+        Alert.alert('Success', isEditMode ? 'Listing updated!' : 'Listing created!', [
           { text: 'OK', onPress: () => navigation.goBack() },
         ]);
       }
     } catch (err: any) {
-      const msg = err?.response?.data?.message ?? 'Failed to create listing.';
+      const msg = err?.response?.data?.message ?? (isEditMode ? 'Failed to update.' : 'Failed to create listing.');
       Alert.alert('Error', msg);
     } finally {
       setLoading(false);
@@ -123,13 +149,19 @@ const CreateListingScreen = ({ navigation }: any) => {
     }
   };
 
+  if (prefilling) {
+    return <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: colors.bg }}>
+      <ActivityIndicator size="large" color={colors.accent} />
+    </View>;
+  }
+
   return (
     <KeyboardAvoidingView
       style={{ flex: 1 }}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
       <SafeAreaView style={styles.container} edges={['top']}>
-      <ScreenHeader eyebrow="Seller workspace" title="Create Listing" subtitle="Post a product with web-consistent details and style." />
+      <ScreenHeader eyebrow="Seller workspace" title={isEditMode ? 'Edit Listing' : 'Create Listing'} subtitle={isEditMode ? 'Update your product details.' : 'Post a product with web-consistent details.'} />
       <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
         <Text style={styles.label}>Images</Text>
         <TouchableOpacity style={styles.imagePickerBtn} onPress={pickImages}>
@@ -281,7 +313,7 @@ const CreateListingScreen = ({ navigation }: any) => {
           {loading ? (
             <ActivityIndicator color="#fff" />
           ) : (
-            <Text style={styles.submitBtnText}>Create Listing</Text>
+            <Text style={styles.submitBtnText}>{isEditMode ? 'Update Listing' : 'Create Listing'}</Text>
           )}
         </TouchableOpacity>
       </ScrollView>
@@ -316,21 +348,20 @@ const styles = StyleSheet.create({
   chipScroll: { marginBottom: 4 },
   chipRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   emptyCategoryBox: {
-    backgroundColor: '#fff7ed',
+    backgroundColor: '#fffacd',
     borderWidth: 1,
-    borderColor: '#fed7aa',
-    borderRadius: 10,
+    borderColor: '#c8b48c',
     padding: 12,
   },
   emptyCategoryText: {
-    color: '#9a3412',
+    color: '#7b5e1a',
     fontSize: 12,
     fontWeight: '600',
   },
   chip: {
     paddingHorizontal: 14,
     paddingVertical: 7,
-    borderRadius: 999,
+    borderRadius: 0,
     backgroundColor: '#fffdf8',
     borderWidth: 1,
     borderColor: colors.border,

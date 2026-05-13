@@ -112,6 +112,22 @@ const chatService = {
     const response = await api.delete(`/conversations/${conversationId}`);
     return response.data;
   },
+
+  /**
+   * Accept, reject, or counter a price offer message
+   */
+  respondToOffer: async (
+    conversationId: string,
+    msgId: string,
+    status: 'accepted' | 'rejected' | 'countered',
+    counterAmount?: number
+  ): Promise<{ success: boolean; message: string; data: any }> => {
+    const response = await api.patch(
+      `/conversations/${conversationId}/messages/${msgId}/offer`,
+      { status, counterAmount }
+    );
+    return response.data;
+  },
 };
 
 export default chatService;

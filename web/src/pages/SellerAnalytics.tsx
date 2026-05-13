@@ -15,17 +15,18 @@ import orderService from '../services/order.service';
 import productService from '../services/product.service';
 import growthService from '../services/growth.service';
 import toast from 'react-hot-toast';
+import { BulletinLayout, BulletinSection, BulletinCard } from '../components/layout/BulletinLayout';
 
-const labelBase = 'text-[9px] font-bold uppercase tracking-[0.28em] text-earth-400';
+const labelBase = 'text-[9px] font-bold uppercase tracking-[0.28em] opacity-40';
 
 const statusColor: Record<string, string> = {
-  pending: 'bg-yellow-50 text-yellow-700 border-yellow-200',
-  paid: 'bg-blue-50 text-blue-700 border-blue-200',
-  confirmed: 'bg-indigo-50 text-indigo-700 border-indigo-200',
-  ready: 'bg-purple-50 text-purple-700 border-purple-200',
-  completed: 'bg-green-50 text-green-700 border-green-200',
-  cancelled: 'bg-red-50 text-red-700 border-red-200',
-  disputed: 'bg-orange-50 text-orange-700 border-orange-200',
+  pending: 'bg-[#f0e8f4] text-black border-black',
+  paid: 'bg-[#e0f2f7] text-black border-black',
+  confirmed: 'bg-[#f0e8f4] text-black border-black',
+  ready: 'bg-[#fff5e1] text-black border-black',
+  completed: 'bg-[#fffacd] text-black border-black',
+  cancelled: 'bg-[#fce4ec] text-black border-black',
+  disputed: 'bg-[#fce4ec] text-black border-black',
 };
 
 const SellerAnalyticsPage: React.FC = () => {
@@ -200,134 +201,122 @@ const SellerAnalyticsPage: React.FC = () => {
   ];
 
   return (
-    <div className="min-h-[calc(100vh-56px)] bg-white">
-
-      {/* ── Hero ── */}
-      <div className="bg-[#0a0a0a] px-6 pt-14 pb-16 lg:px-8">
-        <div className="mx-auto max-w-5xl">
-          <p className="text-[9px] font-bold uppercase tracking-[0.35em] text-white/20 mb-4">
-            Seller / Analytics
-          </p>
-          <div className="flex items-end justify-between">
+    <BulletinLayout title="Analytics" subtitle="Seller" section="16">
+      {/* Stat banner */}
+      <div className="border-b border-black bg-black">
+        <div className="mx-auto max-w-[1400px] px-6 py-8">
+          <div className="flex items-end justify-between mb-6">
             <div>
-              <h1 className="text-4xl font-black uppercase tracking-tight text-white">
-                Analytics
-              </h1>
-              <p className="mt-2 text-sm text-white/35">
-                Track your sales performance, revenue, and listing metrics.
+              <p className="text-[9px] font-bold uppercase tracking-[0.35em] text-white/20 mb-2">
+                Seller Performance
               </p>
+              <h2 className="text-2xl font-bold text-white">Overview</h2>
             </div>
             <div className="flex items-center gap-3">
               <Link
                 to="/seller/orders"
-                className="flex items-center gap-2 border border-white/20 px-5 py-2.5 text-[10px] font-bold uppercase tracking-[0.18em] text-white/60 hover:border-white/50 hover:text-white transition-colors"
+                className="border border-white/30 px-4 py-2 text-[10px] font-bold uppercase tracking-[0.14em] text-white/60 transition-colors hover:border-white hover:text-white"
               >
-                All orders
-                <ArrowRight className="h-3.5 w-3.5" />
+                All orders →
               </Link>
               <Link
                 to="/sell"
-                className="flex items-center gap-2 bg-white text-[#0a0a0a] px-5 py-2.5 text-[10px] font-bold uppercase tracking-[0.18em] hover:bg-earth-100 transition-colors"
+                className="bg-white px-4 py-2 text-[10px] font-bold uppercase tracking-[0.14em] text-black transition-colors hover:bg-[#f0f0f0]"
               >
-                <Package className="h-3.5 w-3.5" />
-                New listing
+                + New listing
               </Link>
             </div>
           </div>
 
-          {/* stat strip */}
-          <div className="mt-10 grid grid-cols-2 lg:grid-cols-4 gap-px bg-white/[0.06] border border-white/[0.06]">
-            {statsLoading
-              ? Array.from({ length: 4 }).map((_, i) => (
-                  <div key={i} className="bg-[#0a0a0a] px-6 py-6 animate-pulse">
-                    <div className="h-3 w-16 bg-white/10 mb-3" />
-                    <div className="h-7 w-24 bg-white/10" />
+          {statsLoading ? (
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-px">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <div key={i} className="bg-black/60 px-5 py-5 animate-pulse border border-white/10">
+                  <div className="h-3 w-16 bg-white/10 mb-3" />
+                  <div className="h-7 w-24 bg-white/10" />
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-px border border-white/10">
+              {STAT_CARDS.map((s) => (
+                <div key={s.label} className="bg-black/80 px-5 py-5">
+                  <div className="flex items-center gap-2 text-white/30 mb-1">
+                    {s.icon}
+                    <span className="text-[9px] font-bold uppercase tracking-[0.22em]">{s.label}</span>
                   </div>
-                ))
-              : STAT_CARDS.map((s) => (
-                  <div key={s.label} className="bg-[#0a0a0a] px-6 py-6">
-                    <div className="flex items-center gap-2 text-white/30 mb-2">
-                      {s.icon}
-                      <span className="text-[9px] font-bold uppercase tracking-[0.22em]">{s.label}</span>
-                    </div>
-                    <p className="text-2xl font-black text-white">{s.value}</p>
-                    <p className="text-[10px] text-white/25 mt-1">{s.sub}</p>
-                  </div>
-                ))}
-          </div>
+                  <p className="text-2xl font-bold text-white">{s.value}</p>
+                  <p className="text-[10px] text-white/25 mt-1">{s.sub}</p>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
 
-      {/* ── Body ── */}
-      <div className="mx-auto max-w-5xl px-6 py-12 lg:px-8">
+      <BulletinSection bgColor="bg-[#faf8f5]">
         <div className="grid lg:grid-cols-[1fr_320px] gap-10">
-
           {/* Left — recent orders */}
           <div>
             <div className="flex items-end justify-between mb-6">
               <div>
                 <p className={labelBase}>Activity</p>
-                <h2 className="mt-1 text-xl font-black uppercase tracking-tight text-earth-900">
-                  Recent orders
-                </h2>
+                <div className="mt-1 text-lg font-bold">Recent orders</div>
               </div>
               <Link
                 to="/seller/orders"
-                className="text-[10px] font-bold uppercase tracking-[0.18em] text-earth-400 hover:text-earth-900 flex items-center gap-1 transition-colors"
+                className="text-[10px] font-bold uppercase tracking-[0.14em] underline hover:no-underline"
               >
-                View all <ArrowRight className="h-3 w-3" />
+                View all →
               </Link>
             </div>
 
             {salesLoading ? (
-              <div className="divide-y divide-earth-100 border border-earth-200">
+              <div className="border border-black divide-y divide-black/20">
                 {Array.from({ length: 5 }).map((_, i) => (
                   <div key={i} className="px-5 py-4 flex items-center justify-between animate-pulse">
                     <div className="space-y-1.5">
-                      <div className="h-3 w-32 bg-earth-100" />
-                      <div className="h-2.5 w-20 bg-earth-100" />
+                      <div className="h-3 w-32 bg-black/10" />
+                      <div className="h-2.5 w-20 bg-black/10" />
                     </div>
-                    <div className="h-3 w-16 bg-earth-100" />
+                    <div className="h-3 w-16 bg-black/10" />
                   </div>
                 ))}
               </div>
             ) : orders.length === 0 ? (
-              <div className="border border-earth-200 px-8 py-16 text-center">
-                <BarChart2 className="h-10 w-10 text-earth-200 mx-auto mb-4" />
-                <p className="text-sm font-semibold text-earth-400 uppercase tracking-wide">
-                  No orders yet
-                </p>
-                <p className="text-xs text-earth-400 mt-1">
+              <div className="border border-black px-8 py-16 text-center bg-white">
+                <BarChart2 className="h-10 w-10 opacity-20 mx-auto mb-4" />
+                <p className="text-sm font-bold uppercase opacity-60">No orders yet</p>
+                <p className="text-xs mt-1 opacity-40">
                   Orders will appear here once buyers purchase your listings.
                 </p>
               </div>
             ) : (
-              <div className="border border-earth-200 divide-y divide-earth-100">
+              <div className="border border-black divide-y divide-black/20 bg-white">
                 {orders.map((order: any) => (
                   <Link
                     key={order._id}
                     to={`/orders/${order._id}`}
-                    className="flex items-center justify-between px-5 py-4 hover:bg-earth-50 transition-colors group"
+                    className="flex items-center justify-between px-5 py-4 hover:bg-[#f8f7f4] transition-colors group"
                   >
                     <div>
-                      <p className="text-sm font-semibold text-earth-900">
+                      <p className="text-[12px] font-bold">
                         {order.items?.[0]?.title ?? 'Order'}
                         {order.items?.length > 1 && (
-                          <span className="text-earth-400 font-normal"> +{order.items.length - 1} more</span>
+                          <span className="opacity-40 font-normal"> +{order.items.length - 1} more</span>
                         )}
                       </p>
-                      <p className="text-[10px] text-earth-400 mt-0.5">
+                      <p className="text-[10px] opacity-40 mt-0.5">
                         {order.orderNumber} &middot; {new Date(order.createdAt).toLocaleDateString()}
                       </p>
                     </div>
                     <div className="flex items-center gap-3">
-                      <span className={`px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide border ${statusColor[order.status] ?? 'bg-earth-50 text-earth-500 border-earth-200'}`}>
+                      <span className={`border border-black px-1.5 py-0.5 text-[9px] font-bold uppercase ${statusColor[order.status] ?? 'bg-white'}`}>
                         {order.status}
                       </span>
-                      <span className="text-sm font-bold text-earth-900">
+                      <span className="text-sm font-bold">
                         GHS {order.totalAmount?.toFixed(2)}
                       </span>
-                      <ArrowRight className="h-3.5 w-3.5 text-earth-300 group-hover:text-earth-600 transition-colors" />
                     </div>
                   </Link>
                 ))}
@@ -339,117 +328,117 @@ const SellerAnalyticsPage: React.FC = () => {
           <div>
             <div className="mb-6">
               <p className={labelBase}>Your listings</p>
-              <h2 className="mt-1 text-xl font-black uppercase tracking-tight text-earth-900">
-                Active products
-              </h2>
+              <div className="mt-1 text-lg font-bold">Active products</div>
             </div>
 
             {listings.length === 0 ? (
-              <div className="border border-earth-200 p-6 text-center">
-                <p className="text-xs text-earth-400">No listings yet.</p>
+              <BulletinCard rotation={0.5} bgColor="bg-[#fffacd]">
+                <p className="text-[12px]">No listings yet.</p>
                 <Link
                   to="/sell"
-                  className="mt-3 inline-flex items-center gap-1.5 bg-earth-900 text-white px-4 py-2 text-[9px] font-bold uppercase tracking-[0.18em] hover:bg-earth-700 transition-colors"
+                  className="mt-3 inline-flex items-center gap-1.5 border border-black bg-black px-3 py-1.5 text-[9px] font-bold uppercase text-white transition-colors hover:bg-white hover:text-black"
                 >
                   <Package className="h-3 w-3" />
-                  Create first listing
+                  Create first
                 </Link>
-              </div>
+              </BulletinCard>
             ) : (
               <div className="space-y-2">
                 {listings.map((p: any) => (
                   <div
                     key={p._id}
-                    className="flex items-center gap-3 border border-earth-200 p-3 hover:border-earth-400 transition-colors"
+                    className="flex items-center gap-3 border border-black bg-white p-3 shadow-[2px_2px_0_0_rgba(0,0,0,1)]"
                   >
-                    {p.images?.[0] ? (
+                    {p.images?.[0]?.url ? (
                       <img
-                        src={p.images[0]}
+                        src={p.images[0].url}
                         alt={p.title}
-                        className="h-12 w-12 object-cover flex-shrink-0"
+                        className="h-12 w-12 object-cover border border-black flex-shrink-0"
                       />
                     ) : (
-                      <div className="h-12 w-12 bg-earth-100 flex-shrink-0 flex items-center justify-center">
-                        <Package className="h-5 w-5 text-earth-300" />
+                      <div className="h-12 w-12 border border-black bg-[#f0e8f4] flex-shrink-0 flex items-center justify-center">
+                        <Package className="h-5 w-5 opacity-40" />
                       </div>
                     )}
                     <div className="min-w-0 flex-1">
-                      <p className="text-xs font-semibold text-earth-900 truncate">{p.title}</p>
-                      <p className="text-[10px] text-earth-400">GHS {p.price?.toFixed(2)}</p>
+                      <p className="text-[12px] font-bold truncate">{p.title}</p>
+                      <p className="text-[10px] opacity-50">GHS {p.price?.toFixed(2)}</p>
                     </div>
-                    <span className={`flex-shrink-0 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide border ${p.isAvailable ? 'bg-green-50 text-green-700 border-green-200' : 'bg-earth-50 text-earth-500 border-earth-200'}`}>
+                    <span className={`flex-shrink-0 border border-black px-1.5 py-0.5 text-[8px] font-bold uppercase ${p.isAvailable ? 'bg-[#fffacd]' : 'bg-[#fce4ec]'}`}>
                       {p.isAvailable ? 'live' : 'sold'}
                     </span>
                   </div>
                 ))}
                 <Link
                   to="/my-listings"
-                  className="flex items-center justify-center gap-2 border border-earth-200 py-3 text-[10px] font-bold uppercase tracking-[0.18em] text-earth-400 hover:border-earth-400 hover:text-earth-700 transition-colors"
+                  className="flex items-center justify-center gap-2 border border-black py-3 text-[10px] font-bold uppercase hover:bg-white transition-colors"
                 >
-                  View all listings <ArrowRight className="h-3 w-3" />
+                  View all listings →
                 </Link>
               </div>
             )}
 
             {/* Completion rate card */}
-            <div className="mt-6 border border-earth-200 p-5">
+            <BulletinCard rotation={-0.3} bgColor="bg-white" className="mt-6">
               <div className="flex items-center gap-2 mb-3">
-                <TrendingUp className="h-4 w-4 text-earth-400" />
+                <TrendingUp className="h-4 w-4 opacity-40" />
                 <p className={labelBase}>Completion rate</p>
               </div>
               <div className="flex items-end gap-2 mb-3">
-                <span className="text-3xl font-black text-earth-900">{completionRate}%</span>
-                <span className="text-xs text-earth-400 mb-1">of orders fulfilled</span>
+                <span className="text-3xl font-bold">{completionRate}%</span>
+                <span className="text-[11px] opacity-50 mb-1">of orders fulfilled</span>
               </div>
-              <div className="h-1.5 bg-earth-100 w-full">
+              <div className="h-2 bg-[#f0e8f4] border border-black">
                 <div
-                  className="h-full bg-earth-900 transition-all duration-500"
+                  className="h-full bg-black transition-all duration-500"
                   style={{ width: `${completionRate}%` }}
                 />
               </div>
-            </div>
+            </BulletinCard>
 
-            <div className="mt-6 border border-earth-200 p-5">
-              <p className={labelBase}>Promotions engine</p>
-              <h3 className="mt-1 text-lg font-black uppercase tracking-tight text-earth-900 mb-3">Campaign scheduler</h3>
-              <div className="grid gap-2 sm:grid-cols-2 mb-3">
-                <input value={campaignName} onChange={(e) => setCampaignName(e.target.value)} placeholder="Campaign name" className="border border-earth-200 px-3 py-2 text-sm sm:col-span-2" />
-                <input type="datetime-local" value={campaignStart} onChange={(e) => setCampaignStart(e.target.value)} className="border border-earth-200 px-3 py-2 text-sm" />
-                <input type="datetime-local" value={campaignEnd} onChange={(e) => setCampaignEnd(e.target.value)} className="border border-earth-200 px-3 py-2 text-sm" />
-                <input value={campaignCouponCode} onChange={(e) => setCampaignCouponCode(e.target.value)} placeholder="Coupon code (optional)" className="border border-earth-200 px-3 py-2 text-sm" />
-                <select value={campaignAB} onChange={(e) => setCampaignAB(e.target.value as 'A' | 'B')} className="border border-earth-200 px-3 py-2 text-sm">
+            {/* Campaign scheduler */}
+            <BulletinCard rotation={0.3} bgColor="bg-[#e0f2f7]" className="mt-6">
+              <p className={labelBase}>Growth toolkit</p>
+              <div className="mt-2 text-base font-bold">Campaign scheduler</div>
+              <div className="grid gap-2 mt-3">
+                <input value={campaignName} onChange={(e) => setCampaignName(e.target.value)} placeholder="Campaign name" className="w-full border border-black bg-[#fefdfb] p-2 text-[12px] font-bold focus:outline-none focus:ring-2 focus:ring-black" />
+                <input type="datetime-local" value={campaignStart} onChange={(e) => setCampaignStart(e.target.value)} className="w-full border border-black bg-[#fefdfb] p-2 text-[12px] font-bold focus:outline-none focus:ring-2 focus:ring-black" />
+                <input type="datetime-local" value={campaignEnd} onChange={(e) => setCampaignEnd(e.target.value)} className="w-full border border-black bg-[#fefdfb] p-2 text-[12px] font-bold focus:outline-none focus:ring-2 focus:ring-black" />
+                <input value={campaignCouponCode} onChange={(e) => setCampaignCouponCode(e.target.value)} placeholder="Coupon code (optional)" className="w-full border border-black bg-[#fefdfb] p-2 text-[12px] font-bold focus:outline-none focus:ring-2 focus:ring-black" />
+                <select value={campaignAB} onChange={(e) => setCampaignAB(e.target.value as 'A' | 'B')} className="w-full border border-black bg-[#fefdfb] p-2 text-[12px] font-bold focus:outline-none focus:ring-2 focus:ring-black">
                   <option value="A">A slot</option>
                   <option value="B">B slot</option>
                 </select>
               </div>
-              <button onClick={createCampaign} className="w-full bg-earth-900 text-white py-2 text-[10px] font-bold uppercase tracking-[0.16em]">Create Campaign</button>
+              <button onClick={createCampaign} className="mt-3 w-full border border-black bg-black py-2 text-[10px] font-bold uppercase text-white transition-colors hover:bg-white hover:text-black">Create Campaign</button>
               {campaigns.length > 0 && (
                 <div className="mt-3 space-y-2">
                   {campaigns.slice(0, 4).map((c: any) => (
-                    <div key={c._id} className="border border-earth-100 px-3 py-2 text-xs">
-                      <p className="font-bold text-earth-900">{c.name}</p>
-                      <p className="text-earth-500">{new Date(c.startsAt).toLocaleDateString()} - {new Date(c.endsAt).toLocaleDateString()} · Slot {c.abSlot || '-'}</p>
+                    <div key={c._id} className="border border-black bg-white px-3 py-2 text-[11px]">
+                      <p className="font-bold">{c.name}</p>
+                      <p className="opacity-50">{new Date(c.startsAt).toLocaleDateString()} - {new Date(c.endsAt).toLocaleDateString()} · Slot {c.abSlot || '-'}</p>
                     </div>
                   ))}
                 </div>
               )}
-            </div>
+            </BulletinCard>
 
-            <div className="mt-6 border border-earth-200 p-5">
+            {/* Coupons */}
+            <BulletinCard rotation={-0.3} bgColor="bg-[#fce4ec]" className="mt-6">
               <p className={labelBase}>Growth toolkit</p>
-              <h3 className="mt-1 text-lg font-black uppercase tracking-tight text-earth-900 mb-4">Coupons</h3>
-              <div className="space-y-2 mb-3">
+              <div className="mt-2 text-base font-bold">Coupons</div>
+              <div className="space-y-2 mt-3">
                 <input
                   value={newCouponCode}
                   onChange={(e) => setNewCouponCode(e.target.value.toUpperCase())}
                   placeholder="CODE"
-                  className="w-full border border-earth-200 px-3 py-2 text-sm"
+                  className="w-full border border-black bg-[#fefdfb] p-2 text-[12px] font-bold focus:outline-none focus:ring-2 focus:ring-black"
                 />
                 <div className="grid grid-cols-2 gap-2">
                   <select
                     value={newCouponType}
                     onChange={(e) => setNewCouponType(e.target.value as 'percentage' | 'fixed')}
-                    className="border border-earth-200 px-3 py-2 text-sm"
+                    className="border border-black bg-[#fefdfb] p-2 text-[12px] font-bold focus:outline-none focus:ring-2 focus:ring-black"
                   >
                     <option value="percentage">Percent</option>
                     <option value="fixed">Fixed (GHS)</option>
@@ -458,46 +447,42 @@ const SellerAnalyticsPage: React.FC = () => {
                     value={newCouponValue}
                     onChange={(e) => setNewCouponValue(e.target.value)}
                     placeholder="Value"
-                    className="border border-earth-200 px-3 py-2 text-sm"
+                    className="border border-black bg-[#fefdfb] p-2 text-[12px] font-bold focus:outline-none focus:ring-2 focus:ring-black"
                   />
                 </div>
               </div>
-              <button
-                onClick={createCoupon}
-                className="w-full bg-earth-900 text-white py-2 text-[10px] font-bold uppercase tracking-[0.16em]"
-              >
-                Create Coupon
-              </button>
+              <button onClick={createCoupon} className="mt-3 w-full border border-black bg-black py-2 text-[10px] font-bold uppercase text-white transition-colors hover:bg-white hover:text-black">Create Coupon</button>
               <div className="mt-4 space-y-2">
                 {coupons.slice(0, 4).map((coupon: any) => (
-                  <div key={coupon._id} className="flex justify-between border border-earth-100 px-3 py-2 text-xs">
-                    <span className="font-bold text-earth-900">{coupon.code}</span>
-                    <span className="text-earth-500">{coupon.type === 'percentage' ? `${coupon.value}%` : `GHS ${coupon.value}`}</span>
+                  <div key={coupon._id} className="flex justify-between border border-black bg-white px-3 py-2 text-[11px]">
+                    <span className="font-bold">{coupon.code}</span>
+                    <span className="opacity-60">{coupon.type === 'percentage' ? `${coupon.value}%` : `GHS ${coupon.value}`}</span>
                   </div>
                 ))}
-                {coupons.length === 0 && <p className="text-xs text-earth-400">No coupons yet.</p>}
+                {coupons.length === 0 && <p className="text-[11px] opacity-40">No coupons yet.</p>}
               </div>
-            </div>
+            </BulletinCard>
 
-            <div className="mt-6 border border-earth-200 p-5">
+            {/* Bundles */}
+            <BulletinCard rotation={0.3} bgColor="bg-[#fffacd]" className="mt-6">
               <p className={labelBase}>Growth toolkit</p>
-              <h3 className="mt-1 text-lg font-black uppercase tracking-tight text-earth-900 mb-3">Bundles</h3>
-              <div className="space-y-2 mb-3">
+              <div className="mt-2 text-base font-bold">Bundles</div>
+              <div className="space-y-2 mt-3">
                 <input
                   value={newBundleName}
                   onChange={(e) => setNewBundleName(e.target.value)}
                   placeholder="Bundle name"
-                  className="w-full border border-earth-200 px-3 py-2 text-sm"
+                  className="w-full border border-black bg-[#fefdfb] p-2 text-[12px] font-bold focus:outline-none focus:ring-2 focus:ring-black"
                 />
                 <input
                   value={newBundleDiscount}
                   onChange={(e) => setNewBundleDiscount(e.target.value)}
                   placeholder="Discount %"
-                  className="w-full border border-earth-200 px-3 py-2 text-sm"
+                  className="w-full border border-black bg-[#fefdfb] p-2 text-[12px] font-bold focus:outline-none focus:ring-2 focus:ring-black"
                 />
-                <div className="max-h-36 overflow-auto border border-earth-100 p-2 space-y-1">
+                <div className="max-h-36 overflow-auto border border-black bg-white p-2 space-y-1">
                   {listings.slice(0, 10).map((p: any) => (
-                    <label key={p._id} className="flex items-center gap-2 text-xs text-earth-700">
+                    <label key={p._id} className="flex items-center gap-2 text-[11px]">
                       <input
                         type="checkbox"
                         checked={selectedBundleProductIds.includes(p._id)}
@@ -506,32 +491,27 @@ const SellerAnalyticsPage: React.FC = () => {
                       <span className="truncate">{p.title}</span>
                     </label>
                   ))}
-                  {listings.length === 0 && <p className="text-xs text-earth-400">Create listings first.</p>}
+                  {listings.length === 0 && <p className="text-[11px] opacity-40">Create listings first.</p>}
                 </div>
               </div>
-              <button
-                onClick={createBundle}
-                className="w-full bg-earth-900 text-white py-2 text-[10px] font-bold uppercase tracking-[0.16em]"
-              >
-                Create Bundle
-              </button>
+              <button onClick={createBundle} className="mt-3 w-full border border-black bg-black py-2 text-[10px] font-bold uppercase text-white transition-colors hover:bg-white hover:text-black">Create Bundle</button>
               {bundles.length === 0 ? (
-                <p className="text-xs text-earth-400 mt-3">No bundles yet.</p>
+                <p className="text-[11px] opacity-40 mt-3">No bundles yet.</p>
               ) : (
                 <div className="space-y-2 mt-3">
                   {bundles.slice(0, 4).map((bundle: any) => (
-                    <div key={bundle._id} className="border border-earth-100 px-3 py-2 text-xs">
-                      <p className="font-bold text-earth-900">{bundle.name}</p>
-                      <p className="text-earth-500 mt-1">{bundle.discountPercent}% off • {bundle.productIds?.length || 0} items</p>
+                    <div key={bundle._id} className="border border-black bg-white px-3 py-2 text-[11px]">
+                      <p className="font-bold">{bundle.name}</p>
+                      <p className="opacity-60 mt-1">{bundle.discountPercent}% off • {bundle.productIds?.length || 0} items</p>
                     </div>
                   ))}
                 </div>
               )}
-            </div>
+            </BulletinCard>
           </div>
         </div>
-      </div>
-    </div>
+      </BulletinSection>
+    </BulletinLayout>
   );
 };
 

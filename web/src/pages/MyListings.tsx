@@ -1,17 +1,19 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
-import { Plus, Package, Eye, Edit2, Trash2, MoreVertical, Zap, Upload, Copy, BarChart3 } from 'lucide-react';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { Plus, Package, Eye, Edit2, Trash2, MoreVertical, Zap, Upload, Copy, BarChart3, X, Filter, ShieldOff } from 'lucide-react';
 import toast from 'react-hot-toast';
 import productService from '../services/product.service';
 import { LoadingSpinner } from '../components/ui';
 import { ProductPopulated, PaginationInfo, ProductStatus } from '../types';
+import { BulletinLayout, BulletinSection, BulletinCard } from '../components/layout/BulletinLayout';
+import { useAuth } from '../context/AuthContext';
 
 const statusStyles: Record<string, string> = {
-  active: 'bg-green-100 text-green-700',
-  sold: 'bg-earth-100 text-earth-600',
-  reserved: 'bg-orange-100 text-orange-700',
-  draft: 'bg-yellow-100 text-yellow-700',
-  removed: 'bg-red-100 text-red-700',
+  active: 'bg-[#fffacd] text-black',
+  sold: 'bg-[#f0e8f4] text-black',
+  reserved: 'bg-[#fff5e1] text-black',
+  draft: 'bg-[#e0f2f7] text-black',
+  removed: 'bg-[#fce4ec] text-black',
 };
 
 const statusLabels: Record<string, string> = {
@@ -24,6 +26,14 @@ const statusLabels: Record<string, string> = {
 
 const MyListings: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const { user } = useAuth();
+
+  const isUnverifiedSeller =
+    user?.role === 'seller' &&
+    !user?.isVerified &&
+    !user?.emailVerified &&
+    !user?.phoneVerified;
 
   const [products, setProducts] = useState<ProductPopulated[]>([]);
   const [pagination, setPagination] = useState<PaginationInfo | null>(null);
@@ -269,423 +279,480 @@ const MyListings: React.FC = () => {
   };
 
   return (
-    <div className="page-container">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-8 pt-2">
-        <div>
-          <p className="text-xs font-bold uppercase tracking-[0.2em] text-earth-400 mb-1">Seller</p>
-          <h1 className="text-3xl font-black text-earth-900 uppercase tracking-tight">My Listings</h1>
-          {pagination && (
-            <p className="text-xs text-earth-500 mt-1">
-              {pagination.total} listing{pagination.total !== 1 ? 's' : ''}
-            </p>
-          )}
-        </div>
-        <div className="flex items-center gap-3">
-          <label className="inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.12em] text-earth-500">
-            <input
-              type="checkbox"
-              checked={importWithImages}
-              onChange={(e) => setImportWithImages(e.target.checked)}
-              className="h-3.5 w-3.5 accent-earth-900"
-            />
-            Import images
-          </label>
-          <input
-            type="file"
-            accept=".csv"
-            ref={fileInputRef}
-            onChange={handleImportCSV}
-            className="hidden"
-          />
-          <button
-            onClick={downloadErrorTemplate}
-            className="inline-flex items-center gap-2 px-5 py-2.5 bg-white text-earth-900 border border-earth-300 text-xs font-bold uppercase tracking-[0.12em] hover:bg-earth-50 transition-colors"
-          >
-            Error CSV template
-          </button>
-          <button
-            onClick={() => fileInputRef.current?.click()}
-            disabled={importing}
-            className="inline-flex items-center gap-2 px-5 py-2.5 bg-earth-100 text-earth-900 border border-earth-300 text-xs font-bold uppercase tracking-[0.12em] hover:bg-earth-200 transition-colors disabled:opacity-50"
-          >
-            {importing ? (
-               <span className="h-4 w-4 border-2 border-earth-400 border-t-earth-900 rounded-full animate-spin" />
-            ) : (
-               <Upload className="h-4 w-4" />
-            )}
-            Import CSV
-          </button>
-          <Link
-            to="/seller/analytics"
-            className="inline-flex items-center gap-2 px-5 py-2.5 bg-white text-earth-900 border border-earth-300 text-xs font-bold uppercase tracking-[0.12em] hover:bg-earth-50 transition-colors"
-          >
-            <BarChart3 className="h-4 w-4" />
-            Analytics
-          </Link>
-          <Link
-            to="/sell"
-            className="inline-flex items-center gap-2 px-5 py-2.5 bg-earth-900 text-white text-xs font-bold uppercase tracking-[0.12em] hover:bg-earth-700 transition-colors"
-          >
-            <Plus className="h-4 w-4" />
-            New Listing
-          </Link>
-        </div>
-      </div>
-
-      {/* Status filter tabs */}
-      <div className="flex gap-0 overflow-x-auto mb-6 border-b border-earth-200">
-        {['', 'active', 'draft', 'reserved', 'sold', 'removed'].map((status) => (
-          <button
-            key={status}
-            onClick={() => updateFilter('status', status)}
-            className={`px-4 py-3 text-xs font-bold uppercase tracking-[0.15em] whitespace-nowrap border-b-2 -mb-px transition-colors ${
-              statusFilter === status
-                ? 'border-earth-900 text-earth-900'
-                : 'border-transparent text-earth-400 hover:text-earth-700'
-            }`}
-          >
-            {status ? statusLabels[status] : 'All'}
-          </button>
-        ))}
-      </div>
-
-      {products.length > 0 && (
-        <div className="mb-4 flex items-center justify-between border border-earth-200 bg-earth-50 px-4 py-2.5">
-          <label className="inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.14em] text-earth-600">
-            <input type="checkbox" checked={allSelected} onChange={toggleSelectAll} className="h-3.5 w-3.5 accent-earth-900" />
-            Select all ({products.length})
-          </label>
-          <div className="flex items-center gap-2">
-            <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-earth-500">{selectedIds.length} selected</span>
-            <button
-              onClick={() => handleBulkStatus('active')}
-              disabled={selectedIds.length === 0 || bulkUpdatingStatus}
-              className="inline-flex items-center gap-1.5 border border-green-300 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.12em] text-green-700 hover:bg-green-50 disabled:opacity-50"
-            >
-              Mark Active
-            </button>
-            <button
-              onClick={() => handleBulkStatus('draft')}
-              disabled={selectedIds.length === 0 || bulkUpdatingStatus}
-              className="inline-flex items-center gap-1.5 border border-yellow-300 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.12em] text-yellow-700 hover:bg-yellow-50 disabled:opacity-50"
-            >
-              Mark Draft
-            </button>
-            <button
-              onClick={() => handleBulkStatus('sold')}
-              disabled={selectedIds.length === 0 || bulkUpdatingStatus}
-              className="inline-flex items-center gap-1.5 border border-earth-300 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.12em] text-earth-700 hover:bg-earth-100 disabled:opacity-50"
-            >
-              Mark Sold
-            </button>
-            <button
-              onClick={handleBulkDelete}
-              disabled={selectedIds.length === 0 || bulkDeleting}
-              className="inline-flex items-center gap-1.5 border border-red-300 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.12em] text-red-700 hover:bg-red-50 disabled:opacity-50"
-            >
-              <Trash2 className="h-3.5 w-3.5" />
-              {bulkDeleting ? 'Deleting...' : 'Delete Selected'}
-            </button>
-            <select value={bulkAction} onChange={(e) => setBulkAction(e.target.value as any)} className="border border-earth-300 px-2 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-earth-700">
-              <option value="none">Advanced action</option>
-              <option value="price_adjust">Price +/- %</option>
-              <option value="set_tags">Set tags</option>
-              <option value="set_category">Set category</option>
-              <option value="duplicate">Duplicate selected</option>
-              <option value="archive">Archive selected</option>
-            </select>
-            {bulkAction === 'price_adjust' && (
-              <input value={bulkPercent} onChange={(e) => setBulkPercent(e.target.value)} className="w-20 border border-earth-300 px-2 py-1 text-[10px]" placeholder="10" />
-            )}
-            {bulkAction === 'set_tags' && (
-              <input value={bulkTags} onChange={(e) => setBulkTags(e.target.value)} className="w-40 border border-earth-300 px-2 py-1 text-[10px]" placeholder="tag1, tag2" />
-            )}
-            {bulkAction === 'set_category' && (
-              <input value={bulkCategory} onChange={(e) => setBulkCategory(e.target.value)} className="w-32 border border-earth-300 px-2 py-1 text-[10px]" placeholder="category slug" />
-            )}
-            <button
-              onClick={runAdvancedBulkAction}
-              disabled={selectedIds.length === 0 || bulkAction === 'none'}
-              className="inline-flex items-center gap-1.5 border border-earth-300 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.12em] text-earth-700 hover:bg-earth-100 disabled:opacity-50"
-            >
-              Run
-            </button>
-          </div>
-        </div>
-      )}
-
-      {previewingCSV && csvPreview && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/45 px-4">
-          <div className="w-full max-w-2xl border border-earth-200 bg-white p-6">
-            <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-earth-400">CSV Preview</p>
-            <h3 className="mt-2 text-2xl font-black uppercase tracking-tight text-earth-900">Import summary</h3>
-            <div className="mt-5 grid gap-3 sm:grid-cols-4">
-              <div className="border border-earth-100 p-3"><p className="text-[10px] text-earth-400">Mode</p><p className="text-sm font-bold text-earth-900 uppercase">{csvPreview.importMode}</p></div>
-              <div className="border border-earth-100 p-3"><p className="text-[10px] text-earth-400">Rows</p><p className="text-sm font-bold text-earth-900">{csvPreview.totalRows}</p></div>
-              <div className="border border-earth-100 p-3"><p className="text-[10px] text-earth-400">Estimated valid</p><p className="text-sm font-bold text-green-700">{csvPreview.estimatedValid}</p></div>
-              <div className="border border-earth-100 p-3"><p className="text-[10px] text-earth-400">Estimated invalid</p><p className="text-sm font-bold text-red-700">{csvPreview.estimatedInvalid}</p></div>
-            </div>
-            <div className="mt-4 border border-earth-100 p-3 max-h-40 overflow-auto">
-              <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-earth-400 mb-2">Detected columns</p>
-              <p className="text-xs text-earth-600 leading-6">{csvPreview.headers.join(', ')}</p>
-            </div>
-            {csvPreview.mappingHints && (
-              <div className="mt-3 border border-earth-100 p-3">
-                <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-earth-400 mb-2">Column mapping hints</p>
-                <div className="grid gap-1 text-xs text-earth-600">
-                  {Object.entries(csvPreview.mappingHints).map(([k, v]) => (
-                    <p key={k}><span className="font-bold uppercase text-earth-500">{k}:</span> {v.join(', ')}</p>
-                  ))}
-                </div>
-              </div>
-            )}
-            {csvPreview.dryRunDiff && (
-              <p className="mt-3 text-xs text-earth-500">Dry run: create {csvPreview.dryRunDiff.toCreate}, skip {csvPreview.dryRunDiff.skipped}</p>
-            )}
-            <div className="mt-5 flex items-center justify-end gap-2">
+    <BulletinLayout title="My Listings" subtitle="Seller" section="04">
+      {/* Action bar */}
+      <div className="border-b border-black bg-[#faf8f5] p-4 md:p-6">
+        <div className="mx-auto max-w-[1400px]">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="flex items-center gap-2">
+              <input
+                type="file"
+                accept=".csv"
+                ref={fileInputRef}
+                onChange={handleImportCSV}
+                className="hidden"
+              />
               <button
-                onClick={() => { setPreviewingCSV(false); setCsvPreview(null); setPendingCSVFile(null); }}
-                className="border border-earth-200 px-4 py-2 text-xs font-bold uppercase tracking-[0.12em] text-earth-600"
+                onClick={downloadErrorTemplate}
+                className="border border-black bg-white px-3 py-1.5 text-[10px] font-bold uppercase shadow-[2px_2px_0_0_rgba(0,0,0,1)] transition-all hover:shadow-[3px_3px_0_0_rgba(0,0,0,1)]"
               >
-                Cancel
+                Error CSV template
               </button>
               <button
-                onClick={runImportCSV}
+                onClick={() => fileInputRef.current?.click()}
                 disabled={importing}
-                className="bg-earth-900 px-4 py-2 text-xs font-bold uppercase tracking-[0.12em] text-white disabled:opacity-50"
+                className="border border-black bg-white px-3 py-1.5 text-[10px] font-bold uppercase shadow-[2px_2px_0_0_rgba(0,0,0,1)] transition-all hover:shadow-[3px_3px_0_0_rgba(0,0,0,1)] disabled:opacity-50"
               >
-                {importing ? 'Importing...' : 'Confirm Import'}
+                <Upload className="inline-block h-3 w-3 mr-1" />
+                {importing ? 'Importing...' : 'Import CSV'}
               </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {confirmDelete && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/45 px-4">
-          <div className="w-full max-w-md border border-earth-200 bg-white p-6">
-            <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-earth-400">Confirm delete</p>
-            <h3 className="mt-2 text-xl font-black uppercase tracking-tight text-earth-900">This cannot be undone</h3>
-            <p className="mt-3 text-sm text-earth-600">
-              {confirmDelete.mode === 'single'
-                ? 'Delete this listing permanently?'
-                : `Delete ${confirmDelete.count || selectedIds.length} selected listings permanently?`}
-            </p>
-            <div className="mt-6 flex items-center justify-end gap-2">
-              <button
-                onClick={() => setConfirmDelete(null)}
-                className="border border-earth-200 px-4 py-2 text-xs font-bold uppercase tracking-[0.12em] text-earth-600"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={() => {
-                  if (confirmDelete.mode === 'single' && confirmDelete.productId) {
-                    runSingleDelete(confirmDelete.productId);
-                    return;
-                  }
-                  runBulkDelete();
-                }}
-                disabled={bulkDeleting || !!deletingId}
-                className="bg-red-600 px-4 py-2 text-xs font-bold uppercase tracking-[0.12em] text-white disabled:opacity-50"
-              >
-                {bulkDeleting || deletingId ? 'Deleting...' : 'Delete'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Listings */}
-      {loading ? (
-        <LoadingSpinner text="Loading your listings..." />
-      ) : products.length === 0 ? (
-        <div className="text-center py-20">
-          <Package className="h-14 w-14 mx-auto text-earth-200 mb-5" />
-          <h2 className="text-lg font-black text-earth-700 uppercase tracking-wide mb-2">No Listings Yet</h2>
-          <p className="text-earth-500 mb-6 text-sm">Start selling by creating your first listing.</p>
-          <Link
-            to="/sell"
-            className="inline-flex items-center gap-2 px-6 py-3 bg-earth-900 text-white text-xs font-bold uppercase tracking-[0.15em]"
-          >
-            <Plus className="h-4 w-4" />
-            Create Listing
-          </Link>
-        </div>
-      ) : (
-        <div className="border border-earth-200 divide-y divide-earth-100">
-          {products.map((product) => {
-            const mainImage = product.images.length > 0
-              ? product.images[0].url
-              : `https://placehold.co/100x100/e2e8f0/64748b?text=${encodeURIComponent(product.title.slice(0, 8))}`;
-
-            return (
-              <div
-                key={product._id}
-                className="flex items-center gap-4 bg-white p-4 hover:bg-earth-50 transition-colors"
-              >
+              <label className="flex items-center gap-1.5 text-[10px] font-bold uppercase">
                 <input
                   type="checkbox"
-                  checked={selectedIds.includes(product._id)}
-                  onChange={() => toggleSelect(product._id)}
-                  className="h-4 w-4 accent-earth-900"
+                  checked={importWithImages}
+                  onChange={(e) => setImportWithImages(e.target.checked)}
+                  className="h-3.5 w-3.5 accent-black"
                 />
-                {/* Image */}
-                <Link to={`/products/${product._id}`} className="flex-shrink-0">
-                  <img src={mainImage} alt={product.title} className="w-16 h-16 object-cover" />
-                </Link>
+                Images
+              </label>
+            </div>
+            <div className="flex items-center gap-2">
+              <Link
+                to="/seller/analytics"
+                className="border border-black bg-white px-3 py-1.5 text-[10px] font-bold uppercase shadow-[2px_2px_0_0_rgba(0,0,0,1)] transition-all hover:shadow-[3px_3px_0_0_rgba(0,0,0,1)]"
+              >
+                <BarChart3 className="inline-block h-3 w-3 mr-1" />
+                Analytics
+              </Link>
+              <Link
+                to="/sell"
+                className="border border-black bg-black px-4 py-1.5 text-[10px] font-bold uppercase text-white shadow-[2px_2px_0_0_rgba(0,0,0,1)] transition-all hover:bg-white hover:text-black"
+              >
+                <Plus className="inline-block h-3 w-3 mr-1" />
+                New Listing
+              </Link>
+            </div>
+          </div>
+        </div>
+      </div>
 
-                {/* Info */}
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <Link
-                      to={`/products/${product._id}`}
-                      className="text-sm font-semibold text-earth-900 hover:text-earth-600 line-clamp-1 transition-colors"
-                    >
-                      {product.title}
-                    </Link>
-                    {product.isFeatured && (
-                      <span className="flex-shrink-0 flex items-center gap-0.5 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.18em] bg-yellow-100 text-yellow-700 border border-yellow-200">
-                        <Zap className="h-2.5 w-2.5" />
-                        Featured
-                      </span>
-                    )}
-                  </div>
-                  <p className="text-base font-black text-earth-900 mt-0.5">
-                    GHS {product.price.toLocaleString('en-GH', { minimumFractionDigits: 2 })}
-                  </p>
-                  <div className="flex items-center gap-3 mt-1 text-xs text-earth-400">
-                    <span className={`px-2 py-0.5 font-bold text-[10px] uppercase tracking-wide ${statusStyles[product.status]}`}>
-                      {statusLabels[product.status]}
-                    </span>
-                    <span className="flex items-center gap-1">
-                      <Eye className="h-3 w-3" />
-                      {product.views}
-                    </span>
-                    <span>{new Date(product.createdAt).toLocaleDateString()}</span>
-                  </div>
+      <BulletinSection bgColor="bg-[#faf8f5]">
+        {/* Verification banner for unverified sellers */}
+        {isUnverifiedSeller && (
+          <div className="mb-6 flex flex-col sm:flex-row items-start sm:items-center gap-3 border-2 border-black bg-[#fce4ec] p-4 shadow-[4px_4px_0_0_rgba(0,0,0,1)]">
+            <ShieldOff className="h-5 w-5 flex-shrink-0 text-black/60" />
+            <div className="flex-1">
+              <div className="text-[11px] font-bold uppercase tracking-wider">Verification required to list items</div>
+              <div className="text-[11px] opacity-70 mt-0.5">
+                Verify your <strong>email</strong> or <strong>phone</strong> before creating active listings. Existing drafts are safe.
+              </div>
+            </div>
+            <button
+              onClick={() => navigate('/verification')}
+              className="flex-shrink-0 border border-black bg-black px-4 py-2 text-[10px] font-bold uppercase text-white shadow-[2px_2px_0_0_rgba(0,0,0,1)] hover:bg-white hover:text-black transition-colors"
+            >
+              Verify Now
+            </button>
+          </div>
+        )}
+
+        {/* Status filter tabs */}
+        <div className="flex gap-0 overflow-x-auto mb-6 border-b border-black scrollbar-hide">
+          {['', 'active', 'draft', 'reserved', 'sold', 'removed'].map((status) => (
+            <button
+              key={status}
+              onClick={() => updateFilter('status', status)}
+              className={`px-4 py-2 text-[10px] font-bold uppercase tracking-wider whitespace-nowrap border-b-2 -mb-px transition-colors ${
+                statusFilter === status
+                  ? 'border-black text-black'
+                  : 'border-transparent opacity-40 hover:opacity-70'
+              }`}
+            >
+              {status ? statusLabels[status] : 'All'}
+              {status && <span className="ml-1">({status})</span>}
+            </button>
+          ))}
+        </div>
+
+        {/* Bulk actions bar */}
+        {products.length > 0 && (
+          <div className="mb-4 flex flex-wrap items-center justify-between gap-3 border border-black bg-[#fefdfb] p-3 shadow-[3px_3px_0_0_rgba(0,0,0,1)]">
+            <label className="flex items-center gap-2 text-[10px] font-bold uppercase">
+              <input type="checkbox" checked={allSelected} onChange={toggleSelectAll} className="h-3.5 w-3.5 accent-black" />
+              Select all ({products.length})
+            </label>
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-[10px] font-bold uppercase opacity-60">{selectedIds.length} selected</span>
+              <button
+                onClick={() => handleBulkStatus('active')}
+                disabled={selectedIds.length === 0 || bulkUpdatingStatus}
+                className="border border-black bg-white px-2 py-1 text-[9px] font-bold uppercase shadow-[1px_1px_0_0_rgba(0,0,0,1)] hover:bg-[#fffacd] disabled:opacity-40"
+              >
+                Active
+              </button>
+              <button
+                onClick={() => handleBulkStatus('draft')}
+                disabled={selectedIds.length === 0 || bulkUpdatingStatus}
+                className="border border-black bg-white px-2 py-1 text-[9px] font-bold uppercase shadow-[1px_1px_0_0_rgba(0,0,0,1)] hover:bg-[#e0f2f7] disabled:opacity-40"
+              >
+                Draft
+              </button>
+              <button
+                onClick={() => handleBulkStatus('sold')}
+                disabled={selectedIds.length === 0 || bulkUpdatingStatus}
+                className="border border-black bg-white px-2 py-1 text-[9px] font-bold uppercase shadow-[1px_1px_0_0_rgba(0,0,0,1)] hover:bg-[#f0e8f4] disabled:opacity-40"
+              >
+                Sold
+              </button>
+              <button
+                onClick={handleBulkDelete}
+                disabled={selectedIds.length === 0 || bulkDeleting}
+                className="border border-black bg-white px-2 py-1 text-[9px] font-bold uppercase shadow-[1px_1px_0_0_rgba(0,0,0,1)] hover:bg-[#fce4ec] disabled:opacity-40"
+              >
+                <Trash2 className="inline-block h-3 w-3 mr-1" />
+                Delete
+              </button>
+              <select
+                value={bulkAction}
+                onChange={(e) => setBulkAction(e.target.value as any)}
+                className="border border-black bg-[#fefdfb] px-2 py-1 text-[9px] font-bold uppercase focus:outline-none focus:ring-2 focus:ring-black"
+              >
+                <option value="none">More...</option>
+                <option value="price_adjust">Adjust price</option>
+                <option value="set_tags">Set tags</option>
+                <option value="set_category">Set category</option>
+                <option value="duplicate">Duplicate</option>
+                <option value="archive">Archive</option>
+              </select>
+              {bulkAction === 'price_adjust' && (
+                <input value={bulkPercent} onChange={(e) => setBulkPercent(e.target.value)} className="w-16 border border-black bg-white px-2 py-1 text-[10px] font-bold focus:outline-none focus:ring-2 focus:ring-black" placeholder="10%" />
+              )}
+              {bulkAction === 'set_tags' && (
+                <input value={bulkTags} onChange={(e) => setBulkTags(e.target.value)} className="w-32 border border-black bg-white px-2 py-1 text-[10px] font-bold focus:outline-none focus:ring-2 focus:ring-black" placeholder="tag1, tag2" />
+              )}
+              {bulkAction === 'set_category' && (
+                <input value={bulkCategory} onChange={(e) => setBulkCategory(e.target.value)} className="w-28 border border-black bg-white px-2 py-1 text-[10px] font-bold focus:outline-none focus:ring-2 focus:ring-black" placeholder="category slug" />
+              )}
+              <button
+                onClick={runAdvancedBulkAction}
+                disabled={selectedIds.length === 0 || bulkAction === 'none'}
+                className="border border-black bg-black px-2 py-1 text-[9px] font-bold uppercase text-white shadow-[1px_1px_0_0_rgba(0,0,0,1)] hover:bg-white hover:text-black disabled:opacity-40"
+              >
+                Run
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* CSV Preview modal */}
+        {previewingCSV && csvPreview && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+            <div className="border border-black bg-[#fefdfb] shadow-[8px_8px_0_0_rgba(0,0,0,1)] max-w-2xl w-full p-6">
+              <div className="flex items-center justify-between mb-4 border-b border-black pb-3">
+                <div>
+                  <div className="text-[10px] uppercase tracking-wider opacity-60">CSV Preview</div>
+                  <div className="text-lg font-bold mt-1">Import summary</div>
                 </div>
-
-                {/* Actions */}
-                <div className="flex items-center gap-1 flex-shrink-0">
-                  {product.status === 'active' && !product.isFeatured && (
-                    <button
-                      onClick={() => handleBoostRequest(product._id)}
-                      disabled={boostingId === product._id}
-                      title="Request Featured Boost"
-                      className="flex items-center gap-1 px-2 py-1.5 border border-yellow-300 text-yellow-700 text-[9px] font-bold uppercase tracking-[0.14em] hover:bg-yellow-50 disabled:opacity-40 transition-colors"
-                    >
-                      <Zap className="h-3 w-3" />
-                      {boostingId === product._id ? '...' : 'Boost'}
-                    </button>
-                  )}
-                  <Link
-                    to={`/products/${product._id}/edit`}
-                    className="p-2 hover:bg-earth-100 text-earth-500 hover:text-earth-700 transition-colors"
-                    title="Edit"
-                  >
-                    <Edit2 className="h-4 w-4" />
-                  </Link>
-                  <div className="relative">
-                    <button
-                      onClick={() => setOpenMenu(openMenu === product._id ? null : product._id)}
-                      className="p-2 hover:bg-earth-100 text-earth-500 hover:text-earth-700 transition-colors"
-                    >
-                      <MoreVertical className="h-4 w-4" />
-                    </button>
-                    {openMenu === product._id && (
-                      <>
-                        <div className="fixed inset-0 z-10" onClick={() => setOpenMenu(null)} />
-                        <div className="absolute right-0 top-full mt-1 bg-white border border-earth-200 shadow-lg z-20 py-1 min-w-[160px]">
-                          {product.status !== 'active' && (
-                            <button
-                              onClick={() => handleStatusChange(product._id, 'active')}
-                              className="w-full text-left px-4 py-2 text-xs hover:bg-earth-50 text-green-700 font-medium uppercase tracking-wide"
-                            >
-                              Mark Active
-                            </button>
-                          )}
-                          {product.status !== 'sold' && (
-                            <button
-                              onClick={() => handleStatusChange(product._id, 'sold')}
-                              className="w-full text-left px-4 py-2 text-xs hover:bg-earth-50 text-earth-600 font-medium uppercase tracking-wide"
-                            >
-                              Mark Sold
-                            </button>
-                          )}
-                          {product.status !== 'reserved' && (
-                            <button
-                              onClick={() => handleStatusChange(product._id, 'reserved')}
-                              className="w-full text-left px-4 py-2 text-xs hover:bg-earth-50 text-orange-700 font-medium uppercase tracking-wide"
-                            >
-                              Mark Reserved
-                            </button>
-                          )}
-                          {!product.isFeatured && product.status === 'active' && (
-                            <button
-                              onClick={() => handleBoostRequest(product._id)}
-                              disabled={boostingId === product._id}
-                              className="w-full text-left px-4 py-2 text-xs hover:bg-yellow-50 text-yellow-700 font-medium uppercase tracking-wide"
-                            >
-                              <span className="inline-flex items-center gap-1">
-                                <Zap className="h-3.5 w-3.5" />
-                                {boostingId === product._id ? 'Requesting...' : 'Request Boost'}
-                              </span>
-                            </button>
-                          )}
-                          <button
-                            onClick={() => handleDuplicate(product._id)}
-                            className="w-full text-left px-4 py-2 text-xs hover:bg-earth-50 text-earth-700 font-medium uppercase tracking-wide flex items-center gap-2"
-                          >
-                            <Copy className="h-3.5 w-3.5" />
-                            Duplicate
-                          </button>
-                          <div className="h-px bg-earth-100 my-1" />
-                          <button
-                            onClick={() => handleDelete(product._id)}
-                            disabled={deletingId === product._id}
-                            className="w-full text-left px-4 py-2 text-xs hover:bg-red-50 text-red-600 font-medium uppercase tracking-wide flex items-center gap-2"
-                          >
-                            <Trash2 className="h-3.5 w-3.5" />
-                            {deletingId === product._id ? 'Deleting...' : 'Delete'}
-                          </button>
-                        </div>
-                      </>
-                    )}
-                  </div>
+                <button
+                  onClick={() => { setPreviewingCSV(false); setCsvPreview(null); setPendingCSVFile(null); }}
+                  className="border border-black bg-white p-1.5 shadow-[2px_2px_0_0_rgba(0,0,0,1)] hover:shadow-[3px_3px_0_0_rgba(0,0,0,1)] transition-all"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+              <div className="grid gap-3 sm:grid-cols-4 mb-4">
+                <div className="border border-black bg-white p-3 shadow-[2px_2px_0_0_rgba(0,0,0,1)]">
+                  <div className="text-[10px] opacity-60 uppercase tracking-wider">Mode</div>
+                  <div className="text-[12px] font-bold uppercase mt-1">{csvPreview.importMode}</div>
+                </div>
+                <div className="border border-black bg-white p-3 shadow-[2px_2px_0_0_rgba(0,0,0,1)]">
+                  <div className="text-[10px] opacity-60 uppercase tracking-wider">Rows</div>
+                  <div className="text-[12px] font-bold mt-1">{csvPreview.totalRows}</div>
+                </div>
+                <div className="border border-black bg-[#fffacd] p-3 shadow-[2px_2px_0_0_rgba(0,0,0,1)]">
+                  <div className="text-[10px] opacity-60 uppercase tracking-wider">Valid</div>
+                  <div className="text-[12px] font-bold mt-1">{csvPreview.estimatedValid}</div>
+                </div>
+                <div className="border border-black bg-[#fce4ec] p-3 shadow-[2px_2px_0_0_rgba(0,0,0,1)]">
+                  <div className="text-[10px] opacity-60 uppercase tracking-wider">Invalid</div>
+                  <div className="text-[12px] font-bold mt-1">{csvPreview.estimatedInvalid}</div>
                 </div>
               </div>
-            );
-          })}
-        </div>
-      )}
+              <div className="border border-black bg-white p-3 max-h-36 overflow-auto mb-3 shadow-[2px_2px_0_0_rgba(0,0,0,1)]">
+                <div className="text-[10px] font-bold uppercase tracking-wider opacity-60 mb-2">Columns</div>
+                <div className="text-[11px] leading-relaxed">{csvPreview.headers.join(', ')}</div>
+              </div>
+              {csvPreview.mappingHints && (
+                <div className="border border-black bg-white p-3 mb-3 shadow-[2px_2px_0_0_rgba(0,0,0,1)]">
+                  <div className="text-[10px] font-bold uppercase tracking-wider opacity-60 mb-2">Mapping hints</div>
+                  <div className="space-y-1 text-[11px]">
+                    {Object.entries(csvPreview.mappingHints).map(([k, v]) => (
+                      <div key={k}><span className="font-bold uppercase">{k}:</span> {v.join(', ')}</div>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {csvPreview.dryRunDiff && (
+                <div className="text-[11px] opacity-60 mb-4">Dry run: create {csvPreview.dryRunDiff.toCreate}, skip {csvPreview.dryRunDiff.skipped}</div>
+              )}
+              <div className="flex items-center justify-end gap-2">
+                <button
+                  onClick={() => { setPreviewingCSV(false); setCsvPreview(null); setPendingCSVFile(null); }}
+                  className="border border-black bg-white px-4 py-2 text-[10px] font-bold uppercase shadow-[2px_2px_0_0_rgba(0,0,0,1)] hover:shadow-[3px_3px_0_0_rgba(0,0,0,1)] transition-all"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={runImportCSV}
+                  disabled={importing}
+                  className="border border-black bg-black px-4 py-2 text-[10px] font-bold uppercase text-white shadow-[2px_2px_0_0_rgba(0,0,0,1)] hover:bg-white hover:text-black disabled:opacity-50 transition-all"
+                >
+                  {importing ? 'Importing...' : 'Confirm Import'}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
-      {/* Pagination */}
-      {pagination && pagination.pages > 1 && (
-        <div className="flex justify-center items-center gap-4 mt-8 pt-6 border-t border-earth-200">
-          {page > 1 && (
-            <button
-              onClick={() => updateFilter('page', String(page - 1))}
-              className="px-5 py-2.5 text-xs font-bold uppercase tracking-[0.15em] border border-earth-300 text-earth-700 hover:bg-earth-100 transition-colors"
+        {/* Delete confirmation modal */}
+        {confirmDelete && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+            <div className="border border-black bg-[#fefdfb] shadow-[8px_8px_0_0_rgba(0,0,0,1)] max-w-md w-full p-6">
+              <div className="flex items-center justify-between mb-4 border-b border-black pb-3">
+                <div>
+                  <div className="text-[10px] uppercase tracking-wider opacity-60">Confirm</div>
+                  <div className="text-lg font-bold mt-1">This cannot be undone</div>
+                </div>
+                <button
+                  onClick={() => setConfirmDelete(null)}
+                  className="border border-black bg-white p-1.5 shadow-[2px_2px_0_0_rgba(0,0,0,1)] hover:shadow-[3px_3px_0_0_rgba(0,0,0,1)] transition-all"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+              <div className="text-[12px] mb-6">
+                {confirmDelete.mode === 'single'
+                  ? 'Delete this listing permanently?'
+                  : `Delete ${confirmDelete.count || selectedIds.length} selected listings permanently?`}
+              </div>
+              <div className="flex items-center justify-end gap-2">
+                <button
+                  onClick={() => setConfirmDelete(null)}
+                  className="border border-black bg-white px-4 py-2 text-[10px] font-bold uppercase shadow-[2px_2px_0_0_rgba(0,0,0,1)] hover:shadow-[3px_3px_0_0_rgba(0,0,0,1)] transition-all"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={() => {
+                    if (confirmDelete.mode === 'single' && confirmDelete.productId) {
+                      runSingleDelete(confirmDelete.productId);
+                      return;
+                    }
+                    runBulkDelete();
+                  }}
+                  disabled={bulkDeleting || !!deletingId}
+                  className="border border-black bg-black px-4 py-2 text-[10px] font-bold uppercase text-white shadow-[2px_2px_0_0_rgba(0,0,0,1)] disabled:opacity-50 transition-all"
+                >
+                  {bulkDeleting || deletingId ? 'Deleting...' : 'Delete'}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Listings */}
+        {loading ? (
+          <LoadingSpinner text="Loading your listings..." />
+        ) : products.length === 0 ? (
+          <div className="border border-black bg-[#fffacd] p-12 text-center shadow-[4px_4px_0_0_rgba(0,0,0,1)]">
+            <Package className="h-12 w-12 mx-auto opacity-40 mb-4" />
+            <div className="text-[10px] uppercase tracking-wider opacity-60 mb-2">Empty</div>
+            <div className="text-lg font-bold mb-4">No Listings Yet</div>
+            <div className="text-[12px] opacity-60 mb-6">Start selling by creating your first listing.</div>
+            <Link
+              to="/sell"
+              className="inline-block border border-black bg-black px-4 py-2 text-[10px] font-bold uppercase text-white transition-colors hover:bg-white hover:text-black shadow-[2px_2px_0_0_rgba(0,0,0,1)]"
             >
-              Previous
-            </button>
-          )}
-          <span className="text-xs text-earth-500 uppercase tracking-[0.15em]">
-            {page} / {pagination.pages}
-          </span>
-          {page < pagination.pages && (
-            <button
-              onClick={() => updateFilter('page', String(page + 1))}
-              className="px-5 py-2.5 text-xs font-bold uppercase tracking-[0.15em] border border-earth-300 text-earth-700 hover:bg-earth-100 transition-colors"
-            >
-              Next
-            </button>
-          )}
-        </div>
-      )}
-    </div>
+              <Plus className="inline-block h-3 w-3 mr-1" />
+              Create Listing
+            </Link>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {products.map((product) => {
+              const mainImage = product.images.length > 0
+                ? product.images[0].url
+                : `https://placehold.co/100x100/e2e8f0/64748b?text=${encodeURIComponent(product.title.slice(0, 8))}`;
+
+              return (
+                <div
+                  key={product._id}
+                  className="border border-black bg-white p-3 shadow-[3px_3px_0_0_rgba(0,0,0,1)]"
+                  style={{ transform: `rotate(${Math.random() * 0.4 - 0.2}deg)` }}
+                >
+                  <div className="flex items-center gap-3">
+                    <input
+                      type="checkbox"
+                      checked={selectedIds.includes(product._id)}
+                      onChange={() => toggleSelect(product._id)}
+                      className="h-4 w-4 accent-black flex-shrink-0"
+                    />
+                    {/* Image */}
+                    <Link to={`/products/${product._id}`} className="flex-shrink-0 border border-black">
+                      <div className="w-14 h-14 overflow-hidden bg-[#f8f7f4]">
+                        <img src={mainImage} alt={product.title} className="w-full h-full object-cover" />
+                      </div>
+                    </Link>
+
+                    {/* Info */}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <Link
+                          to={`/products/${product._id}`}
+                          className="text-[12px] font-bold line-clamp-1 hover:underline"
+                        >
+                          {product.title}
+                        </Link>
+                        {product.isFeatured && (
+                          <span className="flex-shrink-0 border border-black bg-[#fffacd] px-1.5 py-0.5 text-[8px] font-bold uppercase flex items-center gap-0.5 shadow-[1px_1px_0_0_rgba(0,0,0,1)]">
+                            <Zap className="h-2.5 w-2.5" />
+                            Featured
+                          </span>
+                        )}
+                      </div>
+                      <div className="text-[13px] font-bold mt-0.5">
+                        GHS {product.price.toLocaleString('en-GH', { minimumFractionDigits: 2 })}
+                      </div>
+                      <div className="flex items-center gap-3 mt-1">
+                        <span className={`border border-black px-1.5 py-0.5 text-[9px] font-bold uppercase ${statusStyles[product.status]}`}>
+                          {statusLabels[product.status]}
+                        </span>
+                        <span className="flex items-center gap-1 text-[10px] opacity-60">
+                          <Eye className="h-3 w-3" />
+                          {product.views}
+                        </span>
+                        <span className="text-[10px] opacity-60">{new Date(product.createdAt).toLocaleDateString()}</span>
+                      </div>
+                    </div>
+
+                    {/* Actions */}
+                    <div className="flex items-center gap-1 flex-shrink-0">
+                      {product.status === 'active' && !product.isFeatured && (
+                        <button
+                          onClick={() => handleBoostRequest(product._id)}
+                          disabled={boostingId === product._id}
+                          className="border border-black bg-[#fffacd] px-2 py-1 text-[8px] font-bold uppercase shadow-[1px_1px_0_0_rgba(0,0,0,1)] disabled:opacity-40 transition-all hover:shadow-[2px_2px_0_0_rgba(0,0,0,1)]"
+                        >
+                          <Zap className="inline-block h-2.5 w-2.5 mr-0.5" />
+                          {boostingId === product._id ? '...' : 'Boost'}
+                        </button>
+                      )}
+                      <Link
+                        to={`/products/${product._id}/edit`}
+                        className="border border-black bg-white p-1.5 text-[10px] font-bold uppercase shadow-[1px_1px_0_0_rgba(0,0,0,1)] hover:shadow-[2px_2px_0_0_rgba(0,0,0,1)] transition-all"
+                        title="Edit"
+                      >
+                        <Edit2 className="h-3.5 w-3.5" />
+                      </Link>
+                      <div className="relative">
+                        <button
+                          onClick={() => setOpenMenu(openMenu === product._id ? null : product._id)}
+                          className="border border-black bg-white p-1.5 text-[10px] font-bold uppercase shadow-[1px_1px_0_0_rgba(0,0,0,1)] hover:shadow-[2px_2px_0_0_rgba(0,0,0,1)] transition-all"
+                        >
+                          <MoreVertical className="h-3.5 w-3.5" />
+                        </button>
+                        {openMenu === product._id && (
+                          <>
+                            <div className="fixed inset-0 z-10" onClick={() => setOpenMenu(null)} />
+                            <div className="absolute right-0 top-full mt-1 border border-black bg-white shadow-[4px_4px_0_0_rgba(0,0,0,1)] z-20 py-1 min-w-[150px]">
+                              {product.status !== 'active' && (
+                                <button
+                                  onClick={() => handleStatusChange(product._id, 'active')}
+                                  className="w-full text-left px-3 py-1.5 text-[10px] font-bold uppercase hover:bg-[#fffacd]"
+                                >
+                                  Mark Active
+                                </button>
+                              )}
+                              {product.status !== 'sold' && (
+                                <button
+                                  onClick={() => handleStatusChange(product._id, 'sold')}
+                                  className="w-full text-left px-3 py-1.5 text-[10px] font-bold uppercase hover:bg-[#f0e8f4]"
+                                >
+                                  Mark Sold
+                                </button>
+                              )}
+                              {product.status !== 'reserved' && (
+                                <button
+                                  onClick={() => handleStatusChange(product._id, 'reserved')}
+                                  className="w-full text-left px-3 py-1.5 text-[10px] font-bold uppercase hover:bg-[#fff5e1]"
+                                >
+                                  Mark Reserved
+                                </button>
+                              )}
+                              {!product.isFeatured && product.status === 'active' && (
+                                <button
+                                  onClick={() => handleBoostRequest(product._id)}
+                                  disabled={boostingId === product._id}
+                                  className="w-full text-left px-3 py-1.5 text-[10px] font-bold uppercase hover:bg-[#fffacd] disabled:opacity-40"
+                                >
+                                  <Zap className="inline-block h-3 w-3 mr-1" />
+                                  {boostingId === product._id ? 'Requesting...' : 'Request Boost'}
+                                </button>
+                              )}
+                              <button
+                                onClick={() => handleDuplicate(product._id)}
+                                className="w-full text-left px-3 py-1.5 text-[10px] font-bold uppercase hover:bg-[#e0f2f7] flex items-center gap-1"
+                              >
+                                <Copy className="h-3 w-3" />
+                                Duplicate
+                              </button>
+                              <div className="border-t border-black my-1" />
+                              <button
+                                onClick={() => handleDelete(product._id)}
+                                disabled={deletingId === product._id}
+                                className="w-full text-left px-3 py-1.5 text-[10px] font-bold uppercase hover:bg-[#fce4ec] flex items-center gap-1 disabled:opacity-40"
+                              >
+                                <Trash2 className="h-3 w-3" />
+                                {deletingId === product._id ? 'Deleting...' : 'Delete'}
+                              </button>
+                            </div>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+
+        {/* Pagination */}
+        {pagination && pagination.pages > 1 && (
+          <div className="flex justify-center items-center gap-4 mt-8 pt-6 border-t border-black">
+            {page > 1 && (
+              <button
+                onClick={() => updateFilter('page', String(page - 1))}
+                className="border border-black bg-white px-4 py-2 text-[10px] font-bold uppercase shadow-[2px_2px_0_0_rgba(0,0,0,1)] hover:shadow-[3px_3px_0_0_rgba(0,0,0,1)] transition-all"
+              >
+                Previous
+              </button>
+            )}
+            <span className="text-[10px] font-bold uppercase opacity-60">
+              {page} / {pagination.pages}
+            </span>
+            {page < pagination.pages && (
+              <button
+                onClick={() => updateFilter('page', String(page + 1))}
+                className="border border-black bg-white px-4 py-2 text-[10px] font-bold uppercase shadow-[2px_2px_0_0_rgba(0,0,0,1)] hover:shadow-[3px_3px_0_0_rgba(0,0,0,1)] transition-all"
+              >
+                Next
+              </button>
+            )}
+          </div>
+        )}
+      </BulletinSection>
+    </BulletinLayout>
   );
 };
 

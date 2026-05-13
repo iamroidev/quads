@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 import productService from '../services/product.service';
-import { ProductGrid } from '../components/product';
+import { BulletinLayout, BulletinSection, BulletinCard } from '../components/layout/BulletinLayout';
 
 const CollectionDetailPage: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -30,50 +30,108 @@ const CollectionDetailPage: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
-        <div className="h-8 w-48 bg-earth-100 animate-pulse" />
-        <div className="mt-3 h-5 w-72 bg-earth-100 animate-pulse" />
-      </div>
+      <BulletinLayout title="Loading..." subtitle="Collection" section="13">
+        <BulletinSection bgColor="bg-[#faf8f5]">
+          <div className="h-8 w-48 animate-pulse border border-black bg-white" />
+          <div className="mt-3 h-5 w-72 animate-pulse border border-black bg-white" />
+        </BulletinSection>
+      </BulletinLayout>
     );
   }
 
   if (error || !collection) {
     return (
-      <div className="mx-auto max-w-7xl px-4 py-16 text-center sm:px-6 lg:px-8">
-        <p className="text-sm font-semibold uppercase tracking-[0.2em] text-earth-400">Collection</p>
-        <h1 className="mt-3 text-3xl font-black uppercase tracking-tight text-earth-900">Not found</h1>
-        <Link to="/" className="mt-6 inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.16em] text-earth-500 hover:text-earth-900">
-          <ArrowLeft className="h-3.5 w-3.5" /> Back home
-        </Link>
-      </div>
+      <BulletinLayout title="Collection Not Found" subtitle="Collection" section="13">
+        <BulletinSection bgColor="bg-[#faf8f5]">
+          <div className="border border-black bg-[#fffacd] p-8 text-center shadow-[4px_4px_0_0_rgba(0,0,0,1)]">
+            <div className="text-[10px] uppercase tracking-wider opacity-60 mb-2">Missing</div>
+            <div className="text-lg font-bold mb-4">Collection not found</div>
+            <Link
+              to="/"
+              className="inline-flex items-center gap-2 border border-black bg-black px-4 py-2 text-[10px] font-bold uppercase text-white shadow-[2px_2px_0_0_rgba(0,0,0,1)] hover:bg-white hover:text-black transition-all"
+            >
+              <ArrowLeft className="h-3.5 w-3.5" /> Back home
+            </Link>
+          </div>
+        </BulletinSection>
+      </BulletinLayout>
     );
   }
 
   return (
-    <main className="bg-white">
-      <section className="border-b border-earth-200 bg-earth-50">
-        <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8 lg:py-16">
-          <Link to="/" className="inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.18em] text-earth-500 hover:text-earth-900">
+    <BulletinLayout title={collection.title} subtitle="Collection" section="13">
+      <BulletinSection bgColor="bg-[#faf8f5]">
+        <div className="mb-6">
+          <Link
+            to="/"
+            className="inline-flex items-center gap-2 text-[10px] font-bold uppercase hover:underline"
+          >
             <ArrowLeft className="h-3.5 w-3.5" /> Home
           </Link>
-          <h1 className="mt-5 text-4xl font-black uppercase tracking-tight text-earth-900">{collection.title}</h1>
-          <p className="mt-3 max-w-2xl text-sm leading-7 text-earth-500">{collection.description}</p>
-          <div className="mt-6 flex flex-wrap items-center gap-3 text-[10px] font-bold uppercase tracking-[0.16em] text-earth-400">
-            <span>{collection.listingCount} active listings</span>
-            <span className="h-1 w-1 rounded-full bg-earth-300" />
-            <span>Avg GHS {Number(collection.avgPrice || 0).toLocaleString('en-GH')}</span>
-            <span className="h-1 w-1 rounded-full bg-earth-300" />
-            <Link to={`/products?category=${collection.categorySlug}`} className="inline-flex items-center gap-1 text-earth-600 hover:text-earth-900">
-              Browse full category <ArrowRight className="h-3 w-3" />
+          <h1 className="mt-4 text-2xl font-bold">{collection.title}</h1>
+          <p className="mt-2 text-[12px] opacity-70 max-w-2xl">{collection.description}</p>
+          <div className="mt-4 flex flex-wrap items-center gap-3 text-[10px] font-bold uppercase">
+            <span className="opacity-60">{collection.listingCount} active listings</span>
+            <span className="w-1 h-1 bg-black/30" />
+            <span className="opacity-60">Avg GHS {Number(collection.avgPrice || 0).toLocaleString('en-GH')}</span>
+            <span className="w-1 h-1 bg-black/30" />
+            <Link
+              to={`/products?category=${collection.categorySlug}`}
+              className="inline-flex items-center gap-1 border border-black bg-white px-2 py-0.5 text-[9px] font-bold uppercase shadow-[1px_1px_0_0_rgba(0,0,0,1)] hover:shadow-[2px_2px_0_0_rgba(0,0,0,1)] transition-all"
+            >
+              Browse category <ArrowRight className="h-3 w-3" />
             </Link>
           </div>
         </div>
-      </section>
 
-      <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8 lg:py-14">
-        <ProductGrid products={collection.products || []} emptyMessage="No listings in this collection yet" />
-      </section>
-    </main>
+        {/* Products */}
+        {(!collection.products || collection.products.length === 0) ? (
+          <div className="border border-black bg-[#fffacd] p-8 text-center shadow-[4px_4px_0_0_rgba(0,0,0,1)]">
+            <div className="text-[10px] uppercase tracking-wider opacity-60 mb-2">Empty</div>
+            <div className="font-bold">No listings in this collection yet</div>
+          </div>
+        ) : (
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {collection.products.map((product: any, idx: number) => {
+              const getImage = (p: any) => p.images?.[0]?.url || 'https://placehold.co/400x500/ddd/666?text=Item';
+              return (
+                <Link
+                  key={product._id}
+                  to={`/products/${product._id}`}
+                  className="group"
+                  style={{
+                    transform: `rotate(${(idx % 3 - 1) * 0.8}deg)`,
+                    transition: 'transform 0.2s'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.transform = 'rotate(0deg) translateY(-8px)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = `rotate(${(idx % 3 - 1) * 0.8}deg)`;
+                  }}
+                >
+                  <div className="border border-black bg-white p-3 shadow-[6px_6px_0_0_rgba(0,0,0,0.1)]">
+                    <div className="relative aspect-square overflow-hidden border border-black/10 bg-gray-100">
+                      <img
+                        src={getImage(product)}
+                        alt={product.title}
+                        className="h-full w-full object-cover"
+                      />
+                      <div className="absolute -top-2 left-1/2 h-4 w-16 -translate-x-1/2 bg-[#ffd700]/30 opacity-60"
+                           style={{ transform: 'translateX(-50%) rotate(-2deg)' }} />
+                    </div>
+                    <div className="mt-3 space-y-1">
+                      <div className="truncate font-bold leading-tight">{product.title}</div>
+                      <div className="text-base font-bold">GHS {product.price}</div>
+                    </div>
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+        )}
+      </BulletinSection>
+    </BulletinLayout>
   );
 };
 

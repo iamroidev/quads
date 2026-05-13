@@ -8,7 +8,12 @@ export interface User {
   role: 'buyer' | 'seller' | 'admin';
   avatar?: string;
   studentId?: string;
+  department?: string;
+  residenceHall?: string;
+  currentLevel?: string;
   isVerified: boolean;
+  emailVerified: boolean;
+  phoneVerified: boolean;
   isBanned: boolean;
   location?: string;
   bio?: string;

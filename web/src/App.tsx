@@ -32,6 +32,9 @@ import DisputeCenterPage from './pages/DisputeCenter';
 import CollectionDetailPage from './pages/CollectionDetail';
 import SellerOnboardingPage from './pages/SellerOnboarding';
 import AdminGrowthPage from './pages/AdminGrowth';
+import VerificationPage from './pages/Verification';
+import ForgotPasswordPage from './pages/ForgotPassword';
+import ResetPasswordPage from './pages/ResetPassword';
 
 import { LoadingSpinner } from './components/ui';
 
@@ -72,6 +75,8 @@ const App: React.FC = () => {
         />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
+        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+        <Route path="/reset-password" element={<ResetPasswordPage />} />
 
         {/* Protected routes */}
         <Route
@@ -209,6 +214,7 @@ const App: React.FC = () => {
             </ProtectedRoute>
           }
         />
+        <Route path="/verification" element={<ProtectedRoute><VerificationPage /></ProtectedRoute>} />
         <Route path="/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
         <Route path="/disputes" element={<ProtectedRoute><DisputeCenterPage /></ProtectedRoute>} />
         <Route

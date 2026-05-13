@@ -1,29 +1,26 @@
 import React from 'react';
-import { ScrollView, StyleSheet, Switch, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, ScrollView, StyleSheet, Switch, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
+import { supabase } from '../services/supabase';
 import { colors } from '../theme';
 import ScreenHeader from '../components/ScreenHeader';
 
 const SettingsScreen = () => {
   const { user, refreshUser, logout } = useAuth();
   const [notifPrefs, setNotifPrefs] = React.useState({
-    orderUpdates: true,
-    messages: true,
-    reviews: true,
-    promotions: false,
-    systemAlerts: true,
+    orderUpdates: true, messages: true, reviews: true, promotions: false, systemAlerts: true,
   });
   const [privacyPrefs, setPrivacyPrefs] = React.useState({
-    showPhone: false,
-    showLocation: true,
-    allowMessages: true,
-    showOnlineStatus: true,
+    showPhone: false, showLocation: true, allowMessages: true, showOnlineStatus: true,
   });
   const [loading, setLoading] = React.useState(false);
   const [savingNotif, setSavingNotif] = React.useState(false);
   const [savingPrivacy, setSavingPrivacy] = React.useState(false);
+  const [newPw, setNewPw] = React.useState('');
+  const [confirmPw, setConfirmPw] = React.useState('');
+  const [changingPw, setChangingPw] = React.useState(false);
 
   React.useEffect(() => {
     if (!user) return;
@@ -61,6 +58,20 @@ const SettingsScreen = () => {
     } finally {
       setSavingPrivacy(false);
     }
+  };
+
+  const handleChangePassword = async () => {
+    if (!newPw || newPw.length < 6) { Alert.alert('Too short', 'Password must be at least 6 characters.'); return; }
+    if (newPw !== confirmPw) { Alert.alert('Mismatch', 'Passwords do not match.'); return; }
+    setChangingPw(true);
+    try {
+      const { error } = await supabase.auth.updateUser({ password: newPw });
+      if (error) throw error;
+      Alert.alert('Done', 'Password updated successfully.');
+      setNewPw(''); setConfirmPw('');
+    } catch (err: any) {
+      Alert.alert('Error', err.message || 'Failed to update password.');
+    } finally { setChangingPw(false); }
   };
 
   const handleRefresh = async () => {
@@ -134,6 +145,37 @@ const SettingsScreen = () => {
         <Text style={styles.secondaryBtnText}>{loading ? 'Refreshing...' : 'Refresh account data'}</Text>
       </TouchableOpacity>
 
+      <Text style={styles.sectionLabel}>Change password</Text>
+      <View style={styles.card}>
+        <View style={[styles.row, { paddingBottom: 0 }]}>
+          <View style={{ flex: 1, paddingRight: 8, gap: 8 }}>
+            <TextInput
+              style={styles.pwInput}
+              placeholder="New password"
+              placeholderTextColor="#9a8e7f"
+              secureTextEntry
+              value={newPw}
+              onChangeText={setNewPw}
+            />
+            <TextInput
+              style={styles.pwInput}
+              placeholder="Confirm new password"
+              placeholderTextColor="#9a8e7f"
+              secureTextEntry
+              value={confirmPw}
+              onChangeText={setConfirmPw}
+            />
+            <TouchableOpacity
+              style={[styles.pwBtn, changingPw && { opacity: 0.5 }]}
+              onPress={handleChangePassword}
+              disabled={changingPw}
+            >
+              <Text style={styles.pwBtnText}>{changingPw ? 'Updating...' : 'Update Password'}</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </View>
+
       <TouchableOpacity style={styles.logoutBtn} onPress={logout}>
         <Text style={styles.logoutText}>Sign out</Text>
       </TouchableOpacity>
@@ -162,6 +204,12 @@ const styles = StyleSheet.create({
   secondaryBtnText: { fontSize: 11, color: '#3d352b', textTransform: 'uppercase', fontWeight: '800', letterSpacing: 1.1 },
   logoutBtn: { marginTop: 12, borderWidth: 1, borderColor: '#d6b8b4', paddingVertical: 12, alignItems: 'center', backgroundColor: '#fffdf8' },
   logoutText: { fontSize: 11, color: '#9f3d34', textTransform: 'uppercase', fontWeight: '800', letterSpacing: 1.1 },
+  pwInput: {
+    borderWidth: 1, borderColor: colors.border, backgroundColor: '#fff',
+    borderRadius: 0, paddingHorizontal: 12, paddingVertical: 10, fontSize: 14, color: colors.text,
+  },
+  pwBtn: { backgroundColor: '#1f1a14', paddingVertical: 12, alignItems: 'center', marginBottom: 14 },
+  pwBtnText: { color: '#fff', fontSize: 11, fontWeight: '800', textTransform: 'uppercase', letterSpacing: 1.1 },
 });
 
 export default SettingsScreen;

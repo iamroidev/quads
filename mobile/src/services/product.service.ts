@@ -144,6 +144,36 @@ const productService = {
     return response.data;
   },
 
+  updateProduct: async (id: string, payload: Partial<CreateProductPayload>): Promise<ProductResponse> => {
+    const hasImages = Array.isArray(payload.images) && payload.images.length > 0;
+    if (hasImages) {
+      const formData = new FormData();
+      if (payload.title) formData.append('title', payload.title);
+      if (payload.description) formData.append('description', payload.description);
+      if (payload.price != null) formData.append('price', String(payload.price));
+      if (payload.category) formData.append('category', payload.category);
+      if (payload.condition) formData.append('condition', payload.condition);
+      if (payload.deliveryOption) formData.append('deliveryOption', payload.deliveryOption);
+      if (payload.pickupLocation) formData.append('pickupLocation', payload.pickupLocation);
+      if (payload.status) formData.append('status', payload.status);
+      if (payload.tags?.length) formData.append('tags', payload.tags.join(','));
+      payload.images!.forEach((image, idx) => {
+        formData.append('images', {
+          uri: image.uri,
+          type: image.type || 'image/jpeg',
+          name: image.name || `listing-${Date.now()}-${idx}.jpg`,
+        } as any);
+      });
+      const response = await api.put(`/products/${id}`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+      return response.data;
+    }
+    const response = await api.put(`/products/${id}`, payload);
+    return response.data;
+  },
+
+
   getSellerStats: async (): Promise<SellerStatsResponse> => {
     const response = await api.get('/orders/seller/stats');
     return response.data;

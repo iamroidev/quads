@@ -10,13 +10,14 @@ class EmailService {
   private transporter: nodemailer.Transporter;
 
   constructor() {
-    // We use ethereal email for dev/testing or standard SMTP
+    const port = parseInt(process.env.SMTP_PORT || '587', 10);
     this.transporter = nodemailer.createTransport({
       host: process.env.SMTP_HOST || 'smtp.ethereal.email',
-      port: parseInt(process.env.SMTP_PORT || '587', 10),
+      port,
+      secure: port === 465, // true for Resend (465/SSL), false for 587 (STARTTLS)
       auth: {
-        user: process.env.SMTP_USER || 'ethereal.user@ethereal.email',
-        pass: process.env.SMTP_PASS || 'ethereal_password',
+        user: process.env.SMTP_USER || '',
+        pass: process.env.SMTP_PASS || '',
       },
     });
   }

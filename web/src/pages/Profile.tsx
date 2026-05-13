@@ -13,10 +13,50 @@ import {
   Calendar,
   ArrowRight,
   Camera,
+  Repeat,
 } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import toast from 'react-hot-toast';
 import authService from '../services/auth.service';
+import { BulletinLayout, BulletinSection } from '../components/layout/BulletinLayout';
+
+const PROGRAMS = [
+  'Computer Science & Engineering',
+  'Geological Engineering',
+  'Mining Engineering',
+  'Petroleum Engineering',
+  'Electrical & Electronic Engineering',
+  'Mechanical Engineering',
+  'Chemical Engineering',
+  'Mathematics',
+  'Physics',
+  'Environmental Science',
+  'Business Administration',
+  'Accounting & Finance',
+  'Humanities & Social Sciences',
+  'Other',
+];
+
+const RESIDENCE_HALLS = [
+  'D. A. Opoku Mensah (D.A.O.) Hall',
+  'J. C. S. Hagan Hall',
+  'A. A. Adumua-Bossman Hall',
+  'Mensah Sarbah Hall',
+  'Jubilee Hall',
+  'Tarkwaian Hostel',
+  'Off-campus',
+  'Other',
+];
+
+const ACADEMIC_LEVELS = [
+  '100',
+  '200',
+  '300',
+  '400',
+  'Graduate',
+  'Staff',
+];
 
 /* ── Schemas ── */
 const profileSchema = z.object({
@@ -25,6 +65,9 @@ const profileSchema = z.object({
   brandName: z.string().max(80, 'Max 80 characters').optional(),
   phone: z.string().min(10, 'Enter a valid phone number'),
   studentId: z.string().optional(),
+  department: z.string().optional(),
+  residenceHall: z.string().optional(),
+  currentLevel: z.string().optional(),
   location: z.string().optional(),
   bio: z.string().max(500, 'Max 500 characters').optional(),
 });
@@ -44,13 +87,15 @@ type ProfileFormData = z.infer<typeof profileSchema>;
 type PasswordFormData = z.infer<typeof passwordSchema>;
 type Tab = 'profile' | 'password';
 
-/* ── Shared field styles ── */
+/* ── Shared field styles for bulletin ── */
 const fieldBase =
-  'w-full bg-transparent border-0 border-b border-earth-200 focus:border-earth-900 focus:ring-0 text-earth-900 text-sm py-3 px-0 outline-none transition-colors placeholder:text-earth-300';
+  'w-full border border-black bg-[#fefdfb] p-2 text-[12px] font-bold focus:outline-none focus:ring-2 focus:ring-black placeholder:text-black/30';
 const fieldDisabled =
-  'w-full bg-transparent border-0 border-b border-earth-100 text-earth-300 text-sm py-3 px-0 outline-none cursor-not-allowed';
-const labelBase = 'block text-[9px] font-bold uppercase tracking-[0.22em] text-earth-400 mb-1';
-const errorBase = 'mt-1.5 text-[11px] text-red-500';
+  'w-full border border-black/30 bg-[#f8f7f4] p-2 text-[12px] font-bold text-black/50 cursor-not-allowed';
+const selectBase =
+  'w-full border border-black bg-[#fefdfb] p-2 text-[12px] font-bold focus:outline-none focus:ring-2 focus:ring-black appearance-none bg-[url("data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22currentColor%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E")] bg-[length:16px] bg-[right_12px_center] bg-no-repeat';
+const labelBase = 'block text-[10px] font-bold uppercase tracking-wider opacity-60 mb-1';
+const errorBase = 'mt-1 text-[11px] text-red-600 font-bold';
 
 /* ── Initials avatar ── */
 function Initials({ name, size = 'lg' }: { name?: string; size?: 'sm' | 'lg' }) {
@@ -62,14 +107,14 @@ function Initials({ name, size = 'lg' }: { name?: string; size?: 'sm' | 'lg' }) 
     .join('');
   const dim = size === 'lg' ? 'h-24 w-24 text-3xl' : 'h-10 w-10 text-sm';
   return (
-    <div className={`${dim} flex items-center justify-center bg-earth-800 font-black text-white tracking-tight flex-shrink-0`}>
+    <div className={`${dim} flex items-center justify-center border border-black bg-black font-black text-white flex-shrink-0`}>
       {letters}
     </div>
   );
 }
 
 const ProfilePage: React.FC = () => {
-  const { user, updateProfile, changePassword, refreshUser } = useAuth();
+  const { user, updateProfile, changePassword, refreshUser, switchRole } = useAuth();
   const [activeTab, setActiveTab] = useState<Tab>('profile');
   const [isUpdating, setIsUpdating] = useState(false);
   const [isChangingPassword, setIsChangingPassword] = useState(false);
@@ -77,6 +122,10 @@ const ProfilePage: React.FC = () => {
   const [showNew, setShowNew] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const [switchingRole, setSwitchingRole] = useState(false);
+
+  const isSeller = user?.role === 'seller' || user?.role === 'admin';
+  const otherRole = isSeller ? 'buyer' : 'seller';
 
   const {
     register: rp,
@@ -90,6 +139,9 @@ const ProfilePage: React.FC = () => {
       brandName: user?.brandName || '',
       phone: user?.phone || '',
       studentId: user?.studentId || '',
+      department: user?.department || '',
+      residenceHall: user?.residenceHall || '',
+      currentLevel: user?.currentLevel || '',
       location: user?.location || '',
       bio: user?.bio || '',
     },
@@ -154,6 +206,23 @@ const ProfilePage: React.FC = () => {
     }
   };
 
+  const handleRoleSwitch = async () => {
+    const label = otherRole === 'seller' ? 'start selling' : 'switch to buying';
+    const confirmed = window.confirm(
+      `Are you sure you want to ${label}? You can switch back anytime.`
+    );
+    if (!confirmed) return;
+
+    setSwitchingRole(true);
+    try {
+      await switchRole(otherRole);
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || 'Failed to switch role');
+    } finally {
+      setSwitchingRole(false);
+    }
+  };
+
   const joinYear = user?.createdAt ? new Date(user.createdAt).getFullYear() : null;
   const avatarSrc = useMemo(() => {
     if (!user?.avatar) return '';
@@ -161,261 +230,267 @@ const ProfilePage: React.FC = () => {
   }, [user?.avatar, user?.updatedAt]);
 
   return (
-    <div className="min-h-[calc(100vh-56px)] bg-white">
-
-      {/* ══════════════════════════════════════
-          HERO — full-width dark banner
-      ══════════════════════════════════════ */}
-      <div className="bg-[#0a0a0a]">
-        <div className="mx-auto max-w-7xl px-6 pt-16 pb-14 lg:px-8">
-
-          {/* eyebrow */}
-          <p className="text-[9px] font-bold uppercase tracking-[0.35em] text-white/20 mb-10">
-            Account &nbsp;/&nbsp; {user?.name}
-          </p>
-
-          <div className="flex flex-col gap-8 sm:flex-row sm:items-end sm:justify-between">
-
-            {/* Avatar + identity */}
+    <BulletinLayout title="Profile" subtitle="Account" section="09">
+      {/* Avatar + Identity Banner */}
+      <div className="border-b border-black bg-black">
+        <div className="mx-auto max-w-[1400px] px-6 py-10">
+          <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
             <div className="flex items-end gap-6">
               <div className="relative">
                 {user?.avatar ? (
-                  <img
-                    src={avatarSrc}
-                    alt={user.name}
-                    className="h-24 w-24 object-cover flex-shrink-0"
-                    onError={(e) => {
-                      (e.currentTarget as HTMLImageElement).style.display = 'none';
-                    }}
-                  />
+                  <div className="h-24 w-24 border border-white overflow-hidden">
+                    <img
+                      src={avatarSrc}
+                      alt={user.name}
+                      className="h-full w-full object-cover"
+                      onError={(e) => {
+                        (e.currentTarget as HTMLImageElement).style.display = 'none';
+                      }}
+                    />
+                  </div>
                 ) : (
                   <Initials name={user?.name} size="lg" />
                 )}
-                <label className="absolute -right-2 -bottom-2 cursor-pointer border border-earth-800 bg-white p-2 text-earth-800 hover:bg-earth-50">
+                <label className="absolute -right-2 -bottom-2 cursor-pointer border border-black bg-white p-2 hover:bg-[#f8f7f4]">
                   <Camera className="h-3.5 w-3.5" />
-                  <input
-                    type="file"
-                    accept="image/*"
-                    className="hidden"
-                    onChange={handleAvatarUpload}
-                    disabled={uploadingAvatar}
-                  />
+                  <input type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} disabled={uploadingAvatar} />
                 </label>
               </div>
 
               <div className="pb-0.5">
-                <h1 className="text-[clamp(2rem,4vw,3.5rem)] font-black uppercase tracking-[-0.03em] leading-none text-white">
-                  {user?.name}
-                </h1>
-                <p className="mt-2 text-sm text-white/35 tracking-wide">{user?.email}</p>
-
-                {/* meta pills */}
-                <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2">
+                <h1 className="text-3xl font-bold text-white">{user?.name}</h1>
+                <p className="mt-1 text-[12px] text-white/50">{user?.email}</p>
+                <div className="mt-3 flex flex-wrap items-center gap-3">
                   {(user?.storeName || user?.brandName) && (
-                    <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-white/70 border border-white/20 px-2.5 py-1">
+                    <span className="border border-white/30 px-2 py-0.5 text-[9px] font-bold uppercase text-white/70">
                       {user?.storeName || user?.brandName}
                     </span>
                   )}
-                  <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-white/30 border border-white/10 px-2.5 py-1">
+                  <span className="border border-white/20 px-2 py-0.5 text-[9px] font-bold uppercase text-white/40">
                     {user?.role}
                   </span>
                   {user?.isVerified ? (
-                    <span className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.16em] text-emerald-400">
+                    <span className="flex items-center gap-1 text-[9px] font-bold uppercase text-emerald-400">
                       <ShieldCheck className="h-3 w-3" />
                       Verified
                     </span>
                   ) : (
-                    <span className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.16em] text-white/25">
+                    <span className="flex items-center gap-1 text-[9px] font-bold uppercase text-white/30">
                       <ShieldOff className="h-3 w-3" />
                       Unverified
                     </span>
                   )}
                   {user?.location && (
-                    <span className="flex items-center gap-1.5 text-[10px] text-white/30 tracking-wide">
+                    <span className="flex items-center gap-1 text-[10px] text-white/30">
                       <MapPin className="h-3 w-3" />
                       {user.location}
                     </span>
                   )}
                   {joinYear && (
-                    <span className="flex items-center gap-1.5 text-[10px] text-white/25 tracking-wide">
+                    <span className="flex items-center gap-1 text-[10px] text-white/25">
                       <Calendar className="h-3 w-3" />
-                      Member since {joinYear}
+                      Since {joinYear}
                     </span>
                   )}
                 </div>
               </div>
             </div>
-
-            {/* Bio excerpt (desktop) */}
             {user?.bio && (
-              <p className="hidden lg:block max-w-xs text-sm text-white/30 italic leading-relaxed text-right">
+              <p className="hidden lg:block max-w-xs text-sm text-white/30 italic text-right">
                 "{user.bio}"
               </p>
             )}
           </div>
-        </div>
 
-        {/* tab strip — sits at bottom of hero */}
-        <div className="mx-auto max-w-7xl px-6 lg:px-8">
-          <div className="flex border-t border-white/[0.07]">
-            {(['profile', 'password'] as Tab[]).map((t) => (
-              <button
-                key={t}
-                onClick={() => setActiveTab(t)}
-                className={`px-6 py-4 text-[10px] font-bold uppercase tracking-[0.22em] border-t-2 -mt-px transition-colors ${
-                  activeTab === t
-                    ? 'border-white text-white'
-                    : 'border-transparent text-white/30 hover:text-white/60'
-                }`}
-              >
-                {t === 'profile' ? 'Edit Profile' : 'Password'}
-              </button>
-            ))}
+          {/* Tab strip */}
+          <div className="flex border-t border-white/[0.15] mt-8 items-center justify-between">
+            <div className="flex">
+              {(['profile', 'password'] as Tab[]).map((t) => (
+                <button
+                  key={t}
+                  onClick={() => setActiveTab(t)}
+                  className={`px-5 py-3 text-[10px] font-bold uppercase tracking-wider border-t-2 -mt-px transition-colors ${
+                    activeTab === t
+                      ? 'border-white text-white'
+                      : 'border-transparent text-white/30 hover:text-white/60'
+                  }`}
+                >
+                  {t === 'profile' ? 'Edit Profile' : 'Password'}
+                </button>
+              ))}
+            </div>
+
+            {/* Role switch button in header */}
+            <button
+              onClick={handleRoleSwitch}
+              disabled={switchingRole}
+              className="flex items-center gap-1.5 px-4 py-2 text-[9px] font-bold uppercase tracking-wider border border-white/30 text-white/60 hover:text-white hover:border-white/60 transition-all disabled:opacity-40"
+            >
+              <Repeat className={`h-3 w-3 ${switchingRole ? 'animate-spin' : ''}`} />
+              {switchingRole
+                ? 'Switching...'
+                : isSeller
+                  ? 'Switch to Buying'
+                  : 'Start Selling'}
+            </button>
           </div>
         </div>
       </div>
 
-      {/* ══════════════════════════════════════
-          BODY — sidebar + form split
-      ══════════════════════════════════════ */}
-      <div className="mx-auto max-w-7xl px-6 lg:px-8 py-14">
-        <div className="flex flex-col gap-12 lg:flex-row lg:gap-20">
-
-          {/* ── Left sidebar — identity summary ── */}
-          <aside className="lg:w-56 flex-shrink-0 space-y-8">
-
-            {/* compact avatar */}
+      <BulletinSection bgColor="bg-[#faf8f5]">
+        <div className="grid grid-cols-1 gap-10 lg:grid-cols-[200px_1fr] lg:gap-16">
+          {/* Left sidebar - compact info card */}
+          <aside className="space-y-4">
             <div className="flex items-center gap-3">
               {user?.avatar ? (
-                <img
-                  src={avatarSrc}
-                  alt={user.name}
-                  className="h-10 w-10 object-cover"
-                  onError={(e) => {
-                    (e.currentTarget as HTMLImageElement).style.display = 'none';
-                  }}
-                />
+                <div className="h-10 w-10 border border-black overflow-hidden">
+                  <img src={avatarSrc} alt="" className="h-full w-full object-cover"
+                    onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }} />
+                </div>
               ) : (
                 <Initials name={user?.name} size="sm" />
               )}
               <div>
-                <p className="text-xs font-bold text-earth-900 leading-tight">{user?.name}</p>
-                <p className="text-[10px] text-earth-400 capitalize">{user?.role}</p>
-                <label className="mt-2 inline-flex cursor-pointer items-center gap-1.5 border border-earth-200 px-2 py-1 text-[9px] font-bold uppercase tracking-[0.12em] text-earth-500 hover:border-earth-400 hover:text-earth-700">
-                  <Camera className="h-3 w-3" />
-                  {uploadingAvatar ? 'Uploading…' : 'Update photo'}
-                  <input
-                    type="file"
-                    accept="image/*"
-                    className="hidden"
-                    onChange={handleAvatarUpload}
-                    disabled={uploadingAvatar}
-                  />
-                </label>
+                <p className="text-[11px] font-bold">{user?.name}</p>
+                <p className="text-[10px] opacity-50 capitalize">{user?.role}</p>
               </div>
             </div>
 
-            <div className="h-px bg-earth-100" />
+            <div className="border-t border-black/20" />
 
-            {/* quick-info list */}
-            <ul className="space-y-4">
-              <li>
-                <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-earth-300 mb-0.5">Email</p>
-                <p className="text-xs text-earth-600 break-all">{user?.email}</p>
-              </li>
-              {user?.phone && (
-                <li>
-                  <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-earth-300 mb-0.5">Phone</p>
-                  <p className="text-xs text-earth-600 flex items-center gap-1">
-                    <Phone className="h-3 w-3 text-earth-300" />
-                    {user.phone}
-                  </p>
+            <ul className="space-y-3">
+              {[
+                { label: 'Email', value: user?.email },
+                { label: 'Phone', value: user?.phone, icon: <Phone className="h-3 w-3" /> },
+                { label: 'Student ID', value: user?.studentId },
+                { label: 'Program', value: user?.department },
+                { label: 'Residence Hall', value: user?.residenceHall },
+                { label: 'Level', value: user?.currentLevel },
+                { label: 'Location', value: user?.location, icon: <MapPin className="h-3 w-3" /> },
+                ...(joinYear ? [{ label: 'Member since', value: String(joinYear), icon: <Calendar className="h-3 w-3" /> }] : []),
+              ].filter((item) => item.value).map((item) => (
+                <li key={item.label}>
+                  <div className="text-[9px] font-bold uppercase tracking-wider opacity-40 mb-0.5">{item.label}</div>
+                  <div className="text-[11px] flex items-center gap-1 opacity-70">
+                    {item.icon && <span className="opacity-50">{item.icon}</span>}
+                    {item.value}
+                  </div>
                 </li>
-              )}
-              {user?.studentId && (
-                <li>
-                  <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-earth-300 mb-0.5">Student ID</p>
-                  <p className="text-xs text-earth-600">{user.studentId}</p>
-                </li>
-              )}
-              {user?.location && (
-                <li>
-                  <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-earth-300 mb-0.5">Location</p>
-                  <p className="text-xs text-earth-600 flex items-center gap-1">
-                    <MapPin className="h-3 w-3 text-earth-300" />
-                    {user.location}
-                  </p>
-                </li>
-              )}
-              {joinYear && (
-                <li>
-                  <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-earth-300 mb-0.5">Member since</p>
-                  <p className="text-xs text-earth-600">{joinYear}</p>
-                </li>
-              )}
+              ))}
             </ul>
+
+            <label className="mt-2 inline-flex cursor-pointer items-center gap-1 border border-black bg-white px-2 py-0.5 text-[8px] font-bold uppercase shadow-[1px_1px_0_0_rgba(0,0,0,1)] hover:shadow-[2px_2px_0_0_rgba(0,0,0,1)] transition-all">
+              <Camera className="h-3 w-3" />
+              {uploadingAvatar ? 'Uploading' : 'Update photo'}
+              <input type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} disabled={uploadingAvatar} />
+            </label>
 
             {user?.bio && (
               <>
-                <div className="h-px bg-earth-100" />
-                <p className="text-xs text-earth-500 italic leading-relaxed">"{user.bio}"</p>
+                <div className="border-t border-black/20" />
+                <p className="text-[11px] opacity-60 italic">"{user.bio}"</p>
               </>
             )}
+
+            {/* Verification CTA */}
+            {!user?.emailVerified && !user?.phoneVerified && (
+              <div className="border-t border-black/20 pt-4">
+                <Link
+                  to="/verification"
+                  className="w-full flex items-center gap-2 border border-black bg-yellow-100 px-3 py-2 text-[9px] font-bold uppercase shadow-[1px_1px_0_0_rgba(0,0,0,1)] hover:shadow-[2px_2px_0_0_rgba(0,0,0,1)] transition-all"
+                >
+                  <ShieldOff className="h-3 w-3" />
+                  Verify now — get trusted
+                </Link>
+              </div>
+            )}
+            {user?.isVerified && (
+              <div className="border-t border-black/20 pt-4">
+                <Link
+                  to="/verification"
+                  className="w-full flex items-center gap-2 border border-emerald-400 bg-emerald-50 px-3 py-2 text-[9px] font-bold uppercase shadow-[1px_1px_0_0_rgba(0,0,0,1)] hover:shadow-[2px_2px_0_0_rgba(0,0,0,1)] transition-all"
+                >
+                  <ShieldCheck className="h-3 w-3" />
+                  Verified · Add more
+                </Link>
+              </div>
+            )}
+
+            {/* Role switch in sidebar */}
+            <div className="border-t border-black/20 pt-4">
+              <button
+                onClick={handleRoleSwitch}
+                disabled={switchingRole}
+                className="w-full border border-black bg-white px-3 py-2 text-[9px] font-bold uppercase shadow-[1px_1px_0_0_rgba(0,0,0,1)] hover:shadow-[2px_2px_0_0_rgba(0,0,0,1)] transition-all disabled:opacity-40 flex items-center justify-center gap-1.5"
+              >
+                <Repeat className={`h-3 w-3 ${switchingRole ? 'animate-spin' : ''}`} />
+                {switchingRole
+                  ? 'Switching...'
+                  : isSeller
+                    ? 'Switch to Buying'
+                    : 'Start Selling'}
+              </button>
+            </div>
           </aside>
 
-          {/* ── Right: form panel ── */}
-          <div className="flex-1 min-w-0">
-
-            {/* ══ Profile form ══ */}
+          {/* Right: form panel */}
+          <div className="min-w-0">
             {activeTab === 'profile' && (
               <form onSubmit={hsp(onUpdateProfile)}>
-
-                {/* section heading */}
-                <div className="mb-10">
-                  <p className="text-[9px] font-bold uppercase tracking-[0.28em] text-earth-400">Edit profile</p>
-                  <h2 className="mt-1 text-2xl font-black uppercase tracking-tight text-earth-900">
-                    Your information
-                  </h2>
-                  <div className="mt-3 h-px bg-earth-200" />
+                <div className="mb-8">
+                  <div className="text-[10px] uppercase tracking-wider opacity-60">Edit profile</div>
+                  <h2 className="mt-1 text-lg font-bold">Your information</h2>
+                  <div className="mt-3 border-t border-black" />
                 </div>
 
-                {/* two-col grid: name + phone */}
-                <div className="grid grid-cols-1 gap-10 sm:grid-cols-2 mb-10">
+                <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 mb-6">
                   <div>
                     <label className={labelBase}>Full name</label>
                     <input type="text" className={fieldBase} {...rp('name')} />
                     {pe.name && <p className={errorBase}>{pe.name.message}</p>}
                   </div>
-                  <div>
-                    <label className={labelBase}>Store name</label>
-                    <input type="text" className={fieldBase} placeholder="e.g. Campus Gadget Hub" {...rp('storeName')} />
-                    {pe.storeName && <p className={errorBase}>{pe.storeName.message}</p>}
-                  </div>
+                  {/* Only sellers see store/brand fields */}
+                  {isSeller && (
+                    <div>
+                      <label className={labelBase}>Store name</label>
+                      <input type="text" className={fieldBase} placeholder="e.g. Campus Gadget Hub" {...rp('storeName')} />
+                      {pe.storeName && <p className={errorBase}>{pe.storeName.message}</p>}
+                    </div>
+                  )}
                 </div>
 
-                <div className="grid grid-cols-1 gap-10 sm:grid-cols-2 mb-10">
-                  <div>
-                    <label className={labelBase}>Brand name</label>
-                    <input type="text" className={fieldBase} placeholder="e.g. Kofi Tech" {...rp('brandName')} />
-                    {pe.brandName && <p className={errorBase}>{pe.brandName.message}</p>}
+                {isSeller && (
+                  <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 mb-6">
+                    <div>
+                      <label className={labelBase}>Brand name</label>
+                      <input type="text" className={fieldBase} placeholder="e.g. Kofi Tech" {...rp('brandName')} />
+                      {pe.brandName && <p className={errorBase}>{pe.brandName.message}</p>}
+                    </div>
+                    <div>
+                      <label className={labelBase}>Phone</label>
+                      <input type="tel" className={fieldBase} {...rp('phone')} />
+                      {pe.phone && <p className={errorBase}>{pe.phone.message}</p>}
+                    </div>
                   </div>
-                  <div>
-                    <label className={labelBase}>Phone</label>
-                    <input type="tel" className={fieldBase} {...rp('phone')} />
-                    {pe.phone && <p className={errorBase}>{pe.phone.message}</p>}
-                  </div>
-                </div>
+                )}
 
-                {/* email — read only */}
-                <div className="mb-10">
-                  <label className="block text-[9px] font-bold uppercase tracking-[0.22em] text-earth-300 mb-1">
-                    Email&ensp;<span className="normal-case tracking-normal font-normal opacity-60">— cannot be changed</span>
-                  </label>
+                {!isSeller && (
+                  <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 mb-6">
+                    <div>
+                      <label className={labelBase}>Phone</label>
+                      <input type="tel" className={fieldBase} {...rp('phone')} />
+                      {pe.phone && <p className={errorBase}>{pe.phone.message}</p>}
+                    </div>
+                    <div />
+                  </div>
+                )}
+
+                <div className="mb-6">
+                  <label className={`${labelBase} opacity-40`}>Email <span className="normal-case font-normal">— cannot be changed</span></label>
                   <input type="email" value={user?.email || ''} disabled className={fieldDisabled} />
                 </div>
 
-                {/* two-col: student ID + location */}
-                <div className="grid grid-cols-1 gap-10 sm:grid-cols-2 mb-10">
+                <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 mb-6">
                   <div>
                     <label className={labelBase}>Student ID</label>
                     <input type="text" placeholder="STU-XXXX" className={fieldBase} {...rp('studentId')} />
@@ -426,14 +501,35 @@ const ProfilePage: React.FC = () => {
                   </div>
                 </div>
 
-                {/* bio — full width */}
-                <div className="mb-12">
-                  <label className={labelBase}>
-                    Bio&ensp;<span className="normal-case tracking-normal font-normal opacity-60">— optional, max 500 chars</span>
-                  </label>
+                {/* Campus fields */}
+                <div className="border-t border-black/20 pt-6 mb-6">
+                  <div className="text-[10px] uppercase tracking-wider opacity-60 mb-4">Campus Information</div>
+                  <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                    <div>
+                      <label className={labelBase}>Program of Study</label>
+                      <input type="text" placeholder="e.g. Geological Engineering" className={fieldBase} {...rp('department')} />
+                    </div>
+                    <div>
+                      <label className={labelBase}>Residence Hall</label>
+                      <input type="text" placeholder="e.g. Jubilee Hall" className={fieldBase} {...rp('residenceHall')} />
+                    </div>
+                    <div>
+                      <label className={labelBase}>Academic Level</label>
+                      <select className={selectBase} {...rp('currentLevel')}>
+                        <option value="">Not specified</option>
+                        {ACADEMIC_LEVELS.map((l) => (
+                          <option key={l} value={l}>{l}</option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mb-8">
+                  <label className={labelBase}>Bio <span className="normal-case font-normal opacity-60">— optional, max 500 chars</span></label>
                   <textarea
                     rows={3}
-                    placeholder="Tell others a bit about yourself…"
+                    placeholder="Tell others a bit about yourself..."
                     className={`${fieldBase} resize-none`}
                     maxLength={500}
                     {...rp('bio')}
@@ -441,54 +537,36 @@ const ProfilePage: React.FC = () => {
                   {pe.bio && <p className={errorBase}>{pe.bio.message}</p>}
                 </div>
 
-                {/* submit */}
-                <div className="flex items-center justify-between border-t border-earth-100 pt-8">
-                  <p className="text-[10px] text-earth-300 uppercase tracking-[0.15em]">
-                    Changes are saved immediately
-                  </p>
+                <div className="flex items-center justify-between border-t border-black pt-6">
+                  <div className="text-[10px] uppercase tracking-wider opacity-40">Changes saved immediately</div>
                   <button
                     type="submit"
                     disabled={isUpdating}
-                    className="flex items-center gap-2.5 bg-earth-900 text-white px-8 py-3.5 text-[10px] font-bold uppercase tracking-[0.2em] hover:bg-earth-700 disabled:opacity-40 transition-colors"
+                    className="border border-black bg-black px-6 py-2 text-[10px] font-bold uppercase text-white shadow-[2px_2px_0_0_rgba(0,0,0,1)] hover:bg-white hover:text-black transition-colors disabled:opacity-40"
                   >
                     {isUpdating ? (
-                      <>
-                        <span className="h-3.5 w-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                        Saving
-                      </>
+                      <><span className="h-3.5 w-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin inline-block mr-1" /> Saving</>
                     ) : (
-                      <>
-                        <Check className="h-3.5 w-3.5" />
-                        Save changes
-                      </>
+                      <><Check className="inline-block h-3.5 w-3.5 mr-1" /> Save changes</>
                     )}
                   </button>
                 </div>
-
               </form>
             )}
 
-            {/* ══ Password form ══ */}
             {activeTab === 'password' && (
               <form onSubmit={hspw(onChangePassword)}>
-
-                {/* section heading */}
-                <div className="mb-10">
-                  <p className="text-[9px] font-bold uppercase tracking-[0.28em] text-earth-400">Security</p>
-                  <h2 className="mt-1 text-2xl font-black uppercase tracking-tight text-earth-900">
-                    Change password
-                  </h2>
-                  <div className="mt-3 h-px bg-earth-200" />
+                <div className="mb-8">
+                  <div className="text-[10px] uppercase tracking-wider opacity-60">Security</div>
+                  <h2 className="mt-1 text-lg font-bold">Change password</h2>
+                  <div className="mt-3 border-t border-black" />
                 </div>
 
-                {/* hint */}
-                <p className="mb-10 text-sm text-earth-500 leading-relaxed max-w-md">
-                  Choose a strong password of at least 6 characters. You'll remain signed in on this device after changing it.
+                <p className="mb-6 text-[12px] opacity-70 max-w-md">
+                  Choose a strong password of at least 6 characters.
                 </p>
 
-                {/* fields — stacked with generous spacing */}
-                <div className="space-y-10 max-w-md">
-
+                <div className="space-y-6 max-w-md">
                   <div>
                     <label className={labelBase}>Current password</label>
                     <div className="relative flex items-center">
@@ -498,18 +576,14 @@ const ProfilePage: React.FC = () => {
                         className={`flex-1 pr-10 ${fieldBase}`}
                         {...rpw('currentPassword')}
                       />
-                      <button
-                        type="button"
-                        onClick={() => setShowCurrent((p) => !p)}
-                        className="absolute right-0 text-earth-300 hover:text-earth-700 transition-colors"
-                      >
+                      <button type="button" onClick={() => setShowCurrent((p) => !p)} className="absolute right-2 text-black/40 hover:text-black">
                         {showCurrent ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                       </button>
                     </div>
                     {pwe.currentPassword && <p className={errorBase}>{pwe.currentPassword.message}</p>}
                   </div>
 
-                  <div className="h-px bg-earth-100" />
+                  <div className="border-t border-black/20" />
 
                   <div>
                     <label className={labelBase}>New password</label>
@@ -520,11 +594,7 @@ const ProfilePage: React.FC = () => {
                         className={`flex-1 pr-10 ${fieldBase}`}
                         {...rpw('newPassword')}
                       />
-                      <button
-                        type="button"
-                        onClick={() => setShowNew((p) => !p)}
-                        className="absolute right-0 text-earth-300 hover:text-earth-700 transition-colors"
-                      >
+                      <button type="button" onClick={() => setShowNew((p) => !p)} className="absolute right-2 text-black/40 hover:text-black">
                         {showNew ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                       </button>
                     </div>
@@ -540,51 +610,34 @@ const ProfilePage: React.FC = () => {
                         className={`flex-1 pr-10 ${fieldBase}`}
                         {...rpw('confirmNewPassword')}
                       />
-                      <button
-                        type="button"
-                        onClick={() => setShowConfirm((p) => !p)}
-                        className="absolute right-0 text-earth-300 hover:text-earth-700 transition-colors"
-                      >
+                      <button type="button" onClick={() => setShowConfirm((p) => !p)} className="absolute right-2 text-black/40 hover:text-black">
                         {showConfirm ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                       </button>
                     </div>
                     {pwe.confirmNewPassword && <p className={errorBase}>{pwe.confirmNewPassword.message}</p>}
                   </div>
-
                 </div>
 
-                {/* submit */}
-                <div className="flex items-center justify-between border-t border-earth-100 pt-8 mt-12 max-w-md">
-                  <p className="text-[10px] text-earth-300 uppercase tracking-[0.15em]">
-                    Irreversible action
-                  </p>
+                <div className="flex items-center justify-between border-t border-black pt-6 mt-8 max-w-md">
+                  <div className="text-[10px] uppercase tracking-wider opacity-40">Irreversible action</div>
                   <button
                     type="submit"
                     disabled={isChangingPassword}
-                    className="flex items-center gap-2.5 bg-earth-900 text-white px-8 py-3.5 text-[10px] font-bold uppercase tracking-[0.2em] hover:bg-earth-700 disabled:opacity-40 transition-colors"
+                    className="border border-black bg-black px-6 py-2 text-[10px] font-bold uppercase text-white shadow-[2px_2px_0_0_rgba(0,0,0,1)] hover:bg-white hover:text-black transition-colors disabled:opacity-40"
                   >
                     {isChangingPassword ? (
-                      <>
-                        <span className="h-3.5 w-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                        Updating
-                      </>
+                      <><span className="h-3.5 w-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin inline-block mr-1" /> Updating</>
                     ) : (
-                      <>
-                        <ArrowRight className="h-3.5 w-3.5" />
-                        Update password
-                      </>
+                      <><ArrowRight className="inline-block h-3.5 w-3.5 mr-1" /> Update password</>
                     )}
                   </button>
                 </div>
-
               </form>
             )}
-
           </div>
         </div>
-      </div>
-
-    </div>
+      </BulletinSection>
+    </BulletinLayout>
   );
 };
 

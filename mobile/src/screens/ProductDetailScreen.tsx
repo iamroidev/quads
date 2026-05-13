@@ -1,6 +1,8 @@
-import React, { useEffect, useMemo, useState } from 'react';
-import { ActivityIndicator, FlatList, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { ActivityIndicator, FlatList, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View, Dimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+
+const { width: SCREEN_W } = Dimensions.get('window');
 import productService from '../services/product.service';
 import savedService from '../services/saved.service';
 import chatService from '../services/chat.service';
@@ -19,6 +21,8 @@ const ProductDetailScreen = ({ route, navigation }: any) => {
   const [isSaved, setIsSaved] = useState(false);
   const [saving, setSaving] = useState(false);
   const [startingChat, setStartingChat] = useState(false);
+  const [activeImageIdx, setActiveImageIdx] = useState(0);
+  const imageScrollRef = useRef<ScrollView>(null);
 
   useEffect(() => {
     const fetchAll = async () => {
@@ -98,10 +102,46 @@ const ProductDetailScreen = ({ route, navigation }: any) => {
 
   const dealLabel = priceInsights?.dealLabel === 'great_deal' ? 'Great deal' : priceInsights?.dealLabel === 'premium' ? 'Premium' : 'Fair price';
 
+  const images = product.images?.length ? product.images : [{ url: 'https://placehold.co/900x560/e2e8f0/64748b?text=Product' }];
+
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       <ScrollView>
-        <Image source={{ uri: product.images?.[0]?.url || 'https://placehold.co/900x560/e2e8f0/64748b?text=Product' }} style={styles.heroImage} />
+        {/* Image gallery */}
+        <View>
+          <ScrollView
+            ref={imageScrollRef}
+            horizontal
+            pagingEnabled
+            showsHorizontalScrollIndicator={false}
+            onMomentumScrollEnd={(e) => {
+              const idx = Math.round(e.nativeEvent.contentOffset.x / SCREEN_W);
+              setActiveImageIdx(idx);
+            }}
+          >
+            {images.map((img, i) => (
+              <Image
+                key={i}
+                source={{ uri: img.url }}
+                style={[styles.heroImage, { width: SCREEN_W }]}
+              />
+            ))}
+          </ScrollView>
+          {images.length > 1 && (
+            <View style={styles.imageDots}>
+              {images.map((_, i) => (
+                <TouchableOpacity
+                  key={i}
+                  style={[styles.imageDot, i === activeImageIdx && styles.imageDotActive]}
+                  onPress={() => {
+                    imageScrollRef.current?.scrollTo({ x: i * SCREEN_W, animated: true });
+                    setActiveImageIdx(i);
+                  }}
+                />
+              ))}
+            </View>
+          )}
+        </View>
 
         <View style={styles.sheet}>
           <Text style={styles.category}>{product.category?.name || 'General'}</Text>
@@ -137,11 +177,20 @@ const ProductDetailScreen = ({ route, navigation }: any) => {
 
           {user && user._id !== product.seller?._id ? (
             <View style={styles.actionRow}>
-              <TouchableOpacity style={[styles.primaryAction, startingChat && { opacity: 0.7 }]} onPress={handleMessageSeller}>
-                <Text style={styles.primaryActionText}>{startingChat ? 'Opening...' : 'Contact Seller'}</Text>
+              <TouchableOpacity
+                style={[styles.primaryAction, { flex: 1 }]}
+                onPress={() => navigation.navigate('Checkout', { product })}
+              >
+                <Text style={styles.primaryActionText}>Buy Now</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.primaryAction, { backgroundColor: colors.surface, borderColor: colors.border }, startingChat && { opacity: 0.7 }]}
+                onPress={handleMessageSeller}
+              >
+                <Text style={[styles.primaryActionText, { color: colors.text }]}>{startingChat ? '...' : 'Chat'}</Text>
               </TouchableOpacity>
               <TouchableOpacity style={[styles.secondaryAction, saving && { opacity: 0.7 }]} onPress={handleToggleSaved}>
-                <Text style={styles.secondaryActionText}>{isSaved ? 'Saved' : 'Save'}</Text>
+                <Text style={styles.secondaryActionText}>{isSaved ? '♥' : '♡'}</Text>
               </TouchableOpacity>
             </View>
           ) : null}
@@ -174,7 +223,10 @@ const ProductDetailScreen = ({ route, navigation }: any) => {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.bg },
   centered: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: colors.bg },
-  heroImage: { width: '100%', height: 280, backgroundColor: '#e5e7eb' },
+  heroImage: { width: SCREEN_W, height: 280, backgroundColor: '#e5e7eb' },
+  imageDots: { flexDirection: 'row', justifyContent: 'center', gap: 6, position: 'absolute', bottom: 10, left: 0, right: 0 },
+  imageDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: 'rgba(255,255,255,0.5)', borderWidth: 1, borderColor: 'rgba(0,0,0,0.2)' },
+  imageDotActive: { backgroundColor: '#fff', width: 16 },
   sheet: { backgroundColor: '#fffdf8', borderTopWidth: 1, borderTopColor: colors.border, padding: 16 },
   category: { fontSize: 10, color: '#7b6f61', fontWeight: '800', textTransform: 'uppercase', letterSpacing: 1.2 },
   title: { marginTop: 8, fontSize: 24, fontWeight: '900', color: '#1f1a14', textTransform: 'uppercase', lineHeight: 30 },
