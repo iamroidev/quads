@@ -72,7 +72,11 @@ const ContactPage: React.FC = () => {
                 <div className="font-black text-[12px] text-[var(--bulletin-text)]">Tovet Hostel</div>
               </div>
 
-              <div className="border-4 border-[var(--bulletin-border)] bg-[#e0f2f7] dark:bg-sky-900/40 p-6 shadow-[8px_8px_0_0_var(--bulletin-shadow)]" style={{ transform: 'rotate(-0.5deg)' }}>
+              <div 
+                onClick={() => (window as any).toggleLiveChat?.()}
+                className="border-4 border-[var(--bulletin-border)] bg-[#e0f2f7] dark:bg-sky-900/40 p-6 shadow-[8px_8px_0_0_var(--bulletin-shadow)] cursor-pointer hover:-translate-y-1 transition-transform" 
+                style={{ transform: 'rotate(-0.5deg)' }}
+              >
                 <MessageSquare className="h-8 w-8 mb-4 opacity-40 text-black dark:text-sky-200" />
                 <div className="text-[10px] font-black uppercase tracking-widest opacity-40 mb-2 text-black dark:text-sky-200">Live Chat</div>
                 <div className="font-black text-[12px] text-sky-700 dark:text-sky-300">Active Now</div>
