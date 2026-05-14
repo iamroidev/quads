@@ -19,11 +19,14 @@ import { startPayoutScheduler } from './services/payoutScheduler';
 const app = express();
 const httpServer = createServer(app);
 
+// Trust proxy for Cloudflare/Nginx
+app.set('trust proxy', 1);
+
 // Socket.io setup
 const io = new SocketServer(httpServer, {
   cors: {
     origin: env.NODE_ENV === 'production'
-      ? [env.CLIENT_URL]
+      ? [env.CLIENT_URL, 'https://quadsmarket.tech', 'https://www.quadsmarket.tech']
       : [env.CLIENT_URL, 'http://localhost:5173', 'http://localhost:19006'],
     credentials: true,
   },
@@ -48,7 +51,7 @@ app.use(
 
 // CORS
 const allowedOrigins = env.NODE_ENV === 'production'
-  ? [env.CLIENT_URL]
+  ? [env.CLIENT_URL, 'https://quadsmarket.tech', 'https://www.quadsmarket.tech']
   : [env.CLIENT_URL, 'http://localhost:5173', 'http://localhost:19006'];
 
 app.use(

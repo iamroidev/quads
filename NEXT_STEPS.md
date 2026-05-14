@@ -16,13 +16,15 @@
 - **PM2 Process**: `quads-api`
 
 ## 🚀 Action Items for User
-1. **Redeploy Web App**: 
-   - Update Vercel environment variables to use `VITE_API_URL=https://api.quadsmarket.tech/api`.
+1. **Supabase Fix (URGENT)**:
+   - Add `VITE_SUPABASE_URL` and `VITE_SUPABASE_KEY` to **Vercel Settings** -> Environment Variables.
+   - **Redeploy** on Vercel after adding them.
+2. **Cloudflare Settings**:
+   - Set **SSL/TLS** to **"Full (Strict)"**.
+   - Enable **"Always Use HTTPS"**.
+3. **Redeploy Web App**: 
+   - Ensure `VITE_API_URL=https://api.quadsmarket.tech/api` is also set in Vercel.
    - Trigger a new deployment.
-2. **Update Paystack Webhook**:
-   - URL: `https://api.quadsmarket.tech/api/payments/webhook`
-3. **Frontend Domain (Optional)**:
-   - If you want the frontend at `https://quadsmarket.tech`, point the A record for the apex domain (`@`) to Vercel's IP: `76.76.21.21`.
 
 ## 🛠️ Maintenance Commands
 - **Check Logs**: `pm2 logs quads-api`
