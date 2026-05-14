@@ -1,54 +1,52 @@
-# QUADS (Private)
+# QUADS Marketplace 🚀
 
-QUADS is a premium, high-fidelity campus commerce platform designed for student buying, selling, trust-based operations, and administrative oversight. 
+**QUADS** is a premium, high-fidelity campus commerce platform designed for student buying, selling, trust-based operations, and administrative oversight. 
 
-## Product Identity: "Bulletin Board"
-The platform utilizes a unique **Bulletin Board Design System**, inspired by physical campus notice boards. It avoids generic SaaS "slop" (gradients, rounded corners, glassmorphism) in favor of:
-- Rigid black borders and hard-offset shadows.
-- Polaroid-style product framing with rotation.
-- Monospace technical typography.
-- Fragmented, paper-on-board layout metaphors.
+[![Site Status](https://img.shields.io/website?url=https%3A%2F%2Fquadsmarket.tech)](https://quadsmarket.tech)
+[![Production Backend](https://img.shields.io/badge/backend-AWS%20EC2-orange)](https://api.quadsmarket.tech)
+[![Frontend](https://img.shields.io/badge/frontend-Vercel-black)](https://quadsmarket.tech)
 
-## Core Capabilities
+## 🎨 Product Identity: "Bulletin Board"
+The platform utilizes a unique **Bulletin Board Design System**, inspired by physical campus notice boards. It avoids generic SaaS "slop" in favor of:
+- **Rigid Aesthetics**: Sharp borders and hard-offset shadows.
+- **Paper Metaphor**: Polaroid-style product framing with interactive rotation.
+- **Premium Typography**: Monospace and technical font pairings.
 
-- **Marketplace Intelligence**:
-  - Real-time price insights and smart pricing assistance.
-  - Social proof surfaces (Sold feeds, Trending drops).
-- **Growth Tooling**:
-  - Campaign scheduling and featured listing boosts.
-  - Native coupon and bundle creation for sellers.
-  - Advanced CSV bulk import with visual preview.
-- **Trust & Safety**:
-  - Institutional verification flow.
-  - Secure dispute mediation center.
-  - Profile completion gates for high-trust actions.
-- **Messaging Subsystem**:
-  - Real-time socket-based chat with typing indicators.
-  - Integrated offer objects and transaction metadata.
+## 🚀 Deployment Status (Production)
+The platform is fully deployed and operational across the following stack:
+- **Frontend**: [quadsmarket.tech](https://quadsmarket.tech) (Hosted on **Vercel** with **Cloudflare Proxy**).
+- **Backend**: [api.quadsmarket.tech](https://api.quadsmarket.tech) (Hosted on **AWS EC2** using **PM2** and **Let's Encrypt**).
+- **Database**: **MongoDB Atlas** (Managed Cloud Cluster).
+- **Identity**: **Supabase Auth** (Secure Student Verification).
 
-## System Architecture
+## 🛠️ Core Capabilities
+- **Marketplace Intelligence**: Real-time price insights, smart pricing assistance, and social proof feeds.
+- **Growth Tooling**: Campaign scheduling, featured listing boosts, and native coupon/bundle creation.
+- **Trust & Safety**: Institutional verification flow, secure dispute mediation, and profile completion gates.
+- **Real-time Messaging**: Socket-based chat with typing indicators and integrated transaction metadata.
 
-- `web/` — React + Vite (Hardened Bulletin System)
-- `server/` — Express + TypeScript (Mongoose/Supabase/Socket.io)
-- `mobile/` — Expo React Native (Rebranded QUADS app)
+## 📂 Project Structure
+- `web/` — React + Vite (The Hardened Bulletin UI).
+- `server/` — Express + TypeScript (Mongoose/Supabase/Socket.io).
+- `mobile/` — Expo React Native (The Rebranded QUADS App).
 
-## Administrative Access
+## 💻 Technical Setup
 
-Admins have access to the **Command Center** at `/admin`. 
-
-### Initializing Demo Admin
-To seed a test administrator (`admin@quads.app` / `password123`), run:
+### Backend (Server)
 ```bash
 cd server
-npm run seed:admin
+npm install
+npm run build
+# Start in production
+npx pm2 start dist/app.js --name quads-api
 ```
 
-### Promoting Existing Users
-To promote a specific user to the `admin` role via CLI:
+### Frontend (Web)
 ```bash
-cd server
-npx ts-node src/scripts/make-admin.ts <email>
+cd web
+npm install
+npm run dev
 ```
 
 ---
-*This repository is maintained for private product development.*
+*Developed and maintained by **iamroidev** for the university community.*
