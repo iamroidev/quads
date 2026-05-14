@@ -143,6 +143,7 @@ const RegisterPage: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [step, setStep] = useState<Step>(1);
   const [roleShake, setRoleShake] = useState(false);
+  const [protocolAccepted, setProtocolAccepted] = useState(false);
 
   const isGoogleFlow = searchParams.get('google') === '1';
 
@@ -243,6 +244,10 @@ const RegisterPage: React.FC = () => {
   };
 
   const handleLockedGoogleTap = () => {
+    if (!protocolAccepted) {
+      toast.error('Please accept the Session Protocol first.');
+      return;
+    }
     if (isRoleChosen) return;
     window.requestAnimationFrame(() => setRoleShake(true));
     setTimeout(() => setRoleShake(false), 360);
@@ -366,7 +371,30 @@ const RegisterPage: React.FC = () => {
                 </div>
                 <input type="hidden" {...register('role')} />
 
-                <button type="button" onClick={goNext} disabled={!isRoleChosen}
+                <div className="mb-8 p-5 border-2 border-dashed border-[var(--bulletin-border)] bg-[var(--bulletin-bg)] relative">
+                  <div className="absolute -top-3 left-4 bg-red-500 text-white text-[9px] font-black px-2 py-0.5 shadow-[2px_2px_0_0_rgba(0,0,0,1)]">
+                    SESSION PROTOCOL
+                  </div>
+                  <div className="flex items-start gap-4">
+                    <label className="relative flex h-8 w-8 cursor-pointer items-center justify-center border-2 border-black bg-white shadow-[3px_3px_0_0_var(--bulletin-shadow)] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-none transition-all">
+                      <input
+                        type="checkbox"
+                        className="peer sr-only"
+                        checked={protocolAccepted}
+                        onChange={(e) => setProtocolAccepted(e.target.checked)}
+                        required
+                      />
+                      <Pin className="h-4 w-4 text-gray-300 peer-checked:text-red-600 peer-checked:rotate-45 transition-all" />
+                    </label>
+                    <div className="flex-1">
+                      <p className="text-[10px] font-black uppercase tracking-tight text-[var(--bulletin-text)] leading-tight">
+                        I acknowledge the <Link to="/terms" className="underline decoration-2 underline-offset-2">Honor Code</Link> & <Link to="/terms#privacy" className="underline decoration-2 underline-offset-2">Safety Protocols</Link> for this session.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <button type="button" onClick={goNext} disabled={!isRoleChosen || !protocolAccepted}
                   className="w-full border-4 border-[var(--bulletin-border)] bg-[var(--bulletin-text)] px-8 py-5 text-[14px] font-black uppercase tracking-widest text-[var(--bulletin-bg)] shadow-[8px_8px_0_0_var(--bulletin-shadow)] hover:-translate-y-1 hover:shadow-[4px_4px_0_0_var(--bulletin-shadow)] disabled:opacity-40 disabled:hover:translate-y-0 disabled:hover:shadow-[8px_8px_0_0_var(--bulletin-shadow)] transition-all">
                   Continue <ArrowRight className="inline-block h-4 w-4 ml-2" />
                 </button>
@@ -381,8 +409,8 @@ const RegisterPage: React.FC = () => {
 
                     <div className="flex justify-center">
                       <div onClick={handleLockedGoogleTap} role="button" tabIndex={0}
-                        onKeyDown={(e) => { if ((e.key === 'Enter' || e.key === ' ') && !isRoleChosen) { e.preventDefault(); handleLockedGoogleTap(); } }}>
-                        <div className={`${!isRoleChosen ? 'pointer-events-none opacity-45 grayscale' : ''} flex justify-center`}>
+                        onKeyDown={(e) => { if ((e.key === 'Enter' || e.key === ' ') && (!isRoleChosen || !protocolAccepted)) { e.preventDefault(); handleLockedGoogleTap(); } }}>
+                        <div className={`${(!isRoleChosen || !protocolAccepted) ? 'pointer-events-none opacity-45 grayscale' : ''} flex justify-center`}>
                           <div className="border-4 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] shadow-[6px_6px_0_0_var(--bulletin-shadow)] hover:-translate-y-1 hover:shadow-[8px_8px_0_0_var(--bulletin-shadow)] transition-all overflow-hidden" style={{ transform: 'rotate(0.5deg)' }}>
                             <GoogleLogin onSuccess={handleGoogleSuccess} onError={() => toast.error('Google sign-up failed.')} useOneTap={false} shape="rectangular" theme="outline" size="large" text="continue_with" />
                           </div>

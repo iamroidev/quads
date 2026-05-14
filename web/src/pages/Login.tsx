@@ -68,6 +68,7 @@ const LoginPage: React.FC = () => {
   const location = useLocation();
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [protocolAccepted, setProtocolAccepted] = useState(false);
 
   const from = (location.state as any)?.from?.pathname || '/';
 
@@ -250,6 +251,8 @@ const LoginPage: React.FC = () => {
                       <input
                         type="checkbox"
                         className="peer sr-only"
+                        checked={protocolAccepted}
+                        onChange={(e) => setProtocolAccepted(e.target.checked)}
                         required
                       />
                       <Pin className="h-4 w-4 text-gray-300 peer-checked:text-red-600 peer-checked:rotate-45 transition-all" />
@@ -262,7 +265,7 @@ const LoginPage: React.FC = () => {
                   </div>
                 </div>
               </div>
-              <button type="submit" disabled={isSubmitting}
+              <button type="submit" disabled={isSubmitting || !protocolAccepted}
                 className="w-full border-4 border-[var(--bulletin-border)] bg-[var(--bulletin-text)] px-8 py-5 text-[14px] font-black uppercase tracking-widest text-[var(--bulletin-bg)] shadow-[8px_8px_0_0_var(--bulletin-shadow)] hover:translate-y-1 hover:shadow-[4px_4px_0_0_var(--bulletin-shadow)] disabled:opacity-40 transition-all">
                 {isSubmitting ? 'Authenticating...' : 'Sign In'}
               </button>
@@ -275,15 +278,25 @@ const LoginPage: React.FC = () => {
             </div>
 
             <div className="flex justify-center mb-12">
-              <div className="border-4 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] shadow-[6px_6px_0_0_var(--bulletin-shadow)] hover:-translate-y-1 hover:shadow-[10px_10px_0_0_var(--bulletin-shadow)] transition-all overflow-hidden" style={{ transform: 'rotate(-0.5deg)' }}>
-                <GoogleLogin
-                  onSuccess={handleGoogleSuccess}
-                  onError={() => toast.error('Google sign-in could not start.')}
-                  useOneTap={false}
-                  shape="rectangular"
-                  theme="outline"
-                  size="large"
-                />
+              <div 
+                className={`border-4 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] shadow-[6px_6px_0_0_var(--bulletin-shadow)] transition-all overflow-hidden ${!protocolAccepted ? 'opacity-40 grayscale cursor-not-allowed' : 'hover:-translate-y-1 hover:shadow-[10px_10px_0_0_var(--bulletin-shadow)]'}`} 
+                style={{ transform: 'rotate(-0.5deg)' }}
+                onClick={() => {
+                  if (!protocolAccepted) {
+                    toast.error('Please accept the Session Protocol first.');
+                  }
+                }}
+              >
+                <div className={!protocolAccepted ? 'pointer-events-none' : ''}>
+                  <GoogleLogin
+                    onSuccess={handleGoogleSuccess}
+                    onError={() => toast.error('Google sign-in could not start.')}
+                    useOneTap={false}
+                    shape="rectangular"
+                    theme="outline"
+                    size="large"
+                  />
+                </div>
               </div>
             </div>
 
