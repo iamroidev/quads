@@ -9,7 +9,7 @@ BRANCH="bulleting"
 EC2_USER="ec2-user"
 EC2_IP="54.167.221.2" # Your actual AWS IP from NEXT_STEPS.md
 PEM_KEY="quads-key.pem"
-REMOTE_PATH="/home/ec2-user/campusmarketplace" # Path on server
+REMOTE_PATH="/home/ec2-user/quads" # Corrected path on server
 
 echo "🚀 Starting Integrated Deployment for QUADS..."
 
@@ -27,7 +27,12 @@ echo "✅ GitHub Push Complete. Vercel is now rebuilding the frontend."
 echo "🌐 Step 2: Synchronizing AWS EC2 Backend..."
 
 ssh -i "$PEM_KEY" -o StrictHostKeyChecking=no "$EC2_USER@$EC2_IP" << EOF
-  echo "📡 Connected to EC2. Updating code..."
+  # Load NVM and use Node 16
+  export NVM_DIR="\$HOME/.nvm"
+  [ -s "\$NVM_DIR/nvm.sh" ] && \. "\$NVM_DIR/nvm.sh"
+  nvm use 16
+  
+  echo "📡 Connected to EC2. Updating code in $REMOTE_PATH..."
   cd $REMOTE_PATH
   
   # Fetch latest code

@@ -5,7 +5,7 @@ $Branch = "bulleting"
 $Ec2User = "ec2-user"
 $Ec2Ip = "54.167.221.2"
 $PemKey = "quads-key.pem"
-$RemotePath = "/home/ec2-user/campusmarketplace"
+$RemotePath = "/home/ec2-user/quads"
 
 Write-Host "🚀 Starting Integrated Deployment for QUADS..." -ForegroundColor Cyan
 
@@ -22,6 +22,9 @@ Write-Host "✅ GitHub Push Complete. Vercel is now rebuilding the frontend." -F
 Write-Host "🌐 Step 2: Synchronizing AWS EC2 Backend..." -ForegroundColor Yellow
 
 $RemoteCmds = @"
+  export NVM_DIR="`$HOME/.nvm"
+  [ -s "`$NVM_DIR/nvm.sh" ] && \. "`$NVM_DIR/nvm.sh"
+  nvm use 16
   echo '📡 Connected to EC2. Updating code...'
   cd $RemotePath
   git fetch origin $Branch
