@@ -4,6 +4,7 @@ import {
   sendEmailOTP,
   sendPhoneOTP,
   verifyCode,
+  verifyFirebasePhone,
   getVerificationStatus,
 } from '../controllers/verification.controller';
 import { authenticate } from '../middleware/auth';
@@ -51,6 +52,17 @@ router.post(
     validate,
   ],
   verifyCode
+);
+
+// @route   POST /api/verification/verify-firebase
+router.post(
+  '/verify-firebase',
+  authenticate,
+  [
+    body('idToken').notEmpty().withMessage('Firebase ID token is required'),
+    validate,
+  ],
+  verifyFirebasePhone
 );
 
 // @route   GET /api/verification/status

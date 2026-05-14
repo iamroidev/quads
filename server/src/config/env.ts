@@ -30,6 +30,9 @@ interface EnvConfig {
   SMTP_PASS: string;
   SMTP_FROM: string;
   PLATFORM_COMMISSION: number;
+  FIREBASE_PROJECT_ID: string;
+  FIREBASE_CLIENT_EMAIL: string;
+  FIREBASE_PRIVATE_KEY: string;
 }
 
 const env: EnvConfig = {
@@ -57,6 +60,9 @@ const env: EnvConfig = {
   SMTP_PASS: process.env.SMTP_PASS || '',
   SMTP_FROM: process.env.SMTP_FROM || 'support@quadsmarket.tech',
   PLATFORM_COMMISSION: parseInt(process.env.PLATFORM_COMMISSION || '10', 10),
+  FIREBASE_PROJECT_ID: process.env.FIREBASE_PROJECT_ID || '',
+  FIREBASE_CLIENT_EMAIL: process.env.FIREBASE_CLIENT_EMAIL || '',
+  FIREBASE_PRIVATE_KEY: (process.env.FIREBASE_PRIVATE_KEY || '').replace(/\\n/g, '\n'),
 };
 
 export default env;

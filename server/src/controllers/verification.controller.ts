@@ -84,6 +84,32 @@ export const verifyCode = async (
 };
 
 /**
+ * @route   POST /api/verification/verify-firebase
+ * @desc    Verify a Firebase ID token for phone verification
+ * @access  Private
+ */
+export const verifyFirebasePhone = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const { idToken } = req.body;
+    if (!idToken) {
+      res.status(400).json({ success: false, message: 'Firebase ID token is required.' });
+      return;
+    }
+    await verificationService.verifyFirebasePhone(req.user!._id.toString(), idToken);
+    res.status(200).json({
+      success: true,
+      message: 'Phone number verified successfully via Firebase!',
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
  * @route   GET /api/verification/status
  * @desc    Get user's verification status
  * @access  Private
