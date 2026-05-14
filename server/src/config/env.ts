@@ -1,8 +1,9 @@
 import dotenv from 'dotenv';
 import path from 'path';
 
-// Load .env from project root
-dotenv.config({ path: path.resolve(__dirname, '../../../.env') });
+// Load .env from project root - handles both src/ and dist/ structures
+dotenv.config(); // Loads from the current working directory (project root)
+dotenv.config({ path: path.join(process.cwd(), '.env') });
 
 interface EnvConfig {
   PORT: number;
