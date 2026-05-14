@@ -67,3 +67,34 @@ self.addEventListener('fetch', (event) => {
     })
   );
 });
+
+// Push Notifications
+self.addEventListener('push', (event) => {
+  if (!event.data) return;
+  try {
+    const payload = event.data.json();
+    const options = {
+      body: payload.body || payload.message,
+      icon: payload.icon || '/pwa-192x192.png',
+      badge: payload.badge || '/pwa-192x192.png',
+      data: payload.data || { url: payload.url || '/' },
+      vibrate: [100, 50, 100],
+    };
+    event.waitUntil(self.registration.showNotification(payload.title || 'Campus Market', options));
+  } catch (err) {
+    console.error('Push data error:', err);
+  }
+});
+
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  const urlToOpen = event.notification.data.url || '/';
+  event.waitUntil(
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then((windowClients) => {
+      for (let client of windowClients) {
+        if (client.url === urlToOpen && 'focus' in client) return client.focus();
+      }
+      if (clients.openWindow) return clients.openWindow(urlToOpen);
+    })
+  );
+});
