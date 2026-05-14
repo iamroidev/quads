@@ -5,6 +5,7 @@ import User from '../models/User';
 import env from '../config/env';
 import { emailService } from './email.service';
 import ApiError from '../utils/ApiError';
+import firebaseAdmin from '../config/firebase';
 
 // If explicit credentials are set in .env, use them.
 // Otherwise fall through to the AWS default credential provider chain
@@ -220,6 +221,38 @@ class VerificationService {
       phone: user.phone,
       role: user.role,
     };
+  }
+
+  /**
+   * Verify Firebase Phone Auth token and update user
+   */
+  async verifyFirebasePhone(userId: string, idToken: string): Promise<void> {
+    if (!firebaseAdmin) {
+      throw ApiError.internal('Firebase Admin not initialized');
+    }
+
+    try {
+      // 1. Verify the ID token
+      const decodedToken = await firebaseAdmin.auth().verifyIdToken(idToken);
+      const phoneNumber = decodedToken.phone_number;
+
+      if (!phoneNumber) {
+        throw ApiError.badRequest('No phone number found in Firebase token');
+      }
+
+      // 2. Update the user
+      const user = await User.findById(userId);
+      if (!user) throw ApiError.notFound('User not found');
+
+      user.phone = phoneNumber;
+      user.phoneVerified = true;
+      user.isVerified = user.emailVerified || true; // At least one verification
+      
+      await user.save();
+    } catch (error: any) {
+      console.error('Firebase verify failed:', error);
+      throw ApiError.badRequest('Failed to verify phone number with Firebase');
+    }
   }
 }
 

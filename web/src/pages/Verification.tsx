@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import verificationService from '../services/verification.service';
+import { setupRecaptcha, sendOtp } from '../services/firebase';
+import { ConfirmationResult } from 'firebase/auth';
 import toast from 'react-hot-toast';
 import { BulletinLayout, BulletinSection, BulletinCard } from '../components/layout/BulletinLayout';
 import { ShieldCheck, ShieldOff, Mail, Phone, Check, Loader2, ArrowRight, Smartphone, Lock } from 'lucide-react';
@@ -31,6 +33,7 @@ const VerificationPage: React.FC = () => {
   const [verifying, setVerifying] = useState(false);
   const [sent, setSent] = useState(false);
   const [countdown, setCountdown] = useState(0);
+  const [confirmationResult, setConfirmationResult] = useState<ConfirmationResult | null>(null);
 
   // Countdown timer for resend
   useEffect(() => {
@@ -54,14 +57,34 @@ const VerificationPage: React.FC = () => {
       if (method === 'email') {
         await verificationService.sendEmailOTP(email.trim());
       } else {
-        await verificationService.sendPhoneOTP(phone.trim());
+        // Firebase Phone Auth
+        const appVerifier = setupRecaptcha('recaptcha-container');
+        
+        // Ensure Ghana country code if not present
+        let formattedPhone = phone.trim();
+        if (!formattedPhone.startsWith('+')) {
+          // If it starts with 0, replace with +233
+          if (formattedPhone.startsWith('0')) {
+            formattedPhone = '+233' + formattedPhone.substring(1);
+          } else {
+            formattedPhone = '+233' + formattedPhone;
+          }
+        }
+        
+        const result = await sendOtp(formattedPhone, appVerifier);
+        setConfirmationResult(result);
       }
       setSent(true);
       setStep('enter_code');
       setCountdown(60);
       toast.success(`Code sent to your ${method === 'email' ? 'email' : 'phone'}!`);
     } catch (err: any) {
+      console.error('Send error:', err);
       toast.error(err.response?.data?.message || err.message || 'Failed to send code');
+      // Reset recaptcha if error
+      if (method === 'phone' && (window as any).grecaptcha) {
+        (window as any).grecaptcha.reset();
+      }
     } finally {
       setSending(false);
     }
@@ -75,13 +98,27 @@ const VerificationPage: React.FC = () => {
     setCodeError('');
     setVerifying(true);
     try {
-      await verificationService.verifyCode(code, method);
+      if (method === 'email') {
+        await verificationService.verifyCode(code, 'email');
+      } else {
+        if (!confirmationResult) {
+          throw new Error('No verification session found. Please resend code.');
+        }
+        // Verify with Firebase
+        const result = await confirmationResult.confirm(code);
+        const idToken = await result.user.getIdToken();
+        
+        // Finalize with our backend
+        await verificationService.verifyFirebasePhone(idToken);
+      }
+      
       toast.success(method === 'email' ? 'Email verified!' : 'Phone verified!');
       await refreshUser();
       setCode('');
       setStep('select');
       setSent(false);
     } catch (err: any) {
+      console.error('Verify error:', err);
       setCodeError(err.response?.data?.message || err.message || 'Invalid code');
     } finally {
       setVerifying(false);
@@ -265,6 +302,8 @@ const VerificationPage: React.FC = () => {
                         </button>
                       </div>
                     </div>
+                    {/* Invisible ReCAPTCHA Container */}
+                    <div id="recaptcha-container"></div>
                   </div>
                 )}
               </BulletinCard>

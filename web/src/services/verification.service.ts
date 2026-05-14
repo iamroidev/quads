@@ -35,6 +35,14 @@ const verificationService = {
   },
 
   /**
+   * Verify Firebase phone authentication with backend
+   */
+  verifyFirebasePhone: async (idToken: string) => {
+    const response = await api.post('/verification/verify-firebase', { idToken });
+    return response.data;
+  },
+
+  /**
    * Get current user's verification status
    */
   getStatus: async (): Promise<VerificationStatus> => {
