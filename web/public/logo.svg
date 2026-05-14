@@ -1,0 +1,25 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Main Background -->
+  <rect width="512" height="512" fill="black"/>
+  
+  <!-- Main Logo Container (White Border) -->
+  <g transform="rotate(-3, 256, 256)">
+    <rect x="100" y="180" width="312" height="120" rx="40" stroke="white" stroke-width="12" fill="transparent"/>
+    
+    <!-- QUADS Text -->
+    <text x="256" y="265" text-anchor="middle" font-family="Arial, sans-serif" font-weight="900" font-style="italic" font-size="78" fill="#FF6B6B" letter-spacing="-2">QUADS</text>
+  </g>
+  
+  <!-- Price Tags -->
+  <g transform="translate(360, 140) rotate(15)">
+    <!-- Purple Tag -->
+    <path d="M0 10 L40 0 L50 30 L10 40 Z" fill="#7B3FE4" stroke="black" stroke-width="1"/>
+    <text x="25" y="25" text-anchor="middle" font-size="16" fill="white" font-weight="bold">%</text>
+    
+    <!-- Orange Tag -->
+    <g transform="translate(15, 25) rotate(10)">
+      <path d="M0 0 L30 5 L25 40 L-5 35 Z" fill="#FFD93D" stroke="black" stroke-width="1"/>
+      <text x="12" y="28" text-anchor="middle" font-size="20" fill="#26170c" font-weight="bold">$</text>
+    </g>
+  </g>
+</svg>

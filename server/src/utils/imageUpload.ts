@@ -30,7 +30,7 @@ export const upload = multer({
  */
 export const uploadToCloudinary = (
   buffer: Buffer,
-  folder: string = 'campusmarketplace/products'
+  folder: string = 'quads/products'
 ): Promise<{ url: string; publicId: string }> => {
   return new Promise((resolve, reject) => {
     const uploadStream = cloudinary.uploader.upload_stream(
@@ -61,7 +61,7 @@ export const uploadToCloudinary = (
  */
 export const uploadMultipleToCloudinary = async (
   files: Express.Multer.File[],
-  folder: string = 'campusmarketplace/products'
+  folder: string = 'quads/products'
 ): Promise<{ url: string; publicId: string }[]> => {
   const uploadPromises = files.map((file) =>
     uploadToCloudinary(file.buffer, folder)
@@ -79,7 +79,7 @@ const guessImageExtension = (mime: string): string => {
 export const uploadMultipleWithFallback = async (
   files: Express.Multer.File[],
   reqMeta: { protocol: string; host: string },
-  folder: string = 'campusmarketplace/products'
+  folder: string = 'quads/products'
 ): Promise<{ url: string; publicId: string }[]> => {
   try {
     return await uploadMultipleToCloudinary(files, folder);

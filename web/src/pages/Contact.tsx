@@ -12,19 +12,24 @@ import {
 } from 'lucide-react';
 import { BulletinLayout, BulletinSection, BulletinCard } from '../components/layout/BulletinLayout';
 import toast from 'react-hot-toast';
+import api from '../services/api';
 
 const ContactPage: React.FC = () => {
   const [ticketForm, setTicketForm] = useState({ subject: '', category: 'technical', message: '', email: '' });
   const [sending, setSending] = useState(false);
 
-  const handleTicketSubmit = (e: React.FormEvent) => {
+  const handleTicketSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSending(true);
-    setTimeout(() => {
+    try {
+      await api.post('/support/ticket', ticketForm);
       toast.success('Support ticket submitted! We will contact you via email.');
       setTicketForm({ subject: '', category: 'technical', message: '', email: '' });
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || 'Failed to submit ticket');
+    } finally {
       setSending(false);
-    }, 1000);
+    }
   };
 
   return (
@@ -52,7 +57,7 @@ const ContactPage: React.FC = () => {
               <div className="border-4 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] p-6 shadow-[8px_8px_0_0_var(--bulletin-shadow)]" style={{ transform: 'rotate(-1deg)' }}>
                 <Mail className="h-8 w-8 mb-4 opacity-40 text-[var(--bulletin-text)]" />
                 <div className="text-[10px] font-black uppercase tracking-widest opacity-40 mb-2 text-[var(--bulletin-text)]">Email Support</div>
-                <div className="font-black text-[12px] text-[var(--bulletin-text)]">support@quads.app</div>
+                <div className="font-black text-[12px] text-[var(--bulletin-text)]">support@quadsmarket.tech</div>
               </div>
 
               <div className="border-4 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] p-6 shadow-[8px_8px_0_0_var(--bulletin-shadow)]" style={{ transform: 'rotate(1deg)' }}>
@@ -64,7 +69,7 @@ const ContactPage: React.FC = () => {
               <div className="border-4 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] p-6 shadow-[8px_8px_0_0_var(--bulletin-shadow)]" style={{ transform: 'rotate(0.5deg)' }}>
                 <MapPin className="h-8 w-8 mb-4 opacity-40 text-[var(--bulletin-text)]" />
                 <div className="text-[10px] font-black uppercase tracking-widest opacity-40 mb-2 text-[var(--bulletin-text)]">Physical Desk</div>
-                <div className="font-black text-[12px] text-[var(--bulletin-text)]">Student Center, Room 204</div>
+                <div className="font-black text-[12px] text-[var(--bulletin-text)]">Tovet Hostel</div>
               </div>
 
               <div className="border-4 border-[var(--bulletin-border)] bg-[#e0f2f7] dark:bg-sky-900/40 p-6 shadow-[8px_8px_0_0_var(--bulletin-shadow)]" style={{ transform: 'rotate(-0.5deg)' }}>

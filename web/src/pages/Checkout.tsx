@@ -11,6 +11,7 @@ import {
   Shield,
   X,
   CheckCircle,
+  Pin,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import productService from '../services/product.service';
@@ -27,6 +28,7 @@ interface CheckoutFormState {
   deliveryAddress: string;
   note: string;
   paymentMethod: PaymentMethod;
+  termsAccepted: boolean;
 }
 
 const Checkout: React.FC = () => {
@@ -43,6 +45,7 @@ const Checkout: React.FC = () => {
     deliveryAddress: '',
     note: '',
     paymentMethod: 'momo_mtn',
+    termsAccepted: false,
   });
 
   useEffect(() => {
@@ -84,6 +87,11 @@ const Checkout: React.FC = () => {
   const handleSubmit = async () => {
     if (!product || !user) {
       toast.error('Please log in to continue');
+      return;
+    }
+
+    if (!form.termsAccepted) {
+      toast.error('Please agree to the Terms and Conditions');
       return;
     }
 
@@ -302,6 +310,21 @@ const Checkout: React.FC = () => {
                       GHS {product.price.toLocaleString('en-GH', { minimumFractionDigits: 2 })}
                     </span>
                   </div>
+                </div>
+
+                <div className="mt-8 flex items-start gap-3 border-2 border-dashed border-black/20 p-4 bg-white/20">
+                  <label className="relative flex h-8 w-8 cursor-pointer items-center justify-center border-2 border-black bg-white shadow-[2px_2px_0_0_var(--bulletin-shadow)] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-none transition-all flex-shrink-0">
+                    <input
+                      type="checkbox"
+                      checked={form.termsAccepted}
+                      onChange={(e) => setForm((f) => ({ ...f, termsAccepted: e.target.checked }))}
+                      className="peer sr-only"
+                    />
+                    <Pin className={`h-4 w-4 transition-all ${form.termsAccepted ? 'text-red-600 rotate-45' : 'text-gray-300'}`} />
+                  </label>
+                  <label htmlFor="termsAccepted" className="text-[10px] font-black uppercase tracking-tight text-[var(--bulletin-text)] leading-tight cursor-pointer opacity-80">
+                    I verify this purchase & agree to the <Link to="/terms" target="_blank" className="underline decoration-1 underline-offset-2">Institutional Terms</Link>
+                  </label>
                 </div>
 
                 <button

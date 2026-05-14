@@ -1,4 +1,4 @@
-import { createRemoteJWKSet, jwtVerify } from 'jose';
+// import { createRemoteJWKSet, jwtVerify } from 'jose';
 import ApiError from './ApiError';
 
 export interface SupabaseJwtPayload {
@@ -19,6 +19,7 @@ export const verifySupabaseToken = async (token: string): Promise<SupabaseJwtPay
   const baseUrl = supabaseUrl.replace(/\/$/, '');
   const authIssuer = `${baseUrl}/auth/v1`;
   const allowedIssuers = [authIssuer, baseUrl];
+  const { createRemoteJWKSet, jwtVerify } = require('jose/dist/node/cjs/index.js');
   const jwks = createRemoteJWKSet(new URL(`${authIssuer}/.well-known/jwks.json`));
 
   for (const issuer of allowedIssuers) {
