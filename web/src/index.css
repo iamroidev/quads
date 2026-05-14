@@ -66,6 +66,19 @@
   .dark ::-webkit-scrollbar-thumb {
     background-color: rgba(255, 255, 255, 0.2);
   }
+
+  /* Responsive Utilities */
+  @media (max-width: 640px) {
+    .bulletin-container {
+      padding-left: 1rem;
+      padding-right: 1rem;
+    }
+    
+    /* Prevent Tawk.to from covering content if it does appear */
+    #tawk-chat-container {
+      bottom: 80px !important;
+    }
+  }
 }
 
 @layer components {
