@@ -147,3 +147,113 @@ export const generateReference = (): string => {
   const random = crypto.randomBytes(4).toString('hex');
   return `CM_PAY_${timestamp}_${random}`.toUpperCase();
 };
+
+/**
+ * Generate a unique payout reference
+ */
+export const generatePayoutReference = (): string => {
+  const timestamp = Date.now().toString(36);
+  const random = crypto.randomBytes(4).toString('hex');
+  return `CM_PO_${timestamp}_${random}`.toUpperCase();
+};
+
+/**
+ * Create a transfer recipient on Paystack
+ * @param name - Recipient account name
+ * @param accountNumber - Bank account number or mobile money number
+ * @param bankCode - Bank code (for bank transfers) or provider code (for mobile money)
+ * @param type - 'nuban' for bank or 'mobile_money' for MoMo
+ */
+export const createTransferRecipient = async (
+  name: string,
+  accountNumber: string,
+  bankCode: string,
+  type: 'nuban' | 'mobile_money' = 'nuban'
+): Promise<{ recipient_code: string; recipient_id: number }> => {
+  const payload: Record<string, any> = {
+    type,
+    name,
+    account_number: accountNumber,
+    bank_code: bankCode,
+    currency: 'GHS',
+  };
+
+  const response = await paystackApi.post('/transferrecipient', payload);
+  const data = response.data;
+  if (!data.status) {
+    throw new Error(`Paystack recipient creation failed: ${data.message}`);
+  }
+  return {
+    recipient_code: data.data.recipient_code,
+    recipient_id: data.data.id,
+  };
+};
+
+/**
+ * Initiate a payout (transfer) to a recipient via Paystack
+ * @param amount - Amount in GHS (will be converted to pesewas)
+ * @param recipientCode - The recipient code from createTransferRecipient
+ * @param reference - Unique transfer reference
+ * @param reason - Reason for the transfer
+ */
+export const initiateTransfer = async (
+  amount: number,
+  recipientCode: string,
+  reference: string,
+  reason: string = 'Seller payout'
+): Promise<{ transfer_code: string; transfer_id: number; status: string }> => {
+  const payload = {
+    source: 'balance',
+    amount: Math.round(amount * 100), // Convert GHS to pesewas
+    recipient: recipientCode,
+    reference,
+    reason,
+    currency: 'GHS',
+  };
+
+  const response = await paystackApi.post('/transfer', payload);
+  const data = response.data;
+  if (!data.status) {
+    throw new Error(`Paystack transfer failed: ${data.message}`);
+  }
+  return {
+    transfer_code: data.data.transfer_code,
+    transfer_id: data.data.id,
+    status: data.data.status,
+  };
+};
+
+/**
+ * Verify a transfer status on Paystack
+ * @param transferCode - The transfer code to verify
+ */
+export const verifyTransfer = async (
+  transferCode: string
+): Promise<{ status: string; amount: number; reference: string; recipient: any }> => {
+  const response = await paystackApi.get(`/transfer/verify/${transferCode}`);
+  const data = response.data;
+  if (!data.status) {
+    throw new Error(`Paystack transfer verification failed: ${data.message}`);
+  }
+  return {
+    status: data.data.status,
+    amount: data.data.amount / 100,
+    reference: data.data.reference,
+    recipient: data.data.recipient,
+  };
+};
+
+/**
+ * Get Paystack balance
+ */
+export const getPaystackBalance = async (): Promise<{ currency: string; balance: number }[]> => {
+  const response = await paystackApi.get('/balance');
+  const data = response.data;
+  if (!data.status) {
+    throw new Error('Failed to fetch Paystack balance');
+  }
+  return data.data.map((item: any) => ({
+    currency: item.currency,
+    balance: item.amount / 100,
+  }));
+};

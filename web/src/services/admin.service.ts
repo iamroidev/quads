@@ -193,6 +193,37 @@ const adminService = {
     const response = await api.post(`/admin/ops/retry-jobs/${id}/run`);
     return response.data;
   },
+
+  // Payout management
+  getPayouts: async (params?: {
+    page?: number;
+    limit?: number;
+    status?: string;
+    sellerId?: string;
+  }) => {
+    const response = await api.get('/payouts', { params });
+    return response.data;
+  },
+
+  getPayoutStats: async () => {
+    const response = await api.get('/payouts/stats');
+    return response.data;
+  },
+
+  processPayout: async (payoutId: string) => {
+    const response = await api.post(`/payouts/${payoutId}/process`);
+    return response.data;
+  },
+
+  verifyPayout: async (payoutId: string) => {
+    const response = await api.post(`/payouts/${payoutId}/verify`);
+    return response.data;
+  },
+
+  getSellerPayouts: async (params?: { page?: number; limit?: number }) => {
+    const response = await api.get('/payouts/seller', { params });
+    return response.data;
+  },
 };
 
 export default adminService;

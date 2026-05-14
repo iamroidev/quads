@@ -11,7 +11,7 @@ import connectDB from './config/db';
 import routes from './routes';
 import { errorHandler, notFoundHandler } from './middleware/errorHandler';
 import { setupSocketHandlers } from './socket';
-
+import { startPayoutScheduler } from './services/payoutScheduler';
 // Initialize Express app
 const app = express();
 const httpServer = createServer(app);
@@ -104,6 +104,9 @@ const startServer = async () => {
   try {
     // Connect to MongoDB
     await connectDB();
+
+    // Start background payout scheduler (auto-processes every 15 min)
+    startPayoutScheduler(15);
 
     // Start listening
     httpServer.listen(env.PORT, () => {

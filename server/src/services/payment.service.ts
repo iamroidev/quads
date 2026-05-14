@@ -9,6 +9,7 @@ import {
   generateReference,
 } from '../utils/paystack';
 import { emailService } from './email.service';
+import payoutService from './payout.service';
 
 class PaymentService {
   /**
@@ -148,6 +149,12 @@ class PaymentService {
           ).catch(console.error);
         }
 
+        // Auto-create payout record for the seller
+        payoutService.createPayoutForOrder(
+          transaction.order.toString(),
+          transaction._id.toString()
+        ).catch((err) => console.error('Failed to create payout:', err));
+
         return { verified: true, order: populatedOrder, transaction };
       } else {
         transaction.status = 'failed';
@@ -193,6 +200,12 @@ class PaymentService {
           ).catch(console.error);
         }
       }
+
+      // Auto-create payout record
+      payoutService.createPayoutForOrder(
+        transaction.order.toString(),
+        transaction._id.toString()
+      ).catch((err: any) => console.error('Failed to create payout from webhook:', err));
     }
 
     if (event === 'charge.failed') {

@@ -13,6 +13,9 @@ import {
   TrendingUp,
   Search,
   AlertTriangle,
+  DollarSign,
+  Send,
+  RefreshCw,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import adminService, { AdminDashboardStats, DisputePopulated } from '../services/admin.service';
@@ -21,7 +24,7 @@ import { OrderPopulated, ProductPopulated, User } from '../types';
 import { Link } from 'react-router-dom';
 import { BulletinLayout, BulletinSection, BulletinCard } from '../components/layout/BulletinLayout';
 
-type AdminTab = 'overview' | 'users' | 'products' | 'orders' | 'disputes' | 'ops';
+type AdminTab = 'overview' | 'users' | 'products' | 'orders' | 'disputes' | 'ops' | 'payouts';
 
 const TABS: { value: AdminTab; label: string }[] = [
   { value: 'overview', label: 'Overview' },
@@ -30,6 +33,7 @@ const TABS: { value: AdminTab; label: string }[] = [
   { value: 'orders', label: 'Orders' },
   { value: 'disputes', label: 'Disputes' },
   { value: 'ops', label: 'Ops' },
+  { value: 'payouts', label: 'Payouts' },
 ];
 
 const DISPUTE_STATUS_COLORS: Record<string, string> = {
@@ -69,6 +73,18 @@ const AdminDashboard: React.FC = () => {
   const [retryJobs, setRetryJobs] = useState<any[]>([]);
   const [newRetryType, setNewRetryType] = useState<'import' | 'notification' | 'payment' | 'moderation'>('notification');
   const [newRetryPayload, setNewRetryPayload] = useState('{"note":"manual retry"}');
+
+  // Payout management state
+  const [payouts, setPayouts] = useState<any[]>([]);
+  const [payoutStats, setPayoutStats] = useState<{
+    totalPending: number;
+    totalProcessing: number;
+    totalCompleted: number;
+    totalFailed: number;
+    totalPayoutAmount: number;
+    totalCommissionEarned: number;
+  } | null>(null);
+  const [payoutStatusFilter, setPayoutStatusFilter] = useState('');
 
   const fetchStats = async () => {
     try {
@@ -157,9 +173,63 @@ const AdminDashboard: React.FC = () => {
     }
   };
 
+  const fetchPayouts = async () => {
+    try {
+      const params: any = { limit: 50 };
+      if (payoutStatusFilter) params.status = payoutStatusFilter;
+      const res = await adminService.getPayouts(params);
+      if (res.success) setPayouts(res.data.payouts);
+    } catch {
+      toast.error('Failed to load payouts');
+    }
+  };
+
+  const fetchPayoutStats = async () => {
+    try {
+      const res = await adminService.getPayoutStats();
+      if (res.success) setPayoutStats(res.data.stats);
+    } catch {
+      toast.error('Failed to load payout stats');
+    }
+  };
+
+  const handleProcessPayout = async (payoutId: string) => {
+    setBusyId(payoutId);
+    try {
+      const res = await adminService.processPayout(payoutId);
+      if (res.success) {
+        toast.success('Payout processed successfully');
+        fetchPayouts();
+        fetchPayoutStats();
+      }
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || 'Failed to process payout');
+    } finally {
+      setBusyId(null);
+    }
+  };
+
+  const handleVerifyPayout = async (payoutId: string) => {
+    setBusyId(payoutId);
+    try {
+      const res = await adminService.verifyPayout(payoutId);
+      if (res.success) {
+        toast.success('Payout status verified');
+        fetchPayouts();
+        fetchPayoutStats();
+      }
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || 'Failed to verify payout');
+    } finally {
+      setBusyId(null);
+    }
+  };
+
   useEffect(() => {
     refreshAll();
     fetchOpsData();
+    fetchPayouts();
+    fetchPayoutStats();
   }, []);
 
   const queueRetryJob = async () => {
@@ -655,6 +725,116 @@ const AdminDashboard: React.FC = () => {
                     >
                       Intervene
                     </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Payouts */}
+        {activeTab === 'payouts' && (
+          <div className="space-y-8">
+            <div className="flex flex-col md:flex-row gap-6 md:items-center md:justify-between">
+              <div>
+                <h3 className="text-2xl font-black uppercase tracking-tighter text-[var(--bulletin-text)]">Settlement Console</h3>
+                <p className="text-[12px] font-bold opacity-40 text-[var(--bulletin-text)] uppercase tracking-widest">Disburse Funds to Sellers</p>
+              </div>
+              <div className="flex gap-4 items-center">
+                <select
+                  value={payoutStatusFilter}
+                  onChange={(e) => { setPayoutStatusFilter(e.target.value); setTimeout(fetchPayouts, 100); }}
+                  className="border-4 border-black bg-[var(--bulletin-card)] p-3 text-[12px] font-black text-[var(--bulletin-text)]"
+                >
+                  <option value="">All Status</option>
+                  <option value="pending">Pending</option>
+                  <option value="processing">Processing</option>
+                  <option value="completed">Completed</option>
+                  <option value="failed">Failed</option>
+                </select>
+                <button onClick={() => { fetchPayouts(); fetchPayoutStats(); }} className="border-4 border-black bg-black text-white px-6 py-3 text-[12px] font-black uppercase hover:bg-[#ff6b6b] transition-all">
+                  Refresh
+                </button>
+              </div>
+            </div>
+
+            {/* Payout Stats */}
+            {payoutStats && (
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+                {[
+                  { label: 'Pending', value: payoutStats.totalPending, color: 'bg-[#fffacd]' },
+                  { label: 'Processing', value: payoutStats.totalProcessing, color: 'bg-[#e0f2f7]' },
+                  { label: 'Completed', value: payoutStats.totalCompleted, color: 'bg-[#d4edda]' },
+                  { label: 'Failed', value: payoutStats.totalFailed, color: 'bg-[#fce4ec]' },
+                  { label: 'Total Paid', value: `GHS ${payoutStats.totalPayoutAmount.toFixed(2)}`, color: 'bg-[#f0e8f4]' },
+                  { label: 'Commission', value: `GHS ${payoutStats.totalCommissionEarned.toFixed(2)}`, color: 'bg-[#ffd700]/30' },
+                ].map((stat, idx) => (
+                  <BulletinCard key={stat.label} rotation={(idx % 2 === 0 ? 0.3 : -0.3)} className="!p-4 border-2">
+                    <p className={`text-[9px] font-black uppercase tracking-widest text-black mb-2 px-2 py-1 ${stat.color} inline-block border-2 border-black`}>{stat.label}</p>
+                    <p className="text-xl font-black tracking-tighter text-[var(--bulletin-text)]">{stat.value}</p>
+                  </BulletinCard>
+                ))}
+              </div>
+            )}
+
+            {/* Payout List */}
+            <div className="border-4 border-black bg-[var(--bulletin-card)] divide-y-4 divide-black/5 shadow-[12px_12px_0_0_var(--bulletin-shadow)]">
+              {payouts.length === 0 ? (
+                <p className="p-12 text-[12px] font-bold opacity-30 text-center uppercase tracking-widest">No Payouts Recorded</p>
+              ) : payouts.map((payout: any) => (
+                <div key={payout._id} className="p-6 flex items-center justify-between gap-6 hover:bg-black/5 transition-colors">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-3 mb-2">
+                      <span className={`text-[9px] font-black uppercase tracking-widest px-2 py-1 border-2 border-black ${
+                        payout.status === 'completed' ? 'bg-[#d4edda] text-black' :
+                        payout.status === 'pending' ? 'bg-[#fffacd] text-black' :
+                        payout.status === 'processing' ? 'bg-[#e0f2f7] text-black' :
+                        payout.status === 'failed' ? 'bg-[#fce4ec] text-black' : 'bg-white text-black'
+                      }`}>
+                        {payout.status}
+                      </span>
+                      <span className="text-[11px] font-black uppercase opacity-40 text-[var(--bulletin-text)]">
+                        Order #{payout.order?.orderNumber || 'N/A'}
+                      </span>
+                    </div>
+                    <div className="flex flex-wrap gap-x-8 gap-y-1 text-[13px] font-black text-[var(--bulletin-text)]">
+                      <span>Seller: {payout.seller?.name || 'Unknown'}</span>
+                      <span>Gross: GHS {payout.amount?.toFixed(2) || '0.00'}</span>
+                      <span>Commission: GHS {payout.commissionAmount?.toFixed(2) || '0.00'} ({payout.platformCommission}%)</span>
+                      <span className="text-[#ff6b6b]">Net: GHS {payout.netAmount?.toFixed(2) || '0.00'}</span>
+                    </div>
+                    {payout.failureReason && (
+                      <div className="mt-2 bg-[#ff6b6b]/10 border-l-4 border-[#ff6b6b] p-2 text-[11px] font-bold text-[#ff6b6b]">
+                        Error: {payout.failureReason}
+                      </div>
+                    )}
+                    {payout.completedAt && (
+                      <p className="mt-1 text-[10px] font-bold opacity-30 text-[var(--bulletin-text)]">
+                        Completed: {new Date(payout.completedAt).toLocaleString()}
+                      </p>
+                    )}
+                  </div>
+                  <div className="flex gap-2 shrink-0">
+                    {payout.status === 'pending' && (
+                      <button 
+                        onClick={() => handleProcessPayout(payout._id)} 
+                        disabled={busyId === payout._id}
+                        className="border-4 border-black bg-black text-white px-4 py-3 text-[10px] font-black uppercase hover:bg-[#ff6b6b] transition-all disabled:opacity-20 flex items-center gap-1"
+                      >
+                        <Send className="h-3 w-3" />
+                        {busyId === payout._id ? '...' : 'Send'}
+                      </button>
+                    )}
+                    {payout.status === 'processing' && (
+                      <button 
+                        onClick={() => handleVerifyPayout(payout._id)} 
+                        disabled={busyId === payout._id}
+                        className="border-4 border-black bg-[#e0f2f7] text-black px-4 py-3 text-[10px] font-black uppercase hover:bg-sky-200 transition-all disabled:opacity-20 flex items-center gap-1"
+                      >
+                        <RefreshCw className="h-3 w-3" />
+                        {busyId === payout._id ? '...' : 'Verify'}
+                      </button>
+                    )}
                   </div>
                 </div>
               ))}

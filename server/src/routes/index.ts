@@ -12,6 +12,8 @@ import adminRoutes from './admin.routes';
 import disputeRoutes from './dispute.routes';
 import growthRoutes from './growth.routes';
 import verificationRoutes from './verification.routes';
+import payoutRoutes from './payout.routes';
+import autoPayoutRoutes from './autoPayout.routes';
 
 const router = Router();
 
@@ -38,5 +40,7 @@ router.use('/admin', adminRoutes);
 router.use('/disputes', disputeRoutes);
 router.use('/growth', growthRoutes);
 router.use('/verification', verificationRoutes);
+router.use('/payouts', payoutRoutes);
+router.use('/auto-payouts', autoPayoutRoutes);
 
 export default router;

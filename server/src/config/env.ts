@@ -28,6 +28,7 @@ interface EnvConfig {
   SMTP_USER: string;
   SMTP_PASS: string;
   SMTP_FROM: string;
+  PLATFORM_COMMISSION: number;
 }
 
 const env: EnvConfig = {
@@ -54,6 +55,7 @@ const env: EnvConfig = {
   SMTP_USER: process.env.SMTP_USER || '',
   SMTP_PASS: process.env.SMTP_PASS || '',
   SMTP_FROM: process.env.SMTP_FROM || 'noreply@campusmarketplace.com',
+  PLATFORM_COMMISSION: parseInt(process.env.PLATFORM_COMMISSION || '10', 10),
 };
 
 export default env;
