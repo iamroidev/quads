@@ -14,8 +14,10 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as ImagePicker from 'expo-image-picker';
+import { Ionicons } from '@expo/vector-icons';
 import api from '../services/api';
 import productService from '../services/product.service';
+import { useAuth } from '../context/AuthContext';
 import { colors } from '../theme';
 import ScreenHeader from '../components/ScreenHeader';
 
@@ -45,6 +47,7 @@ const CAMPUS_LOCATIONS = [
 ];
 
 const CreateListingScreen = ({ navigation, route }: any) => {
+  const { user } = useAuth();
   const { productId, mode } = route.params ?? {};
   const isEditMode = mode === 'edit' && !!productId;
 
@@ -149,10 +152,52 @@ const CreateListingScreen = ({ navigation, route }: any) => {
     }
   };
 
-  if (prefilling) {
-    return <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: colors.bg }}>
-      <ActivityIndicator size="large" color={colors.accent} />
-    </View>;
+  const isUnverifiedSeller = 
+    !isEditMode && 
+    user?.role === 'seller' && 
+    !user?.isVerified && 
+    !user?.emailVerified && 
+    !user?.phoneVerified;
+
+  if (prefilling || loading) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: colors.bg }}>
+        <ActivityIndicator size="large" color="#000" />
+      </View>
+    );
+  }
+
+  if (isUnverifiedSeller) {
+    return (
+      <SafeAreaView style={styles.container} edges={['top']}>
+        <ScreenHeader 
+          eyebrow="Verification Required" 
+          title="Identity Check" 
+          subtitle="You must verify your student status before listing items." 
+        />
+        <View style={styles.gateContent}>
+          <View style={styles.gateIcon}>
+            <Ionicons name="shield-checkmark-outline" size={60} color="rgba(0,0,0,0.1)" />
+          </View>
+          <Text style={styles.gateTitle}>Verify to continue</Text>
+          <Text style={styles.gateText}>
+            Sellers on UMaT Campus Market are required to verify their email (@st.umat.edu.gh) or phone number to ensure a safe community for all.
+          </Text>
+          <TouchableOpacity 
+            style={styles.primaryBtn} 
+            onPress={() => navigation.navigate('Verification')}
+          >
+            <Text style={styles.primaryBtnText}>Start Verification Now →</Text>
+          </TouchableOpacity>
+          <TouchableOpacity 
+            style={styles.secondaryBtn} 
+            onPress={() => navigation.goBack()}
+          >
+            <Text style={styles.secondaryBtnText}>Maybe Later</Text>
+          </TouchableOpacity>
+        </View>
+      </SafeAreaView>
+    );
   }
 
   return (
@@ -161,7 +206,7 @@ const CreateListingScreen = ({ navigation, route }: any) => {
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
       <SafeAreaView style={styles.container} edges={['top']}>
-      <ScreenHeader eyebrow="Seller workspace" title={isEditMode ? 'Edit Listing' : 'Create Listing'} subtitle={isEditMode ? 'Update your product details.' : 'Post a product with web-consistent details.'} />
+      <ScreenHeader eyebrow="Seller Hub" title={isEditMode ? 'Edit Listing' : 'Create Listing'} subtitle={isEditMode ? 'Update your product details.' : 'Post a product to the campus marketplace.'} />
       <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
         <Text style={styles.label}>Images</Text>
         <TouchableOpacity style={styles.imagePickerBtn} onPress={pickImages}>
@@ -395,6 +440,30 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   submitBtnText: { color: '#fff', fontSize: 16, fontWeight: '700' },
+  // Gate styles
+  gateContent: { flex: 1, padding: 24, alignItems: 'center', justifyContent: 'center', marginTop: 60 },
+  gateIcon: { width: 100, height: 100, backgroundColor: '#f3f4f6', alignItems: 'center', justifyContent: 'center', marginBottom: 24 },
+  gateTitle: { fontSize: 22, fontWeight: '900', textTransform: 'uppercase', marginBottom: 12 },
+  gateText: { fontSize: 13, color: '#666', textAlign: 'center', lineHeight: 20, marginBottom: 32 },
+  primaryBtn: { 
+    width: '100%',
+    backgroundColor: '#000', 
+    paddingVertical: 18, 
+    alignItems: 'center', 
+    borderWidth: 2, 
+    borderColor: '#000',
+    marginBottom: 12,
+  },
+  primaryBtnText: { color: '#fff', fontWeight: '900', textTransform: 'uppercase', fontSize: 12, letterSpacing: 1 },
+  secondaryBtn: { 
+    width: '100%',
+    backgroundColor: '#fff', 
+    paddingVertical: 18, 
+    alignItems: 'center', 
+    borderWidth: 2, 
+    borderColor: '#000',
+  },
+  secondaryBtnText: { color: '#000', fontWeight: '900', textTransform: 'uppercase', fontSize: 12, letterSpacing: 1 },
 });
 
 export default CreateListingScreen;

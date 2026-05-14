@@ -84,20 +84,20 @@ const ProductsBulletin: React.FC = () => {
   const getImage = (p: ProductPopulated) => p.images[0]?.url || 'https://placehold.co/400x500/ddd/666?text=Item';
 
   return (
-    <BulletinLayout title="Browse listings" subtitle="Marketplace" section="02">
+    <BulletinLayout title="Manifest" subtitle="QUADS" section="02">
       
       {/* Filters section */}
-      <BulletinSection bgColor="bg-white">
-        <div className="grid gap-4 md:grid-cols-4">
+      <BulletinSection bgColor="bg-[var(--bulletin-bg)]">
+        <div className="grid gap-6 md:grid-cols-4 items-end">
           {/* Category filter */}
           <div>
-            <label className="mb-2 block text-[10px] uppercase tracking-wider opacity-60">Category</label>
+            <label className="mb-2 block text-[10px] font-black uppercase tracking-[0.2em] opacity-40 text-[var(--bulletin-text)]">Department</label>
             <select
               value={category}
               onChange={(e) => updateFilter('category', e.target.value)}
-              className="w-full border border-black bg-[#fefdfb] p-2 text-[12px] font-bold focus:outline-none focus:ring-2 focus:ring-black"
+              className="w-full border-4 border-black bg-[var(--bulletin-card)] p-3 text-[13px] font-black focus:outline-none focus:ring-0 text-[var(--bulletin-text)]"
             >
-              <option value="">All categories</option>
+              <option value="">All Departments</option>
               {categories.map((cat) => (
                 <option key={cat._id} value={cat.slug}>
                   {cat.name}
@@ -108,59 +108,58 @@ const ProductsBulletin: React.FC = () => {
 
           {/* Condition filter */}
           <div>
-            <label className="mb-2 block text-[10px] uppercase tracking-wider opacity-60">Condition</label>
+            <label className="mb-2 block text-[10px] font-black uppercase tracking-[0.2em] opacity-40 text-[var(--bulletin-text)]">Integrity</label>
             <select
               value={condition}
               onChange={(e) => updateFilter('condition', e.target.value)}
-              className="w-full border border-black bg-[#fefdfb] p-2 text-[12px] font-bold focus:outline-none focus:ring-2 focus:ring-black"
+              className="w-full border-4 border-black bg-[var(--bulletin-card)] p-3 text-[13px] font-black focus:outline-none focus:ring-0 text-[var(--bulletin-text)]"
             >
-              <option value="">All conditions</option>
-              <option value="new">Brand New</option>
-              <option value="like_new">Like New</option>
-              <option value="good">Good</option>
-              <option value="fair">Fair</option>
+              <option value="">Any Condition</option>
+              <option value="new">Pristine (New)</option>
+              <option value="like_new">Excellent (Like New)</option>
+              <option value="good">Operational (Good)</option>
+              <option value="fair">Functional (Fair)</option>
             </select>
           </div>
 
           {/* Sort */}
           <div>
-            <label className="mb-2 block text-[10px] uppercase tracking-wider opacity-60">Sort by</label>
+            <label className="mb-2 block text-[10px] font-black uppercase tracking-[0.2em] opacity-40 text-[var(--bulletin-text)]">Priority</label>
             <select
               value={sort}
               onChange={(e) => updateFilter('sort', e.target.value)}
-              className="w-full border border-black bg-[#fefdfb] p-2 text-[12px] font-bold focus:outline-none focus:ring-2 focus:ring-black"
+              className="w-full border-4 border-black bg-[var(--bulletin-card)] p-3 text-[13px] font-black focus:outline-none focus:ring-0 text-[var(--bulletin-text)]"
             >
-              <option value="">Newest first</option>
-              <option value="price-asc">Price: Low to High</option>
-              <option value="price-desc">Price: High to Low</option>
-              <option value="popular">Most viewed</option>
+              <option value="">Fresh Posts</option>
+              <option value="price-asc">Price: Low → High</option>
+              <option value="price-desc">Price: High → Low</option>
+              <option value="popular">High Traffic</option>
             </select>
           </div>
 
           {/* Clear filters */}
-          <div className="flex items-end">
-            {activeFilters.length > 0 && (
-              <button
-                onClick={clearFilters}
-                className="w-full border border-black bg-black p-2 text-[12px] font-bold uppercase text-white transition-colors hover:bg-white hover:text-black"
-              >
-                Clear all
-              </button>
-            )}
+          <div>
+            <button
+              onClick={clearFilters}
+              disabled={activeFilters.length === 0}
+              className="w-full border-4 border-black bg-black p-3.5 text-[11px] font-black uppercase text-white shadow-[6px_6px_0_0_rgba(0,0,0,0.2)] hover:bg-[#ff6b6b] transition-all disabled:opacity-20 disabled:translate-y-0"
+            >
+              Clear Manifest
+            </button>
           </div>
         </div>
 
         {/* Active filters */}
         {activeFilters.length > 0 && (
-          <div className="mt-4 flex flex-wrap gap-2">
+          <div className="mt-8 flex flex-wrap gap-3">
             {activeFilters.map((filter: any) => (
               <button
                 key={filter.key}
                 onClick={() => updateFilter(filter.key, '')}
-                className="flex items-center gap-2 border border-black bg-[#fffacd] px-3 py-1 text-[11px] font-bold transition-colors hover:bg-[#fff5b8]"
+                className="flex items-center gap-3 border-4 border-black bg-[#fffacd] dark:bg-yellow-900/40 px-4 py-1.5 text-[11px] font-black uppercase text-black dark:text-yellow-200 hover:bg-[#ffd700] transition-colors"
               >
                 {filter.label}
-                <X className="h-3 w-3" />
+                <X className="h-4 w-4" />
               </button>
             ))}
           </div>
@@ -169,54 +168,50 @@ const ProductsBulletin: React.FC = () => {
 
       {/* Products grid */}
       <BulletinSection 
-        bgColor="bg-[#faf8f5]"
-        subtitle={`Found ${pagination?.total || 0} items`}
+        bgColor="bg-[var(--bulletin-bg)]"
+        subtitle={`Audit Found ${pagination?.total || 0} Entities`}
       >
         {loading ? (
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
             {[...Array(8)].map((_, i) => (
-              <div key={i} className="aspect-[3/4] animate-pulse border border-black bg-white" />
+              <div key={i} className="aspect-[3/4] animate-pulse border-4 border-black bg-[var(--bulletin-card)]/50" />
             ))}
           </div>
         ) : products.length === 0 ? (
-          <div className="border border-black bg-[#fffacd] p-8 text-center">
-            <div className="text-base font-bold">No items found</div>
-            <div className="mt-2 text-[12px] opacity-70">Try adjusting your filters</div>
+          <div className="border-4 border-black bg-[#fffacd] dark:bg-yellow-900/10 p-16 text-center shadow-[12px_12px_0_0_var(--bulletin-shadow)]" style={{ transform: 'rotate(-0.5deg)' }}>
+            <div className="text-xl font-black uppercase text-[var(--bulletin-text)]">No Assets Found</div>
+            <div className="mt-2 text-[12px] font-bold opacity-40 uppercase tracking-widest text-[var(--bulletin-text)]">The Board is currently empty for this query</div>
           </div>
         ) : (
           <>
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="grid gap-12 sm:grid-cols-2 lg:grid-cols-4">
               {products.map((product, idx) => (
                 <Link
                   key={product._id}
                   to={`/products/${product._id}`}
-                  className="group relative"
+                  className="group relative block"
                   style={{ 
-                    transform: `rotate(${(idx % 3 - 1) * 0.8}deg)`,
-                    transition: 'transform 0.2s'
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.transform = 'rotate(0deg) translateY(-8px)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.transform = `rotate(${(idx % 3 - 1) * 0.8}deg)`;
+                    transform: `rotate(${(idx % 3 - 1) * 1.5}deg)`,
                   }}
                 >
-                  <div className="border border-black bg-white p-3 shadow-[6px_6px_0_0_rgba(0,0,0,0.1)]">
-                    <div className="relative aspect-square overflow-hidden border border-black/10 bg-gray-100">
+                  <div className="border-4 border-black bg-[var(--bulletin-card)] p-4 shadow-[8px_8px_0_0_var(--bulletin-shadow)] group-hover:shadow-[12px_12px_0_0_var(--bulletin-shadow)] group-hover:-translate-y-2 transition-all">
+                    {/* Tape Effect */}
+                    <div className="absolute -top-3 left-1/2 -translate-x-1/2 h-6 w-24 bg-[#ffd700]/60 rotate-[-1deg] z-10 opacity-60 group-hover:opacity-100 transition-opacity" />
+                    
+                    <div className="relative aspect-square overflow-hidden border-4 border-black bg-black/5">
                       <img
                         src={getImage(product)}
                         alt={product.title}
-                        className="h-full w-full object-cover"
+                        className="h-full w-full object-cover group-hover:scale-110 transition-transform duration-500"
                       />
-                      <div className="absolute -top-2 left-1/2 h-4 w-16 -translate-x-1/2 bg-[#ffd700]/30 opacity-60" 
-                           style={{ transform: 'translateX(-50%) rotate(-2deg)' }} />
+                      <div className="absolute inset-0 bg-black/10 group-hover:bg-transparent transition-colors" />
                     </div>
-                    <div className="mt-3 space-y-1">
-                      <div className="truncate font-bold leading-tight">{product.title}</div>
-                      <div className="flex items-baseline justify-between">
-                        <span className="text-base font-bold">GHS {product.price}</span>
-                        <span className="text-[10px] uppercase opacity-50">
+                    
+                    <div className="mt-5 space-y-2">
+                      <div className="truncate text-lg font-black uppercase tracking-tight text-[var(--bulletin-text)] leading-none">{product.title}</div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-xl font-black text-[var(--bulletin-text)]">GHS {product.price}</span>
+                        <span className="text-[9px] font-black uppercase tracking-widest opacity-40 border-2 border-black/10 px-2 py-0.5 text-[var(--bulletin-text)]">
                           {typeof product.category === 'string' ? '' : product.category.name}
                         </span>
                       </div>
@@ -228,18 +223,18 @@ const ProductsBulletin: React.FC = () => {
 
             {/* Pagination */}
             {pagination && pagination.pages > 1 && (
-              <div className="mt-8 flex justify-center gap-2">
+              <div className="mt-16 flex justify-center gap-3">
                 {[...Array(pagination.pages)].map((_, i) => (
                   <button
                     key={i}
                     onClick={() => updateFilter('page', String(i + 1))}
-                    className={`border border-black px-4 py-2 text-[12px] font-bold transition-colors ${
+                    className={`border-4 border-black px-6 py-3 text-[14px] font-black transition-all ${
                       pagination.page === i + 1
-                        ? 'bg-black text-white'
-                        : 'bg-white hover:bg-[#f8f7f4]'
+                        ? 'bg-black text-white shadow-[6px_6px_0_0_rgba(0,0,0,0.2)] -translate-y-1'
+                        : 'bg-[var(--bulletin-card)] text-[var(--bulletin-text)] hover:bg-[#fffacd] hover:text-black'
                     }`}
                   >
-                    {i + 1}
+                    {String(i + 1).padStart(2, '0')}
                   </button>
                 ))}
               </div>

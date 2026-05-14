@@ -6,7 +6,7 @@ import { colors } from '../theme';
 import ScreenHeader from '../components/ScreenHeader';
 
 const ProfileScreen = ({ navigation }: any) => {
-  const { user, logout } = useAuth();
+  const { user, logout, viewMode, setViewMode } = useAuth();
 
   const menuItems = [
     {
@@ -56,6 +56,24 @@ const ProfileScreen = ({ navigation }: any) => {
           <Text style={styles.roleText}>{user?.role?.toUpperCase()}</Text>
         </View>
       </View>
+
+      {/* Mode Switcher Banner for Sellers */}
+      {isSeller && (
+        <TouchableOpacity 
+          style={styles.modeBanner} 
+          onPress={() => setViewMode(viewMode === 'seller' ? 'buyer' : 'seller')}
+        >
+          <View>
+            <Text style={styles.modeBannerTitle}>
+              {viewMode === 'seller' ? 'Switch to Marketplace View' : 'Switch to Seller Hub'}
+            </Text>
+            <Text style={styles.modeBannerSub}>
+              {viewMode === 'seller' ? 'Browse campus items and shop.' : 'Manage your store and listings.'}
+            </Text>
+          </View>
+          <Text style={styles.modeBannerAction}>GO →</Text>
+        </TouchableOpacity>
+      )}
 
       {/* Info card */}
       <View style={styles.card}>
@@ -142,12 +160,27 @@ const styles = StyleSheet.create({
     marginHorizontal: 16,
     marginBottom: 14,
   },
+  modeBanner: {
+    marginHorizontal: 16,
+    marginBottom: 20,
+    backgroundColor: '#1f1a14',
+    padding: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    borderWidth: 1,
+    borderColor: '#2f2921',
+  },
+  modeBannerTitle: { color: '#fff', fontSize: 13, fontWeight: '900', textTransform: 'uppercase', letterSpacing: 0.8 },
+  modeBannerSub: { color: 'rgba(255,255,255,0.6)', fontSize: 11, marginTop: 2 },
+  modeBannerAction: { color: colors.accentAlt, fontWeight: '900', fontSize: 12 },
   infoRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    alignItems: 'center',
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: '#f3f4f6',
+    borderBottomColor: '#f1f5f9',
   },
   infoKey: { fontSize: 13, color: '#6b7280' },
   infoValue: { fontSize: 13, fontWeight: '600', color: '#111827' },

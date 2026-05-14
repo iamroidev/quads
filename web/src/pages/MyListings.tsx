@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+ import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { Plus, Package, Eye, Edit2, Trash2, MoreVertical, Zap, Upload, Copy, BarChart3, X, Filter, ShieldOff } from 'lucide-react';
 import toast from 'react-hot-toast';
@@ -9,11 +9,11 @@ import { BulletinLayout, BulletinSection, BulletinCard } from '../components/lay
 import { useAuth } from '../context/AuthContext';
 
 const statusStyles: Record<string, string> = {
-  active: 'bg-[#fffacd] text-black',
-  sold: 'bg-[#f0e8f4] text-black',
-  reserved: 'bg-[#fff5e1] text-black',
-  draft: 'bg-[#e0f2f7] text-black',
-  removed: 'bg-[#fce4ec] text-black',
+  active: 'bg-[#fffacd] dark:bg-yellow-900/30 text-black dark:text-yellow-200',
+  sold: 'bg-[#f0e8f4] dark:bg-purple-900/30 text-black dark:text-purple-200',
+  reserved: 'bg-[#fff5e1] dark:bg-orange-900/30 text-black dark:text-orange-200',
+  draft: 'bg-[#e0f2f7] dark:bg-sky-900/30 text-black dark:text-sky-200',
+  removed: 'bg-[#fce4ec] dark:bg-red-900/30 text-black dark:text-red-200',
 };
 
 const statusLabels: Record<string, string> = {
@@ -281,7 +281,7 @@ const MyListings: React.FC = () => {
   return (
     <BulletinLayout title="My Listings" subtitle="Seller" section="04">
       {/* Action bar */}
-      <div className="border-b border-black bg-[#faf8f5] p-4 md:p-6">
+      <div className="border-b border-[var(--bulletin-border)] bg-[var(--bulletin-bg)] p-4 md:p-6">
         <div className="mx-auto max-w-[1400px]">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="flex items-center gap-2">
@@ -294,14 +294,14 @@ const MyListings: React.FC = () => {
               />
               <button
                 onClick={downloadErrorTemplate}
-                className="border border-black bg-white px-3 py-1.5 text-[10px] font-bold uppercase shadow-[2px_2px_0_0_rgba(0,0,0,1)] transition-all hover:shadow-[3px_3px_0_0_rgba(0,0,0,1)]"
+                className="border border-[var(--bulletin-border)] bg-[var(--bulletin-card)] px-3 py-1.5 text-[10px] font-bold uppercase shadow-[2px_2px_0_0_var(--bulletin-shadow)] transition-all hover:shadow-[3px_3px_0_0_var(--bulletin-shadow)]"
               >
                 Error CSV template
               </button>
               <button
                 onClick={() => fileInputRef.current?.click()}
                 disabled={importing}
-                className="border border-black bg-white px-3 py-1.5 text-[10px] font-bold uppercase shadow-[2px_2px_0_0_rgba(0,0,0,1)] transition-all hover:shadow-[3px_3px_0_0_rgba(0,0,0,1)] disabled:opacity-50"
+                className="border border-[var(--bulletin-border)] bg-[var(--bulletin-card)] px-3 py-1.5 text-[10px] font-bold uppercase shadow-[2px_2px_0_0_var(--bulletin-shadow)] transition-all hover:shadow-[3px_3px_0_0_var(--bulletin-shadow)] disabled:opacity-50"
               >
                 <Upload className="inline-block h-3 w-3 mr-1" />
                 {importing ? 'Importing...' : 'Import CSV'}
@@ -311,7 +311,7 @@ const MyListings: React.FC = () => {
                   type="checkbox"
                   checked={importWithImages}
                   onChange={(e) => setImportWithImages(e.target.checked)}
-                  className="h-3.5 w-3.5 accent-black"
+                  className="h-3.5 w-3.5 accent-black dark:accent-white"
                 />
                 Images
               </label>
@@ -319,14 +319,14 @@ const MyListings: React.FC = () => {
             <div className="flex items-center gap-2">
               <Link
                 to="/seller/analytics"
-                className="border border-black bg-white px-3 py-1.5 text-[10px] font-bold uppercase shadow-[2px_2px_0_0_rgba(0,0,0,1)] transition-all hover:shadow-[3px_3px_0_0_rgba(0,0,0,1)]"
+                className="border border-[var(--bulletin-border)] bg-[var(--bulletin-card)] px-3 py-1.5 text-[10px] font-bold uppercase shadow-[2px_2px_0_0_var(--bulletin-shadow)] transition-all hover:shadow-[3px_3px_0_0_var(--bulletin-shadow)]"
               >
                 <BarChart3 className="inline-block h-3 w-3 mr-1" />
                 Analytics
               </Link>
               <Link
                 to="/sell"
-                className="border border-black bg-black px-4 py-1.5 text-[10px] font-bold uppercase text-white shadow-[2px_2px_0_0_rgba(0,0,0,1)] transition-all hover:bg-white hover:text-black"
+                className="border border-[var(--bulletin-border)] bg-[var(--bulletin-text)] px-4 py-1.5 text-[10px] font-bold uppercase text-[var(--bulletin-bg)] shadow-[2px_2px_0_0_var(--bulletin-shadow)] transition-all hover:bg-[var(--bulletin-card)] hover:text-[var(--bulletin-text)]"
               >
                 <Plus className="inline-block h-3 w-3 mr-1" />
                 New Listing
@@ -336,11 +336,11 @@ const MyListings: React.FC = () => {
         </div>
       </div>
 
-      <BulletinSection bgColor="bg-[#faf8f5]">
+      <BulletinSection bgColor="bg-[var(--bulletin-bg)]">
         {/* Verification banner for unverified sellers */}
         {isUnverifiedSeller && (
-          <div className="mb-6 flex flex-col sm:flex-row items-start sm:items-center gap-3 border-2 border-black bg-[#fce4ec] p-4 shadow-[4px_4px_0_0_rgba(0,0,0,1)]">
-            <ShieldOff className="h-5 w-5 flex-shrink-0 text-black/60" />
+          <div className="mb-6 flex flex-col sm:flex-row items-start sm:items-center gap-3 border-2 border-[var(--bulletin-border)] bg-[#fce4ec] dark:bg-red-900/20 p-4 shadow-[4px_4px_0_0_var(--bulletin-shadow)]">
+            <ShieldOff className="h-5 w-5 flex-shrink-0 opacity-60" />
             <div className="flex-1">
               <div className="text-[11px] font-bold uppercase tracking-wider">Verification required to list items</div>
               <div className="text-[11px] opacity-70 mt-0.5">
@@ -349,7 +349,7 @@ const MyListings: React.FC = () => {
             </div>
             <button
               onClick={() => navigate('/verification')}
-              className="flex-shrink-0 border border-black bg-black px-4 py-2 text-[10px] font-bold uppercase text-white shadow-[2px_2px_0_0_rgba(0,0,0,1)] hover:bg-white hover:text-black transition-colors"
+              className="flex-shrink-0 border border-[var(--bulletin-border)] bg-[var(--bulletin-text)] px-4 py-2 text-[10px] font-bold uppercase text-[var(--bulletin-bg)] shadow-[2px_2px_0_0_var(--bulletin-shadow)] hover:bg-[var(--bulletin-card)] hover:text-[var(--bulletin-text)] transition-colors"
             >
               Verify Now
             </button>
@@ -357,14 +357,14 @@ const MyListings: React.FC = () => {
         )}
 
         {/* Status filter tabs */}
-        <div className="flex gap-0 overflow-x-auto mb-6 border-b border-black scrollbar-hide">
+        <div className="flex gap-0 overflow-x-auto mb-6 border-b border-[var(--bulletin-border)] scrollbar-hide">
           {['', 'active', 'draft', 'reserved', 'sold', 'removed'].map((status) => (
             <button
               key={status}
               onClick={() => updateFilter('status', status)}
-              className={`px-4 py-2 text-[10px] font-bold uppercase tracking-wider whitespace-nowrap border-b-2 -mb-px transition-colors ${
+              className={`px-4 py-2 text-[10px] font-bold uppercase tracking-wider whitespace-nowrap border-b-2 -mb-px transition-colors text-[var(--bulletin-text)] ${
                 statusFilter === status
-                  ? 'border-black text-black'
+                  ? 'border-[var(--bulletin-border)]'
                   : 'border-transparent opacity-40 hover:opacity-70'
               }`}
             >
@@ -376,9 +376,9 @@ const MyListings: React.FC = () => {
 
         {/* Bulk actions bar */}
         {products.length > 0 && (
-          <div className="mb-4 flex flex-wrap items-center justify-between gap-3 border border-black bg-[#fefdfb] p-3 shadow-[3px_3px_0_0_rgba(0,0,0,1)]">
+          <div className="mb-4 flex flex-wrap items-center justify-between gap-3 border border-[var(--bulletin-border)] bg-[var(--bulletin-card)] p-3 shadow-[3px_3px_0_0_var(--bulletin-shadow)]">
             <label className="flex items-center gap-2 text-[10px] font-bold uppercase">
-              <input type="checkbox" checked={allSelected} onChange={toggleSelectAll} className="h-3.5 w-3.5 accent-black" />
+              <input type="checkbox" checked={allSelected} onChange={toggleSelectAll} className="h-3.5 w-3.5 accent-black dark:accent-white" />
               Select all ({products.length})
             </label>
             <div className="flex flex-wrap items-center gap-2">
@@ -386,28 +386,28 @@ const MyListings: React.FC = () => {
               <button
                 onClick={() => handleBulkStatus('active')}
                 disabled={selectedIds.length === 0 || bulkUpdatingStatus}
-                className="border border-black bg-white px-2 py-1 text-[9px] font-bold uppercase shadow-[1px_1px_0_0_rgba(0,0,0,1)] hover:bg-[#fffacd] disabled:opacity-40"
+                className="border border-[var(--bulletin-border)] bg-[var(--bulletin-card)] px-2 py-1 text-[9px] font-bold uppercase shadow-[1px_1px_0_0_var(--bulletin-shadow)] hover:bg-[#fffacd] dark:hover:bg-yellow-900/30 disabled:opacity-40"
               >
                 Active
               </button>
               <button
                 onClick={() => handleBulkStatus('draft')}
                 disabled={selectedIds.length === 0 || bulkUpdatingStatus}
-                className="border border-black bg-white px-2 py-1 text-[9px] font-bold uppercase shadow-[1px_1px_0_0_rgba(0,0,0,1)] hover:bg-[#e0f2f7] disabled:opacity-40"
+                className="border border-[var(--bulletin-border)] bg-[var(--bulletin-card)] px-2 py-1 text-[9px] font-bold uppercase shadow-[1px_1px_0_0_var(--bulletin-shadow)] hover:bg-[#e0f2f7] dark:hover:bg-sky-900/30 disabled:opacity-40"
               >
                 Draft
               </button>
               <button
                 onClick={() => handleBulkStatus('sold')}
                 disabled={selectedIds.length === 0 || bulkUpdatingStatus}
-                className="border border-black bg-white px-2 py-1 text-[9px] font-bold uppercase shadow-[1px_1px_0_0_rgba(0,0,0,1)] hover:bg-[#f0e8f4] disabled:opacity-40"
+                className="border border-[var(--bulletin-border)] bg-[var(--bulletin-card)] px-2 py-1 text-[9px] font-bold uppercase shadow-[1px_1px_0_0_var(--bulletin-shadow)] hover:bg-[#f0e8f4] dark:hover:bg-purple-900/30 disabled:opacity-40"
               >
                 Sold
               </button>
               <button
                 onClick={handleBulkDelete}
                 disabled={selectedIds.length === 0 || bulkDeleting}
-                className="border border-black bg-white px-2 py-1 text-[9px] font-bold uppercase shadow-[1px_1px_0_0_rgba(0,0,0,1)] hover:bg-[#fce4ec] disabled:opacity-40"
+                className="border border-[var(--bulletin-border)] bg-[var(--bulletin-card)] px-2 py-1 text-[9px] font-bold uppercase shadow-[1px_1px_0_0_var(--bulletin-shadow)] hover:bg-[#fce4ec] dark:hover:bg-red-900/30 disabled:opacity-40"
               >
                 <Trash2 className="inline-block h-3 w-3 mr-1" />
                 Delete
@@ -415,7 +415,7 @@ const MyListings: React.FC = () => {
               <select
                 value={bulkAction}
                 onChange={(e) => setBulkAction(e.target.value as any)}
-                className="border border-black bg-[#fefdfb] px-2 py-1 text-[9px] font-bold uppercase focus:outline-none focus:ring-2 focus:ring-black"
+                className="border border-[var(--bulletin-border)] bg-[var(--bulletin-card)] px-2 py-1 text-[9px] font-bold uppercase focus:outline-none focus:ring-2 focus:ring-[var(--bulletin-text)]"
               >
                 <option value="none">More...</option>
                 <option value="price_adjust">Adjust price</option>
@@ -425,18 +425,18 @@ const MyListings: React.FC = () => {
                 <option value="archive">Archive</option>
               </select>
               {bulkAction === 'price_adjust' && (
-                <input value={bulkPercent} onChange={(e) => setBulkPercent(e.target.value)} className="w-16 border border-black bg-white px-2 py-1 text-[10px] font-bold focus:outline-none focus:ring-2 focus:ring-black" placeholder="10%" />
+                <input value={bulkPercent} onChange={(e) => setBulkPercent(e.target.value)} className="w-16 border border-[var(--bulletin-border)] bg-[var(--bulletin-card)] px-2 py-1 text-[10px] font-bold focus:outline-none focus:ring-2 focus:ring-[var(--bulletin-text)]" placeholder="10%" />
               )}
               {bulkAction === 'set_tags' && (
-                <input value={bulkTags} onChange={(e) => setBulkTags(e.target.value)} className="w-32 border border-black bg-white px-2 py-1 text-[10px] font-bold focus:outline-none focus:ring-2 focus:ring-black" placeholder="tag1, tag2" />
+                <input value={bulkTags} onChange={(e) => setBulkTags(e.target.value)} className="w-32 border border-[var(--bulletin-border)] bg-[var(--bulletin-card)] px-2 py-1 text-[10px] font-bold focus:outline-none focus:ring-2 focus:ring-[var(--bulletin-text)]" placeholder="tag1, tag2" />
               )}
               {bulkAction === 'set_category' && (
-                <input value={bulkCategory} onChange={(e) => setBulkCategory(e.target.value)} className="w-28 border border-black bg-white px-2 py-1 text-[10px] font-bold focus:outline-none focus:ring-2 focus:ring-black" placeholder="category slug" />
+                <input value={bulkCategory} onChange={(e) => setBulkCategory(e.target.value)} className="w-28 border border-[var(--bulletin-border)] bg-[var(--bulletin-card)] px-2 py-1 text-[10px] font-bold focus:outline-none focus:ring-2 focus:ring-[var(--bulletin-text)]" placeholder="category slug" />
               )}
               <button
                 onClick={runAdvancedBulkAction}
                 disabled={selectedIds.length === 0 || bulkAction === 'none'}
-                className="border border-black bg-black px-2 py-1 text-[9px] font-bold uppercase text-white shadow-[1px_1px_0_0_rgba(0,0,0,1)] hover:bg-white hover:text-black disabled:opacity-40"
+                className="border border-[var(--bulletin-border)] bg-[var(--bulletin-text)] px-2 py-1 text-[9px] font-bold uppercase text-[var(--bulletin-bg)] shadow-[1px_1px_0_0_var(--bulletin-shadow)] hover:bg-[var(--bulletin-card)] hover:text-[var(--bulletin-text)] disabled:opacity-40"
               >
                 Run
               </button>
@@ -447,43 +447,43 @@ const MyListings: React.FC = () => {
         {/* CSV Preview modal */}
         {previewingCSV && csvPreview && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-            <div className="border border-black bg-[#fefdfb] shadow-[8px_8px_0_0_rgba(0,0,0,1)] max-w-2xl w-full p-6">
-              <div className="flex items-center justify-between mb-4 border-b border-black pb-3">
+            <div className="border border-[var(--bulletin-border)] bg-[var(--bulletin-card)] shadow-[8px_8px_0_0_var(--bulletin-shadow)] max-w-2xl w-full p-6">
+              <div className="flex items-center justify-between mb-4 border-b border-[var(--bulletin-border)] pb-3">
                 <div>
                   <div className="text-[10px] uppercase tracking-wider opacity-60">CSV Preview</div>
                   <div className="text-lg font-bold mt-1">Import summary</div>
                 </div>
                 <button
                   onClick={() => { setPreviewingCSV(false); setCsvPreview(null); setPendingCSVFile(null); }}
-                  className="border border-black bg-white p-1.5 shadow-[2px_2px_0_0_rgba(0,0,0,1)] hover:shadow-[3px_3px_0_0_rgba(0,0,0,1)] transition-all"
+                  className="border border-[var(--bulletin-border)] bg-[var(--bulletin-card)] p-1.5 shadow-[2px_2px_0_0_var(--bulletin-shadow)] hover:shadow-[3px_3px_0_0_var(--bulletin-shadow)] transition-all"
                 >
                   <X className="h-4 w-4" />
                 </button>
               </div>
               <div className="grid gap-3 sm:grid-cols-4 mb-4">
-                <div className="border border-black bg-white p-3 shadow-[2px_2px_0_0_rgba(0,0,0,1)]">
+                <div className="border border-[var(--bulletin-border)] bg-[var(--bulletin-card)] p-3 shadow-[2px_2px_0_0_var(--bulletin-shadow)]">
                   <div className="text-[10px] opacity-60 uppercase tracking-wider">Mode</div>
                   <div className="text-[12px] font-bold uppercase mt-1">{csvPreview.importMode}</div>
                 </div>
-                <div className="border border-black bg-white p-3 shadow-[2px_2px_0_0_rgba(0,0,0,1)]">
+                <div className="border border-[var(--bulletin-border)] bg-[var(--bulletin-card)] p-3 shadow-[2px_2px_0_0_var(--bulletin-shadow)]">
                   <div className="text-[10px] opacity-60 uppercase tracking-wider">Rows</div>
                   <div className="text-[12px] font-bold mt-1">{csvPreview.totalRows}</div>
                 </div>
-                <div className="border border-black bg-[#fffacd] p-3 shadow-[2px_2px_0_0_rgba(0,0,0,1)]">
+                <div className="border border-[var(--bulletin-border)] bg-[#fffacd] dark:bg-yellow-900/30 p-3 shadow-[2px_2px_0_0_var(--bulletin-shadow)]">
                   <div className="text-[10px] opacity-60 uppercase tracking-wider">Valid</div>
                   <div className="text-[12px] font-bold mt-1">{csvPreview.estimatedValid}</div>
                 </div>
-                <div className="border border-black bg-[#fce4ec] p-3 shadow-[2px_2px_0_0_rgba(0,0,0,1)]">
+                <div className="border border-[var(--bulletin-border)] bg-[#fce4ec] dark:bg-red-900/30 p-3 shadow-[2px_2px_0_0_var(--bulletin-shadow)]">
                   <div className="text-[10px] opacity-60 uppercase tracking-wider">Invalid</div>
                   <div className="text-[12px] font-bold mt-1">{csvPreview.estimatedInvalid}</div>
                 </div>
               </div>
-              <div className="border border-black bg-white p-3 max-h-36 overflow-auto mb-3 shadow-[2px_2px_0_0_rgba(0,0,0,1)]">
+              <div className="border border-[var(--bulletin-border)] bg-[var(--bulletin-card)] p-3 max-h-36 overflow-auto mb-3 shadow-[2px_2px_0_0_var(--bulletin-shadow)]">
                 <div className="text-[10px] font-bold uppercase tracking-wider opacity-60 mb-2">Columns</div>
                 <div className="text-[11px] leading-relaxed">{csvPreview.headers.join(', ')}</div>
               </div>
               {csvPreview.mappingHints && (
-                <div className="border border-black bg-white p-3 mb-3 shadow-[2px_2px_0_0_rgba(0,0,0,1)]">
+                <div className="border border-[var(--bulletin-border)] bg-[var(--bulletin-card)] p-3 mb-3 shadow-[2px_2px_0_0_var(--bulletin-shadow)]">
                   <div className="text-[10px] font-bold uppercase tracking-wider opacity-60 mb-2">Mapping hints</div>
                   <div className="space-y-1 text-[11px]">
                     {Object.entries(csvPreview.mappingHints).map(([k, v]) => (
@@ -498,14 +498,14 @@ const MyListings: React.FC = () => {
               <div className="flex items-center justify-end gap-2">
                 <button
                   onClick={() => { setPreviewingCSV(false); setCsvPreview(null); setPendingCSVFile(null); }}
-                  className="border border-black bg-white px-4 py-2 text-[10px] font-bold uppercase shadow-[2px_2px_0_0_rgba(0,0,0,1)] hover:shadow-[3px_3px_0_0_rgba(0,0,0,1)] transition-all"
+                  className="border border-[var(--bulletin-border)] bg-[var(--bulletin-card)] px-4 py-2 text-[10px] font-bold uppercase shadow-[2px_2px_0_0_var(--bulletin-shadow)] hover:shadow-[3px_3px_0_0_var(--bulletin-shadow)] transition-all"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={runImportCSV}
                   disabled={importing}
-                  className="border border-black bg-black px-4 py-2 text-[10px] font-bold uppercase text-white shadow-[2px_2px_0_0_rgba(0,0,0,1)] hover:bg-white hover:text-black disabled:opacity-50 transition-all"
+                  className="border border-[var(--bulletin-border)] bg-[var(--bulletin-text)] px-4 py-2 text-[10px] font-bold uppercase text-[var(--bulletin-bg)] shadow-[2px_2px_0_0_var(--bulletin-shadow)] hover:bg-[var(--bulletin-card)] hover:text-[var(--bulletin-text)] disabled:opacity-50 transition-all"
                 >
                   {importing ? 'Importing...' : 'Confirm Import'}
                 </button>
@@ -517,15 +517,15 @@ const MyListings: React.FC = () => {
         {/* Delete confirmation modal */}
         {confirmDelete && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-            <div className="border border-black bg-[#fefdfb] shadow-[8px_8px_0_0_rgba(0,0,0,1)] max-w-md w-full p-6">
-              <div className="flex items-center justify-between mb-4 border-b border-black pb-3">
+            <div className="border border-[var(--bulletin-border)] bg-[var(--bulletin-card)] shadow-[8px_8px_0_0_var(--bulletin-shadow)] max-w-md w-full p-6">
+              <div className="flex items-center justify-between mb-4 border-b border-[var(--bulletin-border)] pb-3">
                 <div>
                   <div className="text-[10px] uppercase tracking-wider opacity-60">Confirm</div>
                   <div className="text-lg font-bold mt-1">This cannot be undone</div>
                 </div>
                 <button
                   onClick={() => setConfirmDelete(null)}
-                  className="border border-black bg-white p-1.5 shadow-[2px_2px_0_0_rgba(0,0,0,1)] hover:shadow-[3px_3px_0_0_rgba(0,0,0,1)] transition-all"
+                  className="border border-[var(--bulletin-border)] bg-[var(--bulletin-card)] p-1.5 shadow-[2px_2px_0_0_var(--bulletin-shadow)] hover:shadow-[3px_3px_0_0_var(--bulletin-shadow)] transition-all"
                 >
                   <X className="h-4 w-4" />
                 </button>
@@ -538,7 +538,7 @@ const MyListings: React.FC = () => {
               <div className="flex items-center justify-end gap-2">
                 <button
                   onClick={() => setConfirmDelete(null)}
-                  className="border border-black bg-white px-4 py-2 text-[10px] font-bold uppercase shadow-[2px_2px_0_0_rgba(0,0,0,1)] hover:shadow-[3px_3px_0_0_rgba(0,0,0,1)] transition-all"
+                  className="border border-[var(--bulletin-border)] bg-[var(--bulletin-card)] px-4 py-2 text-[10px] font-bold uppercase shadow-[2px_2px_0_0_var(--bulletin-shadow)] hover:shadow-[3px_3px_0_0_var(--bulletin-shadow)] transition-all"
                 >
                   Cancel
                 </button>
@@ -551,7 +551,7 @@ const MyListings: React.FC = () => {
                     runBulkDelete();
                   }}
                   disabled={bulkDeleting || !!deletingId}
-                  className="border border-black bg-black px-4 py-2 text-[10px] font-bold uppercase text-white shadow-[2px_2px_0_0_rgba(0,0,0,1)] disabled:opacity-50 transition-all"
+                  className="border border-[var(--bulletin-border)] bg-[var(--bulletin-text)] px-4 py-2 text-[10px] font-bold uppercase text-[var(--bulletin-bg)] shadow-[2px_2px_0_0_var(--bulletin-shadow)] disabled:opacity-50 transition-all"
                 >
                   {bulkDeleting || deletingId ? 'Deleting...' : 'Delete'}
                 </button>
@@ -564,14 +564,14 @@ const MyListings: React.FC = () => {
         {loading ? (
           <LoadingSpinner text="Loading your listings..." />
         ) : products.length === 0 ? (
-          <div className="border border-black bg-[#fffacd] p-12 text-center shadow-[4px_4px_0_0_rgba(0,0,0,1)]">
+          <div className="border border-[var(--bulletin-border)] bg-[#fffacd] dark:bg-yellow-900/20 p-12 text-center shadow-[4px_4px_0_0_var(--bulletin-shadow)]">
             <Package className="h-12 w-12 mx-auto opacity-40 mb-4" />
             <div className="text-[10px] uppercase tracking-wider opacity-60 mb-2">Empty</div>
             <div className="text-lg font-bold mb-4">No Listings Yet</div>
             <div className="text-[12px] opacity-60 mb-6">Start selling by creating your first listing.</div>
             <Link
               to="/sell"
-              className="inline-block border border-black bg-black px-4 py-2 text-[10px] font-bold uppercase text-white transition-colors hover:bg-white hover:text-black shadow-[2px_2px_0_0_rgba(0,0,0,1)]"
+              className="inline-block border border-[var(--bulletin-border)] bg-[var(--bulletin-text)] px-4 py-2 text-[10px] font-bold uppercase text-[var(--bulletin-bg)] transition-colors hover:bg-[var(--bulletin-card)] hover:text-[var(--bulletin-text)] shadow-[2px_2px_0_0_var(--bulletin-shadow)]"
             >
               <Plus className="inline-block h-3 w-3 mr-1" />
               Create Listing
@@ -587,7 +587,7 @@ const MyListings: React.FC = () => {
               return (
                 <div
                   key={product._id}
-                  className="border border-black bg-white p-3 shadow-[3px_3px_0_0_rgba(0,0,0,1)]"
+                  className="border border-[var(--bulletin-border)] bg-[var(--bulletin-card)] p-3 shadow-[3px_3px_0_0_var(--bulletin-shadow)]"
                   style={{ transform: `rotate(${Math.random() * 0.4 - 0.2}deg)` }}
                 >
                   <div className="flex items-center gap-3">
@@ -595,11 +595,11 @@ const MyListings: React.FC = () => {
                       type="checkbox"
                       checked={selectedIds.includes(product._id)}
                       onChange={() => toggleSelect(product._id)}
-                      className="h-4 w-4 accent-black flex-shrink-0"
+                      className="h-4 w-4 accent-black dark:accent-white flex-shrink-0"
                     />
                     {/* Image */}
-                    <Link to={`/products/${product._id}`} className="flex-shrink-0 border border-black">
-                      <div className="w-14 h-14 overflow-hidden bg-[#f8f7f4]">
+                    <Link to={`/products/${product._id}`} className="flex-shrink-0 border border-[var(--bulletin-border)]">
+                      <div className="w-14 h-14 overflow-hidden bg-[var(--bulletin-bg)]">
                         <img src={mainImage} alt={product.title} className="w-full h-full object-cover" />
                       </div>
                     </Link>
@@ -614,7 +614,7 @@ const MyListings: React.FC = () => {
                           {product.title}
                         </Link>
                         {product.isFeatured && (
-                          <span className="flex-shrink-0 border border-black bg-[#fffacd] px-1.5 py-0.5 text-[8px] font-bold uppercase flex items-center gap-0.5 shadow-[1px_1px_0_0_rgba(0,0,0,1)]">
+                          <span className="flex-shrink-0 border border-[var(--bulletin-border)] bg-[#fffacd] dark:bg-yellow-900/30 px-1.5 py-0.5 text-[8px] font-bold uppercase flex items-center gap-0.5 shadow-[1px_1px_0_0_var(--bulletin-shadow)]">
                             <Zap className="h-2.5 w-2.5" />
                             Featured
                           </span>
@@ -624,7 +624,7 @@ const MyListings: React.FC = () => {
                         GHS {product.price.toLocaleString('en-GH', { minimumFractionDigits: 2 })}
                       </div>
                       <div className="flex items-center gap-3 mt-1">
-                        <span className={`border border-black px-1.5 py-0.5 text-[9px] font-bold uppercase ${statusStyles[product.status]}`}>
+                        <span className={`border border-[var(--bulletin-border)] px-1.5 py-0.5 text-[9px] font-bold uppercase ${statusStyles[product.status]}`}>
                           {statusLabels[product.status]}
                         </span>
                         <span className="flex items-center gap-1 text-[10px] opacity-60">
@@ -641,7 +641,7 @@ const MyListings: React.FC = () => {
                         <button
                           onClick={() => handleBoostRequest(product._id)}
                           disabled={boostingId === product._id}
-                          className="border border-black bg-[#fffacd] px-2 py-1 text-[8px] font-bold uppercase shadow-[1px_1px_0_0_rgba(0,0,0,1)] disabled:opacity-40 transition-all hover:shadow-[2px_2px_0_0_rgba(0,0,0,1)]"
+                          className="border border-[var(--bulletin-border)] bg-[#fffacd] dark:bg-yellow-900/30 px-2 py-1 text-[8px] font-bold uppercase shadow-[1px_1px_0_0_var(--bulletin-shadow)] disabled:opacity-40 transition-all hover:shadow-[2px_2px_0_0_var(--bulletin-shadow)]"
                         >
                           <Zap className="inline-block h-2.5 w-2.5 mr-0.5" />
                           {boostingId === product._id ? '...' : 'Boost'}
@@ -649,7 +649,7 @@ const MyListings: React.FC = () => {
                       )}
                       <Link
                         to={`/products/${product._id}/edit`}
-                        className="border border-black bg-white p-1.5 text-[10px] font-bold uppercase shadow-[1px_1px_0_0_rgba(0,0,0,1)] hover:shadow-[2px_2px_0_0_rgba(0,0,0,1)] transition-all"
+                        className="border border-[var(--bulletin-border)] bg-[var(--bulletin-card)] p-1.5 text-[10px] font-bold uppercase shadow-[1px_1px_0_0_var(--bulletin-shadow)] hover:shadow-[2px_2px_0_0_var(--bulletin-shadow)] transition-all"
                         title="Edit"
                       >
                         <Edit2 className="h-3.5 w-3.5" />
@@ -657,18 +657,18 @@ const MyListings: React.FC = () => {
                       <div className="relative">
                         <button
                           onClick={() => setOpenMenu(openMenu === product._id ? null : product._id)}
-                          className="border border-black bg-white p-1.5 text-[10px] font-bold uppercase shadow-[1px_1px_0_0_rgba(0,0,0,1)] hover:shadow-[2px_2px_0_0_rgba(0,0,0,1)] transition-all"
+                          className="border border-[var(--bulletin-border)] bg-[var(--bulletin-card)] p-1.5 text-[10px] font-bold uppercase shadow-[1px_1px_0_0_var(--bulletin-shadow)] hover:shadow-[2px_2px_0_0_var(--bulletin-shadow)] transition-all"
                         >
                           <MoreVertical className="h-3.5 w-3.5" />
                         </button>
                         {openMenu === product._id && (
                           <>
                             <div className="fixed inset-0 z-10" onClick={() => setOpenMenu(null)} />
-                            <div className="absolute right-0 top-full mt-1 border border-black bg-white shadow-[4px_4px_0_0_rgba(0,0,0,1)] z-20 py-1 min-w-[150px]">
+                            <div className="absolute right-0 top-full mt-1 border border-[var(--bulletin-border)] bg-[var(--bulletin-card)] shadow-[4px_4px_0_0_var(--bulletin-shadow)] z-20 py-1 min-w-[150px]">
                               {product.status !== 'active' && (
                                 <button
                                   onClick={() => handleStatusChange(product._id, 'active')}
-                                  className="w-full text-left px-3 py-1.5 text-[10px] font-bold uppercase hover:bg-[#fffacd]"
+                                  className="w-full text-left px-3 py-1.5 text-[10px] font-bold uppercase hover:bg-[#fffacd] dark:hover:bg-yellow-900/30"
                                 >
                                   Mark Active
                                 </button>
@@ -676,7 +676,7 @@ const MyListings: React.FC = () => {
                               {product.status !== 'sold' && (
                                 <button
                                   onClick={() => handleStatusChange(product._id, 'sold')}
-                                  className="w-full text-left px-3 py-1.5 text-[10px] font-bold uppercase hover:bg-[#f0e8f4]"
+                                  className="w-full text-left px-3 py-1.5 text-[10px] font-bold uppercase hover:bg-[#f0e8f4] dark:hover:bg-purple-900/30"
                                 >
                                   Mark Sold
                                 </button>
@@ -684,7 +684,7 @@ const MyListings: React.FC = () => {
                               {product.status !== 'reserved' && (
                                 <button
                                   onClick={() => handleStatusChange(product._id, 'reserved')}
-                                  className="w-full text-left px-3 py-1.5 text-[10px] font-bold uppercase hover:bg-[#fff5e1]"
+                                  className="w-full text-left px-3 py-1.5 text-[10px] font-bold uppercase hover:bg-[#fff5e1] dark:hover:bg-orange-900/30"
                                 >
                                   Mark Reserved
                                 </button>
@@ -693,7 +693,7 @@ const MyListings: React.FC = () => {
                                 <button
                                   onClick={() => handleBoostRequest(product._id)}
                                   disabled={boostingId === product._id}
-                                  className="w-full text-left px-3 py-1.5 text-[10px] font-bold uppercase hover:bg-[#fffacd] disabled:opacity-40"
+                                  className="w-full text-left px-3 py-1.5 text-[10px] font-bold uppercase hover:bg-[#fffacd] dark:hover:bg-yellow-900/30 disabled:opacity-40"
                                 >
                                   <Zap className="inline-block h-3 w-3 mr-1" />
                                   {boostingId === product._id ? 'Requesting...' : 'Request Boost'}
@@ -701,16 +701,16 @@ const MyListings: React.FC = () => {
                               )}
                               <button
                                 onClick={() => handleDuplicate(product._id)}
-                                className="w-full text-left px-3 py-1.5 text-[10px] font-bold uppercase hover:bg-[#e0f2f7] flex items-center gap-1"
+                                className="w-full text-left px-3 py-1.5 text-[10px] font-bold uppercase hover:bg-[#e0f2f7] dark:hover:bg-sky-900/30 flex items-center gap-1"
                               >
                                 <Copy className="h-3 w-3" />
                                 Duplicate
                               </button>
-                              <div className="border-t border-black my-1" />
+                              <div className="border-t border-[var(--bulletin-border)] my-1" />
                               <button
                                 onClick={() => handleDelete(product._id)}
                                 disabled={deletingId === product._id}
-                                className="w-full text-left px-3 py-1.5 text-[10px] font-bold uppercase hover:bg-[#fce4ec] flex items-center gap-1 disabled:opacity-40"
+                                className="w-full text-left px-3 py-1.5 text-[10px] font-bold uppercase hover:bg-[#fce4ec] dark:hover:bg-red-900/30 flex items-center gap-1 disabled:opacity-40"
                               >
                                 <Trash2 className="h-3 w-3" />
                                 {deletingId === product._id ? 'Deleting...' : 'Delete'}
@@ -729,11 +729,11 @@ const MyListings: React.FC = () => {
 
         {/* Pagination */}
         {pagination && pagination.pages > 1 && (
-          <div className="flex justify-center items-center gap-4 mt-8 pt-6 border-t border-black">
+          <div className="flex justify-center items-center gap-4 mt-8 pt-6 border-t border-[var(--bulletin-border)]">
             {page > 1 && (
               <button
                 onClick={() => updateFilter('page', String(page - 1))}
-                className="border border-black bg-white px-4 py-2 text-[10px] font-bold uppercase shadow-[2px_2px_0_0_rgba(0,0,0,1)] hover:shadow-[3px_3px_0_0_rgba(0,0,0,1)] transition-all"
+                className="border border-[var(--bulletin-border)] bg-[var(--bulletin-card)] px-4 py-2 text-[10px] font-bold uppercase shadow-[2px_2px_0_0_var(--bulletin-shadow)] hover:shadow-[3px_3px_0_0_var(--bulletin-shadow)] transition-all"
               >
                 Previous
               </button>
@@ -744,7 +744,7 @@ const MyListings: React.FC = () => {
             {page < pagination.pages && (
               <button
                 onClick={() => updateFilter('page', String(page + 1))}
-                className="border border-black bg-white px-4 py-2 text-[10px] font-bold uppercase shadow-[2px_2px_0_0_rgba(0,0,0,1)] hover:shadow-[3px_3px_0_0_rgba(0,0,0,1)] transition-all"
+                className="border border-[var(--bulletin-border)] bg-[var(--bulletin-card)] px-4 py-2 text-[10px] font-bold uppercase shadow-[2px_2px_0_0_var(--bulletin-shadow)] hover:shadow-[3px_3px_0_0_var(--bulletin-shadow)] transition-all"
               >
                 Next
               </button>

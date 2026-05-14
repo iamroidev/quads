@@ -1,4 +1,23 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+:root {
+  --bulletin-bg: #faf8f5;
+  --bulletin-text: #000000;
+  --bulletin-accent: #ff6b6b;
+  --bulletin-card: #ffffff;
+  --bulletin-border: #000000;
+  --bulletin-shadow: rgba(0, 0, 0, 1);
+  --bulletin-muted: rgba(0, 0, 0, 0.4);
+}
+
+.dark {
+  --bulletin-bg: #000000;
+  --bulletin-text: #f0efec;
+  --bulletin-accent: #ff6b6b;
+  --bulletin-card: #111111;
+  --bulletin-border: #3a3a3a;
+  --bulletin-shadow: rgba(255, 255, 255, 0.15);
+  --bulletin-muted: rgba(255, 255, 255, 0.5);
+  color-scheme: dark;
+}
 
 @tailwind base;
 @tailwind components;
@@ -9,10 +28,25 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+    transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+  }
+
+  html, body {
+    overflow-x: hidden;
+    max-width: 100vw;
   }
 
   body {
-    @apply bg-earth-50 text-earth-900 font-sans antialiased;
+    background-color: var(--bulletin-bg);
+    color: var(--bulletin-text);
+    font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  .dark *::selection {
+    background-color: #ff6b6b !important;
+    color: #ffffff !important;
   }
 
   /* Custom scrollbar */
@@ -21,84 +55,30 @@
   }
 
   ::-webkit-scrollbar-track {
-    @apply bg-earth-100;
+    background-color: var(--bulletin-bg);
   }
 
   ::-webkit-scrollbar-thumb {
-    @apply bg-earth-300 rounded-full;
+    background-color: rgba(0, 0, 0, 0.2);
+    border-radius: 9999px;
   }
-
-  ::-webkit-scrollbar-thumb:hover {
-    @apply bg-earth-400;
+  
+  .dark ::-webkit-scrollbar-thumb {
+    background-color: rgba(255, 255, 255, 0.2);
   }
 }
 
 @layer components {
-  .btn {
-    @apply inline-flex items-center justify-center px-4 py-2.5 rounded-md font-semibold text-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed;
-  }
+  /* Bulletin Design Tokens */
+  .bulletin-border { border: 2px solid var(--bulletin-border); }
+  .bulletin-border-4 { border: 4px solid var(--bulletin-border); }
+  .bulletin-shadow { box-shadow: 4px 4px 0 0 var(--bulletin-shadow); }
+  .bulletin-shadow-lg { box-shadow: 8px 8px 0 0 var(--bulletin-shadow); }
+}
 
-  .btn-primary {
-    @apply btn bg-earth-900 text-earth-50 hover:bg-earth-800 focus:ring-earth-700 active:bg-earth-900;
-  }
-
-  .btn-secondary {
-    @apply btn bg-earth-100 text-earth-800 hover:bg-earth-200 focus:ring-earth-400;
-  }
-
-  .btn-outline {
-    @apply btn border-2 border-earth-900 text-earth-900 hover:bg-earth-100 focus:ring-earth-700;
-  }
-
-  .btn-danger {
-    @apply btn bg-red-600 text-white hover:bg-red-700 focus:ring-red-500;
-  }
-
-  .btn-ghost {
-    @apply btn text-earth-700 hover:bg-earth-100 focus:ring-earth-300;
-  }
-
-  .input {
-    @apply w-full px-4 py-2.5 rounded-lg border border-earth-300 bg-white text-earth-900 placeholder-earth-400 
-    focus:outline-none focus:ring-2 focus:ring-earth-500 focus:border-transparent
-    disabled:bg-earth-100 disabled:cursor-not-allowed transition-all duration-200;
-  }
-
-  .input-error {
-    @apply input border-clay-500 focus:ring-clay-500;
-  }
-
-  .label {
-    @apply block text-sm font-medium text-earth-700 mb-1;
-  }
-
-  .card {
-    @apply bg-white rounded-xl shadow-sm border border-earth-200 overflow-hidden;
-  }
-
-  .badge {
-    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
-  }
-
-  .badge-primary {
-    @apply badge bg-earth-200 text-earth-800;
-  }
-
-  .badge-success {
-    @apply badge bg-green-100 text-green-700;
-  }
-
-  .badge-warning {
-    @apply badge bg-yellow-100 text-yellow-700;
-  }
-
-  .badge-danger {
-    @apply badge bg-red-100 text-red-700;
-  }
-
-  .page-container {
-    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6;
-  }
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
 }
 
 @keyframes role-shake {
@@ -153,6 +133,10 @@
   }
 }
 
+.animate-shimmer {
+  animation: shimmer 2s infinite linear;
+}
+
 .animate-role-shake {
   animation: role-shake 320ms ease-in-out;
 }
@@ -183,57 +167,6 @@
   animation-delay: var(--hero-delay, 0ms);
 }
 
-.hover-card-float {
-  transition: transform 260ms ease, box-shadow 260ms ease;
-}
-
-.hover-card-float:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 14px 34px rgba(19, 17, 13, 0.12);
-}
-
-.hover-card-breath:hover {
-  animation: card-float 2.6s ease-in-out infinite;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .animate-role-shake,
-  .animate-fade-up-in,
-  .animate-card-drop,
-  .hero-reveal,
-  .hover-card-breath:hover {
-    animation: none !important;
-  }
-
-  .reveal-on-scroll,
-  .reveal-on-scroll.is-visible,
-  .hero-reveal {
-    opacity: 1 !important;
-    transform: none !important;
-  }
-
-  .hover-card-float,
-  .hover-card-float:hover {
-    transition: none !important;
-    transform: none !important;
-    box-shadow: none !important;
-  }
-}
-
-/* Dark mode */
-.dark body {
-  @apply bg-gray-900 text-gray-100;
-}
-
-.dark .card {
-  @apply bg-gray-800 border-gray-700;
-}
-
-.dark .input {
-  @apply bg-gray-800 border-gray-600 text-gray-100 placeholder-gray-500;
-}
-
-
 @layer utilities {
   .scrollbar-hide {
     -ms-overflow-style: none;
@@ -242,5 +175,22 @@
   
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
+  }
+
+  .bulletin-toast {
+    overflow: visible !important;
+  }
+
+  .bulletin-toast::before {
+    content: '';
+    position: absolute;
+    top: -10px;
+    left: 50%;
+    transform: translateX(-50%) rotate(-2deg);
+    width: 60px;
+    height: 16px;
+    background-color: rgba(255, 107, 107, 0.4); /* Red tape accent */
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    z-index: 100;
   }
 }

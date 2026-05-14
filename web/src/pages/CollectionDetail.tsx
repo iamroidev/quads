@@ -98,31 +98,36 @@ const CollectionDetailPage: React.FC = () => {
                 <Link
                   key={product._id}
                   to={`/products/${product._id}`}
-                  className="group"
+                  className="group relative"
                   style={{
                     transform: `rotate(${(idx % 3 - 1) * 0.8}deg)`,
-                    transition: 'transform 0.2s'
+                    transition: 'transform 0.25s'
                   }}
                   onMouseEnter={(e) => {
-                    e.currentTarget.style.transform = 'rotate(0deg) translateY(-8px)';
+                    e.currentTarget.style.transform = 'rotate(0deg) translateY(-10px)';
                   }}
                   onMouseLeave={(e) => {
                     e.currentTarget.style.transform = `rotate(${(idx % 3 - 1) * 0.8}deg)`;
                   }}
                 >
-                  <div className="border border-black bg-white p-3 shadow-[6px_6px_0_0_rgba(0,0,0,0.1)]">
+                  <div className="border border-black bg-white p-3 shadow-[6px_6px_0_0_rgba(0,0,0,0.12)]">
                     <div className="relative aspect-square overflow-hidden border border-black/10 bg-gray-100">
                       <img
                         src={getImage(product)}
                         alt={product.title}
                         className="h-full w-full object-cover"
+                        loading="lazy"
                       />
-                      <div className="absolute -top-2 left-1/2 h-4 w-16 -translate-x-1/2 bg-[#ffd700]/30 opacity-60"
-                           style={{ transform: 'translateX(-50%) rotate(-2deg)' }} />
+                      <div className="absolute -top-2 left-1/2 h-4 w-16 -translate-x-1/2 bg-[#ffd700]/30 rotate-[-2deg]" />
                     </div>
                     <div className="mt-3 space-y-1">
                       <div className="truncate font-bold leading-tight">{product.title}</div>
-                      <div className="text-base font-bold">GHS {product.price}</div>
+                      <div className="flex items-baseline justify-between">
+                        <span className="text-base font-bold">GHS {product.price}</span>
+                        <span className="text-[10px] uppercase opacity-50">
+                          {product.category?.name || 'Item'}
+                        </span>
+                      </div>
                     </div>
                   </div>
                 </Link>

@@ -178,66 +178,83 @@ const ProfileStackScreen = () => (
 );
 
 // ── Bottom tabs ───────────────────────────────────────────────────────────────
-const tabIcon = (name: React.ComponentProps<typeof Ionicons>['name']) =>
-  ({ color }: { color: string }) => <Ionicons name={name} size={19} color={color} />;
+const tabIcon = (name: any) => ({ color }: { color: string }) => (
+  <Ionicons name={name} size={19} color={color} />
+);
 
-const MainTabs = ({ role }: { role?: string }) => {
-  const isSeller = role === 'seller' || role === 'admin';
+const MainTabs = () => {
+  const { user, viewMode } = useAuth();
+  const isSellerMode = (user?.role === 'seller' || user?.role === 'admin') && viewMode === 'seller';
   const insets = useSafeAreaInsets();
 
+  const commonOptions = {
+    headerShown: false,
+    tabBarActiveTintColor: colors.text,
+    tabBarInactiveTintColor: '#9f9382',
+    tabBarStyle: {
+      borderTopColor: colors.border,
+      backgroundColor: '#fffdf8',
+      height: 62 + (Platform.OS === 'ios' ? insets.bottom : 0),
+      paddingTop: 8,
+      paddingBottom: Math.max(insets.bottom, 8),
+      paddingHorizontal: 0,
+    },
+    tabBarLabelStyle: {
+      fontSize: 9,
+      fontWeight: '800',
+      textTransform: 'uppercase',
+      letterSpacing: 1,
+      marginBottom: 0,
+    } as any,
+    tabBarItemStyle: {
+      flex: 1,
+      minWidth: 0,
+      justifyContent: 'center',
+      alignItems: 'center',
+      paddingHorizontal: 0,
+    } as any,
+  };
+
   return (
-    <Tab.Navigator
-      screenOptions={{
-        headerShown: false,
-        tabBarActiveTintColor: colors.text,
-        tabBarInactiveTintColor: '#9f9382',
-        tabBarStyle: {
-          borderTopColor: colors.border,
-          backgroundColor: '#fffdf8',
-          height: 62 + (Platform.OS === 'ios' ? insets.bottom : 0),
-          paddingTop: 8,
-          paddingBottom: Math.max(insets.bottom, 8),
-          paddingHorizontal: 0,
-        },
-        tabBarLabelStyle: {
-          fontSize: 9,
-          fontWeight: '800',
-          textTransform: 'uppercase',
-          letterSpacing: 1,
-          marginBottom: 0,
-        },
-        tabBarItemStyle: {
-          flex: 1,
-          minWidth: 0,
-          justifyContent: 'center',
-          alignItems: 'center',
-          paddingHorizontal: 0,
-        },
-      }}
-    >
-      {isSeller ? (
+    <Tab.Navigator screenOptions={commonOptions as any}>
+      {isSellerMode && (
         <Tab.Screen
-          name="SellerTab"
-          component={SellerStackScreen}
-          options={{ title: 'Dashboard', tabBarIcon: tabIcon('storefront-outline') }}
+          name="SellerDashboard"
+          component={SellerAnalyticsScreen}
+          options={{ title: 'Dashboard', tabBarIcon: tabIcon('analytics-outline') }}
         />
-      ) : (
+      )}
+      {isSellerMode && (
+        <Tab.Screen
+          name="InventoryTab"
+          component={SellerStackScreen}
+          options={{ title: 'Inventory', tabBarIcon: tabIcon('cube-outline') }}
+        />
+      )}
+
+      {!isSellerMode && (
         <Tab.Screen
           name="HomeTab"
           component={HomeScreen}
           options={{ title: 'Home', tabBarIcon: tabIcon('home-outline') }}
         />
       )}
-      <Tab.Screen
-        name="ProductsTab"
-        component={ProductsStackScreen}
-        options={{ title: 'Browse', tabBarIcon: tabIcon('grid-outline') }}
-        listeners={({ navigation }) => ({
-          tabPress: () => {
-            navigation.navigate('ProductsTab', { screen: 'ProductsHome' });
-          },
-        })}
-      />
+      {!isSellerMode && (
+        <Tab.Screen
+          name="ProductsTab"
+          component={ProductsStackScreen}
+          options={{ 
+            title: 'Browse', 
+            tabBarIcon: tabIcon('grid-outline')
+          }}
+          listeners={({ navigation }) => ({
+            tabPress: (e) => {
+              e.preventDefault();
+              navigation.navigate('ProductsTab', { screen: 'ProductsHome' });
+            },
+          })}
+        />
+      )}
       <Tab.Screen
         name="MessagesTab"
         component={MessagesStackScreen}
@@ -268,9 +285,7 @@ const AppNavigator = () => {
     <NavigationContainer ref={navigationRef}>
       <Stack.Navigator screenOptions={{ headerShown: false }}>
         {isAuthenticated ? (
-          <Stack.Screen name="Main">
-            {() => <MainTabs role={user?.role} />}
-          </Stack.Screen>
+          <Stack.Screen name="Main" component={MainTabs} />
         ) : (
           <>
             <Stack.Screen name="Login" component={LoginScreen} />

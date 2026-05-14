@@ -62,7 +62,7 @@ const ProductCard = ({
 };
 
 const HomeScreen = ({ navigation }: any) => {
-  const { user } = useAuth();
+  const { user, setViewMode } = useAuth();
   const [featured, setFeatured] = useState<Product[]>([]);
   const [recent, setRecent] = useState<Product[]>([]);
   const [trending, setTrending] = useState<Product[]>([]);
@@ -152,14 +152,14 @@ const HomeScreen = ({ navigation }: any) => {
         }
       >
         <ScreenHeader
-          eyebrow="Campus marketplace"
+          eyebrow="QUADS"
           title="Home"
           subtitle="Curated highlights, featured drops, and fresh campus listings."
         />
         {/* Hero / Search */}
-        <Animated.View style={[styles.hero, { opacity: fadeAnim }]}> 
+        <Animated.View style={[styles.hero, { opacity: fadeAnim }]}>
           <Text style={styles.heroGreeting}>
-            {user ? `Hey, ${user.name.split(' ')[0]} 👋` : 'UMaT Marketplace'}
+            {user ? `Hey, ${user.name.split(' ')[0]} 👋` : 'QUADS'}
           </Text>
           <Text style={styles.heroSubtitle}>Find great deals on campus.</Text>
           <View style={styles.searchRow}>
@@ -181,134 +181,137 @@ const HomeScreen = ({ navigation }: any) => {
           </TouchableOpacity>
         </Animated.View>
 
-      <View style={styles.quickSection}>
-        <View style={styles.sectionHeader}>
-          <Text style={styles.sectionLabel}>CURATED</Text>
-          <Text style={styles.sectionTitle}>Shop by need</Text>
-        </View>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.hScroll}>
-          {CURATED_HERO_CARDS.map((card) => (
-            <TouchableOpacity
-              key={card.id}
-              style={styles.curatedCard}
-              onPress={() => navigation.navigate('ProductsTab', { screen: 'ProductsHome', params: { search: card.filter } })}
-            >
-              <Text style={styles.curatedCardTitle}>{card.title}</Text>
-              <Text style={styles.curatedCardSubtitle}>{card.subtitle}</Text>
-            </TouchableOpacity>
-          ))}
-        </ScrollView>
-      </View>
-
-      {categories.length > 0 && (
-        <View style={styles.section}>
+        <View style={styles.quickSection}>
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionLabel}>CATEGORY</Text>
-            <Text style={styles.sectionTitle}>Shop by category</Text>
-          </View>
-          <View style={styles.categoryGrid}>
-            {categories.map((cat) => (
-              <TouchableOpacity
-                key={cat._id}
-                style={styles.categoryTile}
-                onPress={() => navigation.navigate('ProductsTab', { screen: 'ProductsHome', params: { category: cat._id } })}
-              >
-                <Text style={styles.categoryTileTitle} numberOfLines={1}>{cat.name}</Text>
-                <Text style={styles.categoryTileCount}>{cat.productCount}</Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-        </View>
-      )}
-
-      {/* Featured */}
-      {featured.length > 0 && (
-        <View style={styles.section}>
-          <View style={styles.sectionHeader}>
-            <Text style={styles.sectionLabel}>SPOTLIGHT</Text>
-            <Text style={styles.sectionTitle}>Featured Listings</Text>
+            <Text style={styles.sectionLabel}>CURATED</Text>
+            <Text style={styles.sectionTitle}>Shop by need</Text>
           </View>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.hScroll}>
-            {featured.map((item) => (
+            {CURATED_HERO_CARDS.map((card) => (
               <TouchableOpacity
-                key={item._id}
-                style={styles.featuredCard}
-                onPress={() => goToProduct(item._id)}
+                key={card.id}
+                style={styles.curatedCard}
+                onPress={() => navigation.navigate('ProductsTab', { screen: 'ProductsHome', params: { search: card.filter } })}
               >
-                <Image
-                  source={{ uri: item.images?.[0]?.url || 'https://placehold.co/240x160/e2e8f0/64748b?text=Item' }}
-                  style={styles.featuredImage}
-                />
-                <View style={styles.featuredOverlay} />
-                <View style={styles.featuredInfo}>
-                  <Text style={styles.featuredTitle} numberOfLines={2}>{item.title}</Text>
-                  <Text style={styles.featuredPrice}>{formatPrice(item.price)}</Text>
-                </View>
+                <Text style={styles.curatedCardTitle}>{card.title}</Text>
+                <Text style={styles.curatedCardSubtitle}>{card.subtitle}</Text>
               </TouchableOpacity>
             ))}
           </ScrollView>
         </View>
-      )}
 
-      {/* Recent */}
-      <View style={styles.section}>
-        <View style={styles.sectionHeader}>
-          <Text style={styles.sectionLabel}>LATEST</Text>
-          <Text style={styles.sectionTitle}>Recent Listings</Text>
+        {categories.length > 0 && (
+          <View style={styles.section}>
+            <View style={styles.sectionHeader}>
+              <Text style={styles.sectionLabel}>CATEGORY</Text>
+              <Text style={styles.sectionTitle}>Shop by category</Text>
+            </View>
+            <View style={styles.categoryGrid}>
+              {categories.map((cat) => (
+                <TouchableOpacity
+                  key={cat._id}
+                  style={styles.categoryTile}
+                  onPress={() => navigation.navigate('ProductsTab', { screen: 'ProductsHome', params: { category: cat._id } })}
+                >
+                  <Text style={styles.categoryTileTitle} numberOfLines={1}>{cat.name}</Text>
+                  <Text style={styles.categoryTileCount}>{cat.productCount}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </View>
+        )}
+
+        {/* Featured */}
+        {featured.length > 0 && (
+          <View style={styles.section}>
+            <View style={styles.sectionHeader}>
+              <Text style={styles.sectionLabel}>SPOTLIGHT</Text>
+              <Text style={styles.sectionTitle}>Featured Listings</Text>
+            </View>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.hScroll}>
+              {featured.map((item) => (
+                <TouchableOpacity
+                  key={item._id}
+                  style={styles.featuredCard}
+                  onPress={() => goToProduct(item._id)}
+                >
+                  <Image
+                    source={{ uri: item.images?.[0]?.url || 'https://placehold.co/240x160/e2e8f0/64748b?text=Item' }}
+                    style={styles.featuredImage}
+                  />
+                  <View style={styles.featuredOverlay} />
+                  <View style={styles.featuredInfo}>
+                    <Text style={styles.featuredTitle} numberOfLines={2}>{item.title}</Text>
+                    <Text style={styles.featuredPrice}>{formatPrice(item.price)}</Text>
+                  </View>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+          </View>
+        )}
+
+        {/* Recent */}
+        <View style={styles.section}>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionLabel}>LATEST</Text>
+            <Text style={styles.sectionTitle}>Recent Listings</Text>
+          </View>
+          <FlatList
+            data={recent}
+            keyExtractor={(item) => item._id}
+            renderItem={({ item }) => (
+              <ProductCard item={item} onPress={() => goToProduct(item._id)} />
+            )}
+            numColumns={2}
+            columnWrapperStyle={styles.grid}
+            scrollEnabled={false}
+            ListEmptyComponent={
+              <Text style={styles.emptyText}>No listings available yet. Check back shortly.</Text>
+            }
+            ListFooterComponent={
+              hasMoreRecent ? (
+                <TouchableOpacity style={styles.loadMoreBtn} onPress={loadMoreRecent} disabled={loadingMoreRecent}>
+                  <Text style={styles.loadMoreBtnText}>{loadingMoreRecent ? 'Loading...' : 'Load more'}</Text>
+                </TouchableOpacity>
+              ) : null
+            }
+          />
         </View>
-        <FlatList
-          data={recent}
-          keyExtractor={(item) => item._id}
-          renderItem={({ item }) => (
-            <ProductCard item={item} onPress={() => goToProduct(item._id)} />
-          )}
-          numColumns={2}
-          columnWrapperStyle={styles.grid}
-          scrollEnabled={false}
-          ListEmptyComponent={
-            <Text style={styles.emptyText}>No listings available yet. Check back shortly.</Text>
-          }
-          ListFooterComponent={
-            hasMoreRecent ? (
-              <TouchableOpacity style={styles.loadMoreBtn} onPress={loadMoreRecent} disabled={loadingMoreRecent}>
-                <Text style={styles.loadMoreBtnText}>{loadingMoreRecent ? 'Loading...' : 'Load more'}</Text>
-              </TouchableOpacity>
-            ) : null
-          }
-        />
-      </View>
 
-      <View style={styles.section}>
-        <View style={styles.sectionHeader}>
-          <Text style={styles.sectionLabel}>TRENDING</Text>
-          <Text style={styles.sectionTitle}>Most viewed</Text>
+        <View style={styles.section}>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionLabel}>TRENDING</Text>
+            <Text style={styles.sectionTitle}>Most viewed</Text>
+          </View>
+          <FlatList
+            data={trending}
+            keyExtractor={(item) => item._id}
+            renderItem={({ item }) => (
+              <ProductCard item={item} onPress={() => goToProduct(item._id)} />
+            )}
+            numColumns={2}
+            columnWrapperStyle={styles.grid}
+            scrollEnabled={false}
+            ListEmptyComponent={<Text style={styles.emptyText}>No trending products yet.</Text>}
+          />
         </View>
-        <FlatList
-          data={trending}
-          keyExtractor={(item) => item._id}
-          renderItem={({ item }) => (
-            <ProductCard item={item} onPress={() => goToProduct(item._id)} />
-          )}
-          numColumns={2}
-          columnWrapperStyle={styles.grid}
-          scrollEnabled={false}
-          ListEmptyComponent={<Text style={styles.emptyText}>No trending products yet.</Text>}
-        />
-      </View>
 
-      {user?.role === 'buyer' ? (
-        <TouchableOpacity style={styles.buyerCta} onPress={() => navigation.navigate('ProfileTab')}>
-          <Text style={styles.buyerCtaTop}>Got something to sell?</Text>
-          <Text style={styles.buyerCtaTitle}>Upgrade to seller account</Text>
-          <Text style={styles.buyerCtaSub}>Set up your seller profile and start listing campus items.</Text>
-        </TouchableOpacity>
-      ) : (
-        <TouchableOpacity style={styles.buyerCta} onPress={() => navigation.getParent()?.navigate('SellerTab', { screen: 'CreateListing' })}>
-          <Text style={styles.buyerCtaTop}>Seller workspace</Text>
-          <Text style={styles.buyerCtaTitle}>Create or manage listings</Text>
-          <Text style={styles.buyerCtaSub}>Post new products, manage stock, and track activity.</Text>
-        </TouchableOpacity>
-      )}
+        {user?.role === 'buyer' ? (
+          <TouchableOpacity style={styles.buyerCta} onPress={() => navigation.navigate('ProfileTab', { screen: 'SellerOnboarding' })}>
+            <Text style={styles.buyerCtaTop}>Got something to sell?</Text>
+            <Text style={styles.buyerCtaTitle}>Upgrade to seller account</Text>
+            <Text style={styles.buyerCtaSub}>Set up your seller profile and start listing campus items.</Text>
+          </TouchableOpacity>
+        ) : (
+          <TouchableOpacity 
+            style={styles.buyerCta} 
+            onPress={() => setViewMode('seller')}
+          >
+            <Text style={styles.buyerCtaTop}>Seller workspace</Text>
+            <Text style={styles.buyerCtaTitle}>Return to Seller Hub</Text>
+            <Text style={styles.buyerCtaSub}>Post new products, manage stock, and track activity.</Text>
+          </TouchableOpacity>
+        )}
 
       </ScrollView>
     </SafeAreaView>

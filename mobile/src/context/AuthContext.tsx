@@ -15,6 +15,8 @@ interface AuthContextType {
   register: (data: Omit<RegisterPayload, 'supabaseAccessToken'> & { password: string; email: string }) => Promise<void>;
   logout: () => Promise<void>;
   refreshUser: () => Promise<void>;
+  viewMode: 'buyer' | 'seller';
+  setViewMode: (mode: 'buyer' | 'seller') => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -23,8 +25,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [viewMode, setViewMode] = useState<'buyer' | 'seller'>('buyer');
 
   const isAuthenticated = !!user && !!token;
+
+  // Sync viewMode with role on initial load/login
+  useEffect(() => {
+    if (user) {
+      setViewMode(user.role === 'seller' || user.role === 'admin' ? 'seller' : 'buyer');
+    }
+  }, [user?._id, user?.role]);
 
   // Load stored auth on mount
   useEffect(() => {
@@ -34,7 +44,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (storedToken) {
           setToken(storedToken);
           const response = await authService.getMe();
-          setUser(response.data.user);
+          const newUser = response.data.user;
+          setUser(newUser);
+          setViewMode(newUser.role === 'seller' || newUser.role === 'admin' ? 'seller' : 'buyer');
         }
       } catch {
         await SecureStore.deleteItemAsync('token');
@@ -62,6 +74,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     await SecureStore.setItemAsync('user', JSON.stringify(newUser));
     setToken(newToken);
     setUser(newUser);
+    setViewMode(newUser.role === 'seller' || newUser.role === 'admin' ? 'seller' : 'buyer');
     await syncPushSubscription();
   }, []);
 
@@ -72,6 +85,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     await SecureStore.setItemAsync('user', JSON.stringify(newUser));
     setToken(newToken);
     setUser(newUser);
+    setViewMode(newUser.role === 'seller' || newUser.role === 'admin' ? 'seller' : 'buyer');
     await syncPushSubscription();
     return {
       isNewUser: !!response.data?.isNewUser,
@@ -108,6 +122,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     await SecureStore.setItemAsync('user', JSON.stringify(newUser));
     setToken(newToken);
     setUser(newUser);
+    setViewMode(newUser.role === 'seller' || newUser.role === 'admin' ? 'seller' : 'buyer');
     await syncPushSubscription();
   }, []);
 
@@ -139,7 +154,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   return (
     <AuthContext.Provider
-      value={{ user, token, isLoading, isAuthenticated, login, googleLogin, register, logout, refreshUser }}
+      value={{ user, token, isLoading, isAuthenticated, login, googleLogin, register, logout, refreshUser, viewMode, setViewMode }}
     >
       {children}
     </AuthContext.Provider>

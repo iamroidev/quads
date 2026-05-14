@@ -75,9 +75,9 @@ const STEP_LABELS: Record<Step, string> = {
   4: 'Password',
 };
 
-const fieldBase = 'w-full border border-black bg-[#fefdfb] px-4 py-3 text-[13px] font-bold focus:outline-none focus:ring-2 focus:ring-black placeholder:text-black/30';
+const fieldBase = 'w-full border-4 border-[var(--bulletin-border)] bg-[var(--bulletin-bg)] px-4 py-4 text-[14px] font-black focus:outline-none focus:ring-2 focus:ring-[var(--bulletin-text)] text-[var(--bulletin-text)] placeholder:text-[var(--bulletin-text)] placeholder:opacity-30 shadow-[4px_4px_0_0_var(--bulletin-shadow)]';
 
-const selectBase = 'w-full border border-black bg-[#fefdfb] px-4 py-3 text-[13px] font-bold focus:outline-none focus:ring-2 focus:ring-black appearance-none bg-[url("data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22currentColor%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E")] bg-[length:16px] bg-[right_12px_center] bg-no-repeat';
+const selectBase = 'w-full border-4 border-[var(--bulletin-border)] bg-[var(--bulletin-bg)] px-4 py-4 text-[14px] font-black focus:outline-none focus:ring-2 focus:ring-[var(--bulletin-text)] text-[var(--bulletin-text)] appearance-none shadow-[4px_4px_0_0_var(--bulletin-shadow)] bg-[url("data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22currentColor%22%20stroke-width%3D%224%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E")] bg-[length:16px] bg-[right_16px_center] bg-no-repeat';
 
 /* Scattered note on the cork board */
 const ScatteredNote: React.FC<{
@@ -92,12 +92,12 @@ const ScatteredNote: React.FC<{
   children: React.ReactNode;
 }> = ({ bg, rotation, children, top, left, right, bottom, w = '150px', tapeColor = '#ffd700' }) => (
   <div
-    className={`absolute border border-black/20 ${bg} shadow-[4px_4px_0_0_rgba(0,0,0,0.15)] p-3`}
+    className={`absolute border-4 border-[var(--bulletin-bg)] ${bg} shadow-[8px_8px_0_0_rgba(255,255,255,0.1)] p-4`}
     style={{ transform: `rotate(${rotation}deg)`, top, left, right, bottom, width: w }}
   >
     {/* Tape */}
-    <div className="absolute -top-2 left-1/2 -translate-x-1/2 h-5 w-16 opacity-50"
-      style={{ background: `${tapeColor}40`, transform: 'translateX(-50%) rotate(-1deg)' }} />
+    <div className="absolute -top-3 left-1/2 -translate-x-1/2 h-6 w-20 opacity-50"
+      style={{ background: tapeColor, transform: 'translateX(-50%) rotate(-1deg)' }} />
     {children}
   </div>
 );
@@ -109,15 +109,16 @@ const StringLine: React.FC<{ from: string; to: string }> = ({ from, to }) => {
   const len = Math.sqrt((x2-x1)**2 + (y2-y1)**2);
   const angle = Math.atan2(y2-y1, x2-x1) * 180 / Math.PI;
   return (
-    <div className="absolute pointer-events-none"
+    <div className="absolute pointer-events-none hidden md:block"
       style={{
         left: x1, top: y1,
         width: len,
-        height: 1,
-        background: 'linear-gradient(90deg, #8b7355 50%, transparent 50%)',
-        backgroundSize: '8px 1px',
+        height: 2,
+        background: 'linear-gradient(90deg, var(--bulletin-text) 50%, transparent 50%)',
+        backgroundSize: '12px 2px',
         transform: `rotate(${angle}deg)`,
         transformOrigin: '0 0',
+        opacity: 0.15
       }}
     />
   );
@@ -163,7 +164,6 @@ const RegisterPage: React.FC = () => {
     setIsSubmitting(true);
     try {
       if (isGoogleFlow) {
-        // Google flow: skip password validation — no password fields rendered
         const googleCredential = sessionStorage.getItem('google_credential');
         if (!googleCredential) {
           toast.error('Google session expired. Please try again.');
@@ -194,7 +194,6 @@ const RegisterPage: React.FC = () => {
     if (credentialResponse.credential) {
       setIsSubmitting(true);
       try {
-        // Store credential and redirect to register with google param
         sessionStorage.setItem('google_credential', credentialResponse.credential);
         navigate('/register?google=1');
       } catch (err: any) {
@@ -213,145 +212,140 @@ const RegisterPage: React.FC = () => {
   };
 
   return (
-    <div className="relative min-h-screen bg-[#d4c4a8] font-mono text-[13px] leading-tight overflow-hidden">
+    <div className="relative min-h-screen bg-[#111] font-mono text-[13px] leading-tight overflow-hidden w-full max-w-full">
       
       {/* Cork board texture */}
-      <div className="absolute inset-0 opacity-[0.15]"
+      <div className="absolute inset-0 opacity-10"
         style={{
-          backgroundImage: 'radial-gradient(circle at 25% 25%, #a08060 1px, transparent 1px), radial-gradient(circle at 75% 75%, #907050 1px, transparent 1px)',
-          backgroundSize: '30px 30px',
+          backgroundImage: 'radial-gradient(circle at 25% 25%, var(--bulletin-bg) 2px, transparent 2px), radial-gradient(circle at 75% 75%, var(--bulletin-bg) 2px, transparent 2px)',
+          backgroundSize: '40px 40px',
         }}
       />
 
       {/* Top brand bar */}
-      <div className="relative z-10 flex items-center justify-between border-b border-black/20 bg-[#c4b498] px-4 py-2">
-        <Link to="/" className="inline-flex items-center gap-2">
-          <BrandMark className="h-4 w-4" />
-          <span className="text-[9px] font-bold uppercase tracking-wider opacity-60">CampusMarket</span>
+      <div className="relative z-10 flex items-center justify-between border-b-4 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] px-6 py-4 shadow-[0_8px_0_0_var(--bulletin-shadow)]">
+        <Link to="/" className="inline-flex items-center gap-3">
+          <BrandMark className="h-6 w-6 text-[var(--bulletin-text)]" />
+          <span className="text-[12px] font-black uppercase tracking-[0.3em] opacity-60 text-[var(--bulletin-text)]">QUADS</span>
         </Link>
-        <div className="flex items-center gap-3">
-          <span className="text-[9px] font-bold uppercase tracking-wider opacity-40">Step {step} of 4</span>
+        <div className="flex items-center gap-6">
+          <span className="text-[12px] font-black uppercase tracking-[0.2em] opacity-40 text-[var(--bulletin-text)]">Step {step} of 4</span>
           {step > 1 && (
-            <button onClick={() => setStep((s) => (s - 1) as Step)} className="text-[9px] font-bold uppercase tracking-wider underline opacity-60 hover:opacity-100">Back</button>
+            <button onClick={() => setStep((s) => (s - 1) as Step)} className="text-[12px] font-black uppercase tracking-widest underline decoration-2 underline-offset-4 opacity-60 hover:opacity-100 text-[var(--bulletin-text)]">Back</button>
           )}
         </div>
       </div>
 
-      {/* Scattered notes around the board */}
-      <ScatteredNote bg="bg-[#fffacd]" rotation={-4} top="12%" left="5%" w="130px" tapeColor="#ff6b6b">
-        <div className="text-[10px] font-bold">📚 Textbooks</div>
-        <div className="text-[9px] opacity-60 mt-1">From GHS 15</div>
-      </ScatteredNote>
+      {/* Scattered notes around the board (hidden on mobile) */}
+      <div className="hidden md:block">
+        <ScatteredNote bg="bg-[#fffacd] dark:bg-yellow-900" rotation={-4} top="15%" left="8%" w="160px" tapeColor="#ff6b6b">
+          <div className="text-[14px] font-black text-black dark:text-yellow-200 uppercase tracking-tighter">📚 Textbooks</div>
+          <div className="text-[11px] font-bold opacity-60 mt-1 text-black dark:text-yellow-200">From GHS 15</div>
+        </ScatteredNote>
 
-      <ScatteredNote bg="bg-[#e0f2f7]" rotation={3} top="8%" right="8%" w="120px" tapeColor="#4ecdc4">
-        <div className="text-[10px] font-bold">📱 Gadgets</div>
-        <div className="text-[9px] opacity-60 mt-1">Phones, laptops</div>
-      </ScatteredNote>
+        <ScatteredNote bg="bg-[#e0f2f7] dark:bg-sky-900" rotation={3} top="12%" right="10%" w="150px" tapeColor="#4ecdc4">
+          <div className="text-[14px] font-black text-black dark:text-sky-200 uppercase tracking-tighter">📱 Gadgets</div>
+          <div className="text-[11px] font-bold opacity-60 mt-1 text-black dark:text-sky-200">Phones, laptops</div>
+        </ScatteredNote>
 
-      <ScatteredNote bg="bg-[#fce4ec]" rotation={-2} top="28%" left="3%" w="110px" tapeColor="#a8e6cf">
-        <div className="text-[10px] font-bold">👕 Fashion</div>
-        <div className="text-[9px] opacity-60 mt-1">Campus style</div>
-      </ScatteredNote>
+        <ScatteredNote bg="bg-[#fce4ec] dark:bg-red-900" rotation={-2} top="40%" left="5%" w="140px" tapeColor="#a8e6cf">
+          <div className="text-[14px] font-black text-black dark:text-red-200 uppercase tracking-tighter">👕 Fashion</div>
+          <div className="text-[11px] font-bold opacity-60 mt-1 text-black dark:text-red-200">Campus style</div>
+        </ScatteredNote>
 
-      <ScatteredNote bg="bg-[#f0e8f4]" rotation={5} top="22%" right="4%" w="140px" tapeColor="#ffd93d">
-        <div className="text-[10px] font-bold">🍔 Food & More</div>
-        <div className="text-[9px] opacity-60 mt-1">Meal prep, snacks</div>
-      </ScatteredNote>
+        <ScatteredNote bg="bg-[#f0e8f4] dark:bg-purple-900" rotation={5} top="35%" right="6%" w="180px" tapeColor="#ffd93d">
+          <div className="text-[14px] font-black text-black dark:text-purple-200 uppercase tracking-tighter">🍔 Food & More</div>
+          <div className="text-[11px] font-bold opacity-60 mt-1 text-black dark:text-purple-200">Meal prep, snacks</div>
+        </ScatteredNote>
 
-      <ScatteredNote bg="bg-[#fffacd]" rotation={-3} bottom="15%" left="6%" w="125px" tapeColor="#ff6b6b">
-        <div className="text-[10px] font-bold">🚲 Transport</div>
-        <div className="text-[9px] opacity-60 mt-1">Bikes, rides</div>
-      </ScatteredNote>
+        <ScatteredNote bg="bg-[#fffacd] dark:bg-yellow-900" rotation={-3} bottom="15%" left="8%" w="155px" tapeColor="#ff6b6b">
+          <div className="text-[14px] font-black text-black dark:text-yellow-200 uppercase tracking-tighter">🚲 Transport</div>
+          <div className="text-[11px] font-bold opacity-60 mt-1 text-black dark:text-yellow-200">Bikes, rides</div>
+        </ScatteredNote>
 
-      <ScatteredNote bg="bg-[#e0f2f7]" rotation={2} bottom="10%" right="7%" w="115px" tapeColor="#4ecdc4">
-        <div className="text-[10px] font-bold">🏠 Dorms</div>
-        <div className="text-[9px] opacity-60 mt-1">Furniture, decor</div>
-      </ScatteredNote>
+        <ScatteredNote bg="bg-[#e0f2f7] dark:bg-sky-900" rotation={2} bottom="12%" right="10%" w="145px" tapeColor="#4ecdc4">
+          <div className="text-[14px] font-black text-black dark:text-sky-200 uppercase tracking-tighter">🏠 Dorms</div>
+          <div className="text-[11px] font-bold opacity-60 mt-1 text-black dark:text-sky-200">Furniture, decor</div>
+        </ScatteredNote>
 
-      {/* String lines connecting notes */}
-      <StringLine from="130,180" to="280,280" />
-      <StringLine from="800,150" to="650,320" />
-      <StringLine from="100,400" to="250,500" />
+        {/* String lines connecting notes */}
+        <StringLine from="160,200" to="350,300" />
+        <StringLine from="900,180" to="700,350" />
+        <StringLine from="120,450" to="300,550" />
+      </div>
 
       {/* Main central pinned form */}
-      <div className="relative z-10 flex items-center justify-center min-h-[calc(100vh-48px)] p-6">
+      <div className="relative z-10 flex items-center justify-center min-h-[calc(100vh-80px)] p-6 my-8">
         <div
-          className="relative border border-black/30 bg-[#fffef5] p-6 md:p-8 shadow-[8px_8px_0_0_rgba(0,0,0,0.2)] w-full max-w-md"
+          className="relative border-4 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] p-8 md:p-12 shadow-[16px_16px_0_0_rgba(0,0,0,1)] dark:shadow-[16px_16px_0_0_rgba(255,255,255,0.1)] w-full max-w-lg"
           style={{ transform: 'rotate(-0.5deg)' }}
         >
           {/* Large tape across top */}
-          <div className="absolute -top-4 left-1/2 -translate-x-1/2 h-8 w-32 bg-[#ffd700]/40 rotate-1" />
+          <div className="absolute -top-6 left-1/2 -translate-x-1/2 h-10 w-40 bg-[#ffd700]/50 rotate-1 shadow-[4px_4px_0_0_rgba(0,0,0,0.1)]" />
           
-          {/* Torn edge effect at top */}
-          <div className="absolute -top-1 left-0 right-0 h-3 overflow-hidden">
-            <svg viewBox="0 0 400 12" className="w-full h-full" preserveAspectRatio="none">
-              <path d="M0,12 L5,2 L12,10 L20,3 L28,11 L35,2 L42,10 L50,4 L58,11 L65,2 L72,10 L80,3 L88,11 L95,2 L102,10 L110,4 L118,11 L125,2 L132,10 L140,3 L148,11 L155,2 L162,10 L170,4 L178,11 L185,2 L192,10 L200,3 L208,11 L215,2 L222,10 L230,4 L238,11 L245,2 L252,10 L260,3 L268,11 L275,2 L282,10 L290,4 L298,11 L305,2 L312,10 L320,3 L328,11 L335,2 L342,10 L350,4 L358,11 L365,2 L372,10 L380,3 L388,11 L395,2 L400,10 L400,12 L0,12 Z" fill="#f8f7f4" />
-            </svg>
-          </div>
-
           <form onSubmit={handleSubmit(onSubmit)}>
             {/* Step indicator strip */}
-            <div className="flex border-b border-black/20 pb-3 mb-6">
+            <div className="flex border-b-4 border-[var(--bulletin-border)] pb-6 mb-8 mt-4">
               {([1, 2, 3, 4] as Step[]).map((s) => (
                 <div key={s} className="flex-1 text-center">
-                  <div className={`inline-flex h-6 w-6 items-center justify-center border text-[10px] font-bold ${step >= s ? 'border-black bg-black text-white' : 'border-black/30 text-black/30'}`}>
-                    {step > s ? <Check className="h-3 w-3" /> : s}
+                  <div className={`inline-flex h-8 w-8 items-center justify-center border-2 text-[12px] font-black shadow-[2px_2px_0_0_var(--bulletin-shadow)] ${step >= s ? 'border-[var(--bulletin-border)] bg-[var(--bulletin-text)] text-[var(--bulletin-bg)]' : 'border-[var(--bulletin-border)]/30 opacity-40 text-[var(--bulletin-text)] bg-transparent shadow-none'}`}>
+                    {step > s ? <Check className="h-4 w-4" /> : s}
                   </div>
-                  <div className={`mt-1 text-[8px] uppercase tracking-wider ${step === s ? '' : 'opacity-40'}`}>{STEP_LABELS[s]}</div>
+                  <div className={`mt-3 text-[9px] font-black uppercase tracking-widest text-[var(--bulletin-text)] ${step === s ? '' : 'opacity-40'}`}>{STEP_LABELS[s]}</div>
                 </div>
               ))}
             </div>
 
-            {/* STEP 1: Role choice — torn paper style */}
+            {/* STEP 1: Role choice */}
             {step === 1 && (
-              <div>
+              <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
                 {isGoogleFlow && (
-                  <div className="mb-4 p-3 border border-black/20 bg-[#e0f2f7] text-[11px]">
+                  <div className="mb-6 p-4 border-2 border-[var(--bulletin-border)] bg-[#e0f2f7] dark:bg-sky-900/40 text-[12px] font-bold text-black dark:text-sky-200">
                     <strong>Google account detected.</strong> Choose your role below to complete registration.
                   </div>
                 )}
-                <div className="mb-6 text-center">
-                  <div className="inline-flex items-center gap-1 border border-black px-2 py-1 mb-3">
-                    <Scissors className="h-3 w-3" />
-                    <span className="text-[9px] font-bold uppercase tracking-wider">Cut here to choose</span>
+                <div className="mb-8 text-center">
+                  <div className="inline-flex items-center gap-2 border-2 border-[var(--bulletin-border)] px-3 py-1 mb-6 bg-[var(--bulletin-bg)] text-[var(--bulletin-text)] shadow-[2px_2px_0_0_var(--bulletin-shadow)]">
+                    <Scissors className="h-4 w-4" />
+                    <span className="text-[10px] font-black uppercase tracking-[0.2em]">Cut here to choose</span>
                   </div>
-                  <h1 className="text-2xl font-bold">I want to...</h1>
+                  <h1 className="text-4xl font-black uppercase tracking-tighter text-[var(--bulletin-text)]">I want to...</h1>
                 </div>
 
-                <div className={`grid grid-cols-2 gap-0 mb-6 ${roleShake ? 'animate-role-shake' : ''}`}>
+                <div className={`grid grid-cols-2 gap-0 mb-8 border-4 border-[var(--bulletin-border)] ${roleShake ? 'animate-role-shake' : ''}`}>
                   <button type="button" onClick={() => setValue('role', 'buyer')}
-                    className={`relative border-2 border-dashed border-black py-10 text-center transition-all ${selectedRole === 'buyer' ? 'bg-[#e0f2f7] border-solid shadow-[4px_4px_0_0_rgba(0,0,0,1)]' : 'bg-white border-dashed hover:border-solid'}`}>
-                    <div className="text-lg font-bold uppercase tracking-wider">Buy</div>
-                    <div className="text-[10px] opacity-60 mt-1">Browse & purchase items</div>
-                    {selectedRole === 'buyer' && <div className="absolute -top-2 right-2 h-4 w-4 bg-black text-white text-[8px] flex items-center justify-center">✓</div>}
+                    className={`relative border-r-4 border-[var(--bulletin-border)] py-12 text-center transition-all ${selectedRole === 'buyer' ? 'bg-[#e0f2f7] dark:bg-sky-900/40' : 'bg-[var(--bulletin-bg)] hover:bg-[#e0f2f7]/50 dark:hover:bg-sky-900/20'}`}>
+                    <div className={`text-2xl font-black uppercase tracking-widest ${selectedRole === 'buyer' ? 'text-black dark:text-sky-200' : 'text-[var(--bulletin-text)]'}`}>Buy</div>
+                    <div className={`text-[11px] font-bold mt-2 ${selectedRole === 'buyer' ? 'text-black/60 dark:text-sky-200/60' : 'text-[var(--bulletin-text)] opacity-60'}`}>Browse & purchase items</div>
+                    {selectedRole === 'buyer' && <div className="absolute top-4 right-4 h-6 w-6 border-2 border-black dark:border-sky-200 bg-black dark:bg-sky-200 text-white dark:text-black text-[12px] font-black flex items-center justify-center">✓</div>}
                   </button>
                   <button type="button" onClick={() => setValue('role', 'seller')}
-                    className={`relative border-2 border-dashed border-black py-10 text-center transition-all ${selectedRole === 'seller' ? 'bg-[#fffacd] border-solid shadow-[4px_4px_0_0_rgba(0,0,0,1)]' : 'bg-white border-dashed hover:border-solid'}`}>
-                    <div className="text-lg font-bold uppercase tracking-wider">Sell</div>
-                    <div className="text-[10px] opacity-60 mt-1">List your own items</div>
-                    {selectedRole === 'seller' && <div className="absolute -top-2 right-2 h-4 w-4 bg-black text-white text-[8px] flex items-center justify-center">✓</div>}
+                    className={`relative py-12 text-center transition-all ${selectedRole === 'seller' ? 'bg-[#fffacd] dark:bg-yellow-900/40' : 'bg-[var(--bulletin-bg)] hover:bg-[#fffacd]/50 dark:hover:bg-yellow-900/20'}`}>
+                    <div className={`text-2xl font-black uppercase tracking-widest ${selectedRole === 'seller' ? 'text-black dark:text-yellow-200' : 'text-[var(--bulletin-text)]'}`}>Sell</div>
+                    <div className={`text-[11px] font-bold mt-2 ${selectedRole === 'seller' ? 'text-black/60 dark:text-yellow-200/60' : 'text-[var(--bulletin-text)] opacity-60'}`}>List your own items</div>
+                    {selectedRole === 'seller' && <div className="absolute top-4 right-4 h-6 w-6 border-2 border-black dark:border-yellow-200 bg-black dark:bg-yellow-200 text-white dark:text-black text-[12px] font-black flex items-center justify-center">✓</div>}
                   </button>
                 </div>
                 <input type="hidden" {...register('role')} />
 
                 <button type="button" onClick={goNext} disabled={!isRoleChosen}
-                  className="w-full border border-black bg-black px-6 py-3 text-[11px] font-bold uppercase text-white shadow-[3px_3px_0_0_rgba(0,0,0,1)] hover:bg-white hover:text-black disabled:opacity-40 transition-all">
-                  Continue <ArrowRight className="inline-block h-3 w-3 ml-1" />
+                  className="w-full border-4 border-[var(--bulletin-border)] bg-[var(--bulletin-text)] px-8 py-5 text-[14px] font-black uppercase tracking-widest text-[var(--bulletin-bg)] shadow-[8px_8px_0_0_var(--bulletin-shadow)] hover:-translate-y-1 hover:shadow-[4px_4px_0_0_var(--bulletin-shadow)] disabled:opacity-40 disabled:hover:translate-y-0 disabled:hover:shadow-[8px_8px_0_0_var(--bulletin-shadow)] transition-all">
+                  Continue <ArrowRight className="inline-block h-4 w-4 ml-2" />
                 </button>
 
                 {!isGoogleFlow && (
                   <>
-                    <div className="flex items-center gap-4 my-6">
-                      <div className="flex-1 border-t border-dashed border-black/30" />
-                      <span className="text-[10px] font-bold uppercase tracking-widest opacity-40">Or</span>
-                      <div className="flex-1 border-t border-dashed border-black/30" />
+                    <div className="flex items-center gap-6 my-8">
+                      <div className="flex-1 border-t-2 border-dashed border-[var(--bulletin-border)]/30" />
+                      <span className="text-[12px] font-black uppercase tracking-[0.2em] opacity-40 text-[var(--bulletin-text)]">Or</span>
+                      <div className="flex-1 border-t-2 border-dashed border-[var(--bulletin-border)]/30" />
                     </div>
 
                     <div className="flex justify-center">
                       <div onClick={handleLockedGoogleTap} role="button" tabIndex={0}
                         onKeyDown={(e) => { if ((e.key === 'Enter' || e.key === ' ') && !isRoleChosen) { e.preventDefault(); handleLockedGoogleTap(); } }}>
                         <div className={`${!isRoleChosen ? 'pointer-events-none opacity-45 grayscale' : ''} flex justify-center`}>
-                          <div className="border border-black bg-white shadow-[2px_2px_0_0_rgba(0,0,0,1)] hover:shadow-[3px_3px_0_0_rgba(0,0,0,1)] transition-all overflow-hidden">
+                          <div className="border-4 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] shadow-[6px_6px_0_0_var(--bulletin-shadow)] hover:-translate-y-1 hover:shadow-[8px_8px_0_0_var(--bulletin-shadow)] transition-all overflow-hidden" style={{ transform: 'rotate(0.5deg)' }}>
                             <GoogleLogin onSuccess={handleGoogleSuccess} onError={() => toast.error('Google sign-up failed.')} useOneTap={false} shape="rectangular" theme="outline" size="large" text="continue_with" />
                           </div>
                         </div>
@@ -360,88 +354,90 @@ const RegisterPage: React.FC = () => {
                   </>
                 )}
 
-                <div className="mt-6 text-center">
-                  <p className="text-[11px] opacity-60">Already have an account? <Link to="/login" className="font-bold underline hover:no-underline">Sign in</Link></p>
+                <div className="mt-10 text-center bg-[#f0e8f4] dark:bg-purple-900/20 p-4 border-2 border-[var(--bulletin-border)] shadow-[4px_4px_0_0_var(--bulletin-shadow)]" style={{ transform: 'rotate(-1deg)' }}>
+                  <p className="text-[12px] font-bold text-[var(--bulletin-text)] uppercase tracking-widest">Already have an account? <Link to="/login" className="font-black underline decoration-2 underline-offset-4 hover:no-underline ml-2">Sign in</Link></p>
                 </div>
               </div>
             )}
 
             {/* STEP 2: Account Details */}
             {step === 2 && (
-              <div>
-                <h1 className="text-2xl font-bold mb-1">Tell us about yourself</h1>
-                <p className="text-[11px] opacity-60 mb-5">Fill in your student details.</p>
-                <div className="space-y-3">
+              <div className="animate-in fade-in slide-in-from-right-4 duration-300">
+                <h1 className="text-3xl font-black uppercase tracking-tighter mb-2 text-[var(--bulletin-text)]">Identify Yourself</h1>
+                <p className="text-[12px] font-bold opacity-60 mb-8 text-[var(--bulletin-text)]">Fill in your student details.</p>
+                <div className="space-y-6">
                   <div>
-                    <label className="block text-[9px] font-bold uppercase tracking-wider opacity-60 mb-1">Full name</label>
+                    <label className="block text-[11px] font-black uppercase tracking-[0.2em] opacity-40 mb-3 text-[var(--bulletin-text)]">Full name</label>
                     <input type="text" placeholder="Kwame Asante" autoComplete="name" autoFocus className={fieldBase} {...register('name')} />
-                    {errors.name && <p className="mt-1 text-[11px] text-red-600 font-bold">{errors.name.message}</p>}
+                    {errors.name && <p className="mt-2 text-[12px] text-red-600 font-black uppercase tracking-widest">{errors.name.message}</p>}
                   </div>
                   <div>
-                    <label className="block text-[9px] font-bold uppercase tracking-wider opacity-60 mb-1">Email</label>
+                    <label className="block text-[11px] font-black uppercase tracking-[0.2em] opacity-40 mb-3 text-[var(--bulletin-text)]">Email</label>
                     <input type="email" placeholder="you@example.com" autoComplete="email" className={fieldBase} {...register('email')} />
-                    {errors.email && <p className="mt-1 text-[11px] text-red-600 font-bold">{errors.email.message}</p>}
+                    {errors.email && <p className="mt-2 text-[12px] text-red-600 font-black uppercase tracking-widest">{errors.email.message}</p>}
                   </div>
                   <div>
-                    <label className="block text-[9px] font-bold uppercase tracking-wider opacity-60 mb-1">Phone</label>
+                    <label className="block text-[11px] font-black uppercase tracking-[0.2em] opacity-40 mb-3 text-[var(--bulletin-text)]">Phone</label>
                     <input type="tel" placeholder="0XX XXX XXXX" autoComplete="tel" className={fieldBase} {...register('phone')} />
-                    {errors.phone && <p className="mt-1 text-[11px] text-red-600 font-bold">{errors.phone.message}</p>}
+                    {errors.phone && <p className="mt-2 text-[12px] text-red-600 font-black uppercase tracking-widest">{errors.phone.message}</p>}
                   </div>
                 </div>
-                <div className="flex gap-2 mt-5">
-                  <button type="button" onClick={() => setStep(1)} className="flex-1 border border-black bg-white px-4 py-2.5 text-[9px] font-bold uppercase shadow-[2px_2px_0_0_rgba(0,0,0,1)] hover:shadow-[3px_3px_0_0_rgba(0,0,0,1)] transition-all">← Back</button>
-                  <button type="button" onClick={goNext} className="flex-[2] border border-black bg-black px-4 py-2.5 text-[10px] font-bold uppercase text-white shadow-[3px_3px_0_0_rgba(0,0,0,1)] hover:bg-white hover:text-black transition-all">Continue →</button>
+                <div className="flex gap-4 mt-10">
+                  <button type="button" onClick={() => setStep(1)} className="flex-1 border-4 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] px-4 py-4 text-[12px] font-black uppercase shadow-[6px_6px_0_0_var(--bulletin-shadow)] hover:-translate-y-1 hover:shadow-[4px_4px_0_0_var(--bulletin-shadow)] transition-all text-[var(--bulletin-text)]">← Back</button>
+                  <button type="button" onClick={goNext} className="flex-[2] border-4 border-[var(--bulletin-border)] bg-[var(--bulletin-text)] px-4 py-4 text-[14px] font-black uppercase text-[var(--bulletin-bg)] shadow-[6px_6px_0_0_var(--bulletin-shadow)] hover:-translate-y-1 hover:shadow-[4px_4px_0_0_var(--bulletin-shadow)] transition-all tracking-widest">Continue →</button>
                 </div>
               </div>
             )}
 
             {/* STEP 3: Campus Info */}
             {step === 3 && (
-              <div>
-                <h1 className="text-2xl font-bold mb-1">Campus info</h1>
-                <p className="text-[11px] opacity-60 mb-5">Help others know where you're from.</p>
-                <div className="space-y-3">
+              <div className="animate-in fade-in slide-in-from-right-4 duration-300">
+                <h1 className="text-3xl font-black uppercase tracking-tighter mb-2 text-[var(--bulletin-text)]">Campus Coordinates</h1>
+                <p className="text-[12px] font-bold opacity-60 mb-8 text-[var(--bulletin-text)]">Help others know where you're from.</p>
+                <div className="space-y-6">
                   <div>
-                    <label className="block text-[9px] font-bold uppercase tracking-wider opacity-60 mb-1">Program of Study</label>
+                    <label className="block text-[11px] font-black uppercase tracking-[0.2em] opacity-40 mb-3 text-[var(--bulletin-text)]">Program of Study</label>
                     <input type="text" placeholder="e.g. Geological Engineering" autoFocus className={fieldBase} {...register('department')} />
-                    {errors.department && <p className="mt-1 text-[11px] text-red-600 font-bold">{errors.department.message}</p>}
+                    {errors.department && <p className="mt-2 text-[12px] text-red-600 font-black uppercase tracking-widest">{errors.department.message}</p>}
                   </div>
                   <div>
-                    <label className="block text-[9px] font-bold uppercase tracking-wider opacity-60 mb-1">Residence Hall</label>
+                    <label className="block text-[11px] font-black uppercase tracking-[0.2em] opacity-40 mb-3 text-[var(--bulletin-text)]">Residence Hall</label>
                     <input type="text" placeholder="e.g. Jubilee Hall" className={fieldBase} {...register('residenceHall')} />
-                    {errors.residenceHall && <p className="mt-1 text-[11px] text-red-600 font-bold">{errors.residenceHall.message}</p>}
+                    {errors.residenceHall && <p className="mt-2 text-[12px] text-red-600 font-black uppercase tracking-widest">{errors.residenceHall.message}</p>}
                   </div>
                   <div>
-                    <label className="block text-[9px] font-bold uppercase tracking-wider opacity-60 mb-1">Academic Level</label>
+                    <label className="block text-[11px] font-black uppercase tracking-[0.2em] opacity-40 mb-3 text-[var(--bulletin-text)]">Academic Level</label>
                     <select className={selectBase} {...register('currentLevel')}>
                       <option value="">Select level</option>
                       {ACADEMIC_LEVELS.map((l) => (
                         <option key={l} value={l}>{l}</option>
                       ))}
                     </select>
-                    {errors.currentLevel && <p className="mt-1 text-[11px] text-red-600 font-bold">{errors.currentLevel.message}</p>}
+                    {errors.currentLevel && <p className="mt-2 text-[12px] text-red-600 font-black uppercase tracking-widest">{errors.currentLevel.message}</p>}
                   </div>
                   <div>
-                    <label className="block text-[9px] font-bold uppercase tracking-wider opacity-60 mb-1">Location <span className="normal-case font-normal opacity-60">— optional</span></label>
+                    <label className="block text-[11px] font-black uppercase tracking-[0.2em] opacity-40 mb-3 text-[var(--bulletin-text)]">Location <span className="font-bold opacity-60">— optional</span></label>
                     <input type="text" placeholder="e.g. Jubilee Hostel" className={fieldBase} {...register('location')} />
                   </div>
                 </div>
-                <div className="flex gap-2 mt-5">
-                  <button type="button" onClick={() => setStep(2)} className="flex-1 border border-black bg-white px-4 py-2.5 text-[9px] font-bold uppercase shadow-[2px_2px_0_0_rgba(0,0,0,1)] hover:shadow-[3px_3px_0_0_rgba(0,0,0,1)] transition-all">← Back</button>
-                  <button type="button" onClick={goNext} className="flex-[2] border border-black bg-black px-4 py-2.5 text-[10px] font-bold uppercase text-white shadow-[3px_3px_0_0_rgba(0,0,0,1)] hover:bg-white hover:text-black transition-all">Continue →</button>
+                <div className="flex gap-4 mt-10">
+                  <button type="button" onClick={() => setStep(2)} className="flex-1 border-4 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] px-4 py-4 text-[12px] font-black uppercase shadow-[6px_6px_0_0_var(--bulletin-shadow)] hover:-translate-y-1 hover:shadow-[4px_4px_0_0_var(--bulletin-shadow)] transition-all text-[var(--bulletin-text)]">← Back</button>
+                  <button type="button" onClick={goNext} className="flex-[2] border-4 border-[var(--bulletin-border)] bg-[var(--bulletin-text)] px-4 py-4 text-[14px] font-black uppercase text-[var(--bulletin-bg)] shadow-[6px_6px_0_0_var(--bulletin-shadow)] hover:-translate-y-1 hover:shadow-[4px_4px_0_0_var(--bulletin-shadow)] transition-all tracking-widest">Continue →</button>
                 </div>
               </div>
             )}
 
             {/* STEP 4: Password */}
             {step === 4 && (
-              <div>
+              <div className="animate-in fade-in slide-in-from-right-4 duration-300">
                 {isGoogleFlow ? (
                   <>
-                    <h1 className="text-2xl font-bold mb-1">Almost done!</h1>
-                    <p className="text-[11px] opacity-60 mb-5">Your account will use Google authentication. No password needed.</p>
-                    <div className="flex gap-2 mt-5">
-                      <button type="button" onClick={() => setStep(3)} className="flex-1 border border-black bg-white px-4 py-2.5 text-[9px] font-bold uppercase shadow-[2px_2px_0_0_rgba(0,0,0,1)] hover:shadow-[3px_3px_0_0_rgba(0,0,0,1)] transition-all">← Back</button>
+                    <div className="mb-8 p-6 border-4 border-[var(--bulletin-border)] bg-[#e0f2f7] dark:bg-sky-900/40 shadow-[8px_8px_0_0_var(--bulletin-shadow)]" style={{ transform: 'rotate(-1deg)' }}>
+                      <h1 className="text-3xl font-black uppercase tracking-tighter mb-2 text-[var(--bulletin-text)]">Final Verification</h1>
+                      <p className="text-[14px] font-bold opacity-80 text-[var(--bulletin-text)]">Your account will use Google authentication. No password needed.</p>
+                    </div>
+                    <div className="flex gap-4 mt-10">
+                      <button type="button" onClick={() => setStep(3)} className="flex-1 border-4 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] px-4 py-4 text-[12px] font-black uppercase shadow-[6px_6px_0_0_var(--bulletin-shadow)] hover:-translate-y-1 hover:shadow-[4px_4px_0_0_var(--bulletin-shadow)] transition-all text-[var(--bulletin-text)]">← Back</button>
                       <button 
                         type="button" 
                         onClick={() => {
@@ -449,44 +445,44 @@ const RegisterPage: React.FC = () => {
                           onSubmit(data);
                         }} 
                         disabled={isSubmitting} 
-                        className="flex-[2] border border-black bg-black px-4 py-2.5 text-[10px] font-bold uppercase text-white shadow-[3px_3px_0_0_rgba(0,0,0,1)] hover:bg-white hover:text-black disabled:opacity-40 transition-all"
+                        className="flex-[2] border-4 border-[var(--bulletin-border)] bg-[var(--bulletin-text)] px-4 py-4 text-[14px] font-black uppercase text-[var(--bulletin-bg)] shadow-[6px_6px_0_0_var(--bulletin-shadow)] hover:-translate-y-1 hover:shadow-[4px_4px_0_0_var(--bulletin-shadow)] disabled:opacity-40 transition-all tracking-widest"
                       >
-                        {isSubmitting ? 'Creating...' : 'Complete with Google'}
+                        {isSubmitting ? 'Authenticating...' : 'Complete with Google'}
                       </button>
                     </div>
                   </>
                 ) : (
                   <>
-                    <h1 className="text-2xl font-bold mb-1">Secure your account</h1>
-                    <p className="text-[11px] opacity-60 mb-5">Choose a strong password.</p>
-                    <div className="space-y-3">
+                    <h1 className="text-3xl font-black uppercase tracking-tighter mb-2 text-[var(--bulletin-text)]">Secure Access</h1>
+                    <p className="text-[12px] font-bold opacity-60 mb-8 text-[var(--bulletin-text)]">Choose a strong password.</p>
+                    <div className="space-y-6">
                       <div>
-                        <label className="block text-[9px] font-bold uppercase tracking-wider opacity-60 mb-1">Password</label>
+                        <label className="block text-[11px] font-black uppercase tracking-[0.2em] opacity-40 mb-3 text-[var(--bulletin-text)]">Password</label>
                         <div className="relative flex items-center">
-                          <input type={showPassword ? 'text' : 'password'} placeholder="At least 6 characters" autoComplete="new-password" autoFocus className={`flex-1 pr-12 ${fieldBase}`} {...register('password')} />
-                          <button type="button" onClick={() => setShowPassword((p) => !p)} className="absolute right-3 text-black/40 hover:text-black">{showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}</button>
+                          <input type={showPassword ? 'text' : 'password'} placeholder="At least 6 characters" autoComplete="new-password" autoFocus className={`flex-1 pr-16 ${fieldBase}`} {...register('password')} />
+                          <button type="button" onClick={() => setShowPassword((p) => !p)} className="absolute right-4 opacity-40 hover:opacity-100 text-[var(--bulletin-text)]">{showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}</button>
                         </div>
-                        {errors.password && <p className="mt-1 text-[11px] text-red-600 font-bold">{errors.password.message}</p>}
+                        {errors.password && <p className="mt-2 text-[12px] text-red-600 font-black uppercase tracking-widest">{errors.password.message}</p>}
                       </div>
                       <div>
-                        <label className="block text-[9px] font-bold uppercase tracking-wider opacity-60 mb-1">Confirm</label>
+                        <label className="block text-[11px] font-black uppercase tracking-[0.2em] opacity-40 mb-3 text-[var(--bulletin-text)]">Confirm</label>
                         <div className="relative flex items-center">
-                          <input type={showConfirm ? 'text' : 'password'} placeholder="Re-enter password" autoComplete="new-password" className={`flex-1 pr-12 ${fieldBase}`} {...register('confirmPassword')} />
-                          <button type="button" onClick={() => setShowConfirm((p) => !p)} className="absolute right-3 text-black/40 hover:text-black">{showConfirm ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}</button>
+                          <input type={showConfirm ? 'text' : 'password'} placeholder="Re-enter password" autoComplete="new-password" className={`flex-1 pr-16 ${fieldBase}`} {...register('confirmPassword')} />
+                          <button type="button" onClick={() => setShowConfirm((p) => !p)} className="absolute right-4 opacity-40 hover:opacity-100 text-[var(--bulletin-text)]">{showConfirm ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}</button>
                         </div>
-                        {errors.confirmPassword && <p className="mt-1 text-[11px] text-red-600 font-bold">{errors.confirmPassword.message}</p>}
+                        {errors.confirmPassword && <p className="mt-2 text-[12px] text-red-600 font-black uppercase tracking-widest">{errors.confirmPassword.message}</p>}
                       </div>
                     </div>
-                    <div className="flex gap-2 mt-5">
-                      <button type="button" onClick={() => setStep(3)} className="flex-1 border border-black bg-white px-4 py-2.5 text-[9px] font-bold uppercase shadow-[2px_2px_0_0_rgba(0,0,0,1)] hover:shadow-[3px_3px_0_0_rgba(0,0,0,1)] transition-all">← Back</button>
-                      <button type="submit" disabled={isSubmitting} className="flex-[2] border border-black bg-black px-4 py-2.5 text-[10px] font-bold uppercase text-white shadow-[3px_3px_0_0_rgba(0,0,0,1)] hover:bg-white hover:text-black disabled:opacity-40 transition-all">
-                        {isSubmitting ? 'Creating...' : 'Create account'}
+                    <div className="flex gap-4 mt-10">
+                      <button type="button" onClick={() => setStep(3)} className="flex-1 border-4 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] px-4 py-4 text-[12px] font-black uppercase shadow-[6px_6px_0_0_var(--bulletin-shadow)] hover:-translate-y-1 hover:shadow-[4px_4px_0_0_var(--bulletin-shadow)] transition-all text-[var(--bulletin-text)]">← Back</button>
+                      <button type="submit" disabled={isSubmitting} className="flex-[2] border-4 border-[var(--bulletin-border)] bg-[var(--bulletin-text)] px-4 py-4 text-[14px] font-black uppercase text-[var(--bulletin-bg)] shadow-[6px_6px_0_0_var(--bulletin-shadow)] hover:-translate-y-1 hover:shadow-[4px_4px_0_0_var(--bulletin-shadow)] disabled:opacity-40 transition-all tracking-widest">
+                        {isSubmitting ? 'Creating...' : 'Initialize Account'}
                       </button>
                     </div>
                   </>
                 )}
-                <div className="mt-4 text-center">
-                  <p className="text-[11px] opacity-60">Already have an account? <Link to="/login" className="font-bold underline hover:no-underline">Sign in</Link></p>
+                <div className="mt-8 text-center bg-[#fffacd] dark:bg-yellow-900/40 p-4 border-2 border-[var(--bulletin-border)] shadow-[4px_4px_0_0_var(--bulletin-shadow)]" style={{ transform: 'rotate(1deg)' }}>
+                  <p className="text-[12px] font-bold text-[var(--bulletin-text)] uppercase tracking-widest">Already have an account? <Link to="/login" className="font-black underline decoration-2 underline-offset-4 hover:no-underline ml-2">Sign in</Link></p>
                 </div>
               </div>
             )}

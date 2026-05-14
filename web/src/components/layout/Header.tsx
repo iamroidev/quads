@@ -72,7 +72,7 @@ const Header: React.FC = () => {
     <Link to={isAuthenticated ? '/dashboard' : '/'} className="flex items-center gap-2.5 flex-shrink-0">
       <BrandMark className="h-7 w-7" />
       <span className="text-sm font-black tracking-[-0.02em] text-earth-900 uppercase">
-        CampusMarket
+        QUADS
       </span>
     </Link>
   );

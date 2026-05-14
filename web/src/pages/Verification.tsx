@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import verificationService from '../services/verification.service';
 import toast from 'react-hot-toast';
-import { BulletinLayout, BulletinSection } from '../components/layout/BulletinLayout';
-import { ShieldCheck, ShieldOff, Mail, Phone, Check, Loader2 } from 'lucide-react';
+import { BulletinLayout, BulletinSection, BulletinCard } from '../components/layout/BulletinLayout';
+import { ShieldCheck, ShieldOff, Mail, Phone, Check, Loader2, ArrowRight, Smartphone, Lock } from 'lucide-react';
 
-const fieldBase = 'w-full border border-black bg-[#fefdfb] px-4 py-3 text-[13px] font-bold focus:outline-none focus:ring-2 focus:ring-black placeholder:text-black/30';
+const fieldBase = 'w-full border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-bg)] px-4 py-4 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-[var(--bulletin-text)] shadow-[4px_4px_0_0_var(--bulletin-shadow)] text-[var(--bulletin-text)] placeholder:text-[var(--bulletin-text)] placeholder:opacity-30';
 
 type VerifyMethod = 'email' | 'phone';
 type Step = 'select' | 'enter_code';
@@ -31,14 +31,6 @@ const VerificationPage: React.FC = () => {
   const [verifying, setVerifying] = useState(false);
   const [sent, setSent] = useState(false);
   const [countdown, setCountdown] = useState(0);
-  const [showForm, setShowForm] = useState(true);
-
-  // Auto-hide form if everything verified
-  useEffect(() => {
-    if (user?.emailVerified && user?.phoneVerified) {
-      setShowForm(false);
-    }
-  }, [user]);
 
   // Countdown timer for resend
   useEffect(() => {
@@ -96,240 +88,203 @@ const VerificationPage: React.FC = () => {
     }
   };
 
-  const handleResend = () => {
-    if (countdown > 0) return;
-    handleSendCode();
-  };
-
-  const changeMethod = (m: VerifyMethod) => {
-    setMethod(m);
-    setStep('select');
-    setCode('');
-    setCodeError('');
-    setSent(false);
-    setCountdown(0);
-  };
-
-  const emailVerified = user?.emailVerified;
-  const phoneVerified = user?.phoneVerified;
-  const isVerified = user?.isVerified;
-
-  // Already fully verified
-  if (!showForm) {
-    return (
-      <BulletinLayout title="Verification" subtitle="Trust & Safety" section="10">
-        <BulletinSection bgColor="bg-[#faf8f5]">
-          <div className="max-w-lg mx-auto text-center py-12">
-            <div className="inline-flex items-center justify-center h-16 w-16 rounded-full bg-emerald-100 mb-6">
-              <ShieldCheck className="h-8 w-8 text-emerald-600" />
-            </div>
-            <h2 className="text-2xl font-bold mb-2">You're all verified!</h2>
-            <p className="text-[13px] opacity-60 mb-6">
-              Both your email and phone are verified. You have full access to all features.
-            </p>
-            <button
-              onClick={() => navigate('/profile')}
-              className="border border-black bg-black px-6 py-2 text-[11px] font-bold uppercase text-white shadow-[2px_2px_0_0_rgba(0,0,0,1)] hover:bg-white hover:text-black transition-colors"
-            >
-              Back to Profile
-            </button>
-          </div>
-        </BulletinSection>
-      </BulletinLayout>
-    );
-  }
+  const isVerified = user?.emailVerified && user?.phoneVerified;
 
   return (
-    <BulletinLayout title="Verification" subtitle="Trust & Safety" section="10">
-      <BulletinSection bgColor="bg-[#faf8f5]">
-        <div className="max-w-lg mx-auto">
-          {/* Back button at the top */}
-          <button
-            onClick={() => navigate('/profile')}
-            className="mb-6 flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-black opacity-60 hover:opacity-100 transition-opacity"
-          >
-            ← Back to Profile
-          </button>
+    <BulletinLayout title="Verification" subtitle="Security Center" section="05">
+      {/* Dark Banner with Status */}
+      <div className="border-b-4 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] relative overflow-hidden">
+        {/* Subtle background pattern/tape */}
+        <div className="absolute -top-4 -right-10 h-12 w-40 bg-[#ffd700]/10 rotate-[12deg]" />
 
-          {/* Status cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
-            <div className={`border p-4 ${emailVerified ? 'border-emerald-400 bg-emerald-50' : 'border-black/20 bg-white'}`}>
-              <div className="flex items-center justify-between mb-2">
-                <Mail className={`h-5 w-5 ${emailVerified ? 'text-emerald-600' : 'opacity-40'}`} />
-                {emailVerified ? (
-                  <Check className="h-4 w-4 text-emerald-600" />
-                ) : (
-                  <ShieldOff className="h-4 w-4 text-black/30" />
-                )}
+        <div className="mx-auto max-w-[1400px] px-6 py-12 md:py-20 relative z-10">
+          <div className="grid gap-12 lg:grid-cols-2 lg:items-center">
+            <div>
+              <div className="flex items-center gap-4 mb-8">
+                <div className={`p-4 border-2 border-[var(--bulletin-text)] ${isVerified ? 'bg-emerald-500 shadow-[4px_4px_0_0_var(--bulletin-text)]' : 'bg-red-500 animate-pulse shadow-[4px_4px_0_0_var(--bulletin-text)]'}`}>
+                  {isVerified ? <ShieldCheck className="h-8 w-8 text-[var(--bulletin-bg)]" /> : <ShieldOff className="h-8 w-8 text-[var(--bulletin-bg)]" />}
+                </div>
+                <div className="text-[12px] font-black uppercase tracking-[0.4em] text-[var(--bulletin-text)] opacity-60">Account Integrity</div>
               </div>
-              <div className="text-[11px] font-bold uppercase tracking-wider">Email</div>
-              <div className={`text-[12px] mt-1 ${emailVerified ? 'text-emerald-700' : 'opacity-50'}`}>
-                {emailVerified ? 'Verified' : 'Not verified'}
-              </div>
-              {!emailVerified && (
-                <button
-                  onClick={() => changeMethod('email')}
-                  className={`mt-2 text-[10px] font-bold uppercase underline ${method === 'email' ? 'text-black' : 'opacity-50 hover:opacity-100'}`}
-                >
-                  {method === 'email' ? 'Selected' : 'Verify'}
-                </button>
-              )}
+              <h1 className="text-4xl md:text-6xl font-black text-[var(--bulletin-text)] uppercase tracking-tighter leading-none mb-6">
+                {isVerified ? 'Fully Verified' : 'Action Required'}
+              </h1>
+              <p className="max-w-md text-lg text-[var(--bulletin-text)] opacity-70 font-bold leading-relaxed">
+                Verify your identity to unlock higher transaction limits, faster payouts, and the trusted "Verified Seller" badge.
+              </p>
             </div>
-            <div className={`border p-4 ${phoneVerified ? 'border-emerald-400 bg-emerald-50' : 'border-black/20 bg-white'}`}>
-              <div className="flex items-center justify-between mb-2">
-                <Phone className={`h-5 w-5 ${phoneVerified ? 'text-emerald-600' : 'opacity-40'}`} />
-                {phoneVerified ? (
-                  <Check className="h-4 w-4 text-emerald-600" />
-                ) : (
-                  <ShieldOff className="h-4 w-4 text-black/30" />
-                )}
+
+            <div className="grid gap-6 sm:grid-cols-2">
+              <div className="border-4 border-[var(--bulletin-bg)] p-6 bg-[var(--bulletin-text)] shadow-[8px_8px_0_0_var(--bulletin-bg)]" style={{ transform: 'rotate(-1deg)' }}>
+                <div className="flex justify-between items-start mb-6">
+                  <div className="p-3 border-2 border-[var(--bulletin-bg)]/20 bg-[var(--bulletin-bg)]/5">
+                    <Mail className="h-5 w-5 text-[var(--bulletin-bg)]" />
+                  </div>
+                  {user?.emailVerified ? (
+                    <span className="text-[10px] font-black uppercase bg-emerald-500 px-3 py-1 text-[var(--bulletin-bg)] border-2 border-[var(--bulletin-bg)] shadow-[2px_2px_0_0_var(--bulletin-bg)]">Active</span>
+                  ) : (
+                    <span className="text-[10px] font-black uppercase bg-red-500 px-3 py-1 text-[var(--bulletin-bg)] border-2 border-[var(--bulletin-bg)] shadow-[2px_2px_0_0_var(--bulletin-bg)]">Pending</span>
+                  )}
+                </div>
+                <div className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--bulletin-bg)] opacity-60 mb-1">Email Auth</div>
+                <div className="text-[var(--bulletin-bg)] font-black text-lg truncate">{user?.email}</div>
               </div>
-              <div className="text-[11px] font-bold uppercase tracking-wider">Phone</div>
-              <div className={`text-[12px] mt-1 ${phoneVerified ? 'text-emerald-700' : 'opacity-50'}`}>
-                {phoneVerified ? 'Verified' : 'Not verified'}
+
+              <div className="border-4 border-[var(--bulletin-bg)] p-6 bg-[var(--bulletin-text)] shadow-[8px_8px_0_0_var(--bulletin-bg)]" style={{ transform: 'rotate(1deg)' }}>
+                <div className="flex justify-between items-start mb-6">
+                  <div className="p-3 border-2 border-[var(--bulletin-bg)]/20 bg-[var(--bulletin-bg)]/5">
+                    <Smartphone className="h-5 w-5 text-[var(--bulletin-bg)]" />
+                  </div>
+                  {user?.phoneVerified ? (
+                    <span className="text-[10px] font-black uppercase bg-emerald-500 px-3 py-1 text-[var(--bulletin-bg)] border-2 border-[var(--bulletin-bg)] shadow-[2px_2px_0_0_var(--bulletin-bg)]">Active</span>
+                  ) : (
+                    <span className="text-[10px] font-black uppercase bg-red-500 px-3 py-1 text-[var(--bulletin-bg)] border-2 border-[var(--bulletin-bg)] shadow-[2px_2px_0_0_var(--bulletin-bg)]">Pending</span>
+                  )}
+                </div>
+                <div className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--bulletin-bg)] opacity-60 mb-1">Phone Link</div>
+                <div className="text-[var(--bulletin-bg)] font-black text-lg truncate">{user?.phone || 'Not linked'}</div>
               </div>
-              {!phoneVerified && (
-                <button
-                  onClick={() => changeMethod('phone')}
-                  className={`mt-2 text-[10px] font-bold uppercase underline ${method === 'phone' ? 'text-black' : 'opacity-50 hover:opacity-100'}`}
-                >
-                  {method === 'phone' ? 'Selected' : 'Verify'}
-                </button>
-              )}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <BulletinSection bgColor="bg-[var(--bulletin-bg)]">
+        <div className="grid gap-12 lg:grid-cols-3">
+          <div className="lg:col-span-1">
+            <h2 className="text-3xl font-black uppercase tracking-tighter mb-6 text-[var(--bulletin-text)]">Why verify?</h2>
+            <div className="space-y-8">
+              {[
+                { title: 'Trust Score', desc: 'Buyers prefer verified sellers by a ratio of 4:1.', icon: <Check className="h-5 w-5" /> },
+                { title: 'Safety First', desc: 'Ensures all marketplace participants are UMaT community members.', icon: <Check className="h-5 w-5" /> },
+                { title: 'Faster Payouts', desc: 'Verified accounts bypass standard 48-hour holding periods.', icon: <Check className="h-5 w-5" /> }
+              ].map((item) => (
+                <div key={item.title} className="flex gap-4 items-start">
+                  <div className="mt-1 flex h-8 w-8 flex-shrink-0 items-center justify-center border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-text)] text-[var(--bulletin-bg)] shadow-[2px_2px_0_0_var(--bulletin-shadow)]">
+                    {item.icon}
+                  </div>
+                  <div>
+                    <h3 className="text-base font-black uppercase text-[var(--bulletin-text)]">{item.title}</h3>
+                    <p className="text-[12px] font-bold opacity-60 leading-relaxed mt-1 text-[var(--bulletin-text)]">{item.desc}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="mt-12 p-8 border-4 border-[var(--bulletin-border)] bg-[#fffacd] dark:bg-yellow-900/40 shadow-[8px_8px_0_0_var(--bulletin-shadow)]" style={{ transform: 'rotate(-1deg)' }}>
+              <div className="flex items-center gap-3 mb-4">
+                <Lock className="h-5 w-5 text-[var(--bulletin-text)]" />
+                <span className="text-[12px] font-black uppercase tracking-[0.2em] text-[var(--bulletin-text)]">Privacy</span>
+              </div>
+              <p className="text-[12px] font-bold leading-relaxed opacity-80 text-[var(--bulletin-text)]">
+                Your verification data is encrypted and never shared with third parties or other users.
+              </p>
             </div>
           </div>
 
-          {/* Verify method cards */}
-          {method === 'email' && !emailVerified && step === 'select' && (
-            <div className="border border-black bg-white p-6">
-              <h3 className="text-lg font-bold mb-1">Verify your email</h3>
-              <p className="text-[12px] opacity-60 mb-4">
-                We'll send a 6-digit code to your email. If you have a <strong>@st.umat.edu.gh</strong> email, it proves you're a UMaT student.
-              </p>
-              <input
-                type="email"
-                placeholder="you@example.com or you@st.umat.edu.gh"
-                className={fieldBase}
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
-              <button
-                onClick={handleSendCode}
-                disabled={sending || !email.trim()}
-                className="mt-4 w-full border border-black bg-black px-6 py-3 text-[11px] font-bold uppercase text-white shadow-[2px_2px_0_0_rgba(0,0,0,1)] hover:bg-white hover:text-black transition-colors disabled:opacity-40"
-              >
-                {sending ? <><Loader2 className="inline-block h-3.5 w-3.5 animate-spin mr-1" /> Sending...</> : 'Send verification code'}
-              </button>
-            </div>
-          )}
+          <div className="lg:col-span-2">
+            {!isVerified ? (
+              <BulletinCard bgColor="bg-[var(--bulletin-card)]" className="p-8 md:p-12 border-4 border-[var(--bulletin-border)] shadow-[12px_12px_0_0_var(--bulletin-shadow)]">
+                {step === 'select' ? (
+                  <div>
+                    <h2 className="text-4xl font-black uppercase tracking-tighter mb-10 text-[var(--bulletin-text)]">Choose Method</h2>
+                    <div className="grid gap-8 sm:grid-cols-2">
+                      <button
+                        disabled={user?.emailVerified}
+                        onClick={() => { setMethod('email'); handleSendCode(); }}
+                        className={`group relative flex flex-col items-start border-4 border-[var(--bulletin-border)] p-8 text-left transition-all ${user?.emailVerified ? 'opacity-50 cursor-not-allowed bg-[var(--bulletin-bg)]' : 'bg-[var(--bulletin-card)] hover:-translate-y-2 hover:shadow-[8px_8px_0_0_var(--bulletin-shadow)] shadow-[4px_4px_0_0_var(--bulletin-shadow)]'
+                          }`}
+                      >
+                        <Mail className="mb-6 h-10 w-10 text-[var(--bulletin-text)]" />
+                        <div className="text-[11px] font-black uppercase tracking-widest opacity-40 mb-2 text-[var(--bulletin-text)]">Method 01</div>
+                        <div className="text-2xl font-black uppercase text-[var(--bulletin-text)]">Email OTP</div>
+                        <div className="mt-2 text-[12px] font-bold opacity-60 text-[var(--bulletin-text)]">Send code to {user?.email}</div>
+                        {user?.emailVerified && (
+                          <div className="absolute top-4 right-4 bg-[var(--bulletin-text)] text-[var(--bulletin-bg)] px-3 py-1 text-[9px] font-black uppercase tracking-widest">Verified</div>
+                        )}
+                      </button>
 
-          {method === 'phone' && !phoneVerified && step === 'select' && (
-            <div className="border border-black bg-white p-6">
-              <h3 className="text-lg font-bold mb-1">Verify your phone</h3>
-              <p className="text-[12px] opacity-60 mb-4">
-                AWS SNS SMS will send a 6-digit code to your phone. Standard SMS rates apply.
-              </p>
-              <input
-                type="tel"
-                placeholder="0XX XXX XXXX"
-                className={fieldBase}
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-              />
-              <button
-                onClick={handleSendCode}
-                disabled={sending || !phone.trim()}
-                className="mt-4 w-full border border-black bg-black px-6 py-3 text-[11px] font-bold uppercase text-white shadow-[2px_2px_0_0_rgba(0,0,0,1)] hover:bg-white hover:text-black transition-colors disabled:opacity-40"
-              >
-                {sending ? <><Loader2 className="inline-block h-3.5 w-3.5 animate-spin mr-1" /> Sending...</> : 'Send verification code'}
-              </button>
-            </div>
-          )}
+                      <button
+                        disabled={user?.phoneVerified}
+                        onClick={() => { setMethod('phone'); handleSendCode(); }}
+                        className={`group relative flex flex-col items-start border-4 border-[var(--bulletin-border)] p-8 text-left transition-all ${user?.phoneVerified ? 'opacity-50 cursor-not-allowed bg-[var(--bulletin-bg)]' : 'bg-[var(--bulletin-card)] hover:-translate-y-2 hover:shadow-[8px_8px_0_0_var(--bulletin-shadow)] shadow-[4px_4px_0_0_var(--bulletin-shadow)]'
+                          }`}
+                      >
+                        <Smartphone className="mb-6 h-10 w-10 text-[var(--bulletin-text)]" />
+                        <div className="text-[11px] font-black uppercase tracking-widest opacity-40 mb-2 text-[var(--bulletin-text)]">Method 02</div>
+                        <div className="text-2xl font-black uppercase text-[var(--bulletin-text)]">SMS Code</div>
+                        <div className="mt-2 text-[12px] font-bold opacity-60 text-[var(--bulletin-text)]">Send code to registered phone</div>
+                        {user?.phoneVerified && (
+                          <div className="absolute top-4 right-4 bg-[var(--bulletin-text)] text-[var(--bulletin-bg)] px-3 py-1 text-[9px] font-black uppercase tracking-widest">Verified</div>
+                        )}
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <div>
+                    <div className="mb-10 flex items-center justify-between border-b-2 border-[var(--bulletin-border)] pb-6">
+                      <div>
+                        <h2 className="text-4xl font-black uppercase tracking-tighter text-[var(--bulletin-text)]">Enter Code</h2>
+                        <p className="text-[14px] font-bold opacity-60 mt-2 text-[var(--bulletin-text)]">Sent to your {method === 'email' ? 'email' : 'phone'}</p>
+                      </div>
+                      <button onClick={() => setStep('select')} className="text-[11px] font-black uppercase tracking-widest underline decoration-2 underline-offset-4 hover:no-underline text-[var(--bulletin-text)]">
+                        Change Method
+                      </button>
+                    </div>
 
-          {/* Code entry step */}
-          {step === 'enter_code' && (
-            <div className="border border-black bg-white p-6">
-              <h3 className="text-lg font-bold mb-1">Enter the code</h3>
-              <p className="text-[12px] opacity-60 mb-4">
-                A 6-digit code was sent to your {method === 'email' ? 'email' : 'phone'}. It expires in 10 minutes.
-              </p>
-              <input
-                type="text"
-                inputMode="numeric"
-                maxLength={6}
-                placeholder="000000"
-                className={`${fieldBase} text-center text-2xl tracking-[0.5em]`}
-                value={code}
-                onChange={(e) => {
-                  const val = e.target.value.replace(/\D/g, '').slice(0, 6);
-                  setCode(val);
-                  setCodeError('');
-                }}
-              />
-              {codeError && <p className="mt-1 text-[11px] text-red-600 font-bold">{codeError}</p>}
-              <button
-                onClick={handleVerifyCode}
-                disabled={verifying || code.length !== 6}
-                className="mt-4 w-full border border-black bg-black px-6 py-3 text-[11px] font-bold uppercase text-white shadow-[2px_2px_0_0_rgba(0,0,0,1)] hover:bg-white hover:text-black transition-colors disabled:opacity-40"
-              >
-                {verifying ? <><Loader2 className="inline-block h-3.5 w-3.5 animate-spin mr-1" /> Verifying...</> : 'Verify code'}
-              </button>
-              <div className="mt-4 flex flex-col items-center gap-3">
-                <button
-                  onClick={handleResend}
-                  disabled={countdown > 0 || sending}
-                  className="text-[11px] font-bold underline opacity-60 hover:opacity-100 disabled:opacity-30"
+                    <div className="max-w-sm">
+                      <div className="mb-8">
+                        <label className="text-[11px] font-black uppercase tracking-[0.2em] opacity-40 block mb-3 text-[var(--bulletin-text)]">6-Digit OTP</label>
+                        <input
+                          type="text"
+                          maxLength={6}
+                          value={code}
+                          onChange={(e) => setCode(e.target.value.replace(/\D/g, ''))}
+                          className={`${fieldBase} text-2xl tracking-[0.5em] text-center font-mono`}
+                          placeholder="000000"
+                        />
+                        {codeError && <p className="mt-3 text-[12px] font-black text-red-600 uppercase tracking-widest">{codeError}</p>}
+                      </div>
+
+                      <button
+                        disabled={verifying || code.length !== 6}
+                        onClick={handleVerifyCode}
+                        className="w-full border-4 border-[var(--bulletin-border)] bg-[var(--bulletin-text)] py-4 text-[14px] font-black uppercase tracking-widest text-[var(--bulletin-bg)] shadow-[6px_6px_0_0_var(--bulletin-shadow)] transition-all hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[4px_4px_0_0_var(--bulletin-shadow)] active:translate-x-[6px] active:translate-y-[6px] active:shadow-none disabled:opacity-40"
+                      >
+                        {verifying ? <Loader2 className="mx-auto h-6 w-6 animate-spin" /> : 'Confirm Verification'}
+                      </button>
+
+                      <div className="mt-8 flex items-center justify-between border-t-2 border-[var(--bulletin-border)] pt-6">
+                        <span className="text-[12px] font-black opacity-40 uppercase tracking-widest text-[var(--bulletin-text)]">Didn't get it?</span>
+                        <button
+                          disabled={countdown > 0}
+                          onClick={handleSendCode}
+                          className={`text-[12px] font-black uppercase tracking-widest text-[var(--bulletin-text)] ${countdown > 0 ? 'opacity-30' : 'underline decoration-2 underline-offset-4'}`}
+                        >
+                          {countdown > 0 ? `Resend in ${countdown}s` : 'Resend Now'}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </BulletinCard>
+            ) : (
+              <div className="border-4 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] p-16 text-center shadow-[12px_12px_0_0_var(--bulletin-shadow)]" style={{ transform: 'rotate(0.5deg)' }}>
+                <div className="mx-auto mb-8 flex h-24 w-24 items-center justify-center border-4 border-[var(--bulletin-border)] bg-emerald-500 shadow-[6px_6px_0_0_var(--bulletin-shadow)]">
+                  <ShieldCheck className="h-12 w-12 text-white" />
+                </div>
+                <h2 className="text-5xl font-black uppercase tracking-tighter mb-6 text-[var(--bulletin-text)]">System Secured</h2>
+                <p className="max-w-md mx-auto text-[14px] font-bold opacity-70 leading-relaxed mb-10 text-[var(--bulletin-text)]">
+                  Your identity has been successfully cross-verified. You now have full access to all marketplace features.
+                </p>
+                <Link
+                  to="/dashboard"
+                  className="inline-flex items-center gap-3 border-4 border-[var(--bulletin-border)] bg-[var(--bulletin-text)] px-8 py-4 text-[12px] font-black uppercase tracking-widest text-[var(--bulletin-bg)] hover:-translate-y-1 hover:shadow-[6px_6px_0_0_var(--bulletin-shadow)] transition-all"
                 >
-                  {countdown > 0 ? `Resend in ${countdown}s` : 'Resend code'}
-                </button>
-                <button
-                  onClick={() => {
-                    setStep('select');
-                    setCode('');
-                  }}
-                  className="text-[11px] font-bold uppercase tracking-wider opacity-40 hover:opacity-100"
-                >
-                  Change {method === 'email' ? 'Email' : 'Phone Number'}
-                </button>
+                  Return to Hub <ArrowRight className="h-4 w-4" />
+                </Link>
               </div>
-            </div>
-          )}
-
-          {/* Already verified but not fully */}
-          {((method === 'email' && emailVerified) || (method === 'phone' && phoneVerified)) && step === 'select' && (
-            <div className="border border-emerald-400 bg-emerald-50 p-6 text-center">
-              <Check className="h-6 w-6 text-emerald-600 mx-auto mb-2" />
-              <p className="text-[13px] font-bold text-emerald-800">
-                Your {method === 'email' ? 'email' : 'phone'} is already verified!
-              </p>
-              <p className="text-[12px] text-emerald-600 mt-1">
-                {!emailVerified && 'Verify your email too for full access.'}
-                {!phoneVerified && 'Verify your phone too for full access.'}
-              </p>
-            </div>
-          )}
-
-          {/* Verification info */}
-          <div className="mt-6 border border-black/20 bg-white/50 p-4">
-            <h4 className="text-[10px] font-bold uppercase tracking-wider opacity-60 mb-2">Why verify?</h4>
-            <ul className="space-y-1.5 text-[12px] opacity-70">
-              <li className="flex items-start gap-2">
-                <span className="mt-0.5">•</span>
-                <span>Email verification confirms you're a real UMaT student (use @st.umat.edu.gh).</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="mt-0.5">•</span>
-                <span>Phone verification adds an extra layer of trust for buyers and sellers.</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="mt-0.5">•</span>
-                <span>Sellers must verify at least one method before listing items.</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="mt-0.5">•</span>
-                <span>Verified users get a badge, building trust in the campus community.</span>
-              </li>
-            </ul>
+            )}
           </div>
         </div>
       </BulletinSection>

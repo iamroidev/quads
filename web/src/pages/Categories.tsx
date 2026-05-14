@@ -31,10 +31,10 @@ const Categories: React.FC = () => {
   if (loading) {
     return (
       <BulletinLayout title="Categories" subtitle="Browse" section="02">
-        <BulletinSection bgColor="bg-[#faf8f5]">
+        <BulletinSection bgColor="bg-[var(--bulletin-bg)]">
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {[...Array(8)].map((_, i) => (
-              <div key={i} className="aspect-square animate-pulse border border-black bg-white" />
+              <div key={i} className="aspect-square animate-pulse border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-card)]" />
             ))}
           </div>
         </BulletinSection>
@@ -48,8 +48,8 @@ const Categories: React.FC = () => {
       subtitle={`${totalProducts} listings across ${categories.length} categories`}
       section="02"
     >
-      <BulletinSection bgColor="bg-[#faf8f5]">
-        <div className="flex gap-3 overflow-x-auto pb-4 scrollbar-hide">
+      <BulletinSection bgColor="bg-[var(--bulletin-bg)]">
+        <div className="flex gap-4 overflow-x-auto pb-8 scrollbar-hide p-4">
           {categories.map((cat, idx) => (
             <Link
               key={cat._id}
@@ -57,17 +57,18 @@ const Categories: React.FC = () => {
               className="group flex-shrink-0"
             >
               <div 
-                className="border border-black bg-[#fefdfb] px-6 py-8 shadow-[3px_3px_0_0_rgba(0,0,0,1)] transition-all hover:shadow-[6px_6px_0_0_rgba(0,0,0,1)] hover:-translate-y-1"
+                className="border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] px-8 py-10 shadow-[4px_4px_0_0_var(--bulletin-shadow)] transition-all hover:shadow-[8px_8px_0_0_var(--bulletin-shadow)] hover:-translate-y-1"
                 style={{ 
-                  width: '180px',
+                  width: 'fit-content',
+                  minWidth: '280px',
                   transform: `rotate(${(idx % 2) * 2 - 1}deg)`
                 }}
               >
                 <div className="text-center">
-                  <div className="mb-3 text-3xl">{cat.icon || '📦'}</div>
-                  <div className="font-bold leading-tight">{cat.name}</div>
-                  <div className="mt-2 text-[10px] uppercase opacity-50">
-                    {cat.productCount} items
+                  <div className="mb-4 text-4xl whitespace-nowrap">{cat.icon || '📦'}</div>
+                  <div className="font-black uppercase tracking-tight text-lg text-[var(--bulletin-text)] truncate">{cat.name}</div>
+                  <div className="mt-3 text-[10px] font-black uppercase tracking-widest opacity-40 text-[var(--bulletin-text)]">
+                    {cat.productCount} Items Available
                   </div>
                 </div>
               </div>
@@ -77,19 +78,19 @@ const Categories: React.FC = () => {
       </BulletinSection>
 
       {/* Browse all CTA */}
-      <BulletinSection bgColor="bg-black">
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-6 py-4">
+      <BulletinSection bgColor="bg-[var(--bulletin-text)]">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-8 py-8 px-4">
           <div>
-            <div className="text-[10px] uppercase tracking-wider text-white/40 mb-2">
-              Can't find what you're looking for?
+            <div className="text-[10px] font-black uppercase tracking-widest text-[var(--bulletin-bg)] opacity-40 mb-2">
+              Discovery Hub
             </div>
-            <div className="text-xl font-bold text-white">
-              Browse all products
+            <div className="text-2xl font-black uppercase tracking-tighter text-[var(--bulletin-bg)]">
+              Browse the Full Inventory
             </div>
           </div>
           <button
             onClick={() => navigate('/products')}
-            className="flex-shrink-0 border border-white bg-white px-6 py-3 text-[11px] font-bold uppercase text-black transition-colors hover:bg-black hover:text-white"
+            className="w-full sm:w-auto border-2 border-[var(--bulletin-bg)] bg-[var(--bulletin-bg)] px-8 py-4 text-[11px] font-black uppercase text-[var(--bulletin-text)] transition-all hover:bg-[var(--bulletin-text)] hover:text-[var(--bulletin-bg)] shadow-[4px_4px_0_0_rgba(255,255,255,0.1)] active:translate-y-1 active:shadow-none"
           >
             View all listings →
           </button>

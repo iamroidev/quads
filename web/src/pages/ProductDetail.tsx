@@ -38,11 +38,11 @@ const conditionLabels: Record<string, string> = {
 };
 
 const conditionStyles: Record<string, string> = {
-  'new': 'bg-[#fffacd] text-black',
-  'like-new': 'bg-[#e0f2f7] text-black',
-  'good': 'bg-[#fce4ec] text-black',
-  'fair': 'bg-[#fff5e1] text-black',
-  'poor': 'bg-[#f0e8f4] text-black',
+  'new': 'bg-[#fffacd] dark:bg-yellow-900/40 text-black dark:text-yellow-200',
+  'like-new': 'bg-[#e0f2f7] dark:bg-sky-900/40 text-black dark:text-sky-200',
+  'good': 'bg-[#fce4ec] dark:bg-red-900/40 text-black dark:text-red-200',
+  'fair': 'bg-[#fff5e1] dark:bg-orange-900/40 text-black dark:text-orange-200',
+  'poor': 'bg-[#f0e8f4] dark:bg-purple-900/40 text-black dark:text-purple-200',
 };
 
 const deliveryLabels: Record<string, string> = {
@@ -218,7 +218,7 @@ const ProductDetail: React.FC = () => {
       try {
         await navigator.share({
           title: product?.title,
-          text: `Check out ${product?.title} on CampusMarketplace`,
+          text: `Check out ${product?.title} on QUADS`,
           url,
         });
       } catch {
@@ -253,21 +253,21 @@ const ProductDetail: React.FC = () => {
   };
 
   if (loading) {
-    return <LoadingSpinner text="Loading product..." fullScreen />;
+    return <LoadingSpinner text="Loading product detail..." fullScreen />;
   }
 
   if (!product) {
     return (
       <BulletinLayout title="Product Not Found" subtitle="Error" section="XX">
-        <BulletinSection bgColor="bg-[#faf8f5]">
-          <div className="border border-black bg-[#fffacd] p-8 text-center">
-            <div className="text-[10px] uppercase tracking-wider opacity-60 mb-2">Missing</div>
-            <div className="font-bold mb-4">This product may have been removed or doesn't exist.</div>
+        <BulletinSection bgColor="bg-[var(--bulletin-bg)]">
+          <div className="border-4 border-[var(--bulletin-border)] bg-[#fffacd] dark:bg-yellow-900/10 p-12 text-center shadow-[8px_8px_0_0_var(--bulletin-shadow)]">
+            <div className="text-[10px] font-black uppercase tracking-widest opacity-40 mb-2 text-black dark:text-yellow-200">Missing Inventory</div>
+            <div className="text-xl font-black uppercase tracking-tight mb-8 text-black dark:text-yellow-200">This product may have been removed or doesn't exist.</div>
             <Link
               to="/products"
-              className="inline-block border border-black bg-black px-4 py-2 text-[11px] font-bold uppercase text-white transition-colors hover:bg-white hover:text-black"
+              className="inline-block border-2 border-black dark:border-yellow-200 bg-black dark:bg-yellow-200 px-8 py-3 text-[10px] font-black uppercase text-white dark:text-black transition-all hover:bg-white hover:text-black"
             >
-              Browse Products
+              Browse Catalog
             </Link>
           </div>
         </BulletinSection>
@@ -287,32 +287,27 @@ const ProductDetail: React.FC = () => {
   return (
     <BulletinLayout
       title={product.title}
-      subtitle="Product detail"
+      subtitle="Detailed Inventory Entry"
       section="03"
     >
-      {/* Back button */}
-      <div className="border-b border-black bg-[#faf8f5] p-4 md:p-6">
-        <div className="mx-auto max-w-[1400px]">
+      <BulletinSection bgColor="bg-[var(--bulletin-bg)]">
+        <div className="mb-8">
           <button
             onClick={() => navigate(-1)}
-            className="flex items-center gap-1 text-[12px] font-bold hover:underline"
+            className="flex items-center gap-2 border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] px-4 py-2 text-[10px] font-black uppercase tracking-widest text-[var(--bulletin-text)] shadow-[2px_2px_0_0_var(--bulletin-shadow)] hover:-translate-y-0.5 hover:shadow-[4px_4px_0_0_var(--bulletin-shadow)] transition-all"
           >
-            <ArrowLeft className="h-4 w-4" />
-            Back
+            <ArrowLeft className="h-4 w-4" /> Go Back
           </button>
         </div>
-      </div>
-
-      <BulletinSection bgColor="bg-[#f5f9fa]">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
           {/* Left: Images */}
           <div>
             {/* Main image - Polaroid style */}
             <div
-              className="border border-black bg-white p-3 shadow-[6px_6px_0_0_rgba(0,0,0,1)]"
+              className="border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] p-4 shadow-[8px_8px_0_0_var(--bulletin-shadow)]"
               style={{ transform: 'rotate(-0.5deg)' }}
             >
-              <div className="relative aspect-[4/3] overflow-hidden border border-black/10 bg-gray-100">
+              <div className="relative aspect-[4/3] overflow-hidden border-2 border-[var(--bulletin-border)]/10 bg-[var(--bulletin-bg)]">
                 <img
                   src={images[currentImageIndex].url}
                   alt={product.title}
@@ -326,50 +321,50 @@ const ProductDetail: React.FC = () => {
                   <>
                     <button
                       onClick={() => setCurrentImageIndex((i) => (i > 0 ? i - 1 : images.length - 1))}
-                      className="absolute left-2 top-1/2 -translate-y-1/2 border border-black bg-white p-1.5 shadow-[2px_2px_0_0_rgba(0,0,0,1)] hover:shadow-[3px_3px_0_0_rgba(0,0,0,1)] transition-all"
+                      className="absolute left-4 top-1/2 -translate-y-1/2 border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] p-2 shadow-[4px_4px_0_0_var(--bulletin-shadow)] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-none transition-all text-[var(--bulletin-text)]"
                     >
-                      <ChevronLeft className="h-5 w-5" />
+                      <ChevronLeft className="h-6 w-6" />
                     </button>
                     <button
                       onClick={() => setCurrentImageIndex((i) => (i < images.length - 1 ? i + 1 : 0))}
-                      className="absolute right-2 top-1/2 -translate-y-1/2 border border-black bg-white p-1.5 shadow-[2px_2px_0_0_rgba(0,0,0,1)] hover:shadow-[3px_3px_0_0_rgba(0,0,0,1)] transition-all"
+                      className="absolute right-4 top-1/2 -translate-y-1/2 border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] p-2 shadow-[4px_4px_0_0_var(--bulletin-shadow)] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-none transition-all text-[var(--bulletin-text)]"
                     >
-                      <ChevronRight className="h-5 w-5" />
+                      <ChevronRight className="h-6 w-6" />
                     </button>
                   </>
                 )}
                 {/* Featured badge */}
                 {product.isFeatured && (
-                  <div className="absolute top-3 left-3 border border-black bg-[#fffacd] px-2 py-1 text-[10px] font-bold uppercase shadow-[2px_2px_0_0_rgba(0,0,0,1)] flex items-center gap-1">
-                    <Star className="h-3 w-3" />
-                    Featured
+                  <div className="absolute top-4 left-4 border-2 border-[var(--bulletin-border)] bg-[#fffacd] dark:bg-yellow-900 px-3 py-1 text-[10px] font-black uppercase tracking-widest shadow-[4px_4px_0_0_var(--bulletin-shadow)] flex items-center gap-2 text-black dark:text-yellow-200">
+                    <Star className="h-4 w-4 fill-current" />
+                    Top Pick
                   </div>
                 )}
                 {/* Status */}
                 {product.status === 'sold' && (
-                  <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-                    <span className="text-white font-bold text-2xl border border-white px-4 py-2">SOLD</span>
+                  <div className="absolute inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center">
+                    <span className="text-white font-black text-4xl border-4 border-white px-8 py-4 rotate-[-12deg] tracking-widest shadow-[8px_8px_0_0_rgba(0,0,0,0.3)]">SOLD</span>
                   </div>
                 )}
-                <div className="absolute bottom-3 right-3 border border-black bg-black/80 text-white text-[10px] px-2 py-1">
-                  {currentImageIndex + 1}/{images.length}
+                <div className="absolute bottom-4 right-4 border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-text)] text-[var(--bulletin-bg)] text-[10px] font-black px-3 py-1 tracking-widest">
+                  {currentImageIndex + 1} / {images.length}
                 </div>
               </div>
             </div>
 
             {/* Thumbnails */}
             {images.length > 1 && (
-              <div className="flex gap-2 overflow-x-auto pb-2 mt-4 scrollbar-hide">
+              <div className="flex gap-4 overflow-x-auto pb-4 mt-8 scrollbar-hide">
                 {images.map((img, index) => (
                   <button
                     key={index}
                     onClick={() => setCurrentImageIndex(index)}
-                    className={`border flex-shrink-0 transition-all ${
-                      index === currentImageIndex ? 'border-black shadow-[3px_3px_0_0_rgba(0,0,0,1)]' : 'border-black/30'
+                    className={`border-2 flex-shrink-0 transition-all ${
+                      index === currentImageIndex ? 'border-[var(--bulletin-border)] shadow-[4px_4px_0_0_var(--bulletin-shadow)] scale-105' : 'border-[var(--bulletin-border)]/30 opacity-60 hover:opacity-100'
                     }`}
                     style={{ transform: `rotate(${(index % 3 - 1) * 0.8}deg)` }}
                   >
-                    <div className="w-16 h-16 overflow-hidden">
+                    <div className="w-20 h-20 overflow-hidden bg-[var(--bulletin-bg)]">
                       <img
                         src={img.url}
                         alt={`${product.title} ${index + 1}`}
@@ -383,73 +378,73 @@ const ProductDetail: React.FC = () => {
           </div>
 
           {/* Right: Details */}
-          <div>
+          <div className="flex flex-col">
             {/* Category */}
             <Link
               to={`/products?category=${category.slug}`}
-              className="text-[10px] uppercase tracking-wider font-bold hover:underline"
+              className="text-[10px] font-black uppercase tracking-widest opacity-40 hover:opacity-100 hover:underline transition-opacity text-[var(--bulletin-text)]"
             >
-              {category.name}
+              {category.name} Repository
             </Link>
 
             {/* Title */}
-            <h1 className="text-2xl font-bold mt-2 mb-3">{product.title}</h1>
+            <h1 className="text-3xl font-black uppercase tracking-tight mt-2 mb-4 text-[var(--bulletin-text)]">{product.title}</h1>
 
             {/* Price */}
-            <div className="text-2xl font-bold mb-4 border-b border-black pb-4">
+            <div className="text-4xl font-black mb-8 border-b-4 border-[var(--bulletin-border)] pb-6 text-[var(--bulletin-text)]">
               GHS {product.price.toLocaleString('en-GH', { minimumFractionDigits: 2 })}
             </div>
 
             {/* Price intelligence */}
             {priceInsights && (
-              <BulletinCard rotation={0.5} bgColor="bg-[#fefdfb]" className="mb-5">
-                <div className="text-[10px] font-bold uppercase tracking-wider opacity-60 mb-3">Price intelligence</div>
-                <div className="grid gap-3 sm:grid-cols-3">
+              <div className="border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] p-6 shadow-[4px_4px_0_0_var(--bulletin-shadow)] mb-8" style={{ transform: 'rotate(0.5deg)' }}>
+                <div className="text-[10px] font-black uppercase tracking-widest opacity-40 mb-4 text-[var(--bulletin-text)]">Market Intelligence</div>
+                <div className="grid gap-6 sm:grid-cols-3">
                   <div>
-                    <div className="text-[10px] uppercase tracking-wider opacity-40">Market range</div>
-                    <div className="text-[12px] font-bold">
-                      GHS {priceInsights.min.toLocaleString('en-GH')} - GHS {priceInsights.max.toLocaleString('en-GH')}
+                    <div className="text-[9px] font-black uppercase tracking-widest opacity-40 text-[var(--bulletin-text)]">Range</div>
+                    <div className="text-[13px] font-black text-[var(--bulletin-text)] mt-1">
+                      {priceInsights.min.toLocaleString('en-GH')} - {priceInsights.max.toLocaleString('en-GH')}
                     </div>
                   </div>
                   <div>
-                    <div className="text-[10px] uppercase tracking-wider opacity-40">Average</div>
-                    <div className="text-[12px] font-bold">GHS {priceInsights.average.toLocaleString('en-GH')}</div>
+                    <div className="text-[9px] font-black uppercase tracking-widest opacity-40 text-[var(--bulletin-text)]">Mean</div>
+                    <div className="text-[13px] font-black text-[var(--bulletin-text)] mt-1">{priceInsights.average.toLocaleString('en-GH')}</div>
                   </div>
                   <div>
-                    <div className="text-[10px] uppercase tracking-wider opacity-40">Deal</div>
-                    <div className="text-[12px] font-bold">
-                      {priceInsights.dealLabel === 'great_deal' ? 'Great deal' : priceInsights.dealLabel === 'premium' ? 'Premium pricing' : 'Fair market price'}
+                    <div className="text-[9px] font-black uppercase tracking-widest opacity-40 text-[var(--bulletin-text)]">Rating</div>
+                    <div className="text-[13px] font-black text-[var(--bulletin-text)] mt-1">
+                      {priceInsights.dealLabel === 'great_deal' ? 'Valued Deal' : priceInsights.dealLabel === 'premium' ? 'Premium Tier' : 'Fair Market'}
                     </div>
                   </div>
                 </div>
-              </BulletinCard>
+              </div>
             )}
 
             {/* Badges */}
-            <div className="flex flex-wrap gap-2 mb-4">
-              <span className={`border border-black px-2 py-1 text-[10px] font-bold uppercase ${conditionStyles[product.condition]}`}>
+            <div className="flex flex-wrap gap-3 mb-6">
+              <span className={`border-2 border-[var(--bulletin-border)] px-4 py-1.5 text-[10px] font-black uppercase tracking-widest ${conditionStyles[product.condition]}`}>
                 {conditionLabels[product.condition]}
               </span>
               {product.status === 'reserved' && (
-                <span className="border border-black px-2 py-1 text-[10px] font-bold uppercase bg-[#fff5e1]">
-                  Reserved
+                <span className="border-2 border-[var(--bulletin-border)] px-4 py-1.5 text-[10px] font-black uppercase tracking-widest bg-[#fff5e1] dark:bg-orange-900/40 text-black dark:text-orange-200">
+                  Awaiting Transaction
                 </span>
               )}
             </div>
 
             {/* Key details */}
-            <div className="space-y-3 mb-6 border-y border-black py-4">
-              <div className="flex items-center gap-2 text-[12px]">
-                <Truck className="h-4 w-4 opacity-60" />
+            <div className="space-y-4 mb-8 border-y-2 border-[var(--bulletin-border)] py-6">
+              <div className="flex items-center gap-3 text-sm font-black uppercase tracking-tight text-[var(--bulletin-text)]">
+                <Truck className="h-5 w-5 opacity-40" />
                 {deliveryLabels[product.deliveryOption]}
               </div>
-              <div className="flex items-center gap-2 text-[12px]">
-                <Eye className="h-4 w-4 opacity-60" />
-                {product.views} views
+              <div className="flex items-center gap-3 text-sm font-black uppercase tracking-tight text-[var(--bulletin-text)]">
+                <Eye className="h-5 w-5 opacity-40" />
+                {product.views.toLocaleString()} Community Views
               </div>
-              <div className="flex items-center gap-2 text-[12px]">
-                <Clock className="h-4 w-4 opacity-60" />
-                Listed {new Date(product.createdAt).toLocaleDateString('en-GH', {
+              <div className="flex items-center gap-3 text-sm font-black uppercase tracking-tight text-[var(--bulletin-text)]">
+                <Clock className="h-5 w-5 opacity-40" />
+                Catalogued {new Date(product.createdAt).toLocaleDateString('en-GH', {
                   year: 'numeric',
                   month: 'long',
                   day: 'numeric',
@@ -458,25 +453,25 @@ const ProductDetail: React.FC = () => {
             </div>
 
             {/* Description */}
-            <div className="mb-6">
-              <h3 className="text-[10px] uppercase tracking-wider font-bold mb-2 opacity-60">Description</h3>
-              <p className="text-[13px] leading-relaxed whitespace-pre-wrap">
+            <div className="mb-8">
+              <h3 className="text-[10px] font-black uppercase tracking-widest mb-3 opacity-40 text-[var(--bulletin-text)]">Context & Details</h3>
+              <p className="text-[14px] leading-relaxed font-medium text-[var(--bulletin-text)] opacity-80 whitespace-pre-wrap">
                 {product.description}
               </p>
             </div>
 
             {/* Tags */}
             {product.tags.length > 0 && (
-              <div className="mb-6">
-                <h3 className="text-[10px] uppercase tracking-wider font-bold mb-2 opacity-60">Tags</h3>
+              <div className="mb-8">
+                <h3 className="text-[10px] font-black uppercase tracking-widest mb-3 opacity-40 text-[var(--bulletin-text)]">Meta Tags</h3>
                 <div className="flex flex-wrap gap-2">
                   {product.tags.map((tag) => (
                     <Link
                       key={tag}
                       to={`/products?search=${encodeURIComponent(tag)}`}
-                      className="flex items-center gap-1 border border-black bg-white px-2 py-1 text-[10px] font-bold shadow-[2px_2px_0_0_rgba(0,0,0,1)] transition-all hover:shadow-[3px_3px_0_0_rgba(0,0,0,1)]"
+                      className="flex items-center gap-2 border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] px-3 py-1.5 text-[10px] font-black uppercase tracking-tight shadow-[3px_3px_0_0_var(--bulletin-shadow)] hover:translate-y-1 hover:shadow-none transition-all text-[var(--bulletin-text)]"
                     >
-                      <Tag className="h-3 w-3" />
+                      <Tag className="h-3 w-3 opacity-40" />
                       {tag}
                     </Link>
                   ))}
@@ -485,167 +480,165 @@ const ProductDetail: React.FC = () => {
             )}
 
             {/* Action buttons */}
-            <div className="flex flex-wrap gap-3 mb-6">
+            <div className="flex flex-wrap gap-4 mt-auto">
               {isOwner ? (
                 <Link
                   to={`/products/${product._id}/edit`}
-                  className="flex-1 border border-black bg-black px-4 py-2 text-[11px] font-bold uppercase text-white text-center transition-colors hover:bg-white hover:text-black shadow-[3px_3px_0_0_rgba(0,0,0,1)]"
+                  className="flex-1 border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-text)] px-8 py-4 text-[11px] font-black uppercase tracking-widest text-[var(--bulletin-bg)] text-center shadow-[6px_6px_0_0_var(--bulletin-shadow)] hover:translate-y-1 hover:shadow-none transition-all"
                 >
-                  Edit Listing
+                  Modify Listing
                 </Link>
               ) : (
                 <>
                   <button
-                    className="flex-1 border border-black bg-black px-4 py-2 text-[11px] font-bold uppercase text-white transition-colors hover:bg-white hover:text-black shadow-[3px_3px_0_0_rgba(0,0,0,1)] disabled:opacity-40 disabled:cursor-not-allowed"
+                    className="flex-1 border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-text)] px-8 py-4 text-[11px] font-black uppercase tracking-widest text-[var(--bulletin-bg)] transition-all hover:bg-[#ff6b6b] hover:text-white shadow-[6px_6px_0_0_var(--bulletin-shadow)] hover:translate-y-1 hover:shadow-none disabled:opacity-20 disabled:translate-y-0 disabled:shadow-[6px_6px_0_0_var(--bulletin-shadow)]"
                     disabled={product.status !== 'active' || !user}
                     onClick={() => navigate(`/checkout/${product._id}`)}
                   >
-                    <ShoppingCart className="inline-block h-4 w-4 mr-1" />
-                    Buy Now
+                    <ShoppingCart className="inline-block h-5 w-5 mr-2" />
+                    Secure Transaction
                   </button>
                   <button
-                    className="flex-1 border border-black bg-white px-4 py-2 text-[11px] font-bold uppercase transition-colors hover:bg-[#f8f7f4] shadow-[3px_3px_0_0_rgba(0,0,0,1)] disabled:opacity-40 disabled:cursor-not-allowed"
+                    className="flex-1 border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] px-8 py-4 text-[11px] font-black uppercase tracking-widest text-[var(--bulletin-text)] transition-all hover:bg-[var(--bulletin-text)] hover:text-[var(--bulletin-bg)] shadow-[6px_6px_0_0_var(--bulletin-shadow)] hover:translate-y-1 hover:shadow-none disabled:opacity-20"
                     disabled={product.status !== 'active' || contacting}
                     onClick={handleContactSeller}
                   >
-                    <MessageCircle className="inline-block h-4 w-4 mr-1" />
-                    {contacting ? 'Loading...' : 'Contact Seller'}
+                    <MessageCircle className="inline-block h-5 w-5 mr-2" />
+                    {contacting ? '...' : 'Direct Message'}
                   </button>
                   <button
                     onClick={handleToggleSaved}
                     disabled={saving}
-                    className="border border-black bg-white px-3 py-2 text-[11px] font-bold uppercase transition-colors hover:bg-[#f8f7f4] shadow-[2px_2px_0_0_rgba(0,0,0,1)]"
+                    className="border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] px-5 py-4 text-[11px] font-black uppercase transition-all hover:bg-red-50 dark:hover:bg-red-900/10 shadow-[4px_4px_0_0_var(--bulletin-shadow)] hover:translate-y-1 hover:shadow-none text-[var(--bulletin-text)]"
                   >
-                    <Heart className={`h-4 w-4 ${isSaved ? 'text-red-500 fill-red-500' : ''}`} />
+                    <Heart className={`h-5 w-5 ${isSaved ? 'text-red-500 fill-red-500' : ''}`} />
                   </button>
                 </>
               )}
               <button
                 onClick={handleShare}
-                className="border border-black bg-white px-3 py-2 text-[11px] font-bold uppercase transition-colors hover:bg-[#f8f7f4] shadow-[2px_2px_0_0_rgba(0,0,0,1)]"
+                className="border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] px-5 py-4 text-[11px] font-black uppercase transition-all hover:bg-[var(--bulletin-bg)] shadow-[4px_4px_0_0_var(--bulletin-shadow)] hover:translate-y-1 hover:shadow-none text-[var(--bulletin-text)]"
                 title="Share"
               >
-                <Share2 className="h-4 w-4" />
+                <Share2 className="h-5 w-5" />
               </button>
               {!isOwner && user && (
                 <button
                   onClick={() => setShowReportModal(true)}
-                  className="border border-black bg-white px-3 py-2 text-[11px] font-bold uppercase transition-colors hover:bg-red-50 shadow-[2px_2px_0_0_rgba(0,0,0,1)]"
+                  className="border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] px-5 py-4 text-[11px] font-black uppercase transition-all hover:bg-red-50 dark:hover:bg-red-900/10 shadow-[4px_4px_0_0_var(--bulletin-shadow)] hover:translate-y-1 hover:shadow-none text-red-600"
                   title="Report"
                 >
-                  <Flag className="h-4 w-4" />
+                  <Flag className="h-5 w-5" />
                 </button>
               )}
             </div>
+          </div>
+        </div>
+      </BulletinSection>
 
-            {/* Seller info */}
-            <BulletinCard rotation={-0.5} bgColor="bg-[#fefdfb]">
-              <div className="text-[10px] uppercase tracking-wider font-bold opacity-60 mb-3">Seller</div>
-              <div className="flex items-center gap-3">
-                <div className="h-12 w-12 border border-black bg-[#f8f7f4] flex items-center justify-center font-bold text-lg overflow-hidden">
-                  {seller.avatar ? (
-                    <img src={seller.avatar} alt={seller.name} className="h-full w-full object-cover" />
-                  ) : (
-                    seller.name.charAt(0).toUpperCase()
-                  )}
-                </div>
-                <div className="flex-1">
-                  <div className="flex items-center gap-1.5 font-bold">
-                    <span>{seller.storeName || seller.brandName || seller.name}</span>
-                    {seller.isVerified && (
-                      <svg className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                        <path fillRule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                      </svg>
-                    )}
-                  </div>
-                  {seller.location && (
-                    <div className="text-[11px] flex items-center gap-1 mt-0.5 opacity-60">
-                      <MapPin className="h-3 w-3" />
-                      {seller.location}
-                    </div>
-                  )}
-                </div>
-                <Link
-                  to={`/products?seller=${seller._id}`}
-                  className="border border-black bg-white px-2 py-1 text-[10px] font-bold uppercase shadow-[2px_2px_0_0_rgba(0,0,0,1)] transition-all hover:shadow-[3px_3px_0_0_rgba(0,0,0,1)]"
-                >
-                  Listings
-                </Link>
+      {/* Seller info */}
+      <BulletinSection bgColor="bg-[var(--bulletin-bg)]">
+        <div className="border-4 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] p-8 shadow-[12px_12px_0_0_var(--bulletin-shadow)]" style={{ transform: 'rotate(-0.5deg)' }}>
+          <div className="text-[10px] font-black uppercase tracking-widest opacity-40 mb-6 text-[var(--bulletin-text)]">Counterparty Profile</div>
+          <div className="flex flex-col md:flex-row items-center gap-8">
+            <div className="h-24 w-24 border-4 border-[var(--bulletin-border)] bg-[var(--bulletin-bg)] flex items-center justify-center font-black text-3xl overflow-hidden shadow-[6px_6px_0_0_var(--bulletin-shadow)] text-[var(--bulletin-text)]">
+              {seller.avatar ? (
+                <img src={seller.avatar} alt={seller.name} className="h-full w-full object-cover" />
+              ) : (
+                seller.name.charAt(0).toUpperCase()
+              )}
+            </div>
+            <div className="flex-1 text-center md:text-left">
+              <div className="flex items-center justify-center md:justify-start gap-3 text-2xl font-black uppercase tracking-tight text-[var(--bulletin-text)]">
+                <span>{seller.storeName || seller.brandName || seller.name}</span>
+                {seller.isVerified && (
+                  <span className="text-[9px] font-black uppercase tracking-widest px-3 py-1 bg-sky-500 text-white rounded-full">Verified</span>
+                )}
               </div>
-              {sellerRating && (
-                <div className="mt-3 pt-3 border-t border-black">
-                  <div className="flex items-center gap-2">
-                    <div className="flex items-center gap-1">
-                      <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                      <span className="text-[12px] font-bold">
-                        {sellerRating.averageRating.toFixed(1)}
-                      </span>
-                    </div>
-                    <span className="text-[11px] opacity-60">
-                      ({sellerRating.totalReviews} review{sellerRating.totalReviews === 1 ? '' : 's'})
-                    </span>
-                  </div>
+              {seller.location && (
+                <div className="text-sm font-bold flex items-center justify-center md:justify-start gap-2 mt-2 opacity-60 text-[var(--bulletin-text)]">
+                  <MapPin className="h-4 w-4" />
+                  {seller.location}
                 </div>
               )}
+              {sellerRating && (
+                <div className="mt-4 flex items-center justify-center md:justify-start gap-4">
+                  <div className="flex items-center gap-1.5">
+                    <Star className="h-5 w-5 fill-yellow-400 text-yellow-400" />
+                    <span className="text-lg font-black text-[var(--bulletin-text)]">
+                      {sellerRating.averageRating.toFixed(1)}
+                    </span>
+                  </div>
+                  <span className="text-[11px] font-black uppercase tracking-widest opacity-40 text-[var(--bulletin-text)]">
+                    {sellerRating.totalReviews} Community Reviews
+                  </span>
+                </div>
+              )}
+            </div>
+            <Link
+              to={`/products?seller=${seller._id}`}
+              className="border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] px-8 py-3 text-[10px] font-black uppercase tracking-widest shadow-[4px_4px_0_0_var(--bulletin-shadow)] transition-all hover:translate-y-1 hover:shadow-none text-[var(--bulletin-text)]"
+            >
+              View All Listings
+            </Link>
+          </div>
 
-              <div className="mt-4 grid gap-3 border-t border-black pt-4 md:grid-cols-2">
-                <div className="border border-black bg-[#fffacd] p-3 shadow-[2px_2px_0_0_rgba(0,0,0,1)]">
-                  <div className="text-[10px] font-bold uppercase tracking-wider opacity-60">Trust layer</div>
-                  <div className="mt-2 text-[12px] font-bold flex items-center gap-2">
-                    <Shield className="h-4 w-4" />
-                    Buyer protection ready
-                  </div>
-                  <div className="mt-1 text-[11px] leading-relaxed opacity-70">
-                    Payments verified before fulfillment. Disputes can be raised from your order timeline.
-                  </div>
-                </div>
-                <div className="border border-black bg-[#e0f2f7] p-3 shadow-[2px_2px_0_0_rgba(0,0,0,1)]">
-                  <div className="text-[10px] font-bold uppercase tracking-wider opacity-60">Seller pace</div>
-                  <div className="mt-2 text-[12px] font-bold flex items-center gap-2">
-                    <Sparkles className="h-4 w-4" />
-                    Replies in ~{sellerResponseTime} mins
-                  </div>
-                  <div className="mt-1 text-[11px] leading-relaxed opacity-70">
-                    Meet in a public campus spot, inspect the item first, keep chat inside the app.
-                  </div>
-                </div>
+          <div className="mt-10 grid gap-6 border-t-2 border-[var(--bulletin-border)] pt-8 md:grid-cols-2">
+            <div className="border-2 border-[var(--bulletin-border)] bg-[#fffacd] dark:bg-yellow-900/10 p-6 shadow-[6px_6px_0_0_var(--bulletin-shadow)]">
+              <div className="text-[10px] font-black uppercase tracking-widest opacity-40 text-black dark:text-yellow-200">Security Layer</div>
+              <div className="mt-3 text-sm font-black uppercase tracking-tight flex items-center gap-3 text-black dark:text-yellow-200">
+                <Shield className="h-5 w-5" />
+                UMaT Escrow Active
               </div>
-            </BulletinCard>
+              <p className="mt-2 text-[12px] font-medium text-black/70 dark:text-yellow-200/70 leading-relaxed">
+                Payments are held securely until transaction fulfillment is confirmed by both parties.
+              </p>
+            </div>
+            <div className="border-2 border-[var(--bulletin-border)] bg-[#e0f2f7] dark:bg-sky-900/10 p-6 shadow-[6px_6px_0_0_var(--bulletin-shadow)]">
+              <div className="text-[10px] font-black uppercase tracking-widest opacity-40 text-black dark:text-sky-200">Response Metrics</div>
+              <div className="mt-3 text-sm font-black uppercase tracking-tight flex items-center gap-3 text-black dark:text-sky-200">
+                <MessageCircle className="h-5 w-5" />
+                Replies in ~{sellerResponseTime} mins
+              </div>
+              <p className="mt-2 text-[12px] font-medium text-black/70 dark:text-sky-200/70 leading-relaxed">
+                Counterparty is highly active. Coordinate pickup in designated campus safety zones.
+              </p>
+            </div>
           </div>
         </div>
       </BulletinSection>
 
       {/* Product reviews */}
       {reviews.length > 0 && (
-        <BulletinSection title="Reviews" subtitle="Section 01" bgColor="bg-[#faf8f5]">
-          <div className="space-y-4">
+        <BulletinSection title="Community Feedback" subtitle="Verification" bgColor="bg-[var(--bulletin-bg)]">
+          <div className="space-y-6">
             {reviews.map((review, idx) => (
               <div
                 key={review._id}
-                className="border border-black bg-white p-4 shadow-[4px_4px_0_0_rgba(0,0,0,1)]"
+                className="border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] p-8 shadow-[6px_6px_0_0_var(--bulletin-shadow)]"
                 style={{ transform: `rotate(${(idx % 2) * 0.8}deg)` }}
               >
-                <div className="flex items-start justify-between gap-3">
+                <div className="flex items-start justify-between gap-4">
                   <div>
-                    <div className="text-[12px] font-bold">{review.reviewer.name}</div>
-                    <div className="text-[10px] opacity-60 mt-0.5">
+                    <div className="text-sm font-black uppercase tracking-tight text-[var(--bulletin-text)]">{review.reviewer.name}</div>
+                    <div className="text-[10px] font-black uppercase tracking-widest opacity-40 mt-1 text-[var(--bulletin-text)]">
                       {new Date(review.createdAt).toLocaleDateString('en-GH')}
                     </div>
                   </div>
-                  <div className="flex items-center gap-0.5">
+                  <div className="flex items-center gap-1">
                     {[1, 2, 3, 4, 5].map((star) => (
                       <Star
                         key={star}
-                        className={`h-4 w-4 ${star <= review.rating ? 'fill-yellow-400 text-yellow-400' : 'text-black opacity-20'}`}
+                        className={`h-5 w-5 ${star <= review.rating ? 'fill-yellow-400 text-yellow-400' : 'text-[var(--bulletin-border)] opacity-20'}`}
                       />
                     ))}
                   </div>
                 </div>
-                <div className="text-[12px] mt-3">{review.comment}</div>
+                <div className="text-sm font-medium leading-relaxed mt-4 italic text-[var(--bulletin-text)]">"{review.comment}"</div>
                 {review.reply && (
-                  <div className="mt-3 border border-black bg-[#f8f7f4] p-3 ml-4 shadow-[2px_2px_0_0_rgba(0,0,0,1)]">
-                    <div className="text-[10px] font-bold uppercase tracking-wider opacity-60 mb-1">Seller reply</div>
-                    <div className="text-[12px]">{review.reply}</div>
+                  <div className="mt-6 border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-bg)] p-6 ml-6 shadow-[4px_4px_0_0_var(--bulletin-shadow)]">
+                    <div className="text-[10px] font-black uppercase tracking-widest opacity-40 mb-2 text-[var(--bulletin-text)]">Counterparty Response</div>
+                    <div className="text-sm font-medium text-[var(--bulletin-text)] leading-relaxed">{review.reply}</div>
                   </div>
                 )}
               </div>
@@ -656,8 +649,8 @@ const ProductDetail: React.FC = () => {
 
       {/* Related products */}
       {relatedProducts.length > 0 && (
-        <BulletinSection title="Similar Products" subtitle="Section 02" bgColor="bg-[#f5f9fa]">
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <BulletinSection title="Similar Findings" subtitle="Related Repository" bgColor="bg-[var(--bulletin-bg)]">
+          <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
             {relatedProducts.map((rp, idx) => (
               <Link
                 key={rp._id}
@@ -674,8 +667,8 @@ const ProductDetail: React.FC = () => {
                   e.currentTarget.style.transform = `rotate(${(idx % 3 - 1) * 0.8}deg)`;
                 }}
               >
-                <div className="border border-black bg-white p-3 shadow-[6px_6px_0_0_rgba(0,0,0,0.1)]">
-                  <div className="relative aspect-square overflow-hidden border border-black/10 bg-gray-100">
+                <div className="border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] p-4 shadow-[8px_8px_0_0_var(--bulletin-shadow)] group-hover:shadow-[12px_12px_0_0_var(--bulletin-shadow)] transition-all">
+                  <div className="relative aspect-square overflow-hidden border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-bg)]">
                     <img
                       src={getRelatedImage(rp)}
                       alt={rp.title}
@@ -684,11 +677,11 @@ const ProductDetail: React.FC = () => {
                     <div className="absolute -top-2 left-1/2 h-4 w-16 -translate-x-1/2 bg-[#ffd700]/30 opacity-60"
                          style={{ transform: 'translateX(-50%) rotate(-2deg)' }} />
                   </div>
-                  <div className="mt-3 space-y-1">
-                    <div className="truncate font-bold leading-tight">{rp.title}</div>
+                  <div className="mt-4 space-y-1">
+                    <div className="truncate font-black uppercase tracking-tight text-sm text-[var(--bulletin-text)]">{rp.title}</div>
                     <div className="flex items-baseline justify-between">
-                      <span className="text-base font-bold">GHS {rp.price}</span>
-                      <span className="text-[10px] uppercase opacity-50">
+                      <span className="text-lg font-black text-[var(--bulletin-text)]">GHS {rp.price}</span>
+                      <span className="text-[9px] font-black uppercase tracking-widest opacity-40 text-[var(--bulletin-text)]">
                         {typeof rp.category === 'string' ? '' : rp.category.name}
                       </span>
                     </div>
@@ -702,8 +695,8 @@ const ProductDetail: React.FC = () => {
 
       {/* Recommendations */}
       {recommendations.length > 0 && (
-        <BulletinSection title="Because you viewed this" subtitle="Section 03" bgColor="bg-[#faf8f3]">
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <BulletinSection title="Curated for you" subtitle="Discovery" bgColor="bg-[var(--bulletin-bg)]">
+          <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
             {recommendations.map((rec, idx) => (
               <Link
                 key={rec._id}
@@ -720,8 +713,8 @@ const ProductDetail: React.FC = () => {
                   e.currentTarget.style.transform = `rotate(${(idx % 3 - 1) * 0.8}deg)`;
                 }}
               >
-                <div className="border border-black bg-white p-3 shadow-[6px_6px_0_0_rgba(0,0,0,0.1)]">
-                  <div className="relative aspect-square overflow-hidden border border-black/10 bg-gray-100">
+                <div className="border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] p-4 shadow-[8px_8px_0_0_var(--bulletin-shadow)] group-hover:shadow-[12px_12px_0_0_var(--bulletin-shadow)] transition-all">
+                  <div className="relative aspect-square overflow-hidden border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-bg)]">
                     <img
                       src={getRelatedImage(rec)}
                       alt={rec.title}
@@ -730,11 +723,11 @@ const ProductDetail: React.FC = () => {
                     <div className="absolute -top-2 left-1/2 h-4 w-16 -translate-x-1/2 bg-[#ffd700]/30 opacity-60"
                          style={{ transform: 'translateX(-50%) rotate(-2deg)' }} />
                   </div>
-                  <div className="mt-3 space-y-1">
-                    <div className="truncate font-bold leading-tight">{rec.title}</div>
+                  <div className="mt-4 space-y-1">
+                    <div className="truncate font-black uppercase tracking-tight text-sm text-[var(--bulletin-text)]">{rec.title}</div>
                     <div className="flex items-baseline justify-between">
-                      <span className="text-base font-bold">GHS {rec.price}</span>
-                      <span className="text-[10px] uppercase opacity-50">
+                      <span className="text-lg font-black text-[var(--bulletin-text)]">GHS {rec.price}</span>
+                      <span className="text-[9px] font-black uppercase tracking-widest opacity-40 text-[var(--bulletin-text)]">
                         {typeof rec.category === 'string' ? '' : rec.category.name}
                       </span>
                     </div>
@@ -748,45 +741,48 @@ const ProductDetail: React.FC = () => {
 
       {/* Report modal */}
       {showReportModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="border border-black bg-[#fefdfb] shadow-[8px_8px_0_0_rgba(0,0,0,1)] max-w-md w-full p-6">
-            <div className="flex items-center justify-between mb-4 border-b border-black pb-3">
-              <div className="text-lg font-bold">Report Product</div>
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+          <div className="border-4 border-black dark:border-[var(--bulletin-border)] bg-[var(--bulletin-card)] shadow-[16px_16px_0_0_var(--bulletin-shadow)] max-w-lg w-full p-10 animate-in zoom-in-95 duration-200">
+            <div className="flex items-center justify-between mb-8 border-b-2 border-black dark:border-[var(--bulletin-border)] pb-4">
+              <div>
+                <div className="text-[10px] font-black uppercase tracking-widest opacity-40 text-[var(--bulletin-text)]">Integrity Report</div>
+                <div className="text-2xl font-black uppercase tracking-tight mt-1 text-[var(--bulletin-text)]">Flag Product</div>
+              </div>
               <button
                 onClick={() => {
                   setShowReportModal(false);
                   setReportReason('');
                 }}
-                className="border border-black bg-white p-1.5 shadow-[2px_2px_0_0_rgba(0,0,0,1)] hover:shadow-[3px_3px_0_0_rgba(0,0,0,1)] transition-all"
+                className="border-2 border-black dark:border-[var(--bulletin-border)] bg-[var(--bulletin-card)] p-2 shadow-[2px_2px_0_0_var(--bulletin-shadow)] hover:shadow-none transition-all text-[var(--bulletin-text)]"
               >
-                <X className="h-4 w-4" />
+                <X className="h-6 w-6" />
               </button>
             </div>
-            <div className="text-[11px] opacity-60 mb-4">
-              Please tell us why you're reporting this product.
+            <div className="text-sm font-bold text-[var(--bulletin-text)] opacity-60 mb-6 italic leading-relaxed">
+              Help us maintain a safe marketplace. Please describe the violation in detail.
             </div>
             <textarea
               value={reportReason}
               onChange={(e) => setReportReason(e.target.value)}
-              placeholder="Describe the issue..."
-              className="w-full border border-black bg-white p-2 text-[12px] font-bold focus:outline-none focus:ring-2 focus:ring-black resize-none h-24 mb-4"
+              placeholder="Violation description..."
+              className="w-full border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-bg)] p-4 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-[#ff6b6b] resize-none h-32 mb-8 text-[var(--bulletin-text)]"
             />
-            <div className="flex gap-3">
+            <div className="flex flex-col sm:flex-row gap-4">
               <button
-                className="flex-1 border border-black bg-white px-4 py-2 text-[11px] font-bold uppercase transition-colors hover:bg-[#f8f7f4] shadow-[2px_2px_0_0_rgba(0,0,0,1)]"
+                className="flex-1 border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] py-4 text-[10px] font-black uppercase tracking-widest shadow-[4px_4px_0_0_var(--bulletin-shadow)] transition-all text-[var(--bulletin-text)]"
                 onClick={() => {
                   setShowReportModal(false);
                   setReportReason('');
                 }}
               >
-                Cancel
+                Discard
               </button>
               <button
-                className="flex-1 border border-black bg-black px-4 py-2 text-[11px] font-bold uppercase text-white transition-colors hover:bg-white hover:text-black shadow-[2px_2px_0_0_rgba(0,0,0,1)]"
+                className="flex-1 border-2 border-[var(--bulletin-border)] bg-black dark:bg-white py-4 text-[10px] font-black uppercase tracking-widest text-white dark:text-black shadow-[4px_4px_0_0_var(--bulletin-shadow)] hover:bg-[#ff6b6b] hover:text-white transition-all"
                 onClick={handleReport}
                 disabled={reporting}
               >
-                {reporting ? 'Submitting...' : 'Submit Report'}
+                {reporting ? 'Processing...' : 'Submit Report'}
               </button>
             </div>
           </div>

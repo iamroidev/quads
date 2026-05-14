@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "CampusMarketplace",
-    "slug": "campus-marketplace",
+    "name": "QUADS",
+    "slug": "quads-app",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -16,7 +16,7 @@
     ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.campusmarketplace.app",
+      "bundleIdentifier": "com.quads.app",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
       }
@@ -26,9 +26,9 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#2563eb"
       },
-      "package": "com.campusmarketplace.app"
+      "package": "com.quads.app"
     },
-    "scheme": "campusmarketplace",
+    "scheme": "quads",
     "web": {
       "favicon": "./assets/favicon.png"
     },

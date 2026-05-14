@@ -45,12 +45,12 @@ const NEXT_STATUS: Record<string, { status: string; label: string }> = {
 };
 
 const STATUS_STYLES: Record<string, string> = {
-  paid: 'bg-[#e0f2f7] text-black',
-  confirmed: 'bg-[#f0e8f4] text-black',
-  ready: 'bg-[#fff5e1] text-black',
-  completed: 'bg-[#fffacd] text-black',
-  cancelled: 'bg-[#fce4ec] text-black',
-  pending: 'bg-[#f0e8f4] text-black',
+  pending: 'bg-[#fffacd] dark:bg-yellow-900/40 text-black dark:text-yellow-200',
+  paid: 'bg-[#e0f2f7] dark:bg-sky-900/40 text-black dark:text-sky-200',
+  confirmed: 'bg-[#f0e8f4] dark:bg-purple-900/40 text-black dark:text-purple-200',
+  ready: 'bg-[#fff5e1] dark:bg-orange-900/40 text-black dark:text-orange-200',
+  completed: 'bg-[#fffacd] dark:bg-green-900/40 text-black dark:text-green-200',
+  cancelled: 'bg-[#fce4ec] dark:bg-red-900/40 text-black dark:text-red-200',
 };
 
 interface SellerStats {
@@ -139,64 +139,64 @@ const SellerOrders: React.FC = () => {
   };
 
   return (
-    <BulletinLayout title="Seller Orders" subtitle="Dashboard" section="15">
-      <BulletinSection bgColor="bg-[#faf8f5]">
+    <BulletinLayout title="Seller Orders" subtitle="Hub" section="15">
+      <BulletinSection bgColor="bg-[var(--bulletin-bg)]">
         {/* Header */}
-        <div className="flex items-end justify-between mb-6">
-          <div className="text-[10px] uppercase tracking-wider opacity-60">
-            {pagination ? `${pagination.total} order${pagination.total !== 1 ? 's' : ''}` : ''}
+        <div className="flex items-end justify-between mb-8">
+          <div className="text-[10px] font-black uppercase tracking-widest opacity-40 text-[var(--bulletin-text)]">
+            {pagination ? `${pagination.total} incoming transaction${pagination.total !== 1 ? 's' : ''}` : 'Sales Activity'}
           </div>
           <Link
             to="/seller/analytics"
-            className="border border-black bg-white px-3 py-1.5 text-[10px] font-bold uppercase shadow-[2px_2px_0_0_rgba(0,0,0,1)] hover:shadow-[3px_3px_0_0_rgba(0,0,0,1)] transition-all"
+            className="border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] px-6 py-2 text-[10px] font-black uppercase tracking-widest shadow-[4px_4px_0_0_var(--bulletin-shadow)] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-none transition-all text-[var(--bulletin-text)]"
           >
-            <BarChart2 className="inline-block h-3.5 w-3.5 mr-1" />
-            Analytics
+            <BarChart2 className="inline-block h-4 w-4 mr-2" />
+            Insights
           </Link>
         </div>
 
         {/* Stats mosaic */}
         {stats && (
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
-            <BulletinCard rotation={-0.3} bgColor="bg-white">
-              <div className="text-[10px] uppercase tracking-wider opacity-60 mb-2 flex items-center gap-1.5">
-                <Package className="h-3.5 w-3.5" /> Total
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+            <div className="border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] p-6 shadow-[4px_4px_0_0_var(--bulletin-shadow)]">
+              <div className="text-[10px] font-black uppercase tracking-widest opacity-40 mb-3 flex items-center gap-2 text-[var(--bulletin-text)]">
+                <Package className="h-4 w-4" /> Total Sales
               </div>
-              <div className="text-2xl font-bold">{stats.totalOrders}</div>
-            </BulletinCard>
-            <BulletinCard rotation={0.3} bgColor="bg-white">
-              <div className="text-[10px] uppercase tracking-wider opacity-60 mb-2 flex items-center gap-1.5">
-                <Clock className="h-3.5 w-3.5" /> Pending
+              <div className="text-3xl font-black text-[var(--bulletin-text)]">{stats.totalOrders}</div>
+            </div>
+            <div className="border-2 border-[var(--bulletin-border)] bg-[#e8f4f8] dark:bg-sky-900/10 p-6 shadow-[4px_4px_0_0_var(--bulletin-shadow)]">
+              <div className="text-[10px] font-black uppercase tracking-widest opacity-40 mb-3 flex items-center gap-2 text-sky-900 dark:text-sky-200">
+                <Clock className="h-4 w-4" /> Pending
               </div>
-              <div className="text-2xl font-bold">{stats.pendingOrders}</div>
-            </BulletinCard>
-            <BulletinCard rotation={-0.3} bgColor="bg-white">
-              <div className="text-[10px] uppercase tracking-wider opacity-60 mb-2 flex items-center gap-1.5">
-                <CheckCircle className="h-3.5 w-3.5" /> Completed
+              <div className="text-3xl font-black text-sky-900 dark:text-sky-200">{stats.pendingOrders}</div>
+            </div>
+            <div className="border-2 border-[var(--bulletin-border)] bg-[#f0e8f4] dark:bg-purple-900/10 p-6 shadow-[4px_4px_0_0_var(--bulletin-shadow)]">
+              <div className="text-[10px] font-black uppercase tracking-widest opacity-40 mb-3 flex items-center gap-2 text-purple-900 dark:text-purple-200">
+                <CheckCircle className="h-4 w-4" /> Fulfilled
               </div>
-              <div className="text-2xl font-bold">{stats.completedOrders}</div>
-            </BulletinCard>
-            <BulletinCard rotation={0.3} bgColor="bg-white">
-              <div className="text-[10px] uppercase tracking-wider opacity-60 mb-2 flex items-center gap-1.5">
-                <TrendingUp className="h-3.5 w-3.5" /> Revenue
+              <div className="text-3xl font-black text-purple-900 dark:text-purple-200">{stats.completedOrders}</div>
+            </div>
+            <div className="border-2 border-[var(--bulletin-border)] bg-[#fffacd] dark:bg-yellow-900/10 p-6 shadow-[4px_4px_0_0_var(--bulletin-shadow)]">
+              <div className="text-[10px] font-black uppercase tracking-widest opacity-40 mb-3 flex items-center gap-2 text-yellow-900 dark:text-yellow-200">
+                <TrendingUp className="h-4 w-4" /> Revenue
               </div>
-              <div className="text-xl font-bold">
+              <div className="text-xl font-black text-yellow-900 dark:text-yellow-200">
                 GHS {stats.totalRevenue.toLocaleString('en-GH', { minimumFractionDigits: 2 })}
               </div>
-            </BulletinCard>
+            </div>
           </div>
         )}
 
         {/* Status tabs */}
-        <div className="flex gap-0 border-b border-black mb-6 overflow-x-auto scrollbar-hide">
+        <div className="flex gap-0 border-b-2 border-[var(--bulletin-border)] mb-8 overflow-x-auto scrollbar-hide">
           {STATUS_TABS.map((tab) => (
             <button
               key={tab.value}
               onClick={() => handleTabChange(tab.value as OrderStatus | '')}
-              className={`px-4 py-2 text-[10px] font-bold uppercase tracking-wider whitespace-nowrap border-b-2 -mb-px transition-colors ${
+              className={`px-6 py-3 text-[10px] font-black uppercase tracking-widest whitespace-nowrap border-b-4 -mb-px transition-colors ${
                 statusFilter === tab.value
-                  ? 'border-black text-black'
-                  : 'border-transparent opacity-40 hover:opacity-70'
+                  ? 'border-[var(--bulletin-border)] text-[var(--bulletin-text)]'
+                  : 'border-transparent opacity-40 hover:opacity-100 text-[var(--bulletin-text)]'
               }`}
             >
               {tab.label}
@@ -206,98 +206,100 @@ const SellerOrders: React.FC = () => {
 
         {/* Orders */}
         {loading ? (
-          <LoadingSpinner text="Loading orders..." />
+          <div className="flex justify-center py-20">
+            <LoadingSpinner text="Fetching store orders..." />
+          </div>
         ) : orders.length === 0 ? (
-          <div className="border border-black bg-[#fffacd] p-12 text-center shadow-[4px_4px_0_0_rgba(0,0,0,1)]">
-            <Package className="h-12 w-12 mx-auto opacity-40 mb-4" />
-            <div className="text-[10px] uppercase tracking-wider opacity-60 mb-2">Empty</div>
-            <div className="font-bold">
-              {statusFilter ? `No ${statusFilter} orders` : 'No incoming orders yet'}
+          <div className="border-4 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] p-12 text-center shadow-[8px_8px_0_0_var(--bulletin-shadow)]">
+            <Package className="h-12 w-12 mx-auto opacity-20 mb-4 text-[var(--bulletin-text)]" />
+            <div className="text-[10px] font-black uppercase tracking-widest opacity-40 mb-2 text-[var(--bulletin-text)]">Empty Queue</div>
+            <div className="text-2xl font-black uppercase tracking-tight text-[var(--bulletin-text)]">
+              {statusFilter ? `No ${statusFilter} orders found` : 'No incoming orders yet'}
             </div>
           </div>
         ) : (
-          <div className="space-y-3">
-            {orders.map((order) => {
+          <div className="space-y-4">
+            {orders.map((order, idx) => {
               const item = order.items[0];
               const nextAction = NEXT_STATUS[order.status];
               const isUpdating = updatingId === order._id;
               const canSellerCancel = ['paid', 'confirmed'].includes(order.status);
 
               return (
-                <div key={order._id} className="border border-black bg-white p-4 shadow-[3px_3px_0_0_rgba(0,0,0,1)]"
-                     style={{ transform: `rotate(${Math.random() * 0.4 - 0.2}deg)` }}>
-                  <div className="flex items-start gap-4">
-                    <div className="w-16 h-16 border border-black bg-[#f8f7f4] flex-shrink-0 overflow-hidden">
+                <div key={order._id} className="border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] p-6 shadow-[4px_4px_0_0_var(--bulletin-shadow)]"
+                     style={{ transform: `rotate(${(idx % 2) * 0.4 - 0.2}deg)` }}>
+                  <div className="flex items-start gap-6">
+                    <div className="w-20 h-20 border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-bg)] flex-shrink-0 overflow-hidden shadow-[2px_2px_0_0_var(--bulletin-shadow)]">
                       {item?.image ? (
                         <img src={item.image} alt={item.title} className="w-full h-full object-cover" />
                       ) : (
-                        <div className="w-full h-full flex items-center justify-center opacity-40">
-                          <Package className="h-6 w-6" />
+                        <div className="w-full h-full flex items-center justify-center opacity-20 text-[var(--bulletin-text)]">
+                          <Package className="h-8 w-8" />
                         </div>
                       )}
                     </div>
 
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-start justify-between gap-2 mb-1">
+                      <div className="flex items-start justify-between gap-4 mb-2">
                         <div>
-                          <div className="text-[12px] font-bold truncate">{item?.title || 'Unknown'}</div>
-                          <div className="text-[10px] opacity-60 mt-0.5">
-                            #{order.orderNumber} &middot; {order.buyer.name}
+                          <div className="text-lg font-black uppercase tracking-tight text-[var(--bulletin-text)] line-clamp-1">{item?.title || 'Unknown Product'}</div>
+                          <div className="text-[10px] font-bold opacity-40 mt-1 text-[var(--bulletin-text)] uppercase tracking-widest">
+                            ID: {order.orderNumber} &middot; BUYER: {order.buyer.name}
                           </div>
                         </div>
-                        <div className="text-base font-bold whitespace-nowrap">
+                        <div className="text-xl font-black text-[var(--bulletin-text)] whitespace-nowrap">
                           GHS {order.totalAmount.toLocaleString('en-GH', { minimumFractionDigits: 2 })}
                         </div>
                       </div>
 
-                      <div className="flex items-center gap-2 mb-3">
-                        <span className={`border border-black px-1.5 py-0.5 text-[9px] font-bold uppercase ${STATUS_STYLES[order.status] || 'bg-white'}`}>
+                      <div className="flex items-center gap-3 mb-4">
+                        <span className={`border-2 border-[var(--bulletin-border)] px-2 py-0.5 text-[9px] font-black uppercase tracking-wider ${STATUS_STYLES[order.status] || 'bg-[var(--bulletin-card)]'}`}>
                           {ORDER_STATUS_LABELS[order.status]}
                         </span>
-                        <span className="text-[10px] opacity-50 capitalize">{order.deliveryMethod}</span>
+                        <span className="text-[10px] font-black uppercase tracking-widest opacity-40 text-[var(--bulletin-text)]">&middot; {order.deliveryMethod}</span>
                       </div>
 
-                      <div className="flex items-center gap-2 flex-wrap">
+                      <div className="flex items-center gap-3 flex-wrap">
                         {nextAction && (
                           <button
                             onClick={() => handleUpdateStatus(order._id, nextAction.status)}
                             disabled={isUpdating}
-                            className="border border-black bg-black px-3 py-1.5 text-[9px] font-bold uppercase text-white shadow-[2px_2px_0_0_rgba(0,0,0,1)] hover:bg-white hover:text-black disabled:opacity-50 transition-all"
+                            className="border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-text)] px-6 py-2 text-[10px] font-black uppercase tracking-widest text-[var(--bulletin-bg)] shadow-[4px_4px_0_0_var(--bulletin-shadow)] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-none disabled:opacity-50 transition-all"
                           >
-                            {isUpdating ? '...' : nextAction.label}
+                            {isUpdating ? 'Updating...' : nextAction.label}
                           </button>
                         )}
                         {canSellerCancel && (
                           <button
                             onClick={() => handleCancelOrder(order._id)}
                             disabled={isUpdating}
-                            className="border border-black bg-[#fce4ec] px-3 py-1.5 text-[9px] font-bold uppercase shadow-[1px_1px_0_0_rgba(0,0,0,1)] hover:shadow-[2px_2px_0_0_rgba(0,0,0,1)] disabled:opacity-50 transition-all"
+                            className="border-2 border-[var(--bulletin-border)] bg-red-50 dark:bg-red-900/10 px-6 py-2 text-[10px] font-black uppercase tracking-widest text-red-700 dark:text-red-200 shadow-[4px_4px_0_0_var(--bulletin-shadow)] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-none disabled:opacity-50 transition-all"
                           >
-                            <XCircle className="inline-block h-3 w-3 mr-0.5" />
+                            <XCircle className="inline-block h-4 w-4 mr-2" />
                             Cancel
                           </button>
                         )}
                         <Link
                           to={`/orders/${order._id}`}
-                          className="ml-auto border border-black bg-white px-2 py-1 text-[8px] font-bold uppercase shadow-[1px_1px_0_0_rgba(0,0,0,1)] hover:shadow-[2px_2px_0_0_rgba(0,0,0,1)] transition-all"
+                          className="ml-auto border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] px-4 py-2 text-[9px] font-black uppercase tracking-widest text-[var(--bulletin-text)] shadow-[2px_2px_0_0_var(--bulletin-shadow)] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-none transition-all"
                         >
                           Details
-                          <ArrowUpRight className="inline-block h-3 w-3 ml-0.5" />
+                          <ArrowUpRight className="inline-block h-3 w-3 ml-2" />
                         </Link>
                       </div>
                     </div>
                   </div>
 
                   {order.note && (
-                    <div className="mt-3 pt-3 border-t border-black text-[11px]">
-                      <span className="font-bold uppercase text-[10px] opacity-60">Note: </span>
-                      {order.note}
+                    <div className="mt-4 pt-4 border-t-2 border-[var(--bulletin-border)] text-sm font-medium italic text-[var(--bulletin-text)] opacity-70">
+                      <span className="font-black uppercase tracking-widest text-[10px] opacity-40 not-italic mr-2">Buyer Note:</span>
+                      "{order.note}"
                     </div>
                   )}
 
                   {/* Mini tracking strip */}
                   {!['cancelled', 'disputed'].includes(order.status) && (
-                    <div className="mt-3 pt-3 border-t border-black">
+                    <div className="mt-4 pt-4 border-t-2 border-[var(--bulletin-border)]">
                       <div className="flex items-center gap-0">
                         {TRACKING_PIPELINE.map((step, idx) => {
                           const stepIdx = PIPELINE_ORDER.indexOf(order.status);
@@ -306,19 +308,19 @@ const SellerOrders: React.FC = () => {
                           return (
                             <React.Fragment key={step.status}>
                               <div className="flex flex-col items-center">
-                                <div className={`w-4 h-4 border border-black flex items-center justify-center ${
-                                  isDone || isCurrent ? 'bg-black' : 'bg-white'
+                                <div className={`w-5 h-5 border-2 border-[var(--bulletin-border)] flex items-center justify-center ${
+                                  isDone || isCurrent ? 'bg-[var(--bulletin-text)]' : 'bg-[var(--bulletin-card)]'
                                 }`}>
-                                  {isDone && <CheckCircle className="h-2.5 w-2.5 text-white" />}
+                                  {isDone && <CheckCircle className={`h-3 w-3 ${isDone || isCurrent ? 'text-[var(--bulletin-bg)]' : ''}`} />}
                                 </div>
-                                <span className={`text-[7px] font-bold uppercase mt-0.5 ${
-                                  isDone || isCurrent ? '' : 'opacity-30'
+                                <span className={`text-[8px] font-black uppercase tracking-tight mt-2 ${
+                                  isDone || isCurrent ? 'text-[var(--bulletin-text)]' : 'opacity-20 text-[var(--bulletin-text)]'
                                 }`}>
                                   {step.label}
                                 </span>
                               </div>
                               {idx < TRACKING_PIPELINE.length - 1 && (
-                                <div className={`flex-1 h-px mx-0.5 mb-3.5 ${idx < stepIdx ? 'bg-black' : 'bg-black/20'}`} />
+                                <div className={`flex-1 h-0.5 mx-1 mb-5 ${idx < stepIdx ? 'bg-[var(--bulletin-text)]' : 'bg-[var(--bulletin-text)]/10'}`} />
                               )}
                             </React.Fragment>
                           );
@@ -327,8 +329,8 @@ const SellerOrders: React.FC = () => {
                     </div>
                   )}
 
-                  <div className="text-[10px] opacity-40 mt-2">
-                    {new Date(order.createdAt).toLocaleDateString('en-GH', {
+                  <div className="text-[9px] font-black uppercase tracking-widest opacity-30 mt-4 text-[var(--bulletin-text)] text-right">
+                    Ordered {new Date(order.createdAt).toLocaleDateString('en-GH', {
                       year: 'numeric', month: 'short', day: 'numeric',
                       hour: '2-digit', minute: '2-digit',
                     })}
@@ -341,19 +343,21 @@ const SellerOrders: React.FC = () => {
 
         {/* Pagination */}
         {pagination && pagination.pages > 1 && (
-          <div className="flex justify-center items-center gap-4 mt-8 pt-6 border-t border-black">
+          <div className="flex justify-center items-center gap-6 mt-12 pt-8 border-t-2 border-[var(--bulletin-border)]">
             <button
               onClick={() => setPage((p) => Math.max(1, p - 1))}
               disabled={page === 1}
-              className="border border-black bg-white px-4 py-2 text-[10px] font-bold uppercase shadow-[2px_2px_0_0_rgba(0,0,0,1)] hover:shadow-[3px_3px_0_0_rgba(0,0,0,1)] disabled:opacity-40 transition-all"
+              className="border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] px-6 py-2 text-[10px] font-black uppercase tracking-widest shadow-[4px_4px_0_0_var(--bulletin-shadow)] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-none disabled:opacity-20 transition-all text-[var(--bulletin-text)]"
             >
-              Previous
+              Prev
             </button>
-            <span className="text-[10px] font-bold uppercase opacity-60">{page} / {pagination.pages}</span>
+            <span className="text-[11px] font-black uppercase tracking-tighter text-[var(--bulletin-text)]">
+              {page} / {pagination.pages}
+            </span>
             <button
               onClick={() => setPage((p) => Math.min(pagination.pages, p + 1))}
               disabled={page === pagination.pages}
-              className="border border-black bg-white px-4 py-2 text-[10px] font-bold uppercase shadow-[2px_2px_0_0_rgba(0,0,0,1)] hover:shadow-[3px_3px_0_0_rgba(0,0,0,1)] disabled:opacity-40 transition-all"
+              className="border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] px-6 py-2 text-[10px] font-black uppercase tracking-widest shadow-[4px_4px_0_0_var(--bulletin-shadow)] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-none disabled:opacity-20 transition-all text-[var(--bulletin-text)]"
             >
               Next
             </button>

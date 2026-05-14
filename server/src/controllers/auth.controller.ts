@@ -471,8 +471,8 @@ export const updateSellerOnboarding = async (
   next: NextFunction
 ): Promise<void> => {
   try {
-    if (!req.user || !['seller', 'admin'].includes(req.user.role)) {
-      res.status(403).json({ success: false, message: 'Seller access required.' });
+    if (!req.user || !['buyer', 'seller', 'admin'].includes(req.user.role)) {
+      res.status(403).json({ success: false, message: 'Access denied.' });
       return;
     }
 
@@ -512,6 +512,7 @@ export const updateSellerOnboarding = async (
       brandName,
       sellerOnboarding: onboardingPatch,
       ...(responseTimeMinutes !== undefined ? { responseTimeMinutes } : {}),
+      ...(completed ? { role: 'seller' } : {}),
     } as any);
 
     res.status(200).json({ success: true, message: 'Seller onboarding updated.', data: { user } });

@@ -84,9 +84,9 @@ app.use('/api', routes);
 // Root route
 app.get('/', (_req, res) => {
   res.json({
-    name: 'CampusMarketplace API',
+    name: 'QUADS API',
     version: '1.0.0',
-    description: 'Marketplace for buyers and sellers on UMaT Campus',
+    description: 'Marketplace for buyers and sellers on QUADS',
     docs: '/api/health',
   });
 });
@@ -108,7 +108,7 @@ const startServer = async () => {
     // Start listening
     httpServer.listen(env.PORT, () => {
       console.log('='.repeat(50));
-      console.log(`  CampusMarketplace API Server`);
+      console.log(`  QUADS API Server`);
       console.log(`  Environment: ${env.NODE_ENV}`);
       console.log(`  Port: ${env.PORT}`);
       console.log(`  URL: http://localhost:${env.PORT}`);

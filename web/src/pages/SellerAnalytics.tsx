@@ -20,13 +20,13 @@ import { BulletinLayout, BulletinSection, BulletinCard } from '../components/lay
 const labelBase = 'text-[9px] font-bold uppercase tracking-[0.28em] opacity-40';
 
 const statusColor: Record<string, string> = {
-  pending: 'bg-[#f0e8f4] text-black border-black',
-  paid: 'bg-[#e0f2f7] text-black border-black',
-  confirmed: 'bg-[#f0e8f4] text-black border-black',
-  ready: 'bg-[#fff5e1] text-black border-black',
-  completed: 'bg-[#fffacd] text-black border-black',
-  cancelled: 'bg-[#fce4ec] text-black border-black',
-  disputed: 'bg-[#fce4ec] text-black border-black',
+  pending: 'bg-[#f0e8f4] dark:bg-purple-900/30 text-black dark:text-purple-200 border-black dark:border-white/40',
+  paid: 'bg-[#e0f2f7] dark:bg-sky-900/30 text-black dark:text-sky-200 border-black dark:border-white/40',
+  confirmed: 'bg-[#f0e8f4] dark:bg-purple-900/30 text-black dark:text-purple-200 border-black dark:border-white/40',
+  ready: 'bg-[#fff5e1] dark:bg-orange-900/30 text-black dark:text-orange-200 border-black dark:border-white/40',
+  completed: 'bg-[#fffacd] dark:bg-yellow-900/30 text-black dark:text-yellow-200 border-black dark:border-white/40',
+  cancelled: 'bg-[#fce4ec] dark:bg-red-900/30 text-black dark:text-red-200 border-black dark:border-white/40',
+  disputed: 'bg-[#fce4ec] dark:bg-red-900/30 text-black dark:text-red-200 border-black dark:border-white/40',
 };
 
 const SellerAnalyticsPage: React.FC = () => {
@@ -203,11 +203,11 @@ const SellerAnalyticsPage: React.FC = () => {
   return (
     <BulletinLayout title="Analytics" subtitle="Seller" section="16">
       {/* Stat banner */}
-      <div className="border-b border-black bg-black">
+      <div className="border-b border-[var(--bulletin-border)] bg-[#111] dark:bg-[#1a1a1a]">
         <div className="mx-auto max-w-[1400px] px-6 py-8">
           <div className="flex items-end justify-between mb-6">
             <div>
-              <p className="text-[9px] font-bold uppercase tracking-[0.35em] text-white/20 mb-2">
+              <p className="text-[9px] font-bold uppercase tracking-[0.35em] text-[#ff6b6b] mb-2">
                 Seller Performance
               </p>
               <h2 className="text-2xl font-bold text-white">Overview</h2>
@@ -241,12 +241,12 @@ const SellerAnalyticsPage: React.FC = () => {
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-px border border-white/10">
               {STAT_CARDS.map((s) => (
                 <div key={s.label} className="bg-black/80 px-5 py-5">
-                  <div className="flex items-center gap-2 text-white/30 mb-1">
+                  <div className="flex items-center gap-2 text-white/60 mb-1">
                     {s.icon}
                     <span className="text-[9px] font-bold uppercase tracking-[0.22em]">{s.label}</span>
                   </div>
                   <p className="text-2xl font-bold text-white">{s.value}</p>
-                  <p className="text-[10px] text-white/25 mt-1">{s.sub}</p>
+                  <p className="text-[10px] text-white/40 mt-1">{s.sub}</p>
                 </div>
               ))}
             </div>
@@ -254,7 +254,7 @@ const SellerAnalyticsPage: React.FC = () => {
         </div>
       </div>
 
-      <BulletinSection bgColor="bg-[#faf8f5]">
+      <BulletinSection bgColor="bg-[var(--bulletin-bg)]">
         <div className="grid lg:grid-cols-[1fr_320px] gap-10">
           {/* Left — recent orders */}
           <div>
@@ -272,19 +272,19 @@ const SellerAnalyticsPage: React.FC = () => {
             </div>
 
             {salesLoading ? (
-              <div className="border border-black divide-y divide-black/20">
+              <div className="border border-[var(--bulletin-border)] divide-y divide-[var(--bulletin-border)]/20">
                 {Array.from({ length: 5 }).map((_, i) => (
                   <div key={i} className="px-5 py-4 flex items-center justify-between animate-pulse">
                     <div className="space-y-1.5">
-                      <div className="h-3 w-32 bg-black/10" />
-                      <div className="h-2.5 w-20 bg-black/10" />
+                      <div className="h-3 w-32 bg-[var(--bulletin-bg)]/40" />
+                      <div className="h-2.5 w-20 bg-[var(--bulletin-bg)]/40" />
                     </div>
-                    <div className="h-3 w-16 bg-black/10" />
+                    <div className="h-3 w-16 bg-[var(--bulletin-bg)]/40" />
                   </div>
                 ))}
               </div>
             ) : orders.length === 0 ? (
-              <div className="border border-black px-8 py-16 text-center bg-white">
+              <div className="border border-[var(--bulletin-border)] px-8 py-16 text-center bg-[var(--bulletin-card)]">
                 <BarChart2 className="h-10 w-10 opacity-20 mx-auto mb-4" />
                 <p className="text-sm font-bold uppercase opacity-60">No orders yet</p>
                 <p className="text-xs mt-1 opacity-40">
@@ -292,12 +292,12 @@ const SellerAnalyticsPage: React.FC = () => {
                 </p>
               </div>
             ) : (
-              <div className="border border-black divide-y divide-black/20 bg-white">
+              <div className="border border-[var(--bulletin-border)] divide-y divide-[var(--bulletin-border)]/20 bg-[var(--bulletin-card)]">
                 {orders.map((order: any) => (
                   <Link
                     key={order._id}
                     to={`/orders/${order._id}`}
-                    className="flex items-center justify-between px-5 py-4 hover:bg-[#f8f7f4] transition-colors group"
+                    className="flex items-center justify-between px-5 py-4 hover:bg-[var(--bulletin-bg)] transition-colors group"
                   >
                     <div>
                       <p className="text-[12px] font-bold">
@@ -311,7 +311,7 @@ const SellerAnalyticsPage: React.FC = () => {
                       </p>
                     </div>
                     <div className="flex items-center gap-3">
-                      <span className={`border border-black px-1.5 py-0.5 text-[9px] font-bold uppercase ${statusColor[order.status] ?? 'bg-white'}`}>
+                      <span className={`border border-[var(--bulletin-border)] px-1.5 py-0.5 text-[9px] font-bold uppercase ${statusColor[order.status] ?? 'bg-[var(--bulletin-card)]'}`}>
                         {order.status}
                       </span>
                       <span className="text-sm font-bold">
@@ -332,11 +332,11 @@ const SellerAnalyticsPage: React.FC = () => {
             </div>
 
             {listings.length === 0 ? (
-              <BulletinCard rotation={0.5} bgColor="bg-[#fffacd]">
+              <BulletinCard rotation={0.5} bgColor="bg-[#fffacd] dark:bg-yellow-900/20">
                 <p className="text-[12px]">No listings yet.</p>
                 <Link
                   to="/sell"
-                  className="mt-3 inline-flex items-center gap-1.5 border border-black bg-black px-3 py-1.5 text-[9px] font-bold uppercase text-white transition-colors hover:bg-white hover:text-black"
+                  className="mt-3 inline-flex items-center gap-1.5 border border-[var(--bulletin-border)] bg-[var(--bulletin-text)] px-3 py-1.5 text-[9px] font-bold uppercase text-[var(--bulletin-bg)] transition-colors hover:bg-[var(--bulletin-card)] hover:text-[var(--bulletin-text)]"
                 >
                   <Package className="h-3 w-3" />
                   Create first
@@ -347,16 +347,16 @@ const SellerAnalyticsPage: React.FC = () => {
                 {listings.map((p: any) => (
                   <div
                     key={p._id}
-                    className="flex items-center gap-3 border border-black bg-white p-3 shadow-[2px_2px_0_0_rgba(0,0,0,1)]"
+                    className="flex items-center gap-3 border border-[var(--bulletin-border)] bg-[var(--bulletin-card)] p-3 shadow-[2px_2px_0_0_var(--bulletin-shadow)]"
                   >
                     {p.images?.[0]?.url ? (
                       <img
                         src={p.images[0].url}
                         alt={p.title}
-                        className="h-12 w-12 object-cover border border-black flex-shrink-0"
+                        className="h-12 w-12 object-cover border border-[var(--bulletin-border)] flex-shrink-0"
                       />
                     ) : (
-                      <div className="h-12 w-12 border border-black bg-[#f0e8f4] flex-shrink-0 flex items-center justify-center">
+                      <div className="h-12 w-12 border border-[var(--bulletin-border)] bg-purple-100 dark:bg-purple-900/30 flex-shrink-0 flex items-center justify-center">
                         <Package className="h-5 w-5 opacity-40" />
                       </div>
                     )}
@@ -364,14 +364,14 @@ const SellerAnalyticsPage: React.FC = () => {
                       <p className="text-[12px] font-bold truncate">{p.title}</p>
                       <p className="text-[10px] opacity-50">GHS {p.price?.toFixed(2)}</p>
                     </div>
-                    <span className={`flex-shrink-0 border border-black px-1.5 py-0.5 text-[8px] font-bold uppercase ${p.isAvailable ? 'bg-[#fffacd]' : 'bg-[#fce4ec]'}`}>
+                    <span className={`flex-shrink-0 border border-[var(--bulletin-border)] px-1.5 py-0.5 text-[8px] font-bold uppercase ${p.isAvailable ? 'bg-[#fffacd] dark:bg-yellow-900/30' : 'bg-[#fce4ec] dark:bg-red-900/30'}`}>
                       {p.isAvailable ? 'live' : 'sold'}
                     </span>
                   </div>
                 ))}
                 <Link
                   to="/my-listings"
-                  className="flex items-center justify-center gap-2 border border-black py-3 text-[10px] font-bold uppercase hover:bg-white transition-colors"
+                  className="flex items-center justify-center gap-2 border border-[var(--bulletin-border)] py-3 text-[10px] font-bold uppercase hover:bg-[var(--bulletin-card)] transition-colors"
                 >
                   View all listings →
                 </Link>
@@ -379,7 +379,7 @@ const SellerAnalyticsPage: React.FC = () => {
             )}
 
             {/* Completion rate card */}
-            <BulletinCard rotation={-0.3} bgColor="bg-white" className="mt-6">
+            <BulletinCard rotation={-0.3} bgColor="bg-[var(--bulletin-card)]" className="mt-6">
               <div className="flex items-center gap-2 mb-3">
                 <TrendingUp className="h-4 w-4 opacity-40" />
                 <p className={labelBase}>Completion rate</p>
@@ -388,33 +388,33 @@ const SellerAnalyticsPage: React.FC = () => {
                 <span className="text-3xl font-bold">{completionRate}%</span>
                 <span className="text-[11px] opacity-50 mb-1">of orders fulfilled</span>
               </div>
-              <div className="h-2 bg-[#f0e8f4] border border-black">
+              <div className="h-2 bg-[#f0e8f4] dark:bg-purple-900/30 border border-[var(--bulletin-border)]">
                 <div
-                  className="h-full bg-black transition-all duration-500"
+                  className="h-full bg-[var(--bulletin-text)] transition-all duration-500"
                   style={{ width: `${completionRate}%` }}
                 />
               </div>
             </BulletinCard>
 
             {/* Campaign scheduler */}
-            <BulletinCard rotation={0.3} bgColor="bg-[#e0f2f7]" className="mt-6">
+            <BulletinCard rotation={0.3} bgColor="bg-[#e0f2f7] dark:bg-sky-900/20" className="mt-6">
               <p className={labelBase}>Growth toolkit</p>
               <div className="mt-2 text-base font-bold">Campaign scheduler</div>
               <div className="grid gap-2 mt-3">
-                <input value={campaignName} onChange={(e) => setCampaignName(e.target.value)} placeholder="Campaign name" className="w-full border border-black bg-[#fefdfb] p-2 text-[12px] font-bold focus:outline-none focus:ring-2 focus:ring-black" />
-                <input type="datetime-local" value={campaignStart} onChange={(e) => setCampaignStart(e.target.value)} className="w-full border border-black bg-[#fefdfb] p-2 text-[12px] font-bold focus:outline-none focus:ring-2 focus:ring-black" />
-                <input type="datetime-local" value={campaignEnd} onChange={(e) => setCampaignEnd(e.target.value)} className="w-full border border-black bg-[#fefdfb] p-2 text-[12px] font-bold focus:outline-none focus:ring-2 focus:ring-black" />
-                <input value={campaignCouponCode} onChange={(e) => setCampaignCouponCode(e.target.value)} placeholder="Coupon code (optional)" className="w-full border border-black bg-[#fefdfb] p-2 text-[12px] font-bold focus:outline-none focus:ring-2 focus:ring-black" />
-                <select value={campaignAB} onChange={(e) => setCampaignAB(e.target.value as 'A' | 'B')} className="w-full border border-black bg-[#fefdfb] p-2 text-[12px] font-bold focus:outline-none focus:ring-2 focus:ring-black">
+                <input value={campaignName} onChange={(e) => setCampaignName(e.target.value)} placeholder="Campaign name" className="w-full border border-[var(--bulletin-border)] bg-[var(--bulletin-card)] p-2 text-[12px] font-bold focus:outline-none focus:ring-2 focus:ring-[var(--bulletin-text)]" />
+                <input type="datetime-local" value={campaignStart} onChange={(e) => setCampaignStart(e.target.value)} className="w-full border border-[var(--bulletin-border)] bg-[var(--bulletin-card)] p-2 text-[12px] font-bold focus:outline-none focus:ring-2 focus:ring-[var(--bulletin-text)]" />
+                <input type="datetime-local" value={campaignEnd} onChange={(e) => setCampaignEnd(e.target.value)} className="w-full border border-[var(--bulletin-border)] bg-[var(--bulletin-card)] p-2 text-[12px] font-bold focus:outline-none focus:ring-2 focus:ring-[var(--bulletin-text)]" />
+                <input value={campaignCouponCode} onChange={(e) => setCampaignCouponCode(e.target.value)} placeholder="Coupon code (optional)" className="w-full border border-[var(--bulletin-border)] bg-[var(--bulletin-card)] p-2 text-[12px] font-bold focus:outline-none focus:ring-2 focus:ring-[var(--bulletin-text)]" />
+                <select value={campaignAB} onChange={(e) => setCampaignAB(e.target.value as 'A' | 'B')} className="w-full border border-[var(--bulletin-border)] bg-[var(--bulletin-card)] p-2 text-[12px] font-bold focus:outline-none focus:ring-2 focus:ring-[var(--bulletin-text)]">
                   <option value="A">A slot</option>
                   <option value="B">B slot</option>
                 </select>
               </div>
-              <button onClick={createCampaign} className="mt-3 w-full border border-black bg-black py-2 text-[10px] font-bold uppercase text-white transition-colors hover:bg-white hover:text-black">Create Campaign</button>
+              <button onClick={createCampaign} className="mt-3 w-full border border-[var(--bulletin-border)] bg-[var(--bulletin-text)] py-2 text-[10px] font-bold uppercase text-[var(--bulletin-bg)] transition-colors hover:bg-[var(--bulletin-card)] hover:text-[var(--bulletin-text)]">Create Campaign</button>
               {campaigns.length > 0 && (
                 <div className="mt-3 space-y-2">
                   {campaigns.slice(0, 4).map((c: any) => (
-                    <div key={c._id} className="border border-black bg-white px-3 py-2 text-[11px]">
+                    <div key={c._id} className="border border-[var(--bulletin-border)] bg-[var(--bulletin-card)] px-3 py-2 text-[11px]">
                       <p className="font-bold">{c.name}</p>
                       <p className="opacity-50">{new Date(c.startsAt).toLocaleDateString()} - {new Date(c.endsAt).toLocaleDateString()} · Slot {c.abSlot || '-'}</p>
                     </div>
@@ -424,7 +424,7 @@ const SellerAnalyticsPage: React.FC = () => {
             </BulletinCard>
 
             {/* Coupons */}
-            <BulletinCard rotation={-0.3} bgColor="bg-[#fce4ec]" className="mt-6">
+            <BulletinCard rotation={-0.3} bgColor="bg-[#fce4ec] dark:bg-red-900/20" className="mt-6">
               <p className={labelBase}>Growth toolkit</p>
               <div className="mt-2 text-base font-bold">Coupons</div>
               <div className="space-y-2 mt-3">
@@ -432,13 +432,13 @@ const SellerAnalyticsPage: React.FC = () => {
                   value={newCouponCode}
                   onChange={(e) => setNewCouponCode(e.target.value.toUpperCase())}
                   placeholder="CODE"
-                  className="w-full border border-black bg-[#fefdfb] p-2 text-[12px] font-bold focus:outline-none focus:ring-2 focus:ring-black"
+                  className="w-full border border-[var(--bulletin-border)] bg-[var(--bulletin-card)] p-2 text-[12px] font-bold focus:outline-none focus:ring-2 focus:ring-[var(--bulletin-text)]"
                 />
                 <div className="grid grid-cols-2 gap-2">
                   <select
                     value={newCouponType}
                     onChange={(e) => setNewCouponType(e.target.value as 'percentage' | 'fixed')}
-                    className="border border-black bg-[#fefdfb] p-2 text-[12px] font-bold focus:outline-none focus:ring-2 focus:ring-black"
+                    className="border border-[var(--bulletin-border)] bg-[var(--bulletin-card)] p-2 text-[12px] font-bold focus:outline-none focus:ring-2 focus:ring-[var(--bulletin-text)]"
                   >
                     <option value="percentage">Percent</option>
                     <option value="fixed">Fixed (GHS)</option>
@@ -447,14 +447,14 @@ const SellerAnalyticsPage: React.FC = () => {
                     value={newCouponValue}
                     onChange={(e) => setNewCouponValue(e.target.value)}
                     placeholder="Value"
-                    className="border border-black bg-[#fefdfb] p-2 text-[12px] font-bold focus:outline-none focus:ring-2 focus:ring-black"
+                    className="border border-[var(--bulletin-border)] bg-[var(--bulletin-card)] p-2 text-[12px] font-bold focus:outline-none focus:ring-2 focus:ring-[var(--bulletin-text)]"
                   />
                 </div>
               </div>
-              <button onClick={createCoupon} className="mt-3 w-full border border-black bg-black py-2 text-[10px] font-bold uppercase text-white transition-colors hover:bg-white hover:text-black">Create Coupon</button>
+              <button onClick={createCoupon} className="mt-3 w-full border border-[var(--bulletin-border)] bg-[var(--bulletin-text)] py-2 text-[10px] font-bold uppercase text-[var(--bulletin-bg)] transition-colors hover:bg-[var(--bulletin-card)] hover:text-[var(--bulletin-text)]">Create Coupon</button>
               <div className="mt-4 space-y-2">
                 {coupons.slice(0, 4).map((coupon: any) => (
-                  <div key={coupon._id} className="flex justify-between border border-black bg-white px-3 py-2 text-[11px]">
+                  <div key={coupon._id} className="flex justify-between border border-[var(--bulletin-border)] bg-[var(--bulletin-card)] px-3 py-2 text-[11px]">
                     <span className="font-bold">{coupon.code}</span>
                     <span className="opacity-60">{coupon.type === 'percentage' ? `${coupon.value}%` : `GHS ${coupon.value}`}</span>
                   </div>
@@ -464,7 +464,7 @@ const SellerAnalyticsPage: React.FC = () => {
             </BulletinCard>
 
             {/* Bundles */}
-            <BulletinCard rotation={0.3} bgColor="bg-[#fffacd]" className="mt-6">
+            <BulletinCard rotation={0.3} bgColor="bg-[#fffacd] dark:bg-yellow-900/20" className="mt-6">
               <p className={labelBase}>Growth toolkit</p>
               <div className="mt-2 text-base font-bold">Bundles</div>
               <div className="space-y-2 mt-3">
@@ -472,15 +472,15 @@ const SellerAnalyticsPage: React.FC = () => {
                   value={newBundleName}
                   onChange={(e) => setNewBundleName(e.target.value)}
                   placeholder="Bundle name"
-                  className="w-full border border-black bg-[#fefdfb] p-2 text-[12px] font-bold focus:outline-none focus:ring-2 focus:ring-black"
+                  className="w-full border border-[var(--bulletin-border)] bg-[var(--bulletin-card)] p-2 text-[12px] font-bold focus:outline-none focus:ring-2 focus:ring-[var(--bulletin-text)]"
                 />
                 <input
                   value={newBundleDiscount}
                   onChange={(e) => setNewBundleDiscount(e.target.value)}
                   placeholder="Discount %"
-                  className="w-full border border-black bg-[#fefdfb] p-2 text-[12px] font-bold focus:outline-none focus:ring-2 focus:ring-black"
+                  className="w-full border border-[var(--bulletin-border)] bg-[var(--bulletin-card)] p-2 text-[12px] font-bold focus:outline-none focus:ring-2 focus:ring-[var(--bulletin-text)]"
                 />
-                <div className="max-h-36 overflow-auto border border-black bg-white p-2 space-y-1">
+                <div className="max-h-36 overflow-auto border border-[var(--bulletin-border)] bg-[var(--bulletin-card)] p-2 space-y-1">
                   {listings.slice(0, 10).map((p: any) => (
                     <label key={p._id} className="flex items-center gap-2 text-[11px]">
                       <input
@@ -494,13 +494,13 @@ const SellerAnalyticsPage: React.FC = () => {
                   {listings.length === 0 && <p className="text-[11px] opacity-40">Create listings first.</p>}
                 </div>
               </div>
-              <button onClick={createBundle} className="mt-3 w-full border border-black bg-black py-2 text-[10px] font-bold uppercase text-white transition-colors hover:bg-white hover:text-black">Create Bundle</button>
+              <button onClick={createBundle} className="mt-3 w-full border border-[var(--bulletin-border)] bg-[var(--bulletin-text)] py-2 text-[10px] font-bold uppercase text-[var(--bulletin-bg)] transition-colors hover:bg-[var(--bulletin-card)] hover:text-[var(--bulletin-text)]">Create Bundle</button>
               {bundles.length === 0 ? (
                 <p className="text-[11px] opacity-40 mt-3">No bundles yet.</p>
               ) : (
                 <div className="space-y-2 mt-3">
                   {bundles.slice(0, 4).map((bundle: any) => (
-                    <div key={bundle._id} className="border border-black bg-white px-3 py-2 text-[11px]">
+                    <div key={bundle._id} className="border border-[var(--bulletin-border)] bg-[var(--bulletin-card)] px-3 py-2 text-[11px]">
                       <p className="font-bold">{bundle.name}</p>
                       <p className="opacity-60 mt-1">{bundle.discountPercent}% off • {bundle.productIds?.length || 0} items</p>
                     </div>

@@ -37,7 +37,11 @@ const SellerOnboardingScreen = ({ navigation }: any) => {
       });
       await refreshUser();
       if (allDone) {
-        navigation.navigate('HomeTab');
+        // Role should be updated now, viewMode will switch automatically
+        navigation.reset({
+          index: 0,
+          routes: [{ name: 'Main' }],
+        });
       }
     } finally {
       setSaving(false);
@@ -46,7 +50,11 @@ const SellerOnboardingScreen = ({ navigation }: any) => {
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
-      <ScreenHeader eyebrow="Seller setup" title="Onboarding" subtitle="Branding and payout details for seller profile." />
+      <ScreenHeader 
+        eyebrow={user?.role === 'buyer' ? "Upgrade Account" : "Seller setup"} 
+        title={user?.role === 'buyer' ? "Become a Seller" : "Onboarding"} 
+        subtitle={user?.role === 'buyer' ? "Tell us about your campus store to start listing items." : "Branding and payout details for your seller profile."} 
+      />
       <ScrollView contentContainerStyle={styles.content}>
         <Text style={styles.label}>Store name</Text>
         <TextInput style={styles.input} value={storeName} onChangeText={setStoreName} placeholder="Store name" placeholderTextColor="#9a8e7f" />

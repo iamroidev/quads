@@ -6,6 +6,7 @@ import categoryService from '../services/category.service';
 import { LoadingSpinner } from '../components/ui';
 import { ProductPopulated, Category, PaginationInfo, ProductCondition, DeliveryOption } from '../types';
 import { BulletinLayout, BulletinSection } from '../components/layout/BulletinLayout';
+import { ProductCardSkeleton } from '../components/ui/BulletinSkeleton';
 
 const conditionOptions = [
   { value: '', label: 'All Conditions' },
@@ -109,221 +110,219 @@ const Products: React.FC = () => {
 
   return (
     <BulletinLayout 
-      title={search ? `Results for "${search}"` : 'Browse Products'}
-      subtitle={pagination ? `${pagination.total} item${pagination.total !== 1 ? 's' : ''}` : 'Products'}
+      title={search ? `Manifest: "${search}"` : 'Market Manifest'}
+      subtitle={pagination ? `${pagination.total} Verified Entities` : 'Auditing...'}
       section="02"
     >
-      <BulletinSection bgColor="bg-[#faf8f5]">
-        <div className="mb-6 flex items-center justify-between border-b border-black pb-3">
-          <div className="text-[10px] uppercase tracking-wider opacity-40">
-            {pagination ? `${pagination.total} results` : 'Loading...'}
+      <BulletinSection bgColor="bg-[var(--bulletin-bg)]">
+        <div className="mb-12 flex flex-col md:flex-row md:items-center justify-between gap-6 border-b-4 border-black pb-8">
+          <div>
+            <h2 className="text-[10px] font-black uppercase tracking-[0.3em] opacity-40 text-[var(--bulletin-text)] mb-2">Resource Repository</h2>
+            <p className="text-[14px] font-bold text-[var(--bulletin-text)] opacity-60">Audit the active board for campus utility and equipment.</p>
           </div>
           <button
             onClick={() => setShowFilters(!showFilters)}
-            className="flex items-center gap-2 border border-black bg-white px-3 py-1.5 text-[11px] font-bold uppercase shadow-[2px_2px_0_0_rgba(0,0,0,1)] transition-all hover:shadow-[4px_4px_0_0_rgba(0,0,0,1)] md:hidden"
+            className="flex items-center justify-center gap-3 border-4 border-black bg-[var(--bulletin-card)] px-8 py-4 text-[12px] font-black uppercase tracking-widest shadow-[8px_8px_0_0_var(--bulletin-shadow)] transition-all md:hidden text-[var(--bulletin-text)] hover:shadow-none hover:translate-x-1 hover:translate-y-1"
           >
-            <Filter className="h-3 w-3" />
-            Filters
+            <Filter className="h-5 w-5" />
+            Control Preferences
             {hasActiveFilters && (
-              <span className="ml-1 flex h-4 w-4 items-center justify-center bg-black text-[9px] text-white">
+              <span className="ml-2 flex h-6 w-6 items-center justify-center bg-[#ff6b6b] text-[10px] text-white border-2 border-black">
                 !
               </span>
             )}
           </button>
         </div>
 
-        <div className="flex gap-6">
+        <div className="flex flex-col md:flex-row gap-12">
           {/* Sidebar filters - Desktop */}
-          <div className={`${showFilters ? 'fixed inset-0 z-50 bg-[#f8f7f4] p-6 overflow-auto' : 'hidden'} md:block md:static md:w-64 md:flex-shrink-0`}>
-            <div className="flex items-center justify-between mb-4 border-b border-black pb-3 md:hidden">
-              <div className="text-base font-bold">Filters</div>
-              <button onClick={() => setShowFilters(false)}>
-                <X className="h-5 w-5" />
-              </button>
+          <div className={`${showFilters ? 'fixed inset-0 z-[2000] bg-[var(--bulletin-bg)] p-8 overflow-auto' : 'hidden'} md:block md:static md:w-80 md:flex-shrink-0`}>
+            <div className="flex items-center justify-between mb-10 border-b-4 border-black pb-6 md:hidden">
+              <div className="text-2xl font-black uppercase tracking-tight text-[var(--bulletin-text)]">Preferences</div>
+              <button onClick={() => setShowFilters(false)} className="h-10 w-10 border-4 border-black bg-white flex items-center justify-center text-xl font-black">✕</button>
             </div>
 
-            {/* Category filter */}
-            <div className="mb-6 border border-black bg-white p-3 shadow-[3px_3px_0_0_rgba(0,0,0,1)]">
-              <div className="mb-3 text-[10px] uppercase tracking-wider opacity-60">Category</div>
-              <div className="space-y-1">
-                <button
-                  onClick={() => updateFilter('category', '')}
-                  className={`w-full text-left px-2 py-1.5 text-[12px] transition-colors ${
-                    !category ? 'bg-black text-white font-bold' : 'hover:bg-[#f8f7f4]'
-                  }`}
+            <div className="space-y-12">
+              {/* Category filter */}
+              <div className="relative group">
+                <div className="absolute -top-3 left-6 h-6 w-24 bg-[#ffd700]/60 rotate-[-1deg] z-10" />
+                <div className="border-4 border-black bg-[var(--bulletin-card)] p-6 shadow-[8px_8px_0_0_var(--bulletin-shadow)]">
+                  <div className="mb-6 text-[10px] font-black uppercase tracking-widest opacity-40 text-[var(--bulletin-text)]">Department</div>
+                  <div className="space-y-2">
+                    <button
+                      onClick={() => updateFilter('category', '')}
+                      className={`w-full text-left px-4 py-3 text-[12px] transition-all font-black uppercase tracking-tighter border-2 ${
+                        !category 
+                          ? 'bg-black text-white border-black' 
+                          : 'bg-transparent text-[var(--bulletin-text)] border-transparent hover:border-black/20'
+                      }`}
+                    >
+                      Global Manifest
+                    </button>
+                    {categories.map((cat) => (
+                      <button
+                        key={cat._id}
+                        onClick={() => updateFilter('category', cat.slug)}
+                        className={`w-full text-left px-4 py-3 text-[12px] transition-all font-black uppercase tracking-tighter border-2 ${
+                          category === cat.slug
+                            ? 'bg-black text-white border-black'
+                            : 'bg-transparent text-[var(--bulletin-text)] border-transparent hover:border-black/20'
+                        }`}
+                      >
+                        {cat.name}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Condition filter */}
+              <div className="border-4 border-black bg-[var(--bulletin-card)] p-6 shadow-[8px_8px_0_0_var(--bulletin-shadow)]">
+                <div className="mb-6 text-[10px] font-black uppercase tracking-widest opacity-40 text-[var(--bulletin-text)]">Asset Integrity</div>
+                <select
+                  value={condition}
+                  onChange={(e) => updateFilter('condition', e.target.value)}
+                  className="w-full border-4 border-black bg-[var(--bulletin-bg)] p-4 text-[13px] font-black uppercase focus:outline-none text-[var(--bulletin-text)]"
                 >
-                  All Categories
+                  {conditionOptions.map((opt) => (
+                    <option key={opt.value} value={opt.value}>{opt.label}</option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Price range */}
+              <div className="border-4 border-black bg-[var(--bulletin-card)] p-6 shadow-[8px_8px_0_0_var(--bulletin-shadow)]">
+                <div className="mb-6 text-[10px] font-black uppercase tracking-widest opacity-40 text-[var(--bulletin-text)]">Price Cap (GHS)</div>
+                <div className="grid grid-cols-2 gap-4">
+                  <input
+                    type="number"
+                    placeholder="Floor"
+                    value={minPrice}
+                    onChange={(e) => updateFilter('minPrice', e.target.value)}
+                    className="w-full border-4 border-black bg-[var(--bulletin-bg)] p-4 text-[13px] font-black focus:outline-none placeholder:opacity-20 text-[var(--bulletin-text)]"
+                    min="0"
+                  />
+                  <input
+                    type="number"
+                    placeholder="Ceiling"
+                    value={maxPrice}
+                    onChange={(e) => updateFilter('maxPrice', e.target.value)}
+                    className="w-full border-4 border-black bg-[var(--bulletin-bg)] p-4 text-[13px] font-black focus:outline-none placeholder:opacity-20 text-[var(--bulletin-text)]"
+                    min="0"
+                  />
+                </div>
+              </div>
+
+              {/* Delivery option */}
+              <div className="border-4 border-black bg-[var(--bulletin-card)] p-6 shadow-[8px_8px_0_0_var(--bulletin-shadow)]">
+                <div className="mb-6 text-[10px] font-black uppercase tracking-widest opacity-40 text-[var(--bulletin-text)]">Transfer Logistics</div>
+                <select
+                  value={deliveryOption}
+                  onChange={(e) => updateFilter('delivery', e.target.value)}
+                  className="w-full border-4 border-black bg-[var(--bulletin-bg)] p-4 text-[13px] font-black uppercase focus:outline-none text-[var(--bulletin-text)]"
+                >
+                  {deliveryOptions.map((opt) => (
+                    <option key={opt.value} value={opt.value}>{opt.label}</option>
+                  ))}
+                </select>
+              </div>
+
+              {hasActiveFilters && (
+                <button
+                  onClick={clearFilters}
+                  className="w-full border-4 border-black bg-[#ff6b6b] px-6 py-5 text-[12px] font-black uppercase text-white shadow-[8px_8px_0_0_var(--bulletin-shadow)] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all"
+                >
+                  Purge Preferences
                 </button>
-                {categories.map((cat) => (
-                  <button
-                    key={cat._id}
-                    onClick={() => updateFilter('category', cat.slug)}
-                    className={`w-full text-left px-2 py-1.5 text-[12px] transition-colors ${
-                      category === cat.slug
-                        ? 'bg-black text-white font-bold'
-                        : 'hover:bg-[#f8f7f4]'
-                    }`}
-                  >
-                    {cat.name}
-                  </button>
-                ))}
-              </div>
+              )}
             </div>
-
-            {/* Condition filter */}
-            <div className="mb-6 border border-black bg-white p-3 shadow-[3px_3px_0_0_rgba(0,0,0,1)]">
-              <div className="mb-3 text-[10px] uppercase tracking-wider opacity-60">Condition</div>
-              <select
-                value={condition}
-                onChange={(e) => updateFilter('condition', e.target.value)}
-                className="w-full border border-black bg-[#fefdfb] p-2 text-[12px] font-bold focus:outline-none focus:ring-2 focus:ring-black"
-              >
-                {conditionOptions.map((opt) => (
-                  <option key={opt.value} value={opt.value}>{opt.label}</option>
-                ))}
-              </select>
-            </div>
-
-            {/* Price range */}
-            <div className="mb-6 border border-black bg-white p-3 shadow-[3px_3px_0_0_rgba(0,0,0,1)]">
-              <div className="mb-3 text-[10px] uppercase tracking-wider opacity-60">Price Range (GHS)</div>
-              <div className="flex gap-2">
-                <input
-                  type="number"
-                  placeholder="Min"
-                  value={minPrice}
-                  onChange={(e) => updateFilter('minPrice', e.target.value)}
-                  className="w-full border border-black bg-[#fefdfb] p-2 text-[12px] font-bold focus:outline-none focus:ring-2 focus:ring-black"
-                  min="0"
-                />
-                <input
-                  type="number"
-                  placeholder="Max"
-                  value={maxPrice}
-                  onChange={(e) => updateFilter('maxPrice', e.target.value)}
-                  className="w-full border border-black bg-[#fefdfb] p-2 text-[12px] font-bold focus:outline-none focus:ring-2 focus:ring-black"
-                  min="0"
-                />
-              </div>
-            </div>
-
-            {/* Delivery option */}
-            <div className="mb-6 border border-black bg-white p-3 shadow-[3px_3px_0_0_rgba(0,0,0,1)]">
-              <div className="mb-3 text-[10px] uppercase tracking-wider opacity-60">Delivery</div>
-              <select
-                value={deliveryOption}
-                onChange={(e) => updateFilter('delivery', e.target.value)}
-                className="w-full border border-black bg-[#fefdfb] p-2 text-[12px] font-bold focus:outline-none focus:ring-2 focus:ring-black"
-              >
-                {deliveryOptions.map((opt) => (
-                  <option key={opt.value} value={opt.value}>{opt.label}</option>
-                ))}
-              </select>
-            </div>
-
-            {hasActiveFilters && (
-              <button
-                onClick={clearFilters}
-                className="w-full border border-black bg-white px-3 py-2 text-[11px] font-bold uppercase transition-colors hover:bg-black hover:text-white"
-              >
-                Clear All Filters
-              </button>
-            )}
-
-            {/* Close on mobile */}
-            <button
-              onClick={() => setShowFilters(false)}
-              className="w-full mt-4 border border-black bg-black px-3 py-2 text-[11px] font-bold uppercase text-white transition-colors hover:bg-white hover:text-black md:hidden"
-            >
-              Apply Filters
-            </button>
           </div>
 
           {/* Main content */}
           <div className="flex-1 min-w-0">
             {/* Sort bar */}
-            <div className="flex items-center justify-between mb-4 pb-3 border-b border-black">
-              <div className="flex items-center gap-2">
-                {hasActiveFilters && (
-                  <button
-                    onClick={clearFilters}
-                    className="flex items-center gap-1 border border-black bg-white px-2 py-1 text-[10px] font-bold uppercase transition-colors hover:bg-black hover:text-white"
-                  >
-                    <X className="h-3 w-3" />
-                    Clear
-                  </button>
-                )}
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="text-[11px] uppercase tracking-wider opacity-60">Sort:</span>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-12 gap-6 pb-8 border-b-4 border-black">
+              <div className="flex items-center gap-4">
+                <span className="text-[10px] font-black uppercase tracking-[0.2em] opacity-40 text-[var(--bulletin-text)]">Hierarchy:</span>
                 <select
                   value={sort}
                   onChange={(e) => updateFilter('sort', e.target.value)}
-                  className="border border-black bg-[#fefdfb] px-3 py-1.5 text-[11px] font-bold focus:outline-none focus:ring-2 focus:ring-black"
+                  className="border-4 border-black bg-[var(--bulletin-card)] px-6 py-3 text-[12px] font-black uppercase focus:outline-none text-[var(--bulletin-text)]"
                 >
                   {sortOptions.map((opt) => (
                     <option key={opt.value} value={opt.value}>{opt.label}</option>
                   ))}
                 </select>
               </div>
+              
+              {hasActiveFilters && (
+                <div className="flex flex-wrap gap-2">
+                  <span className="text-[10px] font-black uppercase tracking-[0.2em] opacity-40 text-[var(--bulletin-text)] self-center mr-2">Active:</span>
+                  <button
+                    onClick={clearFilters}
+                    className="flex items-center gap-2 border-2 border-black bg-[#fffacd] dark:bg-yellow-900/40 px-3 py-1 text-[10px] font-black uppercase text-black dark:text-yellow-200"
+                  >
+                    Reset <X className="h-3 w-3" />
+                  </button>
+                </div>
+              )}
             </div>
 
             {/* Products */}
             {loading ? (
-              <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                {[...Array(6)].map((_, i) => (
-                  <div key={i} className="aspect-[3/4] animate-pulse border border-black bg-white" />
-                ))}
+              <div className="grid gap-12 sm:grid-cols-2 lg:grid-cols-3">
+                 {[...Array(6)].map((_, i) => <ProductCardSkeleton key={i} />)}
               </div>
             ) : products.length === 0 ? (
-              <div className="border border-black bg-[#fffacd] p-8 text-center">
-                <div className="text-[10px] uppercase tracking-wider opacity-60 mb-2">No results</div>
-                <div className="font-bold">
+              <div className="border-8 border-black bg-[#fffacd] dark:bg-yellow-900/10 p-20 text-center shadow-[16px_16px_0_0_var(--bulletin-shadow)]" style={{ transform: 'rotate(-0.5deg)' }}>
+                <div className="text-[10px] font-black uppercase tracking-[0.5em] opacity-40 mb-6 text-black dark:text-yellow-200">System Empty</div>
+                <h3 className="text-4xl font-black uppercase tracking-tighter text-black dark:text-yellow-200 leading-none">
                   {search
-                    ? `No products found for "${search}"`
-                    : 'No products available yet. Be the first to list!'}
-                </div>
+                    ? `No matches for "${search}"`
+                    : 'The Manifest is Clear.'}
+                </h3>
+                <p className="mt-6 text-[14px] font-bold opacity-60 text-black dark:text-yellow-200">Adjust your criteria or post a new listing.</p>
               </div>
             ) : (
               <>
-                <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                <div className="grid gap-x-12 gap-y-16 sm:grid-cols-2 lg:grid-cols-3">
                   {products.map((product, idx) => {
                     const getImage = (p: ProductPopulated) => p.images[0]?.url || 'https://placehold.co/400x500/ddd/666?text=Item';
                     return (
                       <Link
                         key={product._id}
                         to={`/products/${product._id}`}
-                        className="group relative"
+                        className="group relative block"
                         style={{ 
-                          transform: `rotate(${(idx % 3 - 1) * 0.5}deg)`,
-                          transition: 'transform 0.2s'
-                        }}
-                        onMouseEnter={(e) => {
-                          e.currentTarget.style.transform = 'rotate(0deg) translateY(-8px)';
-                        }}
-                        onMouseLeave={(e) => {
-                          e.currentTarget.style.transform = `rotate(${(idx % 3 - 1) * 0.5}deg)`;
+                          transform: `rotate(${(idx % 3 - 1) * 1.5}deg)`,
                         }}
                       >
-                        {/* Polaroid frame */}
-                        <div className="border border-black bg-white p-3 shadow-[6px_6px_0_0_rgba(0,0,0,0.1)]">
-                          <div className="relative aspect-square overflow-hidden border border-black/10 bg-gray-100">
+                        {/* Tape effect */}
+                        <div className="absolute -top-4 left-1/2 -translate-x-1/2 h-8 w-32 bg-[#ffd700]/40 rotate-[-2deg] z-10 opacity-60 group-hover:opacity-100 transition-opacity" />
+                        
+                        <div className="border-4 border-black bg-[var(--bulletin-card)] p-5 shadow-[12px_12px_0_0_var(--bulletin-shadow)] group-hover:shadow-[20px_20px_0_0_var(--bulletin-shadow)] group-hover:-translate-y-3 transition-all">
+                          <div className="relative aspect-[4/5] overflow-hidden border-4 border-black bg-black/5">
                             <img
                               src={getImage(product)}
                               alt={product.title}
-                              className="h-full w-full object-cover"
+                              className="h-full w-full object-cover group-hover:scale-110 transition-transform duration-700"
                             />
-                            {/* Tape effect */}
-                            <div className="absolute -top-2 left-1/2 h-4 w-16 -translate-x-1/2 bg-[#ffd700]/30 opacity-60" 
-                                 style={{ transform: 'translateX(-50%) rotate(-2deg)' }} />
+                            <div className="absolute inset-0 bg-black/10 group-hover:bg-transparent transition-colors" />
                           </div>
-                          <div className="mt-3 space-y-1">
-                            <div className="truncate font-bold leading-tight">{product.title}</div>
-                            <div className="flex items-baseline justify-between">
-                              <span className="text-base font-bold">GHS {product.price}</span>
-                              <span className="text-[10px] uppercase opacity-50">
-                                {typeof product.category === 'string' ? '' : product.category.name}
-                              </span>
+                          
+                          <div className="mt-6 space-y-3">
+                            <div className="text-lg font-black uppercase tracking-tight text-[var(--bulletin-text)] leading-none line-clamp-2 min-h-[2.4em]">{product.title}</div>
+                            <div className="flex items-end justify-between border-t-2 border-black/5 pt-4">
+                              <div className="flex flex-col">
+                                <span className="text-[9px] font-black uppercase opacity-40 text-[var(--bulletin-text)]">Valuation</span>
+                                <span className="text-2xl font-black text-[var(--bulletin-text)] tracking-tighter">GHS {product.price.toLocaleString()}</span>
+                              </div>
+                              <div className="flex flex-col items-end">
+                                <span className="text-[9px] font-black uppercase opacity-40 text-[var(--bulletin-text)]">Dept.</span>
+                                <span className="text-[11px] font-black uppercase tracking-tighter text-[var(--bulletin-text)]">
+                                  {typeof product.category === 'string' ? '' : product.category.name}
+                                </span>
+                              </div>
                             </div>
                           </div>
                         </div>
@@ -334,47 +333,46 @@ const Products: React.FC = () => {
 
                 {/* Pagination */}
                 {pagination && pagination.pages > 1 && (
-                  <div className="flex justify-center gap-2 mt-8">
+                  <div className="flex justify-center flex-wrap gap-4 mt-24 pt-12 border-t-4 border-black">
                     {page > 1 && (
                       <button
                         onClick={() => updateFilter('page', String(page - 1))}
-                        className="border border-black bg-white px-4 py-2 text-[11px] font-bold uppercase transition-colors hover:bg-black hover:text-white"
+                        className="border-4 border-black bg-black text-white px-8 py-3 text-[12px] font-black uppercase tracking-widest transition-all hover:bg-[#ff6b6b] shadow-[6px_6px_0_0_rgba(0,0,0,0.2)]"
                       >
-                        Previous
+                        ← Previous
                       </button>
                     )}
-                    {Array.from({ length: Math.min(5, pagination.pages) }, (_, i) => {
-                      let pageNum: number;
-                      if (pagination.pages <= 5) {
-                        pageNum = i + 1;
-                      } else if (page <= 3) {
-                        pageNum = i + 1;
-                      } else if (page >= pagination.pages - 2) {
-                        pageNum = pagination.pages - 4 + i;
-                      } else {
-                        pageNum = page - 2 + i;
-                      }
+                    
+                    <div className="flex gap-2">
+                      {Array.from({ length: Math.min(5, pagination.pages) }, (_, i) => {
+                        let pageNum: number;
+                        if (pagination.pages <= 5) pageNum = i + 1;
+                        else if (page <= 3) pageNum = i + 1;
+                        else if (page >= pagination.pages - 2) pageNum = pagination.pages - 4 + i;
+                        else pageNum = page - 2 + i;
 
-                      return (
-                        <button
-                          key={pageNum}
-                          onClick={() => updateFilter('page', String(pageNum))}
-                          className={`border px-4 py-2 text-[11px] font-bold uppercase transition-colors ${
-                            pageNum === page
-                              ? 'bg-black text-white border-black'
-                              : 'bg-white border-black hover:bg-black hover:text-white'
-                          }`}
-                        >
-                          {pageNum}
-                        </button>
-                      );
-                    })}
+                        return (
+                          <button
+                            key={pageNum}
+                            onClick={() => updateFilter('page', String(pageNum))}
+                            className={`h-12 w-12 border-4 border-black text-[14px] font-black transition-all ${
+                              pageNum === page
+                                ? 'bg-black text-white shadow-[4px_4px_0_0_rgba(0,0,0,0.2)] -translate-y-1'
+                                : 'bg-[var(--bulletin-card)] text-[var(--bulletin-text)] hover:bg-[#fffacd] hover:text-black'
+                            }`}
+                          >
+                            {pageNum}
+                          </button>
+                        );
+                      })}
+                    </div>
+
                     {page < pagination.pages && (
                       <button
                         onClick={() => updateFilter('page', String(page + 1))}
-                        className="border border-black bg-white px-4 py-2 text-[11px] font-bold uppercase transition-colors hover:bg-black hover:text-white"
+                        className="border-4 border-black bg-black text-white px-8 py-3 text-[12px] font-black uppercase tracking-widest transition-all hover:bg-[#ff6b6b] shadow-[6px_6px_0_0_rgba(0,0,0,0.2)]"
                       >
-                        Next
+                        Proceed →
                       </button>
                     )}
                   </div>

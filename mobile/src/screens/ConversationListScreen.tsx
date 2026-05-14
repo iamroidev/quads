@@ -10,6 +10,7 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useFocusEffect } from '@react-navigation/native';
 import chatService, { Conversation } from '../services/chat.service';
 import { useAuth } from '../context/AuthContext';
 import { colors } from '../theme';
@@ -43,9 +44,15 @@ const ConversationListScreen = ({ navigation }: any) => {
     }
   }, []);
 
+  useFocusEffect(
+    useCallback(() => {
+      fetchConversations(false);
+    }, [fetchConversations])
+  );
+
   useEffect(() => {
-    fetchConversations();
-  }, [fetchConversations]);
+    fetchConversations(true);
+  }, []);
 
   const getOtherParticipant = (conv: Conversation) => {
     return conv.participants.find((p) => p._id !== user?._id) ?? conv.participants[0];

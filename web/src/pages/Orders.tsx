@@ -27,13 +27,13 @@ const STATUS_TABS: { value: OrderStatus | ''; label: string }[] = [
 ];
 
 const statusStyles: Record<string, string> = {
-  pending: 'bg-[#fffacd] text-black',
-  paid: 'bg-[#e0f2f7] text-black',
-  confirmed: 'bg-[#f0e8f4] text-black',
-  ready: 'bg-[#fff5e1] text-black',
-  completed: 'bg-[#fffacd] text-black',
-  cancelled: 'bg-[#fce4ec] text-black',
-  disputed: 'bg-[#fce4ec] text-black',
+  pending: 'bg-[#fffacd] dark:bg-yellow-900/40 text-black dark:text-yellow-200',
+  paid: 'bg-[#e0f2f7] dark:bg-sky-900/40 text-black dark:text-sky-200',
+  confirmed: 'bg-[#f0e8f4] dark:bg-purple-900/40 text-black dark:text-purple-200',
+  ready: 'bg-[#fff5e1] dark:bg-orange-900/40 text-black dark:text-orange-200',
+  completed: 'bg-[#fffacd] dark:bg-green-900/40 text-black dark:text-green-200',
+  cancelled: 'bg-[#fce4ec] dark:bg-red-900/40 text-black dark:text-red-200',
+  disputed: 'bg-[#fce4ec] dark:bg-red-900/40 text-black dark:text-red-200',
 };
 
 const Orders: React.FC = () => {
@@ -74,17 +74,17 @@ const Orders: React.FC = () => {
 
   return (
     <BulletinLayout title="My Orders" subtitle="Purchases" section="05">
-      <BulletinSection bgColor="bg-[#faf8f5]">
+      <BulletinSection bgColor="bg-[var(--bulletin-bg)]">
         {/* Status tabs */}
-        <div className="flex gap-0 overflow-x-auto mb-6 border-b border-black scrollbar-hide">
+        <div className="flex gap-0 overflow-x-auto mb-6 border-b border-[var(--bulletin-border)] scrollbar-hide">
           {STATUS_TABS.map((tab) => (
             <button
               key={tab.value}
               onClick={() => handleTabChange(tab.value as OrderStatus | '')}
-              className={`px-4 py-2 text-[10px] font-bold uppercase tracking-wider whitespace-nowrap border-b-2 -mb-px transition-colors ${
+              className={`px-4 py-2 text-[10px] font-black uppercase tracking-widest whitespace-nowrap border-b-2 -mb-px transition-colors ${
                 statusFilter === tab.value
-                  ? 'border-black text-black'
-                  : 'border-transparent opacity-40 hover:opacity-70'
+                  ? 'border-[var(--bulletin-border)] text-[var(--bulletin-text)]'
+                  : 'border-transparent opacity-40 hover:opacity-100 text-[var(--bulletin-text)]'
               }`}
             >
               {tab.label}
@@ -94,70 +94,72 @@ const Orders: React.FC = () => {
 
         {/* Orders list */}
         {loading ? (
-          <LoadingSpinner text="Loading orders..." />
+          <div className="flex justify-center py-20">
+            <LoadingSpinner text="Fetching your purchases..." />
+          </div>
         ) : orders.length === 0 ? (
-          <div className="border border-black bg-[#fffacd] p-12 text-center shadow-[4px_4px_0_0_rgba(0,0,0,1)]">
-            <ShoppingBag className="h-12 w-12 mx-auto opacity-40 mb-4" />
-            <div className="text-[10px] uppercase tracking-wider opacity-60 mb-2">Empty</div>
-            <div className="text-lg font-bold mb-4">
+          <div className="border-4 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] p-12 text-center shadow-[8px_8px_0_0_var(--bulletin-shadow)]">
+            <ShoppingBag className="h-12 w-12 mx-auto opacity-20 mb-4 text-[var(--bulletin-text)]" />
+            <div className="text-[10px] font-black uppercase tracking-widest opacity-40 mb-2 text-[var(--bulletin-text)]">Empty Inventory</div>
+            <div className="text-2xl font-black uppercase tracking-tight mb-6 text-[var(--bulletin-text)]">
               {statusFilter
-                ? `No ${statusFilter} orders`
-                : 'No purchases yet'}
+                ? `No ${statusFilter} orders found`
+                : 'You haven\'t bought anything yet'}
             </div>
             <Link
               to="/products"
-              className="inline-block border border-black bg-black px-4 py-2 text-[10px] font-bold uppercase text-white transition-colors hover:bg-white hover:text-black shadow-[2px_2px_0_0_rgba(0,0,0,1)]"
+              className="inline-block border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-text)] px-8 py-3 text-[10px] font-black uppercase text-[var(--bulletin-bg)] transition-all hover:bg-[#ff6b6b] hover:text-white shadow-[4px_4px_0_0_var(--bulletin-shadow)]"
             >
-              Browse Products
+              Start Shopping
             </Link>
           </div>
         ) : (
-          <div className="space-y-3">
+          <div className="space-y-4">
             {orders.map((order, idx) => {
               const item = order.items[0];
               return (
                 <Link
                   key={order._id}
                   to={`/orders/${order._id}`}
-                  className="block border border-black bg-white p-3 shadow-[3px_3px_0_0_rgba(0,0,0,1)] transition-all hover:-translate-y-1 hover:shadow-[5px_5px_0_0_rgba(0,0,0,1)]"
+                  className="block border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] p-4 shadow-[4px_4px_0_0_var(--bulletin-shadow)] transition-all hover:-translate-y-1 hover:shadow-[8px_8px_0_0_var(--bulletin-shadow)]"
                   style={{ transform: `rotate(${(idx % 3 - 1) * 0.3}deg)` }}
                 >
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-4">
                     {/* Product image */}
-                    <div className="w-14 h-14 border border-black bg-[#f8f7f4] flex-shrink-0 overflow-hidden">
+                    <div className="w-16 h-16 border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-bg)] flex-shrink-0 overflow-hidden shadow-[2px_2px_0_0_var(--bulletin-shadow)]">
                       {item?.image ? (
                         <img src={item.image} alt={item.title} className="w-full h-full object-cover" />
                       ) : (
-                        <div className="w-full h-full flex items-center justify-center opacity-40">
-                          <Package className="h-5 w-5" />
+                        <div className="w-full h-full flex items-center justify-center opacity-20 text-[var(--bulletin-text)]">
+                          <Package className="h-6 w-6" />
                         </div>
                       )}
                     </div>
 
                     {/* Details */}
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-start justify-between gap-2">
+                      <div className="flex items-start justify-between gap-4">
                         <div>
-                          <div className="text-[12px] font-bold line-clamp-1">
+                          <div className="text-sm font-black uppercase tracking-tight text-[var(--bulletin-text)] line-clamp-1">
                             {item?.title || 'Unknown Product'}
                           </div>
-                          <div className="text-[10px] opacity-60 mt-0.5">
-                            #{order.orderNumber} &middot; {(order.seller as any).storeName || (order.seller as any).brandName || order.seller.name}
+                          <div className="text-[10px] font-bold opacity-40 mt-1 text-[var(--bulletin-text)]">
+                            ID: {order.orderNumber} &middot; STORE: {(order.seller as any).storeName || (order.seller as any).brandName || order.seller.name}
                           </div>
                         </div>
-                        <ChevronRight className="h-4 w-4 opacity-30 flex-shrink-0 mt-0.5" />
+                        <ChevronRight className="h-5 w-5 opacity-20 flex-shrink-0 mt-0.5 text-[var(--bulletin-text)]" />
                       </div>
 
-                      <div className="flex items-center justify-between mt-2">
-                        <span className={`border border-black px-1.5 py-0.5 text-[9px] font-bold uppercase ${statusStyles[order.status] || 'bg-white'}`}>
+                      <div className="flex items-center justify-between mt-3">
+                        <span className={`border-2 border-[var(--bulletin-border)] px-2 py-0.5 text-[9px] font-black uppercase tracking-wider ${statusStyles[order.status] || 'bg-[var(--bulletin-card)]'}`}>
                           {ORDER_STATUS_LABELS[order.status]}
                         </span>
-                        <span className="text-[13px] font-bold">
+                        <span className="text-lg font-black text-[var(--bulletin-text)]">
                           GHS {order.totalAmount.toLocaleString('en-GH', { minimumFractionDigits: 2 })}
                         </span>
                       </div>
 
-                      <div className="text-[10px] opacity-50 mt-1">
+                      <div className="text-[9px] font-black uppercase tracking-widest opacity-30 mt-2 text-[var(--bulletin-text)]">
                         {new Date(order.createdAt).toLocaleDateString('en-GH', {
                           year: 'numeric',
                           month: 'short',
@@ -174,21 +176,21 @@ const Orders: React.FC = () => {
 
         {/* Pagination */}
         {pagination && pagination.pages > 1 && (
-          <div className="flex justify-center items-center gap-4 mt-8 pt-6 border-t border-black">
+          <div className="flex justify-center items-center gap-6 mt-12 pt-8 border-t-2 border-[var(--bulletin-border)]">
             <button
               onClick={() => setPage((p) => Math.max(1, p - 1))}
               disabled={page === 1}
-              className="border border-black bg-white px-4 py-2 text-[10px] font-bold uppercase shadow-[2px_2px_0_0_rgba(0,0,0,1)] hover:shadow-[3px_3px_0_0_rgba(0,0,0,1)] disabled:opacity-40 transition-all"
+              className="border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] px-6 py-2 text-[10px] font-black uppercase tracking-widest shadow-[4px_4px_0_0_var(--bulletin-shadow)] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-none disabled:opacity-20 transition-all text-[var(--bulletin-text)]"
             >
-              Previous
+              Prev
             </button>
-            <span className="text-[10px] font-bold uppercase opacity-60">
+            <span className="text-[11px] font-black uppercase tracking-tighter text-[var(--bulletin-text)]">
               {page} / {pagination.pages}
             </span>
             <button
               onClick={() => setPage((p) => Math.min(pagination.pages, p + 1))}
               disabled={page === pagination.pages}
-              className="border border-black bg-white px-4 py-2 text-[10px] font-bold uppercase shadow-[2px_2px_0_0_rgba(0,0,0,1)] hover:shadow-[3px_3px_0_0_rgba(0,0,0,1)] disabled:opacity-40 transition-all"
+              className="border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] px-6 py-2 text-[10px] font-black uppercase tracking-widest shadow-[4px_4px_0_0_var(--bulletin-shadow)] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-none disabled:opacity-20 transition-all text-[var(--bulletin-text)]"
             >
               Next
             </button>

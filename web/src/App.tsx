@@ -28,13 +28,15 @@ import NotificationsPage from './pages/Notifications';
 import AdminDashboardPage from './pages/AdminDashboard';
 import SettingsPage from './pages/Settings';
 import SellerAnalyticsPage from './pages/SellerAnalytics';
-import DisputeCenterPage from './pages/DisputeCenter';
 import CollectionDetailPage from './pages/CollectionDetail';
 import SellerOnboardingPage from './pages/SellerOnboarding';
 import AdminGrowthPage from './pages/AdminGrowth';
 import VerificationPage from './pages/Verification';
 import ForgotPasswordPage from './pages/ForgotPassword';
 import ResetPasswordPage from './pages/ResetPassword';
+import SupportPage from './pages/Support';
+import ContactPage from './pages/Contact';
+import TermsPage from './pages/Terms';
 
 import { LoadingSpinner } from './components/ui';
 
@@ -53,9 +55,10 @@ const CategoryRedirect: React.FC = () => {
 
 // Root: guests → landing, logged-in → dashboard
 const RootRoute: React.FC = () => {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isLoading, user } = useAuth();
   if (isLoading) return null;
-  return isAuthenticated ? <Navigate to="/dashboard" replace /> : <HomePage />;
+  if (!isAuthenticated) return <HomePage />;
+  return user?.role === 'admin' ? <Navigate to="/admin" replace /> : <Navigate to="/dashboard" replace />;
 };
 
 const App: React.FC = () => {
@@ -118,7 +121,7 @@ const App: React.FC = () => {
 
         {/* Order & Payment routes */}
         <Route
-          path="/checkout/:productId"
+          path="/checkout/:id"
           element={
             <ProtectedRoute>
               <CheckoutPage />
@@ -216,7 +219,9 @@ const App: React.FC = () => {
         />
         <Route path="/verification" element={<ProtectedRoute><VerificationPage /></ProtectedRoute>} />
         <Route path="/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
-        <Route path="/disputes" element={<ProtectedRoute><DisputeCenterPage /></ProtectedRoute>} />
+        <Route path="/support" element={<SupportPage />} />
+        <Route path="/contact" element={<ContactPage />} />
+        <Route path="/terms" element={<TermsPage />} />
         <Route
           path="/admin"
           element={

@@ -283,51 +283,51 @@ const ChatRoom: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#f8f7f4]">
+    <div className="min-h-screen bg-[var(--bulletin-bg)] text-[var(--bulletin-text)]">
       {/* Bulletin Sticky Header */}
-      <div className="sticky top-0 z-50 flex items-stretch border-b border-black bg-[#f8f7f4]">
-        <div className="flex-1 border-r border-black bg-[#fff5e1] px-3 py-2">
+      <div className="sticky top-0 z-50 flex items-stretch border-b border-[var(--bulletin-border)] bg-[var(--bulletin-bg)]">
+        <div className="flex-1 border-r border-[var(--bulletin-border)] bg-[#fff5e1] dark:bg-yellow-900/10 px-3 py-2">
           <div className="flex items-center gap-2">
-            <button onClick={() => navigate('/messages')} className="hover:underline">
+            <button onClick={() => navigate('/messages')} className="hover:underline text-black dark:text-yellow-200">
               <ArrowLeft className="h-5 w-5" />
             </button>
-            <span className="text-[10px] uppercase tracking-wider opacity-40">Chat</span>
+            <span className="text-[10px] uppercase tracking-wider opacity-40 text-black dark:text-yellow-200/60">Chat</span>
           </div>
         </div>
-        <div className="flex-1 border-r border-black bg-[#e8f4f8] px-3 py-2">
+        <div className="flex-1 border-r border-[var(--bulletin-border)] bg-[#e8f4f8] dark:bg-sky-900/10 px-3 py-2">
           {otherParticipant && (
             <div className="flex items-center gap-2">
               {otherParticipant.avatar ? (
-                <div className="w-6 h-6 border border-black overflow-hidden flex-shrink-0">
+                <div className="w-6 h-6 border border-[var(--bulletin-border)] overflow-hidden flex-shrink-0">
                   <img src={otherParticipant.avatar} alt="" className="w-full h-full object-cover" />
                 </div>
               ) : (
-                <div className="w-6 h-6 border border-black bg-[#f8f7f4] flex items-center justify-center text-[9px] font-bold flex-shrink-0">
+                <div className="w-6 h-6 border border-[var(--bulletin-border)] bg-[var(--bulletin-bg)] flex items-center justify-center text-[9px] font-bold flex-shrink-0 text-sky-900 dark:text-sky-200">
                   {otherParticipant.name.charAt(0)}
                 </div>
               )}
-              <span className="overflow-hidden text-ellipsis whitespace-nowrap font-bold text-[12px]">
+              <span className="overflow-hidden text-ellipsis whitespace-nowrap font-bold text-[12px] text-sky-900 dark:text-sky-200">
                 {otherParticipant.name}
               </span>
-              {isOtherOnline && <div className="h-2 w-2 border border-black bg-green-400 flex-shrink-0" />}
+              {isOtherOnline && <div className="h-2 w-2 border border-[var(--bulletin-border)] bg-green-400 flex-shrink-0" />}
             </div>
           )}
         </div>
-        <div className="flex-1 bg-[#f0e8f4] px-3 py-2">
+        <div className="flex-1 bg-[#f0e8f4] dark:bg-purple-900/10 px-3 py-2">
           <div className="flex items-center justify-between">
-            <span className="text-[10px] uppercase tracking-wider opacity-40">
+            <span className="text-[10px] uppercase tracking-wider opacity-40 text-purple-900 dark:text-purple-200">
               {typingUser ? 'typing...' : isOtherOnline ? 'Online' : 'Offline'}
             </span>
             <div className="relative" ref={menuRef}>
-              <button onClick={() => setShowMenu(!showMenu)} className="p-1 hover:opacity-60">
+              <button onClick={() => setShowMenu(!showMenu)} className="p-1 hover:opacity-60 text-purple-900 dark:text-purple-200">
                 <MoreVertical className="h-4 w-4" />
               </button>
               {showMenu && (
-                <div className="absolute right-0 top-full mt-1 border border-black bg-white shadow-[4px_4px_0_0_rgba(0,0,0,1)] z-50 py-1 min-w-[160px]">
+                <div className="absolute right-0 top-full mt-1 border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] shadow-[4px_4px_0_0_var(--bulletin-shadow)] z-50 py-1 min-w-[160px]">
                   {conversation?.product && (
                     <Link
                       to={`/products/${conversation.product._id}`}
-                      className="flex items-center gap-2 px-3 py-1.5 text-[10px] font-bold uppercase hover:bg-[#e0f2f7]"
+                      className="flex items-center gap-2 px-3 py-1.5 text-[10px] font-bold uppercase hover:bg-sky-50 dark:hover:bg-sky-900/20 text-[var(--bulletin-text)]"
                       onClick={() => setShowMenu(false)}
                     >
                       <Package className="h-3 w-3" /> View Product
@@ -335,7 +335,7 @@ const ChatRoom: React.FC = () => {
                   )}
                   <button
                     onClick={handleDelete}
-                    className="flex items-center gap-2 px-3 py-1.5 text-[10px] font-bold uppercase hover:bg-[#fce4ec] w-full"
+                    className="flex items-center gap-2 px-3 py-1.5 text-[10px] font-bold uppercase hover:bg-red-50 dark:hover:bg-red-900/20 w-full text-red-600"
                   >
                     <Trash2 className="h-3 w-3" /> Delete
                   </button>
@@ -350,31 +350,31 @@ const ChatRoom: React.FC = () => {
       {conversation?.product && (
         <Link
           to={`/products/${conversation.product._id}`}
-          className="flex items-center gap-3 px-4 py-2 border-b border-black bg-[#fefdfb]"
+          className="flex items-center gap-3 px-4 py-2 border-b border-[var(--bulletin-border)] bg-[var(--bulletin-card)]"
         >
           {conversation.product.images?.[0] && (
-            <div className="w-8 h-8 border border-black overflow-hidden flex-shrink-0">
+            <div className="w-8 h-8 border border-[var(--bulletin-border)] overflow-hidden flex-shrink-0">
               <img src={conversation.product.images[0].url} alt="" className="w-full h-full object-cover" />
             </div>
           )}
           <div className="flex-1 min-w-0">
-            <div className="text-[11px] font-bold truncate">{conversation.product.title}</div>
-            <div className="text-[10px] font-bold">
+            <div className="text-[11px] font-bold truncate text-[var(--bulletin-text)]">{conversation.product.title}</div>
+            <div className="text-[10px] font-bold text-[var(--bulletin-text)] opacity-60">
               GHS {conversation.product.price.toFixed(2)}
             </div>
           </div>
-          <ExternalLink className="h-4 w-4 opacity-40 flex-shrink-0" />
+          <ExternalLink className="h-4 w-4 opacity-40 flex-shrink-0 text-[var(--bulletin-text)]" />
         </Link>
       )}
 
       {/* Messages Area */}
-      <div ref={messagesContainerRef} className="flex-1 overflow-y-auto p-4 space-y-1" style={{ height: 'calc(100vh - 56px - 56px - 140px)' }}>
+      <div ref={messagesContainerRef} className="flex-1 overflow-y-auto p-4 space-y-1" style={{ height: 'calc(100vh - 56px - 44px - 140px)' }}>
         {hasMore && (
           <div className="text-center mb-4">
             <button
               onClick={loadMore}
               disabled={loadingMore}
-              className="border border-black bg-white px-3 py-1.5 text-[9px] font-bold uppercase shadow-[1px_1px_0_0_rgba(0,0,0,1)] hover:shadow-[2px_2px_0_0_rgba(0,0,0,1)] disabled:opacity-40 transition-all"
+              className="border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] px-3 py-1.5 text-[9px] font-bold uppercase shadow-[2px_2px_0_0_var(--bulletin-shadow)] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-none disabled:opacity-40 transition-all text-[var(--bulletin-text)]"
             >
               {loadingMore ? 'Loading...' : 'Load older'}
             </button>
@@ -393,45 +393,45 @@ const ChatRoom: React.FC = () => {
             <React.Fragment key={msg._id}>
               {showDate && (
                 <div className="flex items-center gap-3 py-3">
-                  <div className="flex-1 border-t border-black/20" />
-                  <span className="text-[9px] font-bold uppercase tracking-wider opacity-50">
+                  <div className="flex-1 border-t border-[var(--bulletin-border)]/10" />
+                  <span className="text-[9px] font-bold uppercase tracking-wider opacity-30 text-[var(--bulletin-text)]">
                     {getDateLabel(msg.createdAt)}
                   </span>
-                  <div className="flex-1 border-t border-black/20" />
+                  <div className="flex-1 border-t border-[var(--bulletin-border)]/10" />
                 </div>
               )}
 
               {isSystem ? (
                 <div className="text-center py-2">
-                  <span className="text-[10px] opacity-50 border border-black bg-white px-2 py-1">
+                  <span className="text-[10px] opacity-50 border border-[var(--bulletin-border)] bg-[var(--bulletin-card)] px-2 py-1 text-[var(--bulletin-text)]">
                     {msg.content}
                   </span>
                 </div>
               ) : (
                 <div className={`flex ${isMe ? 'justify-end' : 'justify-start'} mb-1`}>
                   <div className={`max-w-[75%]`}>
-                    <div className={`px-3 py-2 border border-black ${
+                    <div className={`px-3 py-2 border border-[var(--bulletin-border)] ${
                       isMe
-                        ? 'bg-black text-white'
-                        : 'bg-white text-black'
-                    } shadow-[2px_2px_0_0_rgba(0,0,0,1)]`}>
+                        ? 'bg-[var(--bulletin-text)] text-[var(--bulletin-bg)]'
+                        : 'bg-[var(--bulletin-card)] text-[var(--bulletin-text)]'
+                    } shadow-[2px_2px_0_0_var(--bulletin-shadow)]`}>
                       <p className="text-[12px] whitespace-pre-wrap break-words">{msg.content}</p>
 
                       {/* Offer bubble */}
                       {msg.offer && (
-                        <div className={`mt-2 border-t ${ isMe ? 'border-white/20' : 'border-black/10'} pt-2`}>
+                        <div className={`mt-2 border-t ${ isMe ? 'border-[var(--bulletin-bg)]/20' : 'border-[var(--bulletin-text)]/10'} pt-2`}>
                           <div className={`flex items-center justify-between gap-2 flex-wrap`}>
-                            <span className={`text-[11px] font-bold ${ isMe ? 'text-white/80' : '' }`}>
+                            <span className={`text-[11px] font-bold ${ isMe ? 'text-[var(--bulletin-bg)]/80' : '' }`}>
                               GHS {msg.offer.amount.toFixed(2)}
                             </span>
-                            <span className={`text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 border border-black ${
+                            <span className={`text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 border border-[var(--bulletin-border)] ${
                               msg.offer.status === 'pending'
-                                ? isMe ? 'bg-black/20 text-white/70' : 'bg-[#fffacd]'
+                                ? isMe ? 'bg-white/10 text-white' : 'bg-[#fffacd] dark:bg-yellow-900/40 text-black dark:text-yellow-200'
                                 : msg.offer.status === 'accepted'
-                                ? 'bg-[#e0f2f7]'
+                                ? 'bg-emerald-50 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-200'
                                 : msg.offer.status === 'rejected'
-                                ? 'bg-[#fce4ec]'
-                                : 'bg-[#f0e8f4]'
+                                ? 'bg-red-50 dark:bg-red-900/40 text-red-700 dark:text-red-200'
+                                : 'bg-sky-50 dark:bg-sky-900/40 text-sky-700 dark:text-sky-200'
                             }`}>
                               {msg.offer.status}
                             </span>
@@ -444,14 +444,14 @@ const ChatRoom: React.FC = () => {
                                 <button
                                   onClick={() => handleRespondToOffer(msg._id, 'accepted')}
                                   disabled={respondingOffer === msg._id}
-                                  className="flex-1 border border-black bg-[#e0f2f7] px-2 py-1 text-[9px] font-bold uppercase hover:shadow-[2px_2px_0_0_rgba(0,0,0,1)] disabled:opacity-40 transition-all"
+                                  className="flex-1 border border-[var(--bulletin-border)] bg-emerald-50 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-200 px-2 py-1 text-[9px] font-bold uppercase hover:translate-x-[1px] hover:translate-y-[1px] disabled:opacity-40 transition-all"
                                 >
                                   ✓ Accept
                                 </button>
                                 <button
                                   onClick={() => handleRespondToOffer(msg._id, 'rejected')}
                                   disabled={respondingOffer === msg._id}
-                                  className="flex-1 border border-black bg-[#fce4ec] px-2 py-1 text-[9px] font-bold uppercase hover:shadow-[2px_2px_0_0_rgba(0,0,0,1)] disabled:opacity-40 transition-all"
+                                  className="flex-1 border border-[var(--bulletin-border)] bg-red-50 dark:bg-red-900/40 text-red-700 dark:text-red-200 px-2 py-1 text-[9px] font-bold uppercase hover:translate-x-[1px] hover:translate-y-[1px] disabled:opacity-40 transition-all"
                                 >
                                   ✕ Decline
                                 </button>
@@ -466,12 +466,12 @@ const ChatRoom: React.FC = () => {
                                   onChange={(e) =>
                                     setCounterAmounts((prev) => ({ ...prev, [msg._id]: e.target.value }))
                                   }
-                                  className="flex-1 border border-black bg-white px-2 py-1 text-[10px] font-bold focus:outline-none focus:ring-1 focus:ring-black"
+                                  className="flex-1 border border-[var(--bulletin-border)] bg-[var(--bulletin-card)] text-[var(--bulletin-text)] px-2 py-1 text-[10px] font-bold focus:outline-none focus:ring-1 focus:ring-[var(--bulletin-border)]"
                                 />
                                 <button
                                   onClick={() => handleRespondToOffer(msg._id, 'countered')}
                                   disabled={respondingOffer === msg._id}
-                                  className="border border-black bg-[#fefdfb] px-2 py-1 text-[9px] font-bold uppercase hover:shadow-[2px_2px_0_0_rgba(0,0,0,1)] disabled:opacity-40 transition-all"
+                                  className="border border-[var(--bulletin-border)] bg-[var(--bulletin-card)] text-[var(--bulletin-text)] px-2 py-1 text-[9px] font-bold uppercase hover:shadow-[2px_2px_0_0_var(--bulletin-shadow)] disabled:opacity-40 transition-all"
                                 >
                                   Counter
                                 </button>
@@ -483,24 +483,24 @@ const ChatRoom: React.FC = () => {
                       {msg.attachments && msg.attachments.length > 0 && (
                         <div className="mt-2 space-y-1">
                           {msg.attachments.map((a, i) => (
-                            <a key={`${a.url}-${i}`} href={a.url} target="_blank" rel="noreferrer" className={`block text-[10px] underline ${isMe ? 'text-white/70' : 'opacity-70'}`}>
+                            <a key={`${a.url}-${i}`} href={a.url} target="_blank" rel="noreferrer" className={`block text-[10px] underline ${isMe ? 'text-[var(--bulletin-bg)]/70' : 'opacity-70'}`}>
                               {a.name || 'Attachment'}
                             </a>
                           ))}
                         </div>
                       )}
                       {msg.quickReplyLabel && (
-                        <div className={`mt-1 text-[9px] uppercase tracking-wider ${isMe ? 'text-white/50' : 'opacity-50'}`}>Quick reply</div>
+                        <div className={`mt-1 text-[9px] uppercase tracking-wider ${isMe ? 'text-[var(--bulletin-bg)]/50' : 'opacity-50'}`}>Quick reply</div>
                       )}
                     </div>
                     <div className={`flex items-center gap-1 mt-0.5 px-1 ${isMe ? 'justify-end' : 'justify-start'}`}>
-                      <span className="text-[9px] opacity-40">
+                      <span className="text-[9px] opacity-40 text-[var(--bulletin-text)]">
                         {new Date(msg.createdAt).toLocaleTimeString('en-US', {
                           hour: 'numeric', minute: '2-digit',
                         })}
                       </span>
                       {isMe && msg.readBy.length > 1 && (
-                        <span className="text-[9px] opacity-60">&#10003;&#10003;</span>
+                        <span className="text-[9px] opacity-60 text-sky-500">&#10003;&#10003;</span>
                       )}
                     </div>
                   </div>
@@ -512,9 +512,9 @@ const ChatRoom: React.FC = () => {
 
         {typingUser && (
           <div className="flex justify-start mb-1">
-            <div className="border border-black bg-white px-3 py-2 shadow-[2px_2px_0_0_rgba(0,0,0,1)]">
+            <div className="border border-[var(--bulletin-border)] bg-[var(--bulletin-card)] px-3 py-2 shadow-[2px_2px_0_0_var(--bulletin-shadow)]">
               <div className="flex items-center gap-1.5">
-                <div className="text-[10px] opacity-60">{typingUser} is typing</div>
+                <div className="text-[10px] opacity-60 text-[var(--bulletin-text)]">{typingUser} is typing</div>
               </div>
             </div>
           </div>
@@ -523,18 +523,18 @@ const ChatRoom: React.FC = () => {
       </div>
 
       {/* Input Area */}
-      <div className="border-t border-black bg-white p-3">
+      <div className="border-t-2 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] p-3">
         {/* Quick replies */}
-        <div className="mb-2 flex flex-wrap items-center gap-2">
+        <div className="mb-3 flex flex-wrap items-center gap-2">
           {['Available now', 'Can negotiate', 'Meet at main gate'].map((q) => (
-            <button key={q} onClick={() => sendQuickReply(q)} className="border border-black bg-[#fefdfb] px-2 py-1 text-[8px] font-bold uppercase shadow-[1px_1px_0_0_rgba(0,0,0,1)] hover:shadow-[2px_2px_0_0_rgba(0,0,0,1)] transition-all">
+            <button key={q} onClick={() => sendQuickReply(q)} className="border border-[var(--bulletin-border)] bg-[var(--bulletin-card)] text-[var(--bulletin-text)] px-2 py-1 text-[8px] font-black uppercase shadow-[1px_1px_0_0_var(--bulletin-shadow)] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-none transition-all">
               {q}
             </button>
           ))}
           <button
             onClick={() => setShowOfferPanel((v) => !v)}
-            className={`border border-black px-2 py-1 text-[8px] font-bold uppercase shadow-[1px_1px_0_0_rgba(0,0,0,1)] hover:shadow-[2px_2px_0_0_rgba(0,0,0,1)] transition-all ${
-              showOfferPanel ? 'bg-black text-white' : 'bg-[#fffacd]'
+            className={`border border-[var(--bulletin-border)] px-2 py-1 text-[8px] font-black uppercase shadow-[1px_1px_0_0_var(--bulletin-shadow)] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-none transition-all ${
+              showOfferPanel ? 'bg-[var(--bulletin-text)] text-[var(--bulletin-bg)]' : 'bg-[#fffacd] dark:bg-yellow-900/40 text-black dark:text-yellow-200'
             }`}
           >
             💰 Make Offer
@@ -543,8 +543,8 @@ const ChatRoom: React.FC = () => {
 
         {/* Collapsible offer panel */}
         {showOfferPanel && (
-          <div className="mb-2 flex items-center gap-2 border border-black bg-[#fffacd] p-2">
-            <span className="text-[9px] font-bold uppercase opacity-60 whitespace-nowrap">Offer (GHS)</span>
+          <div className="mb-3 flex items-center gap-2 border-2 border-[var(--bulletin-border)] bg-[#fffacd] dark:bg-yellow-900/10 p-2 shadow-[4px_4px_0_0_var(--bulletin-shadow)]">
+            <span className="text-[9px] font-black uppercase opacity-60 whitespace-nowrap text-black dark:text-yellow-200">Offer (GHS)</span>
             <input
               type="number"
               min="0"
@@ -552,12 +552,12 @@ const ChatRoom: React.FC = () => {
               value={offerAmount}
               onChange={(e) => setOfferAmount(e.target.value)}
               placeholder="e.g. 80.00"
-              className="flex-1 border border-black bg-white px-2 py-1.5 text-[11px] font-bold focus:outline-none focus:ring-2 focus:ring-black"
+              className="flex-1 border border-[var(--bulletin-border)] bg-[var(--bulletin-card)] text-[var(--bulletin-text)] px-2 py-1.5 text-[11px] font-bold focus:outline-none focus:ring-2 focus:ring-[var(--bulletin-border)]"
             />
             <button
               onClick={sendOffer}
               disabled={!offerAmount || Number(offerAmount) <= 0}
-              className="border border-black bg-black px-3 py-1.5 text-[9px] font-bold uppercase text-white hover:bg-white hover:text-black disabled:opacity-40 transition-colors"
+              className="border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-text)] px-3 py-1.5 text-[9px] font-black uppercase text-[var(--bulletin-bg)] hover:bg-[#ff6b6b] hover:text-white disabled:opacity-40 transition-colors"
             >
               Send
             </button>
@@ -572,13 +572,13 @@ const ChatRoom: React.FC = () => {
             value={inputValue}
             onChange={handleInputChange}
             onKeyDown={handleKeyDown}
-            className="flex-1 border border-black bg-[#fefdfb] p-2 text-[12px] font-bold focus:outline-none focus:ring-2 focus:ring-black placeholder:text-black/30"
+            className="flex-1 border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] p-2 text-[12px] font-bold focus:outline-none focus:ring-2 focus:ring-[#ff6b6b] placeholder:text-[var(--bulletin-muted)] text-[var(--bulletin-text)]"
             autoFocus
           />
           <button
             onClick={handleSend}
             disabled={!inputValue.trim() || sending}
-            className="border border-black bg-black px-3 py-2 text-white font-bold hover:bg-white hover:text-black transition-colors disabled:opacity-40 shadow-[2px_2px_0_0_rgba(0,0,0,1)]"
+            className="border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-text)] px-4 py-2 text-[var(--bulletin-bg)] font-bold hover:bg-[#ff6b6b] hover:text-white transition-colors disabled:opacity-40 shadow-[4px_4px_0_0_var(--bulletin-shadow)] active:translate-y-1 active:shadow-none"
           >
             <Send className="h-4 w-4" />
           </button>

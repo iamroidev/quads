@@ -16,7 +16,7 @@ const Layout: React.FC = () => {
 
   return (
     <div className="flex flex-col min-h-screen">
-      <main className="flex-1 animate-fade-up-in">
+      <main className="flex-1">
         <Outlet />
       </main>
     </div>

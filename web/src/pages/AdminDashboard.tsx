@@ -308,10 +308,11 @@ const AdminDashboard: React.FC = () => {
 
   if (loading) {
     return (
-      <BulletinLayout title="Admin Dashboard" subtitle="Administration" section="18">
-        <BulletinSection bgColor="bg-[#faf8f5]">
-          <div className="flex items-center justify-center py-20">
-            <div className="animate-spin h-8 w-8 border-b-2 border-black" />
+      <BulletinLayout title="Central Command" subtitle="System Administration" section="18">
+        <BulletinSection bgColor="bg-[var(--bulletin-bg)]">
+          <div className="flex flex-col items-center justify-center py-32">
+            <div className="h-12 w-12 border-4 border-black border-t-[#ff6b6b] animate-spin mb-4" />
+            <div className="text-[10px] font-black uppercase tracking-[0.3em] opacity-40">Accessing Data...</div>
           </div>
         </BulletinSection>
       </BulletinLayout>
@@ -319,19 +320,19 @@ const AdminDashboard: React.FC = () => {
   }
 
   return (
-    <BulletinLayout title="Admin Dashboard" subtitle="Administration" section="18">
+    <BulletinLayout title="Central Command" subtitle="Administration" section="18">
       {/* Tab bar */}
-      <div className="border-b border-black bg-white">
-        <div className="mx-auto max-w-[1400px] px-6">
-          <div className="flex gap-0 overflow-x-auto">
+      <div className="border-b-4 border-black bg-[var(--bulletin-card)] sticky top-[72px] z-50">
+        <div className="mx-auto max-w-[1400px] px-6 md:px-12">
+          <div className="flex gap-1 overflow-x-auto no-scrollbar py-2">
             {TABS.map((tab) => (
               <button
                 key={tab.value}
                 onClick={() => setActiveTab(tab.value)}
-                className={`px-5 py-3 text-[10px] font-bold uppercase tracking-wider whitespace-nowrap border-b-2 -mb-px transition-colors ${
+                className={`px-6 py-2 text-[11px] font-black uppercase tracking-widest whitespace-nowrap transition-all border-2 ${
                   activeTab === tab.value
-                    ? 'border-black text-black'
-                    : 'border-transparent opacity-40 hover:opacity-70'
+                    ? 'bg-black text-white border-black shadow-[4px_4px_0_0_rgba(0,0,0,0.2)]'
+                    : 'bg-transparent text-[var(--bulletin-text)] border-transparent opacity-40 hover:opacity-100 hover:border-black/10'
                 }`}
               >
                 {tab.label}
@@ -341,121 +342,166 @@ const AdminDashboard: React.FC = () => {
         </div>
       </div>
 
-      <BulletinSection bgColor="bg-[#faf8f5]">
+      <BulletinSection bgColor="bg-[var(--bulletin-bg)]">
         {/* Overview */}
         {activeTab === 'overview' && (
-          <div className="space-y-8">
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-px border border-black bg-black">
-              {statCards.map((card) => (
-                <div key={card.label} className="bg-white p-5">
-                  <div className="mb-2 flex items-center gap-2 text-[10px] uppercase tracking-wider opacity-50">
-                    <card.icon className="h-3.5 w-3.5" />
+          <div className="space-y-12">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
+              {statCards.map((card, idx) => (
+                <BulletinCard 
+                  key={card.label} 
+                  rotation={(idx % 2 === 0 ? 1 : -1) * (Math.random() * 0.5)}
+                  className="!p-6"
+                >
+                  <div className="mb-4 flex items-center gap-2 text-[10px] font-black uppercase tracking-widest opacity-40 text-[var(--bulletin-text)]">
+                    <card.icon className="h-4 w-4" />
                     {card.label}
                   </div>
-                  <p className="text-2xl font-bold">{card.value}</p>
-                </div>
+                  <p className="text-3xl font-black tracking-tighter text-[var(--bulletin-text)]">{card.value}</p>
+                </BulletinCard>
               ))}
             </div>
 
-            <div className="grid gap-6 lg:grid-cols-2">
-              <BulletinCard rotation={-0.3} bgColor="bg-white" className="!p-0 shadow-[3px_3px_0_0_rgba(0,0,0,1)]">
-                <div className="flex items-center justify-between border-b border-black px-5 py-4">
-                  <div>
-                    <p className="text-[10px] uppercase tracking-wider opacity-50">Moderation queue</p>
-                    <div className="mt-1 text-sm font-bold">Flagged listings</div>
-                  </div>
-                  <div className="flex gap-2">
-                    <button onClick={runAutomationSweep} disabled={runningAutomation} className="border border-black bg-white px-2.5 py-1.5 text-[9px] font-bold uppercase shadow-[1px_1px_0_0_rgba(0,0,0,1)] hover:shadow-[2px_2px_0_0_rgba(0,0,0,1)] disabled:opacity-40 transition-all">
-                      {runningAutomation ? 'Running...' : 'Run sweep'}
-                    </button>
-                    <button onClick={fetchModerationQueue} className="border border-black bg-white px-2.5 py-1.5 text-[9px] font-bold uppercase shadow-[1px_1px_0_0_rgba(0,0,0,1)] hover:shadow-[2px_2px_0_0_rgba(0,0,0,1)] transition-all">
-                      Refresh
-                    </button>
-                  </div>
-                </div>
-                <div className="divide-y divide-black/20">
-                  {moderationQueue.products.length === 0 ? (
-                    <p className="p-5 text-[12px] opacity-50">No flagged listings waiting.</p>
-                  ) : moderationQueue.products.map((product) => (
-                    <div key={product._id} className="p-5">
-                      <div className="flex items-start justify-between gap-4">
-                        <div>
-                          <p className="text-[12px] font-bold">{product.title}</p>
-                          <p className="mt-1 text-[11px] opacity-50">{typeof product.seller === 'string' ? 'Seller' : product.seller.name}</p>
-                          {product.flagReason && (
-                            <p className="mt-2 text-[11px] text-red-600">Reason: {product.flagReason}</p>
-                          )}
-                        </div>
-                        <button onClick={() => setActiveTab('products')} className="border border-black bg-black px-2.5 py-1 text-[9px] font-bold uppercase text-white transition-colors hover:bg-white hover:text-black">
-                          Review
-                        </button>
-                      </div>
+            <div className="grid gap-12 lg:grid-cols-2">
+              <div className="relative">
+                <div className="absolute -top-4 left-6 h-8 w-32 bg-[#ffd700]/40 rotate-[-2deg] z-10" />
+                <BulletinCard rotation={-0.3} className="!p-0 border-2">
+                  <div className="flex items-center justify-between border-b-2 border-black/10 px-6 py-5 bg-[#faf8f5] dark:bg-black/20">
+                    <div>
+                      <p className="text-[10px] font-black uppercase tracking-widest opacity-40 text-black dark:text-white">Moderation Queue</p>
+                      <div className="mt-1 text-sm font-black uppercase text-black dark:text-white">Flagged Listings</div>
                     </div>
-                  ))}
-                </div>
-              </BulletinCard>
+                    <div className="flex gap-3">
+                      <button onClick={runAutomationSweep} disabled={runningAutomation} className="border-2 border-black bg-black text-white px-3 py-1.5 text-[9px] font-black uppercase hover:bg-[#ff6b6b] transition-all disabled:opacity-20">
+                        {runningAutomation ? '...' : 'Sweep'}
+                      </button>
+                      <button onClick={fetchModerationQueue} className="border-2 border-black bg-white text-black px-3 py-1.5 text-[9px] font-black uppercase hover:bg-[#fffacd] transition-all">
+                        Refresh
+                      </button>
+                    </div>
+                  </div>
+                  <div className="divide-y-2 divide-black/5 max-h-[400px] overflow-auto">
+                    {moderationQueue.products.length === 0 ? (
+                      <p className="p-8 text-[12px] font-bold opacity-30 text-center uppercase tracking-widest">Board is Clean</p>
+                    ) : moderationQueue.products.map((product) => (
+                      <div key={product._id} className="p-6 hover:bg-black/5 transition-colors">
+                        <div className="flex items-start justify-between gap-4">
+                          <div>
+                            <p className="text-[13px] font-black uppercase text-[var(--bulletin-text)]">{product.title}</p>
+                            <p className="mt-1 text-[11px] font-bold opacity-40 text-[var(--bulletin-text)]">
+                              By {typeof product.seller === 'string' ? 'Unknown' : product.seller.name}
+                            </p>
+                            {product.flagReason && (
+                              <div className="mt-3 bg-[#ff6b6b]/10 border-l-4 border-[#ff6b6b] p-2 text-[11px] font-bold text-[#ff6b6b]">
+                                REASON: {product.flagReason}
+                              </div>
+                            )}
+                          </div>
+                          <button onClick={() => setActiveTab('products')} className="border-2 border-black bg-black text-white px-4 py-2 text-[10px] font-black uppercase hover:bg-[#ff6b6b] transition-all">
+                            Review
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </BulletinCard>
+              </div>
 
-              <BulletinCard rotation={0.3} bgColor="bg-white" className="!p-0 shadow-[3px_3px_0_0_rgba(0,0,0,1)]">
-                <div className="border-b border-black px-5 py-4">
-                  <p className="text-[10px] uppercase tracking-wider opacity-50">Moderation queue</p>
-                  <div className="mt-1 text-sm font-bold">Open disputes</div>
-                </div>
-                <div className="divide-y divide-black/20">
-                  {moderationQueue.disputes.length === 0 ? (
-                    <p className="p-5 text-[12px] opacity-50">No active disputes in queue.</p>
-                  ) : moderationQueue.disputes.map((dispute) => (
-                    <div key={dispute._id} className="p-5">
-                      <div className="flex items-start justify-between gap-4">
-                        <div>
-                          <p className="text-[12px] font-bold">#{dispute.order.orderNumber}</p>
-                          <p className="mt-1 text-[11px] opacity-50">{dispute.reason.replace(/_/g, ' ')}</p>
-                          <p className="mt-2 text-[11px] opacity-70 line-clamp-2">{dispute.description}</p>
+              <div className="relative">
+                <div className="absolute -top-4 right-6 h-8 w-32 bg-[#fffacd]/40 rotate-[2deg] z-10" />
+                <BulletinCard rotation={0.3} className="!p-0 border-2">
+                  <div className="border-b-2 border-black/10 px-6 py-5 bg-[#e0f2f7] dark:bg-sky-900/20">
+                    <p className="text-[10px] font-black uppercase tracking-widest opacity-40 text-sky-900 dark:text-sky-200">Open Disputes</p>
+                    <div className="mt-1 text-sm font-black uppercase text-sky-900 dark:text-sky-200">System Conflicts</div>
+                  </div>
+                  <div className="divide-y-2 divide-black/5 max-h-[400px] overflow-auto">
+                    {moderationQueue.disputes.length === 0 ? (
+                      <p className="p-8 text-[12px] font-bold opacity-30 text-center uppercase tracking-widest">No Active Conflicts</p>
+                    ) : moderationQueue.disputes.map((dispute) => (
+                      <div key={dispute._id} className="p-6 hover:bg-sky-50 dark:hover:bg-sky-900/10 transition-colors">
+                        <div className="flex items-start justify-between gap-4">
+                          <div>
+                            <p className="text-[13px] font-black uppercase text-[var(--bulletin-text)]">Order #{dispute.order.orderNumber}</p>
+                            <p className="mt-1 text-[11px] font-bold text-sky-700 dark:text-sky-400 uppercase tracking-tighter">
+                              {dispute.reason.replace(/_/g, ' ')}
+                            </p>
+                            <p className="mt-2 text-[11px] font-bold opacity-60 text-[var(--bulletin-text)] line-clamp-2 italic">
+                              "{dispute.description}"
+                            </p>
+                          </div>
+                          <button onClick={() => setActiveTab('disputes')} className="border-2 border-black bg-black text-white px-4 py-2 text-[10px] font-black uppercase hover:bg-sky-500 transition-all">
+                            Review
+                          </button>
                         </div>
-                        <button onClick={() => setActiveTab('disputes')} className="border border-black bg-black px-2.5 py-1 text-[9px] font-bold uppercase text-white transition-colors hover:bg-white hover:text-black">
-                          Review
-                        </button>
                       </div>
-                    </div>
-                  ))}
-                </div>
-              </BulletinCard>
+                    ))}
+                  </div>
+                </BulletinCard>
+              </div>
             </div>
           </div>
         )}
 
         {/* Users */}
         {activeTab === 'users' && (
-          <div>
-            <div className="flex flex-col md:flex-row gap-3 md:items-center md:justify-between mb-6">
-              <div className="text-sm font-bold uppercase tracking-wider opacity-60">User Management</div>
-              <div className="flex gap-2">
-                <input value={userSearch} onChange={(e) => setUserSearch(e.target.value)} placeholder="Search users" className={fieldBase} />
-                <button onClick={fetchUsers} className="border border-black bg-black px-3 py-1.5 text-[9px] font-bold uppercase text-white transition-colors hover:bg-white hover:text-black">Search</button>
+          <div className="space-y-8">
+            <div className="flex flex-col md:flex-row gap-6 md:items-center md:justify-between">
+              <div>
+                <h3 className="text-2xl font-black uppercase tracking-tighter text-[var(--bulletin-text)]">Identity Registry</h3>
+                <p className="text-[12px] font-bold opacity-40 text-[var(--bulletin-text)] uppercase tracking-widest">Manage Community Access</p>
+              </div>
+              <div className="flex gap-4 w-full md:w-auto">
+                <div className="relative flex-1 md:w-80">
+                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 opacity-30 text-[var(--bulletin-text)]" />
+                  <input 
+                    value={userSearch} 
+                    onChange={(e) => setUserSearch(e.target.value)} 
+                    placeholder="Search by name or email..." 
+                    className="w-full border-4 border-black bg-[var(--bulletin-card)] p-3 pl-12 text-[13px] font-black focus:outline-none text-[var(--bulletin-text)]" 
+                  />
+                </div>
+                <button onClick={fetchUsers} className="border-4 border-black bg-black text-white px-6 py-3 text-[12px] font-black uppercase hover:bg-[#ff6b6b] transition-all">
+                  Query
+                </button>
               </div>
             </div>
-            <div className="border border-black divide-y divide-black/20 bg-white">
+            
+            <div className="border-4 border-black bg-[var(--bulletin-card)] divide-y-4 divide-black/5 shadow-[12px_12px_0_0_var(--bulletin-shadow)]">
               {users.map((user) => (
-                <div key={user._id} className="p-4 flex items-center justify-between gap-3">
-                  <div>
-                    <p className="text-[12px] font-bold">{user.name}</p>
-                    <p className="text-[10px] opacity-50 mt-0.5">{user.email} &middot; {user.role}</p>
-                    <div className="flex gap-2 mt-1.5">
-                      {user.isVerified && (
-                        <span className="text-[9px] border border-black px-1.5 py-0.5 bg-[#fffacd] font-bold uppercase">Verified</span>
-                      )}
-                      {user.isBanned && (
-                        <span className="text-[9px] border border-black px-1.5 py-0.5 bg-[#fce4ec] font-bold uppercase">Banned</span>
-                      )}
+                <div key={user._id} className="p-6 flex items-center justify-between gap-6 hover:bg-black/5 transition-colors">
+                  <div className="flex items-center gap-4">
+                    <div className="h-12 w-12 border-4 border-black bg-[#ff6b6b] flex items-center justify-center text-white text-xl font-black">
+                      {user.name[0].toUpperCase()}
+                    </div>
+                    <div>
+                      <p className="text-[15px] font-black uppercase text-[var(--bulletin-text)]">{user.name}</p>
+                      <p className="text-[11px] font-bold opacity-40 text-[var(--bulletin-text)]">{user.email} · {user.role}</p>
+                      <div className="flex gap-2 mt-2">
+                        {user.isVerified && (
+                          <span className="text-[8px] border-2 border-black px-2 py-0.5 bg-[#fffacd] dark:bg-yellow-900/40 text-black dark:text-yellow-200 font-black uppercase tracking-widest">Verified</span>
+                        )}
+                        {user.isBanned && (
+                          <span className="text-[8px] border-2 border-black px-2 py-0.5 bg-[#ff6b6b] text-white font-black uppercase tracking-widest">Banned</span>
+                        )}
+                      </div>
                     </div>
                   </div>
-                  <div className="flex gap-2">
+                  <div className="flex gap-3">
                     {user.role === 'seller' && (
-                      <button onClick={() => handleToggleVerifySeller(user)} disabled={busyId === user._id} className="border border-black bg-black px-2.5 py-1.5 text-[8px] font-bold uppercase text-white transition-colors hover:bg-white hover:text-black disabled:opacity-40">
-                        {busyId === user._id ? '...' : user.isVerified ? 'Unverify' : 'Verify'}
+                      <button 
+                        onClick={() => handleToggleVerifySeller(user)} 
+                        disabled={busyId === user._id} 
+                        className={`border-4 border-black px-4 py-2 text-[10px] font-black uppercase transition-all disabled:opacity-20 ${user.isVerified ? 'bg-white text-black' : 'bg-[#fffacd] text-black'}`}
+                      >
+                        {busyId === user._id ? '...' : user.isVerified ? 'Revoke Trust' : 'Verify Shop'}
                       </button>
                     )}
-                    <button onClick={() => handleToggleBan(user)} disabled={busyId === user._id} className="border border-black bg-[#fce4ec] px-2.5 py-1.5 text-[8px] font-bold uppercase shadow-[1px_1px_0_0_rgba(0,0,0,1)] hover:shadow-[2px_2px_0_0_rgba(0,0,0,1)] disabled:opacity-40 transition-all">
-                      {busyId === user._id ? '...' : user.isBanned ? 'Unban' : 'Ban'}
+                    <button 
+                      onClick={() => handleToggleBan(user)} 
+                      disabled={busyId === user._id} 
+                      className={`border-4 border-black px-4 py-2 text-[10px] font-black uppercase transition-all disabled:opacity-20 ${user.isBanned ? 'bg-black text-white' : 'bg-[#ff6b6b] text-white'}`}
+                    >
+                      {busyId === user._id ? '...' : user.isBanned ? 'Lift Ban' : 'Suspend'}
                     </button>
                   </div>
                 </div>
@@ -466,195 +512,242 @@ const AdminDashboard: React.FC = () => {
 
         {/* Products */}
         {activeTab === 'products' && (
-          <div>
-            <div className="flex flex-col md:flex-row gap-3 md:items-center md:justify-between mb-6">
-              <div className="text-sm font-bold uppercase tracking-wider opacity-60">Product Moderation</div>
-              <div className="flex gap-2">
-                <input value={productSearch} onChange={(e) => setProductSearch(e.target.value)} placeholder="Search products" className={fieldBase} />
-                <button onClick={fetchProducts} className="border border-black bg-black px-3 py-1.5 text-[9px] font-bold uppercase text-white transition-colors hover:bg-white hover:text-black">Search</button>
+          <div className="space-y-8">
+            <div className="flex flex-col md:flex-row gap-6 md:items-center md:justify-between">
+              <div>
+                <h3 className="text-2xl font-black uppercase tracking-tighter text-[var(--bulletin-text)]">Manifest Review</h3>
+                <p className="text-[12px] font-bold opacity-40 text-[var(--bulletin-text)] uppercase tracking-widest">Audit Active Board Listings</p>
+              </div>
+              <div className="flex gap-4 w-full md:w-auto">
+                <input 
+                  value={productSearch} 
+                  onChange={(e) => setProductSearch(e.target.value)} 
+                  placeholder="Search listings..." 
+                  className="w-full md:w-80 border-4 border-black bg-[var(--bulletin-card)] p-3 text-[13px] font-black focus:outline-none text-[var(--bulletin-text)]" 
+                />
+                <button onClick={fetchProducts} className="border-4 border-black bg-black text-white px-6 py-3 text-[12px] font-black uppercase hover:bg-[#ff6b6b] transition-all">
+                  Query
+                </button>
               </div>
             </div>
-            <div className="border border-black divide-y divide-black/20 bg-white">
-              {products.map((product) => (
-                <div key={product._id} className="p-4 flex items-center justify-between gap-3">
-                  <div>
-                    <p className="text-[12px] font-bold">{product.title}</p>
-                    <p className="text-[10px] opacity-50 mt-0.5">
-                      GHS {product.price.toLocaleString('en-GH', { minimumFractionDigits: 2 })} &middot;{' '}
-                      {typeof product.seller === 'string' ? 'Seller' : product.seller.name}
-                    </p>
-                    <div className="flex gap-2 mt-1.5">
-                      {product.isFlagged && (
-                        <span className="text-[9px] border border-black px-1.5 py-0.5 bg-[#fce4ec] font-bold uppercase">Flagged</span>
-                      )}
-                      {product.isFeatured && (
-                        <span className="text-[9px] border border-black px-1.5 py-0.5 bg-[#fffacd] font-bold uppercase">Featured</span>
-                      )}
-                      <span className="text-[9px] border border-black px-1.5 py-0.5 bg-[#f0e8f4] font-bold uppercase capitalize">{product.status}</span>
+
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {products.map((product, idx) => (
+                <BulletinCard 
+                  key={product._id} 
+                  rotation={(idx % 2 === 0 ? 0.5 : -0.5)}
+                  className="group relative border-2"
+                >
+                  <div className="flex justify-between items-start mb-4">
+                    <div className={`text-[8px] font-black uppercase tracking-[0.2em] px-2 py-1 border-2 border-black ${product.isFlagged ? 'bg-[#ff6b6b] text-white' : 'bg-[#fffacd] text-black'}`}>
+                      {product.status}
                     </div>
+                    {product.isFeatured && (
+                      <Star className="h-4 w-4 text-[#ff6b6b] fill-current" />
+                    )}
                   </div>
+                  
+                  <h4 className="text-lg font-black uppercase tracking-tight text-[var(--bulletin-text)] mb-1 group-hover:text-[#ff6b6b] transition-colors">{product.title}</h4>
+                  <p className="text-[12px] font-bold opacity-40 text-[var(--bulletin-text)] mb-4">
+                    GHS {product.price.toFixed(2)} · By {typeof product.seller === 'string' ? 'Seller' : product.seller.name}
+                  </p>
+                  
+                  {product.isFlagged && product.flagReason && (
+                    <div className="mb-6 bg-[#ff6b6b]/10 border-l-4 border-[#ff6b6b] p-3 text-[11px] font-bold text-[#ff6b6b]">
+                      FLAG: {product.flagReason}
+                    </div>
+                  )}
+                  
                   <div className="flex gap-2">
-                    <button onClick={() => handleToggleFeatured(product)} disabled={busyId === product._id} className="border border-black bg-black px-2.5 py-1.5 text-[8px] font-bold uppercase text-white transition-colors hover:bg-white hover:text-black disabled:opacity-40">
-                      {busyId === product._id ? '...' : product.isFeatured ? 'Unfeature' : 'Feature'}
+                    <button 
+                      onClick={() => handleToggleFeatured(product)} 
+                      disabled={busyId === product._id} 
+                      className={`flex-1 border-2 border-black px-3 py-2 text-[9px] font-black uppercase transition-all ${product.isFeatured ? 'bg-white text-black' : 'bg-black text-white hover:bg-[#ff6b6b]'}`}
+                    >
+                      {busyId === product._id ? '...' : product.isFeatured ? 'Unfeature' : 'Promote'}
                     </button>
                     {product.isFlagged && (
-                      <button onClick={() => handleClearFlag(product)} disabled={busyId === product._id} className="border border-black bg-white px-2.5 py-1.5 text-[8px] font-bold uppercase shadow-[1px_1px_0_0_rgba(0,0,0,1)] hover:shadow-[2px_2px_0_0_rgba(0,0,0,1)] disabled:opacity-40 transition-all">
-                        {busyId === product._id ? '...' : 'Clear'}
+                      <button 
+                        onClick={() => handleClearFlag(product)} 
+                        disabled={busyId === product._id} 
+                        className="flex-1 border-2 border-black bg-white text-black px-3 py-2 text-[9px] font-black uppercase hover:bg-[#fffacd] transition-all"
+                      >
+                        {busyId === product._id ? '...' : 'Clear Flag'}
                       </button>
                     )}
                   </div>
-                </div>
+                </BulletinCard>
               ))}
-            </div>
-          </div>
-        )}
-
-        {/* Orders */}
-        {activeTab === 'orders' && (
-          <div>
-            <div className="flex flex-col md:flex-row gap-3 md:items-center md:justify-between mb-6">
-              <div className="text-sm font-bold uppercase tracking-wider opacity-60">Order Monitoring</div>
-              <div className="flex gap-2">
-                <input value={orderSearch} onChange={(e) => setOrderSearch(e.target.value)} placeholder="Search order number" className={fieldBase} />
-                <button onClick={fetchOrders} className="border border-black bg-black px-3 py-1.5 text-[9px] font-bold uppercase text-white transition-colors hover:bg-white hover:text-black">Search</button>
-              </div>
-            </div>
-            <div className="border border-black divide-y divide-black/20 bg-white">
-              {orders.map((order) => (
-                <div key={order._id} className="p-4">
-                  <div className="flex items-center justify-between gap-2">
-                    <div>
-                      <Link to={`/orders/${order._id}`} className="text-[12px] font-bold hover:underline">#{order.orderNumber}</Link>
-                      <p className="text-[10px] opacity-50 mt-0.5">
-                        Buyer: {order.buyer.name} &middot; Seller: {order.seller.name}
-                      </p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-sm font-bold">
-                        GHS {order.totalAmount.toLocaleString('en-GH', { minimumFractionDigits: 2 })}
-                      </p>
-                      <p className="text-[10px] opacity-50 capitalize mt-0.5">{order.status.replace('_', ' ')}</p>
-                    </div>
-                  </div>
-                </div>
-              ))}
-              {orders.length === 0 && <p className="p-4 text-[12px] opacity-50">No orders found.</p>}
             </div>
           </div>
         )}
 
         {/* Disputes */}
         {activeTab === 'disputes' && (
-          <div>
-            <div className="flex flex-col md:flex-row gap-3 md:items-center md:justify-between mb-6">
-              <div className="text-sm font-bold uppercase tracking-wider opacity-60">Dispute Center</div>
-              <button onClick={fetchDisputes} className="border border-black bg-white px-3 py-1.5 text-[9px] font-bold uppercase shadow-[1px_1px_0_0_rgba(0,0,0,1)] hover:shadow-[2px_2px_0_0_rgba(0,0,0,1)] transition-all">Refresh</button>
+          <div className="space-y-8">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-2xl font-black uppercase tracking-tighter text-[var(--bulletin-text)]">Tribunal Console</h3>
+                <p className="text-[12px] font-bold opacity-40 text-[var(--bulletin-text)] uppercase tracking-widest">Adjudicate Member Conflicts</p>
+              </div>
+              <button onClick={fetchDisputes} className="border-4 border-black bg-[var(--bulletin-card)] text-[var(--bulletin-text)] px-6 py-3 text-[11px] font-black uppercase hover:bg-[#fffacd] transition-all shadow-[6px_6px_0_0_var(--bulletin-shadow)]">
+                Sync Data
+              </button>
             </div>
-            <div className="border border-black divide-y divide-black/20 bg-white">
-              {disputes.map((dispute) => (
-                <div key={dispute._id} className="p-4 flex flex-col md:flex-row gap-4 justify-between items-start md:items-center">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-1">
-                      <span className={`text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 border border-black ${DISPUTE_STATUS_COLORS[dispute.status] || 'bg-white'}`}>
-                        {dispute.status.replace('_', ' ')}
-                      </span>
-                      <Link to={`/orders/${dispute.order._id}`} className="text-[11px] font-bold hover:underline">
-                        Order #{dispute.order.orderNumber}
-                      </Link>
+
+            <div className="space-y-6">
+              {disputes.map((dispute, idx) => (
+                <div 
+                  key={dispute._id} 
+                  className="relative group"
+                  style={{ transform: `rotate(${(idx % 2 === 0 ? 0.3 : -0.3)}deg)` }}
+                >
+                  <div className="absolute -top-3 left-10 h-6 w-6 rounded-full bg-black/10 border-2 border-black shadow-inner z-10 hidden md:block" />
+                  <div className="border-4 border-black bg-[var(--bulletin-card)] p-8 shadow-[12px_12px_0_0_var(--bulletin-shadow)] flex flex-col md:flex-row gap-8 items-start">
+                    <div className="flex-1">
+                      <div className="flex flex-wrap items-center gap-4 mb-6">
+                        <span className={`text-[10px] font-black uppercase tracking-widest px-3 py-1 border-2 border-black ${DISPUTE_STATUS_COLORS[dispute.status] || 'bg-white'}`}>
+                          {dispute.status.replace('_', ' ')}
+                        </span>
+                        <span className="text-[12px] font-black text-[var(--bulletin-text)] uppercase opacity-30">Case ID: {dispute._id.slice(-8)}</span>
+                        <Link to={`/orders/${dispute.order._id}`} className="text-[12px] font-black text-[#ff6b6b] uppercase underline decoration-2 underline-offset-4 hover:opacity-70 transition-all">
+                          Order #{dispute.order.orderNumber}
+                        </Link>
+                      </div>
+
+                      <h4 className="text-xl font-black uppercase text-[var(--bulletin-text)] mb-2">Issue: {dispute.reason.replace(/_/g, ' ')}</h4>
+                      <p className="text-[14px] font-bold text-[var(--bulletin-text)] opacity-70 mb-6 italic border-l-4 border-black/10 pl-4">
+                        "{dispute.description}"
+                      </p>
+
+                      <div className="grid grid-cols-2 gap-8 text-[11px] font-black uppercase tracking-widest opacity-40 text-[var(--bulletin-text)] mb-8">
+                        <div>
+                          <p className="mb-1">Complainant</p>
+                          <p className="text-black dark:text-white opacity-100">{dispute.raisedBy.name}</p>
+                        </div>
+                        <div>
+                          <p className="mb-1">Respondent</p>
+                          <p className="text-black dark:text-white opacity-100">{dispute.against.name}</p>
+                        </div>
+                      </div>
+
+                      {dispute.adminNote && (
+                        <div className="mb-8 p-4 bg-[#fffacd] dark:bg-yellow-900/20 border-2 border-black">
+                          <p className="text-[9px] font-black uppercase tracking-[0.2em] text-black dark:text-yellow-200 mb-2">Internal Admin Ledger</p>
+                          <p className="text-[12px] font-bold text-black dark:text-white">{dispute.adminNote}</p>
+                        </div>
+                      )}
+
+                      {dispute.evidence && dispute.evidence.length > 0 && (
+                        <div className="flex flex-wrap gap-3">
+                          {dispute.evidence.map((item, i) => (
+                            <a key={i} href={item} target="_blank" rel="noreferrer" className="flex items-center gap-2 border-2 border-black bg-white text-black px-4 py-2 text-[10px] font-black uppercase hover:bg-sky-50 transition-all">
+                              View Exhibit {i+1} <AlertTriangle className="h-4 w-4" />
+                            </a>
+                          ))}
+                        </div>
+                      )}
                     </div>
-                    <p className="text-[12px] font-bold mt-2">Reason: {dispute.reason}</p>
-                    <p className="text-[12px] opacity-70 mt-1 line-clamp-2">{dispute.description}</p>
-                    <p className="text-[10px] opacity-50 mt-2">
-                      Raised by {dispute.raisedBy.name} against {dispute.against.name}
-                      <br/>
-                      <span className="text-[9px] uppercase tracking-wider mt-1 block">
-                        {new Date(dispute.createdAt).toLocaleString()}
-                      </span>
-                    </p>
-                    {dispute.adminNote && (
-                      <div className="mt-3 p-3 bg-[#faf8f5] border-l-2 border-black text-[11px]">
-                        <p className="text-[9px] font-bold uppercase tracking-wider opacity-50 mb-1">Admin Note</p>
-                        <p>{dispute.adminNote}</p>
-                      </div>
-                    )}
-                    {dispute.evidence && dispute.evidence.length > 0 && (
-                      <div className="mt-3 flex flex-wrap gap-2">
-                        {dispute.evidence.map((item, index) => (
-                          <a key={`${dispute._id}-evidence-${index}`} href={item} target="_blank" rel="noreferrer"
-                            className="inline-flex items-center gap-1 border border-black px-2 py-1 text-[9px] font-bold uppercase hover:bg-[#f0e8f4] transition-colors">
-                            Evidence <AlertTriangle className="h-3 w-3" />
-                          </a>
-                        ))}
-                      </div>
-                    )}
+                    
+                    <button 
+                      onClick={() => { setSelectedDispute(dispute); setDisputeStatus(dispute.status); setAdminNote(dispute.adminNote || ''); }}
+                      className="w-full md:w-40 border-4 border-black bg-black text-white px-6 py-4 text-[12px] font-black uppercase hover:bg-[#ff6b6b] transition-all shadow-[6px_6px_0_0_rgba(0,0,0,0.2)]"
+                    >
+                      Intervene
+                    </button>
                   </div>
-                  <button onClick={() => { setSelectedDispute(dispute); setDisputeStatus(dispute.status); setAdminNote(dispute.adminNote || ''); }}
-                    className="border border-black bg-black px-3 py-1.5 text-[9px] font-bold uppercase text-white transition-colors hover:bg-white hover:text-black flex-shrink-0">
-                    Manage
-                  </button>
                 </div>
               ))}
-              {disputes.length === 0 && <p className="p-4 text-[12px] opacity-50">No disputes found.</p>}
             </div>
           </div>
         )}
 
         {/* Ops */}
         {activeTab === 'ops' && (
-          <div className="space-y-8">
-            <BulletinCard rotation={-0.3} bgColor="bg-white">
-              <div className="text-sm font-bold uppercase tracking-wider mb-3">Queue Retry Job</div>
-              <div className="grid gap-2 sm:grid-cols-3">
-                <select value={newRetryType} onChange={(e) => setNewRetryType(e.target.value as any)} className={fieldBase}>
-                  <option value="notification">notification</option>
-                  <option value="import">import</option>
-                  <option value="payment">payment</option>
-                  <option value="moderation">moderation</option>
-                </select>
-                <input value={newRetryPayload} onChange={(e) => setNewRetryPayload(e.target.value)} className={`${fieldBase} sm:col-span-2`} />
-              </div>
-              <button onClick={queueRetryJob} disabled={busyId === 'retry-queue'} className="mt-3 border border-black bg-black px-3 py-1.5 text-[9px] font-bold uppercase text-white transition-colors hover:bg-white hover:text-black disabled:opacity-40">
-                {busyId === 'retry-queue' ? '...' : 'Queue Job'}
-              </button>
-            </BulletinCard>
-
-            <div className="grid gap-6 lg:grid-cols-2">
-              <BulletinCard rotation={0.3} bgColor="bg-white" className="!p-0 shadow-[3px_3px_0_0_rgba(0,0,0,1)]">
-                <div className="border-b border-black px-5 py-4">
-                  <div className="text-sm font-bold uppercase tracking-wider">Retry Jobs</div>
+          <div className="space-y-12">
+            <div className="relative">
+              <div className="absolute -top-4 left-6 h-8 w-32 bg-[#ffd700]/40 rotate-[1deg] z-10" />
+              <BulletinCard rotation={-0.3} className="border-2 p-8">
+                <h3 className="text-xl font-black uppercase tracking-tight text-[var(--bulletin-text)] mb-6">Manual Job Dispatch</h3>
+                <div className="grid gap-6 md:grid-cols-4 items-end">
+                  <div className="md:col-span-1">
+                    <label className="block text-[10px] font-black uppercase tracking-widest opacity-40 mb-2 text-[var(--bulletin-text)]">System Scope</label>
+                    <select value={newRetryType} onChange={(e) => setNewRetryType(e.target.value as any)} className="w-full border-4 border-black bg-[var(--bulletin-bg)] p-3 text-[13px] font-black focus:outline-none text-[var(--bulletin-text)]">
+                      <option value="notification">Notifications</option>
+                      <option value="import">Data Import</option>
+                      <option value="payment">Financials</option>
+                      <option value="moderation">Moderation</option>
+                    </select>
+                  </div>
+                  <div className="md:col-span-2">
+                    <label className="block text-[10px] font-black uppercase tracking-widest opacity-40 mb-2 text-[var(--bulletin-text)]">JSON Payload</label>
+                    <input 
+                      value={newRetryPayload} 
+                      onChange={(e) => setNewRetryPayload(e.target.value)} 
+                      className="w-full border-4 border-black bg-[var(--bulletin-bg)] p-3 text-[13px] font-black focus:outline-none text-[var(--bulletin-text)]" 
+                    />
+                  </div>
+                  <button 
+                    onClick={queueRetryJob} 
+                    disabled={busyId === 'retry-queue'} 
+                    className="border-4 border-black bg-black text-white px-8 py-3.5 text-[12px] font-black uppercase hover:bg-[#ff6b6b] transition-all disabled:opacity-20"
+                  >
+                    {busyId === 'retry-queue' ? '...' : 'Queue Dispatch'}
+                  </button>
                 </div>
-                <div className="divide-y divide-black/20">
-                  {retryJobs.length === 0 ? (
-                    <p className="p-4 text-[12px] opacity-50">No retry jobs yet.</p>
-                  ) : retryJobs.map((job) => (
-                    <div key={job._id} className="p-4 flex items-center justify-between gap-2">
-                      <div>
-                        <p className="text-[11px] font-bold uppercase">{job.type}</p>
-                        <p className="text-[10px] opacity-50 mt-0.5">{job.status} · attempts {job.attempts}/{job.maxAttempts}</p>
+              </BulletinCard>
+            </div>
+
+            <div className="grid gap-12 lg:grid-cols-2">
+              <div className="relative">
+                <BulletinCard rotation={0.2} className="!p-0 border-2">
+                  <div className="border-b-2 border-black/10 px-6 py-5 bg-[#faf8f5] dark:bg-black/20">
+                    <p className="text-[10px] font-black uppercase tracking-widest opacity-40 text-black dark:text-white">Active Retry Queue</p>
+                  </div>
+                  <div className="divide-y-2 divide-black/5 max-h-[500px] overflow-auto">
+                    {retryJobs.map((job) => (
+                      <div key={job._id} className="p-6 flex items-center justify-between gap-4">
+                        <div>
+                          <p className="text-[13px] font-black uppercase text-[var(--bulletin-text)]">{job.type}</p>
+                          <p className="text-[11px] font-bold opacity-40 text-[var(--bulletin-text)] mt-1">
+                            Status: <span className="text-sky-600">{job.status}</span> · Attempts {job.attempts}/{job.maxAttempts}
+                          </p>
+                        </div>
+                        <button 
+                          onClick={() => runRetry(job._id)} 
+                          disabled={busyId === job._id} 
+                          className="border-2 border-black bg-black text-white px-4 py-2 text-[9px] font-black uppercase hover:bg-[#ff6b6b] transition-all disabled:opacity-20"
+                        >
+                          {busyId === job._id ? '...' : 'Force Run'}
+                        </button>
                       </div>
-                      <button onClick={() => runRetry(job._id)} disabled={busyId === job._id} className="border border-black bg-white px-2.5 py-1 text-[8px] font-bold uppercase shadow-[1px_1px_0_0_rgba(0,0,0,1)] hover:shadow-[2px_2px_0_0_rgba(0,0,0,1)] disabled:opacity-40 transition-all">
-                        {busyId === job._id ? '...' : 'Run'}
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              </BulletinCard>
+                    ))}
+                  </div>
+                </BulletinCard>
+              </div>
 
-              <BulletinCard rotation={-0.3} bgColor="bg-white" className="!p-0 shadow-[3px_3px_0_0_rgba(0,0,0,1)]">
-                <div className="border-b border-black px-5 py-4">
-                  <div className="text-sm font-bold uppercase tracking-wider">Audit Logs</div>
-                </div>
-                <div className="divide-y divide-black/20 max-h-[480px] overflow-auto">
-                  {opsAuditLogs.length === 0 ? (
-                    <p className="p-4 text-[12px] opacity-50">No audit logs yet.</p>
-                  ) : opsAuditLogs.map((log) => (
-                    <div key={log._id} className="p-4">
-                      <p className="text-[11px] font-bold uppercase">{log.action}</p>
-                      <p className="text-[10px] opacity-50 mt-1">{log.scope} · {log.status} · {new Date(log.createdAt).toLocaleString()}</p>
-                    </div>
-                  ))}
-                </div>
-              </BulletinCard>
+              <div className="relative">
+                <BulletinCard rotation={-0.2} className="!p-0 border-2">
+                  <div className="border-b-2 border-black/10 px-6 py-5 bg-[#e0f2f7] dark:bg-sky-900/20">
+                    <p className="text-[10px] font-black uppercase tracking-widest opacity-40 text-sky-900 dark:text-sky-200">System Audit Logs</p>
+                  </div>
+                  <div className="divide-y-2 divide-black/5 max-h-[500px] overflow-auto no-scrollbar">
+                    {opsAuditLogs.map((log) => (
+                      <div key={log._id} className="p-6 hover:bg-sky-50 dark:hover:bg-sky-900/10 transition-colors">
+                        <div className="flex justify-between items-start gap-4">
+                          <p className="text-[13px] font-black uppercase text-[var(--bulletin-text)]">{log.action.replace(/_/g, ' ')}</p>
+                          <span className={`text-[8px] font-black px-1.5 py-0.5 border-2 border-black ${log.status === 'success' ? 'bg-[#fffacd] text-black' : 'bg-[#ff6b6b] text-white'}`}>
+                            {log.status}
+                          </span>
+                        </div>
+                        <p className="text-[11px] font-bold opacity-40 text-[var(--bulletin-text)] mt-2">
+                          Scope: {log.scope} · {new Date(log.createdAt).toLocaleString()}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </BulletinCard>
+              </div>
             </div>
           </div>
         )}
@@ -662,48 +755,71 @@ const AdminDashboard: React.FC = () => {
 
       {/* Dispute Management Modal */}
       {selectedDispute && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
-          <div className="border border-black bg-white w-full max-w-lg shadow-[8px_8px_0_0_rgba(0,0,0,1)]">
-            <div className="p-5 border-b border-black flex justify-between items-center">
-              <div className="flex items-center gap-2 text-base font-bold uppercase">
-                <AlertTriangle className="w-5 h-5" />
-                Manage Dispute
+        <div className="fixed inset-0 z-[1000] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="border-4 border-black bg-[var(--bulletin-card)] w-full max-w-xl shadow-[16px_16px_0_0_rgba(0,0,0,0.5)] relative overflow-hidden" style={{ transform: 'rotate(-0.5deg)' }}>
+            {/* Modal Tape */}
+            <div className="absolute top-4 left-1/2 -translate-x-1/2 h-8 w-40 bg-[#ff6b6b]/60 rotate-[1deg] z-10" />
+            
+            <div className="p-8 border-b-4 border-black bg-[#faf8f5] dark:bg-black/20 flex justify-between items-end pt-16">
+              <div>
+                <p className="text-[10px] font-black uppercase tracking-[0.2em] opacity-40 text-[var(--bulletin-text)]">Tribunal Intervene</p>
+                <h2 className="text-3xl font-black uppercase tracking-tighter text-[var(--bulletin-text)]">Manage Dispute</h2>
               </div>
-              <button onClick={() => setSelectedDispute(null)} className="opacity-40 hover:opacity-100 transition-opacity">✕</button>
+              <button onClick={() => setSelectedDispute(null)} className="h-10 w-10 border-4 border-black bg-white flex items-center justify-center hover:bg-[#ff6b6b] hover:text-white transition-all text-xl font-black">✕</button>
             </div>
             
-            <div className="p-5">
-              <div className="mb-6 bg-[#faf8f5] p-4 border border-black">
-                <p className="text-[9px] font-bold uppercase tracking-wider opacity-50 mb-2">Order Info</p>
-                <p className="text-[12px] font-bold">Order #{selectedDispute.order.orderNumber}</p>
-                <p className="text-[12px] opacity-70">Amount: GHS {selectedDispute.order.totalAmount.toFixed(2)}</p>
-                <div className="h-px bg-black/20 my-3" />
-                <p className="text-[12px]"><span className="opacity-50">Raised By:</span> {selectedDispute.raisedBy.name}</p>
-                <p className="text-[12px] mt-1"><span className="opacity-50">Against:</span> {selectedDispute.against.name}</p>
+            <div className="p-8 space-y-8">
+              <div className="bg-[#fffacd] dark:bg-yellow-900/20 p-6 border-4 border-black">
+                <p className="text-[9px] font-black uppercase tracking-widest opacity-40 text-black dark:text-yellow-200 mb-3">Case Context</p>
+                <div className="flex justify-between items-center mb-2">
+                  <p className="text-sm font-black uppercase text-black dark:text-white">Order #{selectedDispute.order.orderNumber}</p>
+                  <p className="text-sm font-black text-[#ff6b6b]">GHS {selectedDispute.order.totalAmount.toFixed(2)}</p>
+                </div>
+                <div className="h-0.5 bg-black/10 my-4" />
+                <div className="grid grid-cols-2 gap-4 text-[11px] font-bold text-black dark:text-white/70">
+                  <p>RAISED BY: <span className="text-black dark:text-white font-black">{selectedDispute.raisedBy.name}</span></p>
+                  <p>AGAINST: <span className="text-black dark:text-white font-black">{selectedDispute.against.name}</span></p>
+                </div>
               </div>
 
-              <div className="mb-5">
-                <label className="block text-[9px] font-bold uppercase tracking-wider opacity-50 mb-2">Update Status</label>
-                <select value={disputeStatus} onChange={(e) => setDisputeStatus(e.target.value)} className="w-full border border-black bg-[#fefdfb] p-2 text-[12px] font-bold focus:outline-none focus:ring-2 focus:ring-black">
-                  <option value="open">Open</option>
-                  <option value="under_review">Under Review</option>
-                  <option value="resolved">Resolved</option>
-                  <option value="closed">Closed (No Action)</option>
+              <div>
+                <label className="block text-[10px] font-black uppercase tracking-widest opacity-40 mb-3 text-[var(--bulletin-text)]">Adjudication Status</label>
+                <select 
+                  value={disputeStatus} 
+                  onChange={(e) => setDisputeStatus(e.target.value)} 
+                  className="w-full border-4 border-black bg-[var(--bulletin-bg)] p-4 text-[13px] font-black focus:outline-none text-[var(--bulletin-text)]"
+                >
+                  <option value="open">Open Case</option>
+                  <option value="under_review">Under Active Review</option>
+                  <option value="resolved">Mark Resolved</option>
+                  <option value="closed">Close (Dismissed)</option>
                 </select>
               </div>
 
-              <div className="mb-2">
-                <label className="block text-[9px] font-bold uppercase tracking-wider opacity-50 mb-2">Admin Note</label>
-                <textarea value={adminNote} onChange={(e) => setAdminNote(e.target.value)}
-                  className="w-full border border-black bg-[#fefdfb] p-2 text-[12px] font-bold focus:outline-none focus:ring-2 focus:ring-black resize-none min-h-[100px]"
-                  placeholder="Enter resolution details..." />
+              <div>
+                <label className="block text-[10px] font-black uppercase tracking-widest opacity-40 mb-3 text-[var(--bulletin-text)]">Administrative Verdict</label>
+                <textarea 
+                  value={adminNote} 
+                  onChange={(e) => setAdminNote(e.target.value)}
+                  className="w-full border-4 border-black bg-[var(--bulletin-bg)] p-4 text-[13px] font-black focus:outline-none min-h-[120px] resize-none text-[var(--bulletin-text)]"
+                  placeholder="Enter detailed resolution notes for the ledger..." 
+                />
               </div>
             </div>
 
-            <div className="p-5 border-t border-black flex justify-end gap-3 bg-[#faf8f5]">
-              <button onClick={() => setSelectedDispute(null)} className="border border-black bg-white px-4 py-2 text-[10px] font-bold uppercase shadow-[1px_1px_0_0_rgba(0,0,0,1)] hover:shadow-[2px_2px_0_0_rgba(0,0,0,1)] transition-all">Cancel</button>
-              <button onClick={handleUpdateDispute} disabled={busyId === 'dispute-update'} className="border border-black bg-black px-4 py-2 text-[10px] font-bold uppercase text-white transition-colors hover:bg-white hover:text-black disabled:opacity-40">
-                {busyId === 'dispute-update' ? '...' : 'Save Changes'}
+            <div className="p-8 border-t-4 border-black flex justify-end gap-4 bg-[#faf8f5] dark:bg-black/20">
+              <button 
+                onClick={() => setSelectedDispute(null)} 
+                className="border-4 border-black bg-white text-black px-6 py-3 text-[12px] font-black uppercase hover:bg-[#e0f2f7] transition-all"
+              >
+                Decline
+              </button>
+              <button 
+                onClick={handleUpdateDispute} 
+                disabled={busyId === 'dispute-update'} 
+                className="border-4 border-black bg-black text-white px-8 py-3 text-[12px] font-black uppercase hover:bg-[#ff6b6b] transition-all disabled:opacity-20 shadow-[6px_6px_0_0_rgba(0,0,0,0.2)]"
+              >
+                {busyId === 'dispute-update' ? '...' : 'Apply Verdict'}
               </button>
             </div>
           </div>

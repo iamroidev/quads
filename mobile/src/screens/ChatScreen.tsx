@@ -45,7 +45,7 @@ const ChatScreen = ({ route, navigation }: any) => {
     try {
       const res = await chatService.getMessages(conversationId);
       if (res.success) {
-        setMessages([...res.data.messages].reverse());
+        setMessages(res.data.messages);
         chatService.markAsRead(conversationId).catch(() => {});
       }
     } finally {
@@ -289,7 +289,7 @@ const ChatScreen = ({ route, navigation }: any) => {
 
       {loading ? (
         <View style={styles.centered}>
-          <ActivityIndicator size="large" color={colors.accent} />
+          <ActivityIndicator size="large" color="#000" />
         </View>
       ) : (
         <FlatList

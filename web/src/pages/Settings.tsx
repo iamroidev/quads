@@ -1,20 +1,12 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import {
   Bell,
   Shield,
   Trash2,
-  Eye,
-  EyeOff,
-  ChevronRight,
   AlertTriangle,
-  Check,
   Lock,
   Smartphone,
-  Store,
-  ShoppingBag,
-  Megaphone,
-  Package,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
@@ -24,8 +16,8 @@ import { BulletinLayout, BulletinSection, BulletinCard } from '../components/lay
 
 type Tab = 'notifications' | 'privacy' | 'account';
 
-const labelBase = 'text-[10px] font-bold uppercase tracking-wider opacity-60';
-const descBase = 'text-[11px] opacity-60 mt-0.5';
+const labelBase = 'text-[10px] font-black uppercase tracking-widest opacity-40 text-[var(--bulletin-text)]';
+const descBase = 'text-[11px] font-bold opacity-60 mt-1 text-[var(--bulletin-text)]';
 
 interface NotifPrefs {
   newMessage: boolean;
@@ -62,7 +54,7 @@ async function registerServiceWorker() {
 }
 
 const SettingsPage: React.FC = () => {
-  const { user, refreshUser, changePassword } = useAuth();
+  const { user } = useAuth();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<Tab>('notifications');
   const [notifPrefs, setNotifPrefs] = useState<NotifPrefs>({
@@ -85,7 +77,6 @@ const SettingsPage: React.FC = () => {
   const isSeller = user?.role === 'seller' || user?.role === 'admin';
   const isSellerView = isSeller;
 
-  // Load saved prefs
   useEffect(() => {
     const stored = localStorage.getItem('notifPrefs');
     if (stored) {
@@ -115,7 +106,6 @@ const SettingsPage: React.FC = () => {
     setSavingNotif(true);
     try {
       localStorage.setItem('notifPrefs', JSON.stringify(notifPrefs));
-      // Save prefs to server via notifications endpoint
       await api.put('/notifications/preferences', notifPrefs);
       toast.success('Notification preferences saved');
     } catch (err: any) {
@@ -180,29 +170,35 @@ const SettingsPage: React.FC = () => {
     }
   };
 
-  const fieldBase = 'w-full border border-black bg-[#fefdfb] p-2 text-[12px] font-bold focus:outline-none focus:ring-2 focus:ring-black placeholder:text-black/30';
+  const fieldBase = 'w-full border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-bg)] p-3 text-[12px] font-black focus:outline-none focus:ring-2 focus:ring-[var(--bulletin-text)] text-[var(--bulletin-text)] placeholder:text-[var(--bulletin-text)] placeholder:opacity-30';
 
   return (
-    <BulletinLayout subtitle="Settings" section="10">
-      {/* Dark header with tabs (no title to avoid redundancy) */}
-      <div className="border-b border-black bg-black">
-        <div className="mx-auto max-w-[1400px] px-6 py-10">
+    <BulletinLayout subtitle="Settings" section="10" hideBreadcrumbs={true}>
+      <div className="border-b-4 border-[var(--bulletin-border)] bg-[#111] dark:bg-[#1a1a1a]">
+        <div className="mx-auto max-w-[1400px] px-6 py-12">
           <div className="flex items-end justify-between">
             <div>
-              <p className="text-[10px] uppercase tracking-wider text-white/30">Settings</p>
-              <h1 className="mt-1 text-2xl font-bold text-white">Account & preferences</h1>
+              <nav className="mb-4 flex flex-wrap items-center gap-2 text-[10px] font-black uppercase tracking-widest text-white/60">
+                <Link to="/" className="hover:opacity-100 transition-opacity">Home</Link>
+                <span className="opacity-40">/</span>
+                <Link to="/dashboard" className="hover:opacity-100 transition-opacity">Dashboard</Link>
+                <span className="opacity-40">/</span>
+                <span className="opacity-100 text-white">Settings</span>
+              </nav>
+              <p className="text-[10px] font-black uppercase tracking-[0.35em] text-[#ff6b6b] mb-3">Account Management</p>
+              <h1 className="text-4xl font-black uppercase tracking-tight text-white">Preferences</h1>
             </div>
           </div>
 
-          <div className="flex border-t border-white/[0.12] mt-8">
+          <div className="flex border-t-2 border-white/10 mt-10">
             {TABS.map((t) => (
               <button
                 key={t.id}
                 onClick={() => setActiveTab(t.id)}
-                className={`flex items-center gap-2 px-5 py-3 text-[10px] font-bold uppercase tracking-wider border-t-2 -mt-px transition-colors ${
+                className={`flex items-center gap-2 px-6 py-4 text-[10px] font-black uppercase tracking-widest border-t-2 -mt-0.5 transition-colors ${
                   activeTab === t.id
-                    ? 'border-white text-white'
-                    : 'border-transparent text-white/30 hover:text-white/60'
+                    ? 'border-[#ff6b6b] text-[#ff6b6b] bg-white/5'
+                    : 'border-transparent text-white/40 hover:text-white hover:bg-white/5'
                 }`}
               >
                 {t.icon}
@@ -213,40 +209,39 @@ const SettingsPage: React.FC = () => {
         </div>
       </div>
 
-      <BulletinSection bgColor="bg-[#faf8f5]">
+      <BulletinSection bgColor="bg-[var(--bulletin-bg)]">
         {/* ══ NOTIFICATIONS ══ */}
         {activeTab === 'notifications' && (
           <div>
-            <div className="mb-6">
-              <div className="text-[10px] uppercase tracking-wider opacity-60">Preferences</div>
-              <h2 className="mt-1 text-lg font-bold">Notification settings</h2>
-              <div className="mt-3 border-t border-black" />
+            <div className="mb-8 border-b-2 border-[var(--bulletin-border)] pb-4">
+              <div className={labelBase}>Preferences</div>
+              <h2 className="mt-2 text-2xl font-black uppercase tracking-tight text-[var(--bulletin-text)]">Notification Engine</h2>
             </div>
 
-            <p className="text-[12px] opacity-70 mb-6 max-w-lg">
+            <p className="text-[12px] font-bold opacity-70 mb-8 max-w-xl text-[var(--bulletin-text)]">
               {isSellerView
-                ? 'Control sales alerts, buyer messages, and promotion opportunities for your store.'
-                : 'Control order, chat, and deal alerts for your buying activity.'}
+                ? 'Configure delivery channels for sales alerts, buyer inquiries, and growth opportunities.'
+                : 'Configure delivery channels for order status, seller replies, and promotional drops.'}
             </p>
 
-            <BulletinCard rotation={0} bgColor="bg-white" className="mb-6 p-0">
-              {notificationItems.map((item) => (
-                <div key={item.key} className="flex items-center justify-between px-5 py-4 border-b border-black last:border-b-0">
-                  <div className="pr-4">
-                    <div className="text-[12px] font-bold">{item.label}</div>
+            <BulletinCard rotation={0.5} bgColor="bg-[var(--bulletin-card)]" className="mb-8 p-0 border-2 border-[var(--bulletin-border)] shadow-[8px_8px_0_0_var(--bulletin-shadow)] overflow-hidden">
+              {notificationItems.map((item, idx) => (
+                <div key={item.key} className={`flex items-center justify-between px-6 py-5 ${idx !== notificationItems.length - 1 ? 'border-b-2 border-[var(--bulletin-border)]' : ''}`}>
+                  <div className="pr-6">
+                    <div className="text-[14px] font-black uppercase tracking-tight text-[var(--bulletin-text)]">{item.label}</div>
                     <div className={descBase}>{item.desc}</div>
                   </div>
                   <button
                     onClick={() => setNotifPrefs((p) => ({ ...p, [item.key]: !p[item.key] }))}
-                    className={`relative h-6 w-10 flex-shrink-0 border border-black transition-colors ${
-                      notifPrefs[item.key] ? 'bg-black' : 'bg-white'
+                    className={`relative h-8 w-14 flex-shrink-0 border-2 border-[var(--bulletin-border)] transition-colors ${
+                      notifPrefs[item.key] ? 'bg-black dark:bg-[#fffacd]' : 'bg-[var(--bulletin-bg)]'
                     }`}
                     role="switch"
                     aria-checked={notifPrefs[item.key]}
                   >
                     <span
-                      className={`absolute top-0.5 h-[18px] w-[18px] border border-black bg-white transition-transform ${
-                        notifPrefs[item.key] ? 'translate-x-[22px]' : 'translate-x-[2px]'
+                      className={`absolute top-1 h-5 w-5 border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] dark:bg-black transition-transform ${
+                        notifPrefs[item.key] ? 'translate-x-[26px]' : 'translate-x-[4px]'
                       }`}
                     />
                   </button>
@@ -254,47 +249,50 @@ const SettingsPage: React.FC = () => {
               ))}
             </BulletinCard>
 
-            <div className="flex justify-end mb-8">
+            <div className="flex justify-end mb-12">
               <button
                 onClick={saveNotifPrefs}
                 disabled={savingNotif}
-                className="border border-black bg-black px-6 py-2 text-[10px] font-bold uppercase text-white shadow-[2px_2px_0_0_rgba(0,0,0,1)] hover:bg-white hover:text-black transition-colors disabled:opacity-40"
+                className="border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-text)] px-8 py-3 text-[11px] font-black uppercase tracking-widest text-[var(--bulletin-bg)] shadow-[4px_4px_0_0_var(--bulletin-shadow)] hover:translate-y-1 hover:shadow-none transition-all disabled:opacity-40"
               >
-                {savingNotif ? 'Saving...' : 'Save preferences'}
+                {savingNotif ? 'Committing...' : 'Commit Preferences'}
               </button>
             </div>
 
             {/* Push Notifications */}
             <div>
-              <div className="text-[10px] uppercase tracking-wider opacity-60">This Device</div>
-              <h3 className="mt-1 text-base font-bold">Push Notifications</h3>
-              <div className="mt-3 border-t border-black mb-6" />
+              <div className="mb-8 border-b-2 border-[var(--bulletin-border)] pb-4">
+                <div className={labelBase}>Local Machine</div>
+                <h3 className="mt-2 text-2xl font-black uppercase tracking-tight text-[var(--bulletin-text)]">Push Delivery</h3>
+              </div>
 
-              <BulletinCard rotation={0} bgColor="bg-[#fefdfb]" className="mb-4">
+              <BulletinCard rotation={-0.5} bgColor="bg-[#e0f2f7] dark:bg-sky-900/20" className="mb-6 border-2 border-[var(--bulletin-border)] shadow-[8px_8px_0_0_var(--bulletin-shadow)] p-6">
                 <div className="flex items-center justify-between">
-                  <div className="flex items-start gap-3">
-                    <Smartphone className="h-5 w-5 flex-shrink-0 mt-0.5" />
+                  <div className="flex items-start gap-4">
+                    <div className="h-10 w-10 border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-bg)] flex items-center justify-center flex-shrink-0">
+                      <Smartphone className="h-5 w-5 text-[var(--bulletin-text)]" />
+                    </div>
                     <div>
-                      <div className="text-[12px] font-bold">Enable browser notifications</div>
+                      <div className="text-[14px] font-black uppercase tracking-tight text-[var(--bulletin-text)]">Browser Push Active</div>
                       <div className={descBase}>
                         {isSellerView
-                          ? 'Get real-time sales and buyer chat alerts for this browser.'
-                          : 'Get instant order and seller reply alerts for this browser.'}
+                          ? 'Maintain real-time situational awareness for incoming sales.'
+                          : 'Receive instant ping on order dispatch and tracking updates.'}
                       </div>
                     </div>
                   </div>
                   <button
                     onClick={handleTogglePush}
                     disabled={togglingPush}
-                    className={`relative h-6 w-10 flex-shrink-0 border border-black transition-colors disabled:opacity-50 ${
-                      pushEnabled ? 'bg-black' : 'bg-white'
+                    className={`relative h-8 w-14 flex-shrink-0 border-2 border-[var(--bulletin-border)] transition-colors disabled:opacity-50 ml-4 ${
+                      pushEnabled ? 'bg-black dark:bg-[#fffacd]' : 'bg-[var(--bulletin-bg)]'
                     }`}
                     role="switch"
                     aria-checked={pushEnabled}
                   >
                     <span
-                      className={`absolute top-0.5 h-[18px] w-[18px] border border-black bg-white transition-transform ${
-                        pushEnabled ? 'translate-x-[22px]' : 'translate-x-[2px]'
+                      className={`absolute top-1 h-5 w-5 border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] dark:bg-black transition-transform ${
+                        pushEnabled ? 'translate-x-[26px]' : 'translate-x-[4px]'
                       }`}
                     />
                   </button>
@@ -305,10 +303,10 @@ const SettingsPage: React.FC = () => {
                 <button
                   onClick={handleTestPush}
                   disabled={!pushEnabled || testingPush}
-                  className="border border-black bg-white px-4 py-2 text-[9px] font-bold uppercase shadow-[1px_1px_0_0_rgba(0,0,0,1)] hover:shadow-[2px_2px_0_0_rgba(0,0,0,1)] disabled:opacity-40 transition-all"
+                  className="border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] px-6 py-3 text-[10px] font-black uppercase tracking-widest shadow-[4px_4px_0_0_var(--bulletin-shadow)] hover:translate-y-1 hover:shadow-none disabled:opacity-40 transition-all text-[var(--bulletin-text)]"
                 >
-                  <Bell className="inline-block h-3 w-3 mr-1" />
-                  {testingPush ? 'Sending...' : 'Send test push'}
+                  <Bell className="inline-block h-3 w-3 mr-2" />
+                  {testingPush ? 'Transmitting...' : 'Ping Device'}
                 </button>
               </div>
             </div>
@@ -318,49 +316,52 @@ const SettingsPage: React.FC = () => {
         {/* ══ PRIVACY & SECURITY ══ */}
         {activeTab === 'privacy' && (
           <div>
-            <div className="mb-6">
-              <div className="text-[10px] uppercase tracking-wider opacity-60">Privacy</div>
-              <h2 className="mt-1 text-lg font-bold">Privacy & Security</h2>
-              <div className="mt-3 border-t border-black" />
+            <div className="mb-8 border-b-2 border-[var(--bulletin-border)] pb-4">
+              <div className={labelBase}>Privacy</div>
+              <h2 className="mt-2 text-2xl font-black uppercase tracking-tight text-[var(--bulletin-text)]">Security Audit</h2>
             </div>
 
-            <div className="max-w-lg space-y-5">
-              <BulletinCard rotation={-0.3} bgColor="bg-white">
-                <div className="flex items-start gap-3">
-                  <Lock className="h-5 w-5 flex-shrink-0 mt-0.5" />
+            <div className="max-w-2xl space-y-8">
+              <BulletinCard rotation={-0.5} bgColor="bg-[#fffacd] dark:bg-yellow-900/20" className="border-2 border-[var(--bulletin-border)] shadow-[8px_8px_0_0_var(--bulletin-shadow)] p-6">
+                <div className="flex items-start gap-4">
+                  <div className="h-10 w-10 border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-bg)] flex items-center justify-center flex-shrink-0">
+                    <Lock className="h-5 w-5 text-[var(--bulletin-text)]" />
+                  </div>
                   <div>
-                    <div className="text-[12px] font-bold">Password</div>
+                    <div className="text-[14px] font-black uppercase tracking-tight text-[var(--bulletin-text)]">Access Credentials</div>
                     <div className={descBase}>
-                      Update your password from your profile page.
+                      Modify your cryptographic authentication keys from the profile module.
                     </div>
-                    <Link to="/profile" className="mt-2 inline-block border border-black bg-black px-3 py-1.5 text-[9px] font-bold uppercase text-white transition-colors hover:bg-white hover:text-black">
-                      Go to Profile →
+                    <Link to="/profile" className="mt-4 inline-block border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-text)] px-4 py-2 text-[10px] font-black uppercase tracking-widest text-[var(--bulletin-bg)] transition-all hover:-translate-y-1 shadow-[4px_4px_0_0_var(--bulletin-shadow)]">
+                      Initialize Key Rotation →
                     </Link>
                   </div>
                 </div>
               </BulletinCard>
 
-              <BulletinCard rotation={0.3} bgColor="bg-white">
-                <div className="flex items-start gap-3">
-                  <Shield className="h-5 w-5 flex-shrink-0 mt-0.5" />
+              <BulletinCard rotation={0.5} bgColor="bg-[var(--bulletin-card)]" className="border-2 border-[var(--bulletin-border)] shadow-[8px_8px_0_0_var(--bulletin-shadow)] p-6">
+                <div className="flex items-start gap-4">
+                  <div className="h-10 w-10 border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-bg)] flex items-center justify-center flex-shrink-0">
+                    <Shield className="h-5 w-5 text-[var(--bulletin-text)]" />
+                  </div>
                   <div>
-                    <div className="text-[12px] font-bold">Account security</div>
+                    <div className="text-[14px] font-black uppercase tracking-tight text-[var(--bulletin-text)]">Integrity Protocol</div>
                     <div className={descBase}>
-                      Your account is protected by email authentication. 
-                      Password changes are handled securely via your profile settings.
+                      Your ledger is secured via email authentication. Zero third-party telemetry is injected into your operational flow.
                     </div>
                   </div>
                 </div>
               </BulletinCard>
 
-              <BulletinCard rotation={-0.3} bgColor="bg-[#e0f2f7]">
-                <div className="flex items-start gap-3">
-                  <Smartphone className="h-5 w-5 flex-shrink-0 mt-0.5" />
+              <BulletinCard rotation={-0.5} bgColor="bg-[#e0f2f7] dark:bg-sky-900/20" className="border-2 border-[var(--bulletin-border)] shadow-[8px_8px_0_0_var(--bulletin-shadow)] p-6">
+                <div className="flex items-start gap-4">
+                  <div className="h-10 w-10 border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-bg)] flex items-center justify-center flex-shrink-0">
+                    <Smartphone className="h-5 w-5 text-[var(--bulletin-text)]" />
+                  </div>
                   <div>
-                    <div className="text-[12px] font-bold">Session management</div>
+                    <div className="text-[14px] font-black uppercase tracking-tight text-[var(--bulletin-text)]">Active Session</div>
                     <div className={descBase}>
-                      You are currently logged in on this device. 
-                      Sign out from any device via your account settings.
+                      You are authenticated on this terminal. Terminate session globally via account settings to force re-authentication.
                     </div>
                   </div>
                 </div>
@@ -372,19 +373,20 @@ const SettingsPage: React.FC = () => {
         {/* ══ ACCOUNT ══ */}
         {activeTab === 'account' && (
           <div>
-            <div className="mb-6">
-              <div className="text-[10px] uppercase tracking-wider opacity-60">Danger zone</div>
-              <h2 className="mt-1 text-lg font-bold">Delete account</h2>
-              <div className="mt-3 border-t border-black" />
+            <div className="mb-8 border-b-2 border-[var(--bulletin-border)] pb-4">
+              <div className={labelBase}>Danger Zone</div>
+              <h2 className="mt-2 text-2xl font-black uppercase tracking-tight text-red-600 dark:text-red-400">Account Termination</h2>
             </div>
 
-            <BulletinCard rotation={0.5} bgColor="bg-[#fce4ec]" className="max-w-lg">
-              <div className="flex items-start gap-3 mb-4">
-                <AlertTriangle className="h-5 w-5 flex-shrink-0 mt-0.5" />
+            <BulletinCard rotation={0.5} bgColor="bg-[#fce4ec] dark:bg-red-900/20" className="max-w-xl border-4 border-red-600 dark:border-red-400 shadow-[12px_12px_0_0_rgba(220,38,38,0.5)] p-8">
+              <div className="flex items-start gap-4 mb-8">
+                <div className="h-12 w-12 border-4 border-red-600 dark:border-red-400 bg-white dark:bg-black flex items-center justify-center flex-shrink-0 text-red-600 dark:text-red-400 animate-pulse">
+                  <AlertTriangle className="h-6 w-6" />
+                </div>
                 <div>
-                  <div className="text-[12px] font-bold">Permanently delete your account</div>
-                  <div className={descBase}>
-                    This will remove all your listings, orders, and data. This action cannot be undone.
+                  <div className="text-[16px] font-black uppercase tracking-tight text-red-600 dark:text-red-400">Permanent Erasure</div>
+                  <div className="text-[12px] font-bold opacity-80 mt-2 text-red-600/80 dark:text-red-400/80 leading-relaxed">
+                    Executing this command will irreversibly wipe all operational data, listings, and transaction history. Recovery is impossible.
                   </div>
                 </div>
               </div>
@@ -392,34 +394,34 @@ const SettingsPage: React.FC = () => {
               {!showDeleteConfirm ? (
                 <button
                   onClick={() => setShowDeleteConfirm(true)}
-                  className="border border-black bg-white px-4 py-2 text-[10px] font-bold uppercase shadow-[2px_2px_0_0_rgba(0,0,0,1)] hover:shadow-[3px_3px_0_0_rgba(0,0,0,1)] transition-all"
+                  className="w-full border-4 border-red-600 dark:border-red-400 bg-transparent px-6 py-4 text-[12px] font-black uppercase tracking-widest text-red-600 dark:text-red-400 hover:bg-red-600 hover:text-white dark:hover:bg-red-400 dark:hover:text-black transition-all"
                 >
-                  <Trash2 className="inline-block h-3.5 w-3.5 mr-1" />
-                  Delete my account
+                  <Trash2 className="inline-block h-4 w-4 mr-2" />
+                  Initiate Deletion
                 </button>
               ) : (
-                <div className="space-y-3">
-                  <p className="text-[11px] font-bold uppercase">Type DELETE to confirm</p>
+                <div className="space-y-4 border-t-2 border-red-600/20 dark:border-red-400/20 pt-6 mt-6">
+                  <p className="text-[11px] font-black uppercase tracking-widest text-red-600 dark:text-red-400">Type DELETE to confirm authorization</p>
                   <input
                     type="text"
                     value={deleteConfirmation}
                     onChange={(e) => setDeleteConfirmation(e.target.value)}
                     placeholder="DELETE"
-                    className={fieldBase}
+                    className="w-full border-4 border-red-600 dark:border-red-400 bg-white dark:bg-black p-4 text-[14px] font-black uppercase focus:outline-none focus:ring-0 text-red-600 dark:text-red-400 placeholder:text-red-600/30 dark:placeholder:text-red-400/30"
                   />
-                  <div className="flex gap-2">
+                  <div className="flex gap-4">
                     <button
                       onClick={() => { setShowDeleteConfirm(false); setDeleteConfirmation(''); }}
-                      className="border border-black bg-white px-4 py-2 text-[10px] font-bold uppercase shadow-[1px_1px_0_0_rgba(0,0,0,1)] hover:shadow-[2px_2px_0_0_rgba(0,0,0,1)] transition-all"
+                      className="flex-1 border-4 border-red-600 dark:border-red-400 bg-white dark:bg-black px-4 py-4 text-[11px] font-black uppercase tracking-widest text-red-600 dark:text-red-400 hover:bg-red-600/10 transition-colors"
                     >
-                      Cancel
+                      Abort
                     </button>
                     <button
                       onClick={handleDeleteAccount}
                       disabled={deleteConfirmation !== 'DELETE' || deleting}
-                      className="border border-black bg-black px-4 py-2 text-[10px] font-bold uppercase text-white transition-colors hover:bg-red-600 disabled:opacity-40"
+                      className="flex-1 border-4 border-red-600 dark:border-red-400 bg-red-600 dark:bg-red-400 px-4 py-4 text-[11px] font-black uppercase tracking-widest text-white dark:text-black transition-colors hover:bg-red-700 dark:hover:bg-red-300 disabled:opacity-40"
                     >
-                      {deleting ? 'Deleting...' : 'Confirm delete'}
+                      {deleting ? 'Executing...' : 'Confirm Purge'}
                     </button>
                   </div>
                 </div>

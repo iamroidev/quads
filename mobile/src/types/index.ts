@@ -8,6 +8,8 @@ export interface User {
   role: 'buyer' | 'seller' | 'admin';
   avatar?: string;
   isVerified: boolean;
+  emailVerified: boolean;
+  phoneVerified: boolean;
   location?: string;
   responseTimeMinutes?: number;
   notificationPrefs?: {

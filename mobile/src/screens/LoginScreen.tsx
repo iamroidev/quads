@@ -68,7 +68,7 @@ const LoginScreen = ({ navigation }: any) => {
   const handleGooglePress = async () => {
     setIsLoading(true);
     try {
-      const redirectTo = makeRedirectUri({ scheme: 'campusmarketplace', path: 'auth/callback' });
+      const redirectTo = makeRedirectUri({ scheme: 'quads', path: 'auth/callback' });
 
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
@@ -168,7 +168,7 @@ const LoginScreen = ({ navigation }: any) => {
       <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
         <ScrollView contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled">
           <View style={styles.heroWrap}>
-            <Text style={styles.eyebrow}>UMaT Marketplace</Text>
+            <Text style={styles.eyebrow}>QUADS</Text>
             <Text style={styles.title}>Welcome Back</Text>
             <Text style={styles.subtitle}>Sign in to continue buying and selling on campus.</Text>
             <Image source={require('../../assets/marketillustration1.jpg')} style={styles.heroArt} />

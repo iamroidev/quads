@@ -102,24 +102,24 @@ const Messages: React.FC = () => {
 
   return (
     <BulletinLayout title="Messages" subtitle="Inbox" section="07">
-      <BulletinSection bgColor="bg-[#faf8f5]">
+      <BulletinSection bgColor="bg-[var(--bulletin-bg)]">
         {/* Search */}
         {conversations.length > 0 && (
-          <div className="relative mb-6 border-b border-black pb-3">
+          <div className="relative mb-6 border-b border-[var(--bulletin-border)] pb-3">
             <Search className="absolute left-0 top-1/2 -translate-y-1/2 h-4 w-4 opacity-40" />
             <input
               type="text"
               placeholder="Search conversations..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-6 pr-4 py-2 bg-transparent text-[12px] font-bold focus:outline-none placeholder:text-black/30"
+              className="w-full pl-6 pr-4 py-2 bg-transparent text-[12px] font-bold focus:outline-none placeholder:text-[var(--bulletin-muted)]"
             />
           </div>
         )}
 
         {/* Conversation List */}
         {filteredConversations.length === 0 ? (
-          <div className="border border-black bg-[#fffacd] p-12 text-center shadow-[4px_4px_0_0_rgba(0,0,0,1)]">
+          <div className="border border-[var(--bulletin-border)] bg-[var(--bulletin-card)] p-12 text-center shadow-[4px_4px_0_0_var(--bulletin-shadow)]">
             <MessageSquare className="h-12 w-12 mx-auto opacity-40 mb-4" />
             <div className="text-[10px] uppercase tracking-wider opacity-60 mb-2">
               {searchQuery ? 'No results' : 'Empty'}
@@ -135,7 +135,7 @@ const Messages: React.FC = () => {
             {!searchQuery && (
               <button
                 onClick={() => navigate('/products')}
-                className="inline-block border border-black bg-black px-4 py-2 text-[10px] font-bold uppercase text-white transition-colors hover:bg-white hover:text-black shadow-[2px_2px_0_0_rgba(0,0,0,1)]"
+                className="inline-block border border-[var(--bulletin-border)] bg-[var(--bulletin-text)] px-4 py-2 text-[10px] font-bold uppercase text-[var(--bulletin-bg)] transition-colors hover:bg-[var(--bulletin-card)] hover:text-[var(--bulletin-text)] shadow-[2px_2px_0_0_var(--bulletin-shadow)]"
               >
                 Browse Products
               </button>
@@ -152,24 +152,24 @@ const Messages: React.FC = () => {
                 <Link
                   key={conv._id}
                   to={`/messages/${conv._id}`}
-                  className={`block border border-black p-3 shadow-[2px_2px_0_0_rgba(0,0,0,1)] transition-all hover:-translate-y-0.5 hover:shadow-[4px_4px_0_0_rgba(0,0,0,1)] ${
-                    hasUnread ? 'bg-[#fffacd]' : 'bg-white'
+                  className={`block border border-[var(--bulletin-border)] p-3 shadow-[2px_2px_0_0_var(--bulletin-shadow)] transition-all hover:-translate-y-0.5 hover:shadow-[4px_4px_0_0_var(--bulletin-shadow)] ${
+                    hasUnread ? 'bg-[#fffacd] dark:bg-yellow-900/20' : 'bg-[var(--bulletin-card)]'
                   }`}
                 >
                   <div className="flex items-center gap-3">
                     {/* Avatar */}
                     <div className="relative flex-shrink-0">
                       {other.avatar ? (
-                        <div className="w-10 h-10 border border-black overflow-hidden">
+                        <div className="w-10 h-10 border border-[var(--bulletin-border)] overflow-hidden">
                           <img src={other.avatar} alt={other.name} className="w-full h-full object-cover" />
                         </div>
                       ) : (
-                        <div className="w-10 h-10 border border-black bg-[#f8f7f4] flex items-center justify-center font-bold text-sm">
+                        <div className="w-10 h-10 border border-[var(--bulletin-border)] bg-[var(--bulletin-bg)] flex items-center justify-center font-bold text-sm text-[var(--bulletin-text)]">
                           {other.name.charAt(0).toUpperCase()}
                         </div>
                       )}
                       {isOnline && (
-                        <div className="absolute -bottom-0.5 -right-0.5 h-3 w-3 border border-black bg-green-400" />
+                        <div className="absolute -bottom-0.5 -right-0.5 h-3 w-3 border border-[var(--bulletin-border)] bg-green-400" />
                       )}
                     </div>
 
@@ -208,14 +208,14 @@ const Messages: React.FC = () => {
                     {/* Right */}
                     <div className="flex items-center gap-2 flex-shrink-0">
                       {hasUnread && (
-                        <span className="inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 border border-black bg-black text-white text-[9px] font-bold">
+                        <span className="inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 border border-[var(--bulletin-border)] bg-[var(--bulletin-text)] text-[var(--bulletin-bg)] text-[9px] font-bold">
                           {conv.unreadCount! > 99 ? '99+' : conv.unreadCount}
                         </span>
                       )}
                       <button
                         onClick={(e) => handleDelete(e, conv._id)}
                         disabled={deletingId === conv._id}
-                        className="border border-black bg-white p-1 text-[9px] font-bold uppercase shadow-[1px_1px_0_0_rgba(0,0,0,1)] opacity-0 group-hover:opacity-100 hover:bg-[#fce4ec] transition-all"
+                        className="border border-[var(--bulletin-border)] bg-[var(--bulletin-card)] p-1 text-[9px] font-bold uppercase shadow-[1px_1px_0_0_var(--bulletin-shadow)] opacity-0 group-hover:opacity-100 hover:bg-[#fce4ec] dark:hover:bg-red-900/20 transition-all"
                         title="Delete"
                       >
                         <Trash2 className="h-3 w-3" />

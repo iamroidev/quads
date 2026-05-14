@@ -15,7 +15,7 @@ const Footer: React.FC = () => {
       <footer className="border-t border-earth-100 bg-white">
         <div className="mx-auto flex max-w-7xl flex-col gap-2 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-8">
           <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-earth-400">
-            CampusMarket &copy; {year}
+            QUADS &copy; {year}
           </p>
           <div className="flex items-center gap-5">
             <Link to="/products" className="text-[10px] font-bold uppercase tracking-[0.15em] text-earth-400 hover:text-earth-900 transition-colors">
@@ -60,7 +60,7 @@ const Footer: React.FC = () => {
           {/* Statement */}
           <div>
             <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-white/25 mb-5">
-              CampusMarket
+              QUADS
             </p>
             <h2 className="text-[clamp(2.5rem,6vw,5rem)] font-black leading-[0.9] tracking-[-0.04em] text-white">
               Buy it.<br />
@@ -138,7 +138,7 @@ const Footer: React.FC = () => {
       <div className="border-t border-white/[0.08]">
         <div className="mx-auto flex max-w-7xl flex-col gap-3 px-4 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-8">
           <p className="text-[10px] text-white/25">
-            &copy; {year} CampusMarket. All rights reserved.
+            &copy; {year} QUADS. All rights reserved.
           </p>
           <p className="text-[10px] text-white/15">
             Built for students, by students.

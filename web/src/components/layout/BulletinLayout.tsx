@@ -1,195 +1,343 @@
-import React, { useState } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
+import React from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { 
+  ChevronRight, 
+  Home, 
+  ArrowLeft,
+  ChevronDown,
+  User,
+  Settings,
+  Package,
+  LogOut,
+  Repeat,
+  Bell,
+  Sun,
+  Moon
+} from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
-import { User, LogOut, Settings, ChevronDown } from 'lucide-react';
 
 interface BulletinLayoutProps {
   children: React.ReactNode;
   title?: string;
   subtitle?: string;
   section?: string;
+  hideBreadcrumbs?: boolean;
+  hideHero?: boolean;
 }
 
-export const BulletinLayout: React.FC<BulletinLayoutProps> = ({ 
-  children, 
-  title, 
+export const BulletinLayout: React.FC<BulletinLayoutProps> = ({
+  children,
+  title,
   subtitle,
-  section = '01'
+  section = '01',
+  hideBreadcrumbs = false,
+  hideHero = false,
 }) => {
-  const { user, isAuthenticated, logout } = useAuth();
-  const navigate = useNavigate();
+  const { user, isAuthenticated, logout, switchRole } = useAuth();
   const location = useLocation();
-  const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
+  const navigate = useNavigate();
+  const [isProfileOpen, setIsProfileOpen] = React.useState(false);
+  const [isSwitching, setIsSwitching] = React.useState(false);
+
+  const [isDark, setIsDark] = React.useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('theme') === 'dark' || document.documentElement.classList.contains('dark');
+    }
+    return false;
+  });
+
+  // Scroll to top on route change
+  React.useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [location.pathname]);
+
+  // Sync theme with DOM
+  React.useEffect(() => {
+    if (isDark) {
+      document.documentElement.classList.add('dark');
+      localStorage.setItem('theme', 'dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+      localStorage.setItem('theme', 'light');
+    }
+  }, [isDark]);
+
+  const toggleTheme = () => setIsDark(!isDark);
 
   const handleLogout = async () => {
     await logout();
     navigate('/login');
   };
 
-  // Close dropdown on route change
-  React.useEffect(() => {
-    setIsProfileMenuOpen(false);
-  }, [location.pathname]);
+  const handleRoleSwitch = async () => {
+    setIsSwitching(true);
+    try {
+      const targetRole = user?.role === 'seller' ? 'buyer' : 'seller';
+      await switchRole(targetRole);
+      setIsProfileOpen(false);
+    } catch (err) {
+      console.error('Failed to switch role', err);
+    } finally {
+      setIsSwitching(false);
+    }
+  };
 
+  const handleStartSelling = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    setIsSwitching(true);
+    try {
+      await switchRole('seller');
+      navigate('/seller/onboarding');
+    } catch (err) {
+      console.error('Failed to transition to seller', err);
+    } finally {
+      setIsSwitching(false);
+    }
+  };
+
+  // Unified footer logic: Always show 4 stable columns
   return (
-    <div className="relative min-h-screen bg-[#f8f7f4] font-mono text-[13px] leading-tight">
-      
-      {/* Fragmented header strip */}
-      <div className="sticky top-0 z-50 flex items-stretch border-b border-black bg-[#f8f7f4]">
-        <Link to="/" className="w-[40%] border-r border-black bg-[#fff5e1] px-3 py-2 transition-colors hover:bg-[#fff0d0]">
-          <span className="block text-[10px] uppercase tracking-wider opacity-40">UMaT</span>
-          <span className="block overflow-hidden text-ellipsis whitespace-nowrap font-bold">Campus Market</span>
-        </Link>
-        <div className="w-[35%] border-r border-black bg-[#e8f4f8] px-3 py-2">
-          <span className="block text-[10px] uppercase tracking-wider opacity-40">Section</span>
-          <span className="block overflow-hidden text-ellipsis whitespace-nowrap font-bold">{section}</span>
-        </div>
+    <div className="min-h-screen bg-[var(--bulletin-bg)] text-[var(--bulletin-text)] font-sans selection:bg-[#ff6b6b] selection:text-white overflow-x-hidden">
+      {/* Heavy Header Border */}
+      <div className="h-2 bg-black w-full fixed top-0 z-[1000]" />
 
-        {/* Profile / auth segment - compact */}
-        <div className="relative w-[25%] bg-[#f0e8f4]">
-          {isAuthenticated && user ? (
-            <>
-              <button
-                className="flex w-full items-center justify-center gap-1 px-2 py-2 text-left transition-colors hover:bg-[#e4dce8]"
-                onClick={() => setIsProfileMenuOpen((prev) => !prev)}
-              >
-                <div className="flex h-5 w-5 flex-shrink-0 items-center justify-center bg-black">
-                  <User className="h-3 w-3 text-white" />
-                </div>
-                <span className="hidden lg:inline text-[9px] uppercase tracking-wider opacity-50 truncate max-w-[50px]">
-                  {user.name?.split(' ')[0] || 'User'}
-                </span>
-                <ChevronDown className="h-3 w-3 text-black/50 flex-shrink-0" />
-              </button>
-
-              {isProfileMenuOpen && (
-                <>
-                  <div className="fixed inset-0 z-30" onClick={() => setIsProfileMenuOpen(false)} />
-                  <div className="absolute right-0 top-full z-40 w-44 border border-black bg-white shadow-[4px_4px_0_0_rgba(0,0,0,1)]">
-                    <div className="border-b border-black px-3 py-2.5">
-                      <p className="text-[10px] font-bold uppercase tracking-wider">{user.name}</p>
-                      <p className="text-[9px] text-black/40 mt-0.5">{user.email}</p>
-                    </div>
-                    <Link
-                      to="/profile"
-                      className="flex items-center gap-2.5 border-b border-black/20 px-3 py-2.5 text-[11px] font-bold transition-colors hover:bg-[#f0e8f4]"
-                      onClick={() => setIsProfileMenuOpen(false)}
-                    >
-                      <User className="h-3 w-3" />
-                      Profile
-                    </Link>
-                    <Link
-                      to="/settings"
-                      className="flex items-center gap-2.5 border-b border-black/20 px-3 py-2.5 text-[11px] font-bold transition-colors hover:bg-[#f0e8f4]"
-                      onClick={() => setIsProfileMenuOpen(false)}
-                    >
-                      <Settings className="h-3 w-3" />
-                      Settings
-                    </Link>
-                    <button
-                      className="flex w-full items-center gap-2.5 px-3 py-2.5 text-[11px] font-bold text-red-600 transition-colors hover:bg-red-50"
-                      onClick={() => { setIsProfileMenuOpen(false); handleLogout(); }}
-                    >
-                      <LogOut className="h-3 w-3" />
-                      Sign out
-                    </button>
-                  </div>
-                </>
-              )}
-            </>
-          ) : (
-            <div className="flex items-stretch h-full">
-              <Link
-                to="/login"
-                className="flex flex-1 items-center px-3 py-2 text-[10px] uppercase tracking-wider text-black/60 transition-colors hover:bg-[#e4dce8] hover:text-black border-r border-black/30"
-              >
-                <span className="block opacity-40">Account</span>
-                <span className="ml-auto block font-bold">Sign in</span>
-              </Link>
-              <Link
-                to="/register"
-                className="flex flex-1 items-center justify-end px-3 py-2 text-[10px] uppercase tracking-wider font-bold text-black transition-colors hover:bg-[#e4dce8]"
-              >
-                Register
-              </Link>
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Page title section */}
-      {title && (
-        <div className="border-b border-black bg-white p-6 md:p-12">
-          <div className="mx-auto max-w-[1400px]">
-            <div className="text-[10px] uppercase tracking-wider opacity-40">{subtitle || 'Page'}</div>
-            <h1 className="mt-2 text-2xl font-bold md:text-3xl">{title}</h1>
-          </div>
-        </div>
-      )}
-
-      {/* Main content */}
-      <div className="relative">
-        {children}
-      </div>
-
-      {/* Footer strip */}
-      <div className="border-t border-black bg-[#f8f7f4]">
-        <div className="mx-auto max-w-[1400px] p-6 md:p-12">
-          <div className="grid gap-8 md:grid-cols-4">
-            {/* Column 1 */}
-            <div>
-              <div className="mb-3 text-[10px] uppercase tracking-wider opacity-40">Marketplace</div>
-              <div className="space-y-2 text-[12px]">
-                <Link to="/products" className="block hover:underline">Browse listings</Link>
-                <Link to="/categories" className="block hover:underline">Categories</Link>
-                <Link to="/sell" className="block hover:underline">Sell an item</Link>
+      {/* Main Container */}
+      <div className="pt-2">
+        {/* Bulletin-Style Top Nav */}
+        <nav className="border-b-2 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] px-6 py-4 md:px-12 relative z-[900]">
+          <div className="mx-auto flex max-w-[1400px] items-center justify-between">
+            <Link to="/" className="flex items-center gap-3 group">
+              <div className="bg-[var(--bulletin-text)] text-[var(--bulletin-bg)] px-2 py-1 text-xl font-black uppercase tracking-tighter transition-colors group-hover:bg-[#ff6b6b]">
+                Q
               </div>
-            </div>
+              <span className="hidden md:block text-sm font-black uppercase tracking-widest text-[var(--bulletin-text)]">QUADS</span>
+            </Link>
 
-            {/* Column 2 */}
-            <div>
-              <div className="mb-3 text-[10px] uppercase tracking-wider opacity-40">Account</div>
-              <div className="space-y-2 text-[12px]">
-                {isAuthenticated ? (
+            <div className="flex items-center gap-8">
+              <div className="hidden lg:flex items-center gap-6 text-[10px] font-black uppercase tracking-widest">
+                {user?.role === 'seller' ? (
                   <>
-                    <Link to="/dashboard" className="block hover:underline">Dashboard</Link>
-                    <Link to="/my-listings" className="block hover:underline">My listings</Link>
-                    <Link to="/orders" className="block hover:underline">Orders</Link>
+                    <Link to="/seller/analytics" className="hover:text-[#ff6b6b]">Analytics</Link>
+                    <Link to="/my-listings" className="hover:text-[#ff6b6b]">My Listings</Link>
+                    <Link to="/seller/onboarding" className="hover:text-[#ff6b6b]">Payouts</Link>
                   </>
                 ) : (
                   <>
-                    <Link to="/login" className="block hover:underline">Login</Link>
-                    <Link to="/register" className="block hover:underline">Register</Link>
+                    <Link to="/products" className="hover:text-[#ff6b6b]">Marketplace</Link>
+                    <Link to="/saved" className="hover:text-[#ff6b6b]">Saved Items</Link>
+                    <Link to="/orders" className="hover:text-[#ff6b6b]">Orders</Link>
                   </>
                 )}
               </div>
-            </div>
 
-            {/* Column 3 */}
-            <div>
-              <div className="mb-3 text-[10px] uppercase tracking-wider opacity-40">Support</div>
-              <div className="space-y-2 text-[12px]">
-                <a href="#" className="block hover:underline">Help center</a>
-                <a href="#" className="block hover:underline">Safety tips</a>
-                <a href="#" className="block hover:underline">Contact us</a>
-              </div>
-            </div>
+              <button 
+                onClick={toggleTheme}
+                className="p-2 border-2 border-black bg-white dark:bg-black/20 hover:bg-[#fffacd] dark:hover:bg-white/10 transition-colors shadow-[2px_2px_0_0_var(--bulletin-shadow)] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none"
+                title={isDark ? "Switch to Light Mode" : "Switch to Dark Mode"}
+              >
+                {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+              </button>
 
-            {/* Column 4 */}
-            <div>
-              <div className="mb-3 text-[10px] uppercase tracking-wider opacity-40">Info</div>
-              <div className="space-y-2 text-[12px]">
-                <div className="border border-black bg-[#fffacd] p-2 text-[11px]">
-                  <div className="font-bold">Campus only</div>
-                  <div className="opacity-70">UMaT students & staff</div>
+              {isAuthenticated ? (
+                <div className="relative">
+                  <button 
+                    onClick={() => setIsProfileOpen(!isProfileOpen)}
+                    className="flex items-center gap-3 border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] px-3 py-1.5 shadow-[4px_4px_0_0_var(--bulletin-shadow)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all active:scale-95"
+                  >
+                    <div className="h-6 w-6 rounded-full bg-[#ff6b6b] border border-[var(--bulletin-border)] flex items-center justify-center text-[10px] text-white font-black">
+                      {user?.name?.[0].toUpperCase()}
+                    </div>
+                    <span className="text-[10px] font-black uppercase tracking-widest truncate max-w-[80px] text-[var(--bulletin-text)]">
+                      {user?.name.split(' ')[0]}
+                    </span>
+                    <ChevronDown className={`h-3 w-3 transition-transform text-[var(--bulletin-text)] ${isProfileOpen ? 'rotate-180' : ''}`} />
+                  </button>
+
+                  {isProfileOpen && (
+                    <>
+                      <div className="fixed inset-0 z-[-1]" onClick={() => setIsProfileOpen(false)} />
+                      <div className="absolute right-0 mt-3 w-64 border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] shadow-[8px_8px_0_0_var(--bulletin-shadow)] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-100">
+                        <div className="px-4 py-3 border-b-2 border-[var(--bulletin-border)] bg-[#fffacd] dark:bg-yellow-900/20">
+                           <div className="text-[8px] font-black uppercase tracking-widest opacity-40 text-black dark:text-white">Active Perspective</div>
+                           <div className="text-[10px] font-black uppercase tracking-widest flex items-center gap-2 text-black dark:text-white">
+                             <div className={`h-2 w-2 rounded-full ${user?.role === 'seller' ? 'bg-[#ff6b6b]' : 'bg-sky-500'} animate-pulse`} />
+                             {user?.role} View
+                           </div>
+                        </div>
+                        
+                        <Link to="/profile" className="px-4 py-3 text-[10px] font-black uppercase tracking-widest border-b border-[var(--bulletin-border)]/10 hover:bg-[var(--bulletin-bg)] transition-colors flex items-center gap-2 text-[var(--bulletin-text)]">
+                           <User className="h-3 w-3" /> My Profile
+                        </Link>
+                        
+                        <button 
+                          disabled={isSwitching}
+                          onClick={handleRoleSwitch}
+                          className="px-4 py-3 text-[10px] font-black uppercase tracking-widest border-b border-[var(--bulletin-border)]/10 hover:bg-sky-50 dark:hover:bg-sky-900/10 transition-colors flex items-center gap-2 text-sky-700 dark:text-sky-400">
+                           <Repeat className={`h-3 w-3 ${isSwitching ? 'animate-spin' : ''}`} />
+                           {isSwitching ? 'Switching...' : `Switch to ${user?.role === 'seller' ? 'Buyer' : 'Seller'} Mode`}
+                        </button>
+
+                        <Link to="/settings" className="px-4 py-3 text-[10px] font-black uppercase tracking-widest border-b border-[var(--bulletin-border)]/10 hover:bg-[var(--bulletin-bg)] transition-colors flex items-center gap-2 text-[var(--bulletin-text)]">
+                           <Settings className="h-3 w-3" /> Account Settings
+                        </Link>
+
+                        <Link to="/notifications" className="px-4 py-3 text-[10px] font-black uppercase tracking-widest border-b border-[var(--bulletin-border)]/10 hover:bg-[var(--bulletin-bg)] transition-colors flex items-center gap-2 text-[var(--bulletin-text)]">
+                           <Bell className="h-3 w-3" /> Notifications
+                        </Link>
+
+                        <button 
+                          onClick={handleLogout}
+                          className="px-4 py-3 text-[10px] font-black uppercase tracking-widest text-left text-[#ff6b6b] hover:bg-[#fff0f0] transition-colors flex items-center gap-2"
+                        >
+                           <LogOut className="h-3 w-3" /> Sign Out
+                        </button>
+                      </div>
+                    </>
+                  )}
                 </div>
-              </div>
+              ) : (
+                <Link to="/login" className="border-2 border-black bg-black text-white px-4 py-1.5 text-[10px] font-black uppercase tracking-widest hover:bg-[#fffacd] hover:text-black transition-colors">
+                  Join Market
+                </Link>
+              )}
             </div>
           </div>
+        </nav>
 
-          <div className="mt-8 border-t border-black pt-6 text-center">
-            <div className="text-[10px] uppercase tracking-wider opacity-40">
-              UMaT Campus Marketplace · 2026 · Made for students, by students
+        {/* Navigation Breadcrumbs */}
+        {!hideBreadcrumbs && (
+          <div className="border-b border-[var(--bulletin-border)] bg-[var(--bulletin-card)] px-6 py-3">
+            <div className="mx-auto flex max-w-[1400px] items-center gap-2 text-[10px] font-black uppercase tracking-widest opacity-40 text-[var(--bulletin-text)]">
+              <Link to="/" className="hover:opacity-100 text-[var(--bulletin-text)]"><Home className="h-3 w-3" /></Link>
+              <ChevronRight className="h-3 w-3" />
+              <span>{section}</span>
+              {title && (
+                <>
+                  <ChevronRight className="h-3 w-3" />
+                  <span className="opacity-100">{title}</span>
+                </>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Hero Section */}
+        {title && !hideHero && (
+          <div className="border-b border-[var(--bulletin-border)] bg-[var(--bulletin-card)] px-6 py-12 md:px-12 md:py-20">
+            <div className="mx-auto max-w-[1400px]">
+              <div className="mb-4 inline-block border-2 border-[var(--bulletin-border)] bg-[#ff6b6b] px-3 py-1 text-[10px] font-black uppercase tracking-tighter text-white">
+                Bulletin · {section}
+              </div>
+              <h1 className="mb-4 text-6xl font-black uppercase tracking-tighter md:text-8xl lg:text-9xl">
+                {title}
+              </h1>
+              {subtitle && (
+                <p className="max-w-xl text-xl font-medium leading-tight opacity-60">
+                  {subtitle}
+                </p>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Page Content */}
+        <div className="relative">
+          {children}
+        </div>
+
+        {/* High-Contrast Bulletin Footer */}
+        <div className="border-t-4 border-[var(--bulletin-border)] bg-[var(--bulletin-card)]">
+          {/* Yellow Accent Strip */}
+          <div className="h-1.5 bg-[#fffacd] dark:bg-yellow-900/40 border-b border-[var(--bulletin-border)] w-full" />
+          
+          <div className="mx-auto max-w-[1400px] p-8 md:p-16">
+            <div className="grid gap-12 sm:grid-cols-2 md:grid-cols-4">
+              
+              {/* Column 1: Mode-Aware Marketplace */}
+              <div className="border-l-2 border-black/10 pl-6 first:border-l-0 first:pl-0">
+                <div className="mb-6 inline-block border border-black bg-black px-2 py-0.5 text-[9px] font-black uppercase tracking-widest text-white">
+                  {user?.role === 'seller' ? 'Store Management' : 'Marketplace'}
+                </div>
+                <div className="space-y-3 text-[12px] font-bold">
+                  {user?.role === 'seller' ? (
+                    <>
+                      <Link to="/my-listings" className="block hover:text-[#ff6b6b]">Manage Listings</Link>
+                      <Link to="/seller/orders" className="block hover:text-[#ff6b6b]">Store Orders</Link>
+                      <Link to="/sell" className="block hover:text-[#ff6b6b]">Add New Item</Link>
+                    </>
+                  ) : (
+                    <>
+                      <Link to="/products" className="block hover:text-[#ff6b6b]">Browse Products</Link>
+                      <Link to="/categories" className="block hover:text-[#ff6b6b]">Categories</Link>
+                      <button 
+                        onClick={handleStartSelling}
+                        disabled={isSwitching}
+                        className="block text-left hover:text-[#ff6b6b] disabled:opacity-50"
+                      >
+                        {isSwitching ? 'Switching...' : 'Sell on Market'}
+                      </button>
+                    </>
+                  )}
+                </div>
+              </div>
+
+              {/* Column 2: Account & Context */}
+              <div className="border-l-2 border-black/10 pl-6">
+                <div className="mb-6 inline-block border border-black bg-black px-2 py-0.5 text-[9px] font-black uppercase tracking-widest text-white">
+                  {user?.role === 'seller' ? 'Seller Workspace' : 'Personal Hub'}
+                </div>
+                <div className="space-y-3 text-[12px] font-bold">
+                  {user?.role === 'seller' ? (
+                    <>
+                      <Link to="/seller/analytics" className="block hover:text-[#ff6b6b]">Analytics</Link>
+                      <Link to="/seller/onboarding" className="block hover:text-[#ff6b6b]">Payout Setup</Link>
+                      <Link to="/disputes" className="block hover:text-[#ff6b6b]">Dispute Center</Link>
+                    </>
+                  ) : (
+                    <>
+                      <Link to="/dashboard" className="block hover:text-[#ff6b6b]">Dashboard</Link>
+                      <Link to="/saved" className="block hover:text-[#ff6b6b]">Saved Items</Link>
+                      <Link to="/orders" className="block hover:text-[#ff6b6b]">My Orders</Link>
+                    </>
+                  )}
+                </div>
+              </div>
+
+              {/* Column 3: Identity & Security */}
+              <div className="border-l-2 border-black/10 pl-6">
+                <div className="mb-6 inline-block border border-black bg-[#ff6b6b] px-2 py-0.5 text-[9px] font-black uppercase tracking-widest text-white">
+                  Commerce
+                </div>
+                <div className="space-y-3 text-[12px] font-bold">
+                  <Link to="/verification" className="block hover:text-[#ff6b6b]">Verification</Link>
+                  <Link to="/profile" className="block hover:text-[#ff6b6b]">Public Profile</Link>
+                  <Link to="/messages" className="block hover:text-[#ff6b6b]">Messages</Link>
+                </div>
+              </div>
+
+              {/* Column 4: Assistance */}
+              <div className="border-l-2 border-black/10 pl-6">
+                <div className="mb-6 inline-block border border-black bg-black px-2 py-0.5 text-[9px] font-black uppercase tracking-widest text-white">
+                  Assistance
+                </div>
+                <div className="space-y-3 text-[12px] font-bold">
+                  <Link to="/support" className="block hover:text-[#ff6b6b]">Help Hub</Link>
+                  <Link to="/contact" className="block hover:text-[#ff6b6b]">Contact Support</Link>
+                  <Link to="/terms" className="block hover:text-[#ff6b6b]">Privacy & Terms</Link>
+                </div>
+              </div>
+
+            </div>
+
+            <div className="mt-16 border-t-2 border-[var(--bulletin-border)] pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
+              <div className="text-[10px] font-black uppercase tracking-widest opacity-30">
+                QUADS · 2026 / Tarkwa
+              </div>
+              <div className="flex items-center gap-6 text-[10px] font-black uppercase tracking-widest">
+                <span className="opacity-20 select-none">///</span>
+                <span>SECURE ESCROW ACTIVE</span>
+                <span className="opacity-20 select-none">///</span>
+              </div>
             </div>
           </div>
         </div>
@@ -205,18 +353,23 @@ export const BulletinSection: React.FC<{
   subtitle?: string;
   action?: React.ReactNode;
   bgColor?: string;
-}> = ({ children, title, subtitle, action, bgColor = 'bg-[#faf8f5]' }) => {
+  id?: string;
+  className?: string;
+}> = ({ children, title, subtitle, action, bgColor, id, className = '' }) => {
+  // If no bgColor provided, use theme variable
+  const bgClass = bgColor ? bgColor : 'bg-[var(--bulletin-bg)]';
+  
   return (
-    <div className={`border-b border-black ${bgColor} p-6 md:p-12`}>
+    <div id={id} className={`border-b border-black dark:border-white/20 ${bgClass} p-6 md:p-12 transition-colors duration-200 ${className}`}>
       <div className="mx-auto max-w-[1400px]">
         {(title || action) && (
-          <div className="mb-8 flex items-end justify-between border-b border-black pb-2">
+          <div className="mb-8 flex items-end justify-between border-b border-black dark:border-white/20 pb-2">
             <div>
               {subtitle && (
                 <div className="text-[10px] uppercase tracking-wider opacity-40">{subtitle}</div>
               )}
               {title && (
-                <div className="text-lg font-bold">{title}</div>
+                <div className="text-lg font-black uppercase tracking-tight">{title}</div>
               )}
             </div>
             {action}
@@ -234,10 +387,14 @@ export const BulletinCard: React.FC<{
   rotation?: number;
   bgColor?: string;
   className?: string;
-}> = ({ children, rotation = 0, bgColor = 'bg-white', className = '' }) => {
+  onClick?: () => void;
+}> = ({ children, rotation = 0, bgColor, className = '', onClick }) => {
+  const bgClass = bgColor ? bgColor : 'bg-[var(--bulletin-card)]';
+
   return (
     <div
-      className={`border border-black ${bgColor} p-4 shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition-transform hover:-translate-y-1 ${className}`}
+      onClick={onClick}
+      className={`border border-black dark:border-white/40 ${bgClass} p-4 shadow-[4px_4px_0_0_var(--bulletin-shadow)] transition-all hover:-translate-y-1 ${className} ${onClick ? 'cursor-pointer' : ''}`}
       style={{ transform: `rotate(${rotation}deg)` }}
     >
       {children}

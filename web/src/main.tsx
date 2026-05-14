@@ -54,39 +54,39 @@ const AppRoot: React.FC = () => {
               <Toaster
                 position={isMobile ? 'bottom-center' : 'bottom-right'}
                 toastOptions={{
-                  duration: 1800,
+                  duration: 2500,
+                  className: 'bulletin-toast',
                   style: {
                     borderRadius: '0px',
-                    background: '#f6f1e7',
-                    color: '#2c2418',
-                    fontSize: '12px',
-                    fontWeight: '700',
-                    letterSpacing: '0.08em',
+                    background: '#fffdf8',
+                    color: '#000',
+                    fontSize: '11px',
+                    fontWeight: '900',
+                    letterSpacing: '0.1em',
                     textTransform: 'uppercase',
-                    border: '1px solid #dccfb8',
-                    boxShadow: 'none',
-                    padding: '10px 12px',
+                    border: '4px solid #000',
+                    boxShadow: '8px 8px 0 0 rgba(0,0,0,1)',
+                    padding: '16px 20px',
+                    fontFamily: '"JetBrains Mono", monospace',
+                    maxWidth: '400px',
                   },
                   success: {
                     style: {
-                      borderColor: '#93a77a',
-                      background: '#edf3e6',
-                      color: '#2d3b1f',
+                      background: '#fffacd', // Yellow notice
                     },
                     iconTheme: {
-                      primary: '#5f7a3f',
-                      secondary: '#edf3e6',
+                      primary: '#000',
+                      secondary: '#fffacd',
                     },
                   },
                   error: {
                     style: {
-                      borderColor: '#e2a8a2',
-                      background: '#fceceb',
-                      color: '#6b221c',
+                      background: '#ff6b6b', // Red alert
+                      color: '#fff',
                     },
                     iconTheme: {
-                      primary: '#c0392b',
-                      secondary: '#fceceb',
+                      primary: '#fff',
+                      secondary: '#ff6b6b',
                     },
                   },
                 }}

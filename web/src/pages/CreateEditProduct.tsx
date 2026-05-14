@@ -33,7 +33,7 @@ const CAMPUS_LOCATIONS = [
   'Sports Complex', 'Admin Block', 'ICT Center', 'Tarkwa Market',
 ];
 
-const fieldBase = 'w-full border border-black bg-[#fefdfb] p-2 text-[12px] font-bold focus:outline-none focus:ring-2 focus:ring-black placeholder:text-black/30';
+const fieldBase = 'w-full border border-[var(--bulletin-border)] bg-[var(--bulletin-card)] p-2 text-[12px] font-bold focus:outline-none focus:ring-2 focus:ring-[var(--bulletin-text)] placeholder:text-[var(--bulletin-muted)]';
 const fieldError = 'border-red-500';
 const labelBase = 'block text-[10px] font-bold uppercase tracking-wider opacity-60 mb-1';
 
@@ -185,9 +185,9 @@ const CreateEditProduct: React.FC = () => {
 
   if (loadingProduct) {
     return <BulletinLayout title="Loading..." subtitle={isEdit ? 'Edit' : 'New'} section="14">
-      <BulletinSection bgColor="bg-[#faf8f5]">
+      <BulletinSection bgColor="bg-[var(--bulletin-bg)]">
         <div className="flex items-center justify-center py-20">
-          <div className="animate-spin h-8 w-8 border-b-2 border-black" />
+          <div className="animate-spin h-8 w-8 border-b-2 border-[var(--bulletin-border)]" />
         </div>
       </BulletinSection>
     </BulletinLayout>;
@@ -197,10 +197,10 @@ const CreateEditProduct: React.FC = () => {
   if (isUnverifiedSeller) {
     return (
       <BulletinLayout title="Verification Required" subtitle="Seller" section="14">
-        <BulletinSection bgColor="bg-[#faf8f5]">
+        <BulletinSection bgColor="bg-[var(--bulletin-bg)]">
           <div className="max-w-lg mx-auto text-center py-16">
-            <div className="inline-flex items-center justify-center h-16 w-16 border-2 border-black bg-[#fce4ec] mb-6">
-              <ShieldOff className="h-8 w-8 text-black/60" />
+            <div className="inline-flex items-center justify-center h-16 w-16 border-2 border-[var(--bulletin-border)] bg-[#fce4ec] dark:bg-red-900/20 mb-6">
+              <ShieldOff className="h-8 w-8 opacity-60" />
             </div>
             <div className="text-[10px] font-bold uppercase tracking-[3px] opacity-50 mb-3">Action Required</div>
             <h2 className="text-2xl font-bold mb-3">Verify before listing</h2>
@@ -213,13 +213,13 @@ const CreateEditProduct: React.FC = () => {
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
               <button
                 onClick={() => navigate('/verification')}
-                className="border border-black bg-black px-6 py-3 text-[11px] font-bold uppercase text-white shadow-[3px_3px_0_0_rgba(0,0,0,1)] hover:bg-white hover:text-black transition-colors"
+                className="border border-[var(--bulletin-border)] bg-[var(--bulletin-text)] px-6 py-3 text-[11px] font-bold uppercase text-[var(--bulletin-bg)] shadow-[3px_3px_0_0_var(--bulletin-shadow)] hover:bg-[var(--bulletin-card)] hover:text-[var(--bulletin-text)] transition-colors"
               >
                 Verify My Account
               </button>
               <button
                 onClick={() => navigate(-1)}
-                className="border border-black bg-white px-6 py-3 text-[11px] font-bold uppercase shadow-[3px_3px_0_0_rgba(0,0,0,1)] hover:shadow-[4px_4px_0_0_rgba(0,0,0,1)] transition-all"
+                className="border border-[var(--bulletin-border)] bg-[var(--bulletin-card)] px-6 py-3 text-[11px] font-bold uppercase shadow-[3px_3px_0_0_var(--bulletin-shadow)] hover:shadow-[4px_4px_0_0_var(--bulletin-shadow)] transition-all"
               >
                 Go Back
               </button>
@@ -236,7 +236,7 @@ const CreateEditProduct: React.FC = () => {
       subtitle={isEdit ? 'Edit listing' : 'New listing'}
       section="14"
     >
-      <div className="border-b border-black bg-[#faf8f5] p-4 md:p-6">
+      <div className="border-b border-[var(--bulletin-border)] bg-[var(--bulletin-bg)] p-4 md:p-6">
         <div className="mx-auto max-w-[1400px]">
           <button
             onClick={() => navigate(-1)}
@@ -248,10 +248,10 @@ const CreateEditProduct: React.FC = () => {
         </div>
       </div>
 
-      <BulletinSection bgColor="bg-[#f5f9fa]">
+      <BulletinSection bgColor="bg-[var(--bulletin-bg)]">
         <form onSubmit={handleSubmit(onSubmit)} className="max-w-2xl mx-auto space-y-8">
           {/* Images */}
-          <BulletinCard rotation={-0.3} bgColor="bg-white">
+          <BulletinCard rotation={-0.3} bgColor="bg-[var(--bulletin-card)]">
             <div className={labelBase}>Photos</div>
             <div className="mt-3">
               <ImageUpload
@@ -265,7 +265,7 @@ const CreateEditProduct: React.FC = () => {
           </BulletinCard>
 
           {/* Title */}
-          <BulletinCard rotation={0.3} bgColor="bg-white">
+          <BulletinCard rotation={0.3} bgColor="bg-[var(--bulletin-card)]">
             <label className={labelBase}>Title</label>
             <input
               type="text"
@@ -277,7 +277,7 @@ const CreateEditProduct: React.FC = () => {
           </BulletinCard>
 
           {/* Description */}
-          <BulletinCard rotation={-0.3} bgColor="bg-white">
+          <BulletinCard rotation={-0.3} bgColor="bg-[var(--bulletin-card)]">
             <label className={labelBase}>Description</label>
             <textarea
               placeholder="Describe your item — condition details, why you're selling, any defects, etc."
@@ -290,7 +290,7 @@ const CreateEditProduct: React.FC = () => {
 
           {/* Price + Condition */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <BulletinCard rotation={0.3} bgColor="bg-white">
+            <BulletinCard rotation={0.3} bgColor="bg-[var(--bulletin-card)]">
               <label className={labelBase}>Price (GHS)</label>
               <input
                 type="number"
@@ -304,7 +304,7 @@ const CreateEditProduct: React.FC = () => {
               {errors.price && <p className="mt-1 text-[11px] text-red-600 font-bold">{errors.price.message}</p>}
             </BulletinCard>
 
-            <BulletinCard rotation={-0.3} bgColor="bg-white">
+            <BulletinCard rotation={-0.3} bgColor="bg-[var(--bulletin-card)]">
               <label className={labelBase}>Condition</label>
               <select className={`${fieldBase} mt-2 ${errors.condition ? fieldError : ''}`} {...register('condition')}>
                 <option value="">Select condition</option>
@@ -320,7 +320,7 @@ const CreateEditProduct: React.FC = () => {
 
           {/* Pricing insights */}
           {pricingInsights && (
-            <BulletinCard rotation={0} bgColor="bg-[#fffacd]">
+            <BulletinCard rotation={0} bgColor="bg-[#fffacd] dark:bg-yellow-900/20">
               <div className="text-[10px] font-bold uppercase tracking-wider opacity-60">Smart pricing assistant</div>
               <div className="mt-2 text-[12px]">
                 Recommended band: <span className="font-bold">GHS {pricingInsights.recommendedMin}</span> - <span className="font-bold">GHS {pricingInsights.recommendedMax}</span>
@@ -332,7 +332,7 @@ const CreateEditProduct: React.FC = () => {
           )}
 
           {/* Category */}
-          <BulletinCard rotation={0.3} bgColor="bg-white">
+          <BulletinCard rotation={0.3} bgColor="bg-[var(--bulletin-card)]">
             <label className={labelBase}>Category</label>
             <select className={`${fieldBase} mt-2 ${errors.category ? fieldError : ''}`} {...register('category')}>
               <option value="">Select a category</option>
@@ -345,7 +345,7 @@ const CreateEditProduct: React.FC = () => {
 
           {/* Delivery + Pickup */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <BulletinCard rotation={-0.3} bgColor="bg-white">
+            <BulletinCard rotation={-0.3} bgColor="bg-[var(--bulletin-card)]">
               <label className={labelBase}>Delivery Option</label>
               <select className={`${fieldBase} mt-2`} {...register('deliveryOption')}>
                 <option value="pickup">Campus Pickup</option>
@@ -355,7 +355,7 @@ const CreateEditProduct: React.FC = () => {
             </BulletinCard>
 
             {(deliveryOption === 'pickup' || deliveryOption === 'both') && (
-              <BulletinCard rotation={0.3} bgColor="bg-white">
+              <BulletinCard rotation={0.3} bgColor="bg-[var(--bulletin-card)]">
                 <label className={labelBase}>Pickup Location</label>
                 <select className={`${fieldBase} mt-2`} {...register('pickupLocation')}>
                   <option value="">Select location</option>
@@ -368,7 +368,7 @@ const CreateEditProduct: React.FC = () => {
           </div>
 
           {/* Tags */}
-          <BulletinCard rotation={-0.3} bgColor="bg-white">
+          <BulletinCard rotation={-0.3} bgColor="bg-[var(--bulletin-card)]">
             <label className={labelBase}>Tags</label>
             <input
               type="text"
@@ -380,7 +380,7 @@ const CreateEditProduct: React.FC = () => {
           </BulletinCard>
 
           {/* Status */}
-          <BulletinCard rotation={0.3} bgColor="bg-white">
+          <BulletinCard rotation={0.3} bgColor="bg-[var(--bulletin-card)]">
             <div className={labelBase}>Listing Status</div>
             <div className="flex gap-6 mt-3">
               <label className="flex items-center gap-2 cursor-pointer">
@@ -388,7 +388,7 @@ const CreateEditProduct: React.FC = () => {
                   type="radio"
                   value="active"
                   {...register('status')}
-                  className="h-4 w-4 accent-black"
+                  className="h-4 w-4 accent-[var(--bulletin-text)]"
                 />
                 <span className="text-[12px] font-bold">Publish Now</span>
               </label>
@@ -397,7 +397,7 @@ const CreateEditProduct: React.FC = () => {
                   type="radio"
                   value="draft"
                   {...register('status')}
-                  className="h-4 w-4 accent-black"
+                  className="h-4 w-4 accent-[var(--bulletin-text)]"
                 />
                 <span className="text-[12px] font-bold">Save as Draft</span>
               </label>
@@ -409,14 +409,14 @@ const CreateEditProduct: React.FC = () => {
             <button
               type="button"
               onClick={() => navigate(-1)}
-              className="flex-1 border border-black bg-white px-4 py-2 text-[10px] font-bold uppercase shadow-[2px_2px_0_0_rgba(0,0,0,1)] hover:shadow-[3px_3px_0_0_rgba(0,0,0,1)] transition-all"
+              className="flex-1 border border-[var(--bulletin-border)] bg-[var(--bulletin-card)] px-4 py-2 text-[10px] font-bold uppercase shadow-[2px_2px_0_0_var(--bulletin-shadow)] hover:shadow-[3px_3px_0_0_var(--bulletin-shadow)] transition-all"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={submitting}
-              className="flex-1 border border-black bg-black px-4 py-2 text-[10px] font-bold uppercase text-white shadow-[2px_2px_0_0_rgba(0,0,0,1)] hover:bg-white hover:text-black disabled:opacity-40 transition-all"
+              className="flex-1 border border-[var(--bulletin-border)] bg-[var(--bulletin-text)] px-4 py-2 text-[10px] font-bold uppercase text-[var(--bulletin-bg)] shadow-[2px_2px_0_0_var(--bulletin-shadow)] hover:bg-[var(--bulletin-card)] hover:text-[var(--bulletin-text)] disabled:opacity-40 transition-all"
             >
               {submitting ? 'Saving...' : isEdit ? 'Update Listing' : 'Post Listing'}
             </button>

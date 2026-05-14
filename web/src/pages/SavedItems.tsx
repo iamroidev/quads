@@ -50,30 +50,30 @@ const SavedItems: React.FC = () => {
       subtitle={pagination ? `${pagination.total} item${pagination.total !== 1 ? 's' : ''}` : 'Your wishlist'}
       section="03"
     >
-      <BulletinSection bgColor="bg-[#faf8f5]">
+      <BulletinSection bgColor="bg-[var(--bulletin-bg)]">
         {loading ? (
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {[...Array(8)].map((_, i) => (
-              <div key={i} className="aspect-[3/4] animate-pulse border border-black bg-white" />
+              <div key={i} className="aspect-[3/4] animate-pulse border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-card)]" />
             ))}
           </div>
         ) : products.length === 0 ? (
-          <div className="border border-black bg-[#fffacd] p-8 text-center">
-            <div className="mb-3">
-              <Heart className="h-12 w-12 mx-auto opacity-30" />
+          <div className="border-4 border-[var(--bulletin-border)] bg-[#fffacd] dark:bg-yellow-900/10 p-12 text-center shadow-[8px_8px_0_0_var(--bulletin-shadow)]">
+            <div className="mb-6">
+              <Heart className="h-16 w-16 mx-auto opacity-20 text-[var(--bulletin-text)]" />
             </div>
-            <div className="text-[10px] uppercase tracking-wider opacity-60 mb-2">No saved items</div>
-            <div className="font-bold mb-4">You haven't saved any items yet</div>
+            <div className="text-[10px] font-black uppercase tracking-widest opacity-40 mb-2 text-[var(--bulletin-text)]">Wishlist Empty</div>
+            <div className="text-2xl font-black uppercase tracking-tight mb-8 text-[var(--bulletin-text)]">You haven't saved any items yet</div>
             <Link
               to="/products"
-              className="inline-block border border-black bg-black px-4 py-2 text-[11px] font-bold uppercase text-white transition-colors hover:bg-white hover:text-black"
+              className="inline-block border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-text)] px-8 py-3 text-[10px] font-black uppercase text-[var(--bulletin-bg)] transition-all hover:bg-[var(--bulletin-card)] hover:text-[var(--bulletin-text)] shadow-[4px_4px_0_0_var(--bulletin-shadow)]"
             >
               Browse products →
             </Link>
           </div>
         ) : (
           <>
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
               {products.map((product, idx) => (
                 <Link
                   key={product._id}
@@ -91,8 +91,8 @@ const SavedItems: React.FC = () => {
                   }}
                 >
                   {/* Polaroid frame */}
-                  <div className="border border-black bg-white p-3 shadow-[6px_6px_0_0_rgba(0,0,0,0.1)]">
-                    <div className="relative aspect-square overflow-hidden border border-black/10 bg-gray-100">
+                  <div className="border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] p-4 shadow-[6px_6px_0_0_var(--bulletin-shadow)] group-hover:shadow-[10px_10px_0_0_var(--bulletin-shadow)] transition-all">
+                    <div className="relative aspect-square overflow-hidden border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-bg)]">
                       <img
                         src={getImage(product)}
                         alt={product.title}
@@ -102,15 +102,15 @@ const SavedItems: React.FC = () => {
                       <div className="absolute -top-2 left-1/2 h-4 w-16 -translate-x-1/2 bg-[#ffd700]/30 opacity-60"
                            style={{ transform: 'translateX(-50%) rotate(-2deg)' }} />
                       {/* Heart badge */}
-                      <div className="absolute top-2 right-2 bg-[#fce4ec] border border-black p-1.5">
-                        <Heart className="h-3 w-3 fill-black" />
+                      <div className="absolute top-3 right-3 bg-red-50 dark:bg-red-900/30 border-2 border-[var(--bulletin-border)] p-2 shadow-[2px_2px_0_0_var(--bulletin-shadow)]">
+                        <Heart className="h-4 w-4 fill-red-500 text-red-500" />
                       </div>
                     </div>
-                    <div className="mt-3 space-y-1">
-                      <div className="truncate font-bold leading-tight">{product.title}</div>
+                    <div className="mt-4 space-y-1">
+                      <div className="truncate font-black uppercase tracking-tight text-sm text-[var(--bulletin-text)]">{product.title}</div>
                       <div className="flex items-baseline justify-between">
-                        <span className="text-base font-bold">GHS {product.price}</span>
-                        <span className="text-[10px] uppercase opacity-50">
+                        <span className="text-lg font-black text-[var(--bulletin-text)]">GHS {product.price}</span>
+                        <span className="text-[9px] font-black uppercase tracking-widest opacity-40 text-[var(--bulletin-text)]">
                           {typeof product.category === 'string' ? '' : product.category.name}
                         </span>
                       </div>
@@ -122,24 +122,24 @@ const SavedItems: React.FC = () => {
 
             {/* Pagination */}
             {pagination && pagination.pages > 1 && (
-              <div className="flex justify-center gap-2 mt-8">
+              <div className="flex justify-center gap-4 mt-12 pt-8 border-t-2 border-[var(--bulletin-border)]">
                 {page > 1 && (
                   <button
                     onClick={() => setPage((prev) => Math.max(1, prev - 1))}
                     disabled={loading}
-                    className="border border-black bg-white px-4 py-2 text-[11px] font-bold uppercase transition-colors hover:bg-black hover:text-white disabled:opacity-40"
+                    className="border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] px-6 py-2 text-[10px] font-black uppercase tracking-widest transition-all hover:bg-[var(--bulletin-text)] hover:text-[var(--bulletin-bg)] disabled:opacity-20 shadow-[4px_4px_0_0_var(--bulletin-shadow)] text-[var(--bulletin-text)]"
                   >
-                    Previous
+                    Prev
                   </button>
                 )}
-                <span className="flex items-center px-4 py-2 text-[11px] font-bold uppercase opacity-60">
+                <span className="flex items-center px-6 py-2 text-[11px] font-black uppercase tracking-tighter text-[var(--bulletin-text)]">
                   {pagination.page} / {pagination.pages}
                 </span>
                 {page < pagination.pages && (
                   <button
                     onClick={() => setPage((prev) => Math.min(pagination.pages, prev + 1))}
                     disabled={loading}
-                    className="border border-black bg-white px-4 py-2 text-[11px] font-bold uppercase transition-colors hover:bg-black hover:text-white disabled:opacity-40"
+                    className="border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] px-6 py-2 text-[10px] font-black uppercase tracking-widest transition-all hover:bg-[var(--bulletin-text)] hover:text-[var(--bulletin-bg)] disabled:opacity-20 shadow-[4px_4px_0_0_var(--bulletin-shadow)] text-[var(--bulletin-text)]"
                   >
                     Next
                   </button>

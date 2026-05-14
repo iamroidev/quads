@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { Bell, CheckCheck, Trash2 } from 'lucide-react';
 import toast from 'react-hot-toast';
@@ -79,72 +78,72 @@ const Notifications: React.FC = () => {
 
   return (
     <BulletinLayout title="Notifications" subtitle="Inbox" section="08">
-      <BulletinSection bgColor="bg-[#faf8f5]">
+      <BulletinSection bgColor="bg-[var(--bulletin-bg)]">
         {/* Header bar */}
-        <div className="flex items-center justify-between mb-6 border-b border-black pb-3">
-          <div className="text-[10px] uppercase tracking-wider opacity-60">
+        <div className="flex items-center justify-between mb-8 border-b-4 border-[var(--bulletin-border)] pb-4">
+          <div className="text-[12px] font-black uppercase tracking-widest opacity-60 text-[var(--bulletin-text)]">
             {pagination ? `${pagination.total} notification${pagination.total !== 1 ? 's' : ''}` : ''}
           </div>
           <button
             onClick={handleMarkAllAsRead}
             disabled={markingAll}
-            className="border border-black bg-white px-3 py-1.5 text-[10px] font-bold uppercase shadow-[2px_2px_0_0_rgba(0,0,0,1)] hover:shadow-[3px_3px_0_0_rgba(0,0,0,1)] disabled:opacity-40 transition-all"
+            className="border-4 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] px-4 py-2 text-[10px] font-black uppercase shadow-[4px_4px_0_0_var(--bulletin-shadow)] hover:-translate-y-1 hover:shadow-[6px_6px_0_0_var(--bulletin-shadow)] disabled:opacity-40 transition-all text-[var(--bulletin-text)]"
           >
-            <CheckCheck className="inline-block h-3 w-3 mr-1" />
+            <CheckCheck className="inline-block h-4 w-4 mr-2" />
             {markingAll ? 'Marking...' : 'Mark all read'}
           </button>
         </div>
 
         {notifications.length === 0 ? (
-          <div className="border border-black bg-[#fffacd] p-12 text-center shadow-[4px_4px_0_0_rgba(0,0,0,1)]">
-            <Bell className="h-12 w-12 mx-auto opacity-40 mb-4" />
-            <div className="text-[10px] uppercase tracking-wider opacity-60 mb-2">All clear</div>
-            <div className="text-lg font-bold mb-2">No notifications yet</div>
+          <div className="border-4 border-[var(--bulletin-border)] bg-[#fffacd] dark:bg-yellow-900/40 p-16 text-center shadow-[8px_8px_0_0_var(--bulletin-shadow)]" style={{ transform: 'rotate(-0.5deg)' }}>
+            <Bell className="h-16 w-16 mx-auto opacity-40 mb-6 text-[var(--bulletin-text)]" />
+            <div className="text-[12px] font-black uppercase tracking-widest opacity-60 mb-2 text-[var(--bulletin-text)]">All clear</div>
+            <div className="text-2xl font-black uppercase tracking-tight text-[var(--bulletin-text)]">No notifications yet</div>
           </div>
         ) : (
-          <div className="space-y-2">
+          <div className="space-y-4">
             {notifications.map((item) => (
               <div
                 key={item._id}
-                className={`border border-black p-4 shadow-[2px_2px_0_0_rgba(0,0,0,1)] ${
-                  item.isRead ? 'bg-white' : 'bg-[#fffacd]'
+                className={`border-4 border-[var(--bulletin-border)] p-6 shadow-[8px_8px_0_0_var(--bulletin-shadow)] transition-colors ${
+                  item.isRead ? 'bg-[var(--bulletin-card)]' : 'bg-[#fffacd] dark:bg-yellow-900/40'
                 }`}
               >
-                <div className="flex items-start justify-between gap-3">
+                <div className="flex items-start justify-between gap-4">
                   <div className="flex-1 min-w-0">
                     {!item.isRead && (
-                      <div className="w-2 h-2 border border-black bg-black mb-2" />
+                      <div className="w-3 h-3 border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-text)] mb-3" />
                     )}
-                    <div className="text-[12px] font-bold">{item.title}</div>
-                    <div className="text-[12px] opacity-70 mt-1">{item.message}</div>
-                    <div className="text-[10px] opacity-50 mt-2">
+                    <div className="text-[14px] font-black uppercase tracking-tight text-[var(--bulletin-text)]">{item.title}</div>
+                    <div className="text-[12px] font-bold opacity-80 mt-2 text-[var(--bulletin-text)]">{item.message}</div>
+                    <div className="text-[10px] font-black uppercase tracking-widest opacity-40 mt-4 text-[var(--bulletin-text)]">
                       {new Date(item.createdAt).toLocaleString('en-GH')}
                     </div>
                     {item.link && (
                       <Link
                         to={item.link}
-                        className="inline-block mt-2 border border-black bg-white px-2 py-0.5 text-[9px] font-bold uppercase shadow-[1px_1px_0_0_rgba(0,0,0,1)] hover:shadow-[2px_2px_0_0_rgba(0,0,0,1)] transition-all"
+                        className="inline-block mt-4 border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-text)] text-[var(--bulletin-bg)] px-3 py-1.5 text-[10px] font-black uppercase tracking-widest shadow-[4px_4px_0_0_var(--bulletin-shadow)] hover:-translate-y-0.5 hover:shadow-[6px_6px_0_0_var(--bulletin-shadow)] transition-all"
                       >
                         View details
                       </Link>
                     )}
                   </div>
-                  <div className="flex items-center gap-1 flex-shrink-0">
+                  <div className="flex flex-col sm:flex-row items-center gap-2 flex-shrink-0">
                     {!item.isRead && (
                       <button
                         onClick={() => handleMarkAsRead(item._id)}
-                        className="border border-black bg-white p-1.5 text-[9px] font-bold uppercase shadow-[1px_1px_0_0_rgba(0,0,0,1)] hover:shadow-[2px_2px_0_0_rgba(0,0,0,1)] transition-all"
+                        className="border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] p-2 text-[10px] font-black uppercase shadow-[2px_2px_0_0_var(--bulletin-shadow)] hover:-translate-y-0.5 hover:shadow-[4px_4px_0_0_var(--bulletin-shadow)] transition-all text-[var(--bulletin-text)]"
                         title="Mark as read"
                       >
-                        <CheckCheck className="h-3 w-3" />
+                        <CheckCheck className="h-4 w-4" />
                       </button>
                     )}
                     <button
                       onClick={() => handleDelete(item._id)}
-                      className="border border-black bg-white p-1.5 text-[9px] font-bold uppercase shadow-[1px_1px_0_0_rgba(0,0,0,1)] hover:bg-[#fce4ec] transition-all"
+                      className="border-2 border-[var(--bulletin-border)] bg-[#fce4ec] dark:bg-red-900/40 p-2 text-[10px] font-black uppercase shadow-[2px_2px_0_0_var(--bulletin-shadow)] hover:-translate-y-0.5 hover:shadow-[4px_4px_0_0_var(--bulletin-shadow)] transition-all text-[var(--bulletin-text)]"
                       title="Delete"
                     >
-                      <Trash2 className="h-3 w-3" />
+                      <Trash2 className="h-4 w-4" />
                     </button>
                   </div>
                 </div>
@@ -155,21 +154,21 @@ const Notifications: React.FC = () => {
 
         {/* Pagination */}
         {pagination && pagination.pages > 1 && (
-          <div className="flex justify-center items-center gap-4 mt-8 pt-6 border-t border-black">
+          <div className="flex justify-center items-center gap-6 mt-12 pt-8 border-t-4 border-[var(--bulletin-border)]">
             <button
               onClick={() => setPage((prev) => Math.max(1, prev - 1))}
               disabled={page <= 1 || loading}
-              className="border border-black bg-white px-4 py-2 text-[10px] font-bold uppercase shadow-[2px_2px_0_0_rgba(0,0,0,1)] hover:shadow-[3px_3px_0_0_rgba(0,0,0,1)] disabled:opacity-40 transition-all"
+              className="border-4 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] px-6 py-3 text-[12px] font-black uppercase tracking-widest shadow-[4px_4px_0_0_var(--bulletin-shadow)] hover:-translate-y-1 hover:shadow-[6px_6px_0_0_var(--bulletin-shadow)] disabled:opacity-40 transition-all text-[var(--bulletin-text)]"
             >
               Previous
             </button>
-            <span className="text-[10px] font-bold uppercase opacity-60">
+            <span className="text-[12px] font-black uppercase tracking-widest opacity-60 text-[var(--bulletin-text)]">
               {pagination.page} / {pagination.pages}
             </span>
             <button
               onClick={() => setPage((prev) => Math.min(pagination.pages, prev + 1))}
               disabled={page >= pagination.pages || loading}
-              className="border border-black bg-white px-4 py-2 text-[10px] font-bold uppercase shadow-[2px_2px_0_0_rgba(0,0,0,1)] hover:shadow-[3px_3px_0_0_rgba(0,0,0,1)] disabled:opacity-40 transition-all"
+              className="border-4 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] px-6 py-3 text-[12px] font-black uppercase tracking-widest shadow-[4px_4px_0_0_var(--bulletin-shadow)] hover:-translate-y-1 hover:shadow-[6px_6px_0_0_var(--bulletin-shadow)] disabled:opacity-40 transition-all text-[var(--bulletin-text)]"
             >
               Next
             </button>

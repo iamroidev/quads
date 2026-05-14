@@ -165,7 +165,7 @@ const RegisterScreen = ({ navigation }: any) => {
       const selectedRole: 'buyer' | 'seller' = form.role === 'seller' ? 'seller' : 'buyer';
       setIsLoading(true);
       try {
-        const redirectTo = makeRedirectUri({ scheme: 'campusmarketplace', path: 'auth/callback' });
+        const redirectTo = makeRedirectUri({ scheme: 'quads', path: 'auth/callback' });
 
         const { data, error } = await supabase.auth.signInWithOAuth({
           provider: 'google',
@@ -238,7 +238,7 @@ const RegisterScreen = ({ navigation }: any) => {
         <ScrollView contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled">
           <View style={styles.heroWrap}>
             <Text style={styles.eyebrow}>Create account</Text>
-            <Text style={styles.title}>Join Marketplace</Text>
+            <Text style={styles.title}>Join QUADS</Text>
             <Text style={styles.subtitle}>
               {step === 1 && 'Step 1: choose your role.'}
               {step === 2 && 'Step 2: add your details.'}
@@ -285,9 +285,9 @@ const RegisterScreen = ({ navigation }: any) => {
                 <>
                   {[
                     ['Full Name *', 'name', 'Kwame Asante'],
-                    ['Email *', 'email', 'you@umat.edu.gh'],
+                    ['Email *', 'email', 'you@email.com'],
                     ['Phone Number *', 'phone', '0XX XXX XXXX'],
-                    ['Student ID (Optional)', 'studentId', 'Your UMaT student ID'],
+                    ['Student ID (Optional)', 'studentId', 'Your institutional student ID'],
                     ['Location on Campus (Optional)', 'location', 'e.g. Jubilee Hostel, Esaase'],
                   ].map(([label, key, placeholder]) => (
                     <View style={styles.inputGroup} key={key}>

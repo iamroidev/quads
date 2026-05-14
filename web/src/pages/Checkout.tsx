@@ -45,7 +45,12 @@ const Checkout: React.FC = () => {
   });
 
   useEffect(() => {
-    if (!id) return;
+    if (!id) {
+      toast.error('Product ID missing');
+      navigate('/products');
+      setLoading(false);
+      return;
+    }
     const fetchProduct = async () => {
       try {
         // Timeout after 15 seconds
@@ -109,7 +114,7 @@ const Checkout: React.FC = () => {
 
   return (
     <BulletinLayout title="Checkout" subtitle="Purchase" section="11">
-      <div className="border-b border-black bg-[#faf8f5] p-4 md:p-6">
+      <div className="border-b border-[var(--bulletin-border)] bg-[var(--bulletin-bg)] p-4 md:p-6">
         <div className="mx-auto max-w-[1400px]">
           <button
             onClick={() => navigate(-1)}
@@ -121,29 +126,38 @@ const Checkout: React.FC = () => {
         </div>
       </div>
 
-      <BulletinSection bgColor="bg-[#f5f9fa]">
+      <BulletinSection bgColor="bg-[var(--bulletin-bg)]">
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-8">
           {/* Left: Form */}
           <div>
             {/* Product Summary */}
-            <BulletinCard rotation={-0.3} bgColor="bg-white" className="mb-6">
-              <div className="text-[10px] uppercase tracking-wider opacity-60 mb-3">Item</div>
-              <div className="flex gap-3">
-                <div className="w-16 h-16 border border-black bg-[#f8f7f4] flex-shrink-0 overflow-hidden">
-                  <img src={mainImage} alt={product.title} className="w-full h-full object-cover" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="text-[12px] font-bold line-clamp-1">{product.title}</div>
-                  <div className="text-[10px] opacity-60 mt-0.5 capitalize">{product.condition}</div>
-                  <div className="text-base font-bold mt-1">
-                    GHS {product.price.toLocaleString('en-GH', { minimumFractionDigits: 2 })}
+            <div className="relative mb-8">
+              <div className="absolute -top-3 left-4 bg-[var(--bulletin-text)] text-[var(--bulletin-bg)] text-[9px] font-black px-2 py-0.5 z-10 rotate-[-1deg]">
+                SELECTED ITEM
+              </div>
+              <div className="border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] p-5 shadow-[4px_4px_0_0_var(--bulletin-shadow)]">
+                <div className="flex gap-4">
+                  <div className="w-20 h-20 border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-bg)] flex-shrink-0 overflow-hidden shadow-[2px_2px_0_0_var(--bulletin-shadow)]">
+                    <img src={mainImage} alt={product.title} className="w-full h-full object-cover" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="text-[10px] uppercase tracking-wider opacity-40 mb-1">Product</div>
+                    <div className="text-sm font-black uppercase leading-tight line-clamp-1">{product.title}</div>
+                    <div className="flex items-center gap-2 mt-2">
+                      <span className="border border-[var(--bulletin-border)] px-1.5 py-0.5 text-[9px] font-black uppercase bg-[#e0f2f7] dark:bg-sky-900/30">
+                        {product.condition}
+                      </span>
+                      <span className="text-lg font-black tracking-tighter">
+                        GHS {product.price.toLocaleString('en-GH', { minimumFractionDigits: 2 })}
+                      </span>
+                    </div>
                   </div>
                 </div>
               </div>
-            </BulletinCard>
+            </div>
 
             {/* Delivery Method */}
-            <BulletinCard rotation={0.3} bgColor="bg-white" className="mb-6">
+            <BulletinCard rotation={0.3} bgColor="bg-[var(--bulletin-card)]" className="mb-6">
               <div className="text-[10px] uppercase tracking-wider opacity-60 mb-4">
                 <Truck className="inline-block h-3.5 w-3.5 mr-1" />
                 Delivery
@@ -151,8 +165,8 @@ const Checkout: React.FC = () => {
               <div className="flex gap-3 mb-4">
                 <button
                   onClick={() => setForm((f) => ({ ...f, deliveryMethod: 'pickup' }))}
-                  className={`flex-1 border border-black p-3 text-[11px] font-bold uppercase transition-colors ${
-                    form.deliveryMethod === 'pickup' ? 'bg-black text-white' : 'bg-white hover:bg-[#f8f7f4]'
+                  className={`flex-1 border border-[var(--bulletin-border)] p-3 text-[11px] font-bold uppercase transition-colors ${
+                    form.deliveryMethod === 'pickup' ? 'bg-[var(--bulletin-text)] text-[var(--bulletin-bg)]' : 'bg-[var(--bulletin-card)] hover:bg-[var(--bulletin-bg)]'
                   }`}
                 >
                   <MapPin className="inline-block h-4 w-4 mr-1" />
@@ -160,8 +174,8 @@ const Checkout: React.FC = () => {
                 </button>
                 <button
                   onClick={() => setForm((f) => ({ ...f, deliveryMethod: 'delivery' }))}
-                  className={`flex-1 border border-black p-3 text-[11px] font-bold uppercase transition-colors ${
-                    form.deliveryMethod === 'delivery' ? 'bg-black text-white' : 'bg-white hover:bg-[#f8f7f4]'
+                  className={`flex-1 border border-[var(--bulletin-border)] p-3 text-[11px] font-bold uppercase transition-colors ${
+                    form.deliveryMethod === 'delivery' ? 'bg-[var(--bulletin-text)] text-[var(--bulletin-bg)]' : 'bg-[var(--bulletin-card)] hover:bg-[var(--bulletin-bg)]'
                   }`}
                 >
                   <Truck className="inline-block h-4 w-4 mr-1" />
@@ -175,7 +189,7 @@ const Checkout: React.FC = () => {
                   value={form.pickupLocation}
                   onChange={(e) => setForm((f) => ({ ...f, pickupLocation: e.target.value }))}
                   placeholder="Pickup location on campus"
-                  className="w-full border border-black bg-[#fefdfb] p-2 text-[12px] font-bold focus:outline-none focus:ring-2 focus:ring-black"
+                  className="w-full border border-[var(--bulletin-border)] bg-[var(--bulletin-card)] p-2 text-[12px] font-bold focus:outline-none focus:ring-2 focus:ring-[var(--bulletin-text)]"
                 />
               ) : (
                 <textarea
@@ -183,25 +197,25 @@ const Checkout: React.FC = () => {
                   onChange={(e) => setForm((f) => ({ ...f, deliveryAddress: e.target.value }))}
                   placeholder="Enter your delivery address"
                   rows={2}
-                  className="w-full border border-black bg-[#fefdfb] p-2 text-[12px] font-bold focus:outline-none focus:ring-2 focus:ring-black resize-none"
+                  className="w-full border border-[var(--bulletin-border)] bg-[var(--bulletin-card)] p-2 text-[12px] font-bold focus:outline-none focus:ring-2 focus:ring-[var(--bulletin-text)] resize-none"
                 />
               )}
             </BulletinCard>
 
             {/* Note */}
-            <BulletinCard rotation={-0.3} bgColor="bg-white" className="mb-6">
+            <BulletinCard rotation={-0.3} bgColor="bg-[var(--bulletin-card)]" className="mb-6">
               <div className="text-[10px] uppercase tracking-wider opacity-60 mb-3">Note to seller</div>
               <textarea
                 value={form.note}
                 onChange={(e) => setForm((f) => ({ ...f, note: e.target.value }))}
                 placeholder="Optional — e.g. I'll be there at 2pm..."
                 rows={2}
-                className="w-full border border-black bg-[#fefdfb] p-2 text-[12px] font-bold focus:outline-none focus:ring-2 focus:ring-black resize-none"
+                className="w-full border border-[var(--bulletin-border)] bg-[var(--bulletin-card)] p-2 text-[12px] font-bold focus:outline-none focus:ring-2 focus:ring-[var(--bulletin-text)] resize-none"
               />
             </BulletinCard>
 
             {/* Payment Method */}
-            <BulletinCard rotation={0.3} bgColor="bg-white" className="mb-6">
+            <BulletinCard rotation={0.3} bgColor="bg-[var(--bulletin-card)]" className="mb-6">
               <div className="text-[10px] uppercase tracking-wider opacity-60 mb-4">
                 <CreditCard className="inline-block h-3.5 w-3.5 mr-1" />
                 Payment
@@ -211,8 +225,8 @@ const Checkout: React.FC = () => {
                   <button
                     key={pm.value}
                     onClick={() => setForm((f) => ({ ...f, paymentMethod: pm.value }))}
-                    className={`w-full flex items-center gap-3 border border-black p-3 text-[12px] font-bold transition-colors ${
-                      form.paymentMethod === pm.value ? 'bg-black text-white' : 'bg-white hover:bg-[#f8f7f4]'
+                    className={`w-full flex items-center gap-3 border border-[var(--bulletin-border)] p-3 text-[12px] font-bold transition-colors ${
+                      form.paymentMethod === pm.value ? 'bg-[var(--bulletin-text)] text-[var(--bulletin-bg)]' : 'bg-[var(--bulletin-card)] hover:bg-[var(--bulletin-bg)]'
                     }`}
                   >
                     <span>{pm.icon}</span>
@@ -224,7 +238,7 @@ const Checkout: React.FC = () => {
             </BulletinCard>
 
             {/* Trust */}
-            <BulletinCard rotation={-0.3} bgColor="bg-[#e0f2f7]">
+            <BulletinCard rotation={-0.3} bgColor="bg-[#e0f2f7] dark:bg-sky-900/20">
               <div className="flex items-start gap-3">
                 <Shield className="h-5 w-5 flex-shrink-0 mt-0.5" />
                 <div>
@@ -238,37 +252,61 @@ const Checkout: React.FC = () => {
           </div>
 
           {/* Right: Order Summary */}
-          <div>
-            <BulletinCard rotation={-0.5} bgColor="bg-[#fefdfb]" className="sticky top-24">
-              <div className="text-[10px] uppercase tracking-wider opacity-60 mb-4">Order Summary</div>
+          <div className="lg:sticky lg:top-24 h-fit">
+            <div className="relative">
+              <div className="absolute -top-3 -right-2 bg-[#ff6b6b] text-white text-[9px] font-black px-2 py-0.5 z-10 rotate-[2deg] shadow-[2px_2px_0_0_var(--bulletin-shadow)]">
+                PAYMENT DUE
+              </div>
+              <div className="border-2 border-[var(--bulletin-border)] bg-[#fffacd] dark:bg-yellow-900/20 p-6 shadow-[8px_8px_0_0_var(--bulletin-shadow)]">
+                <div className="text-[10px] uppercase font-black tracking-widest opacity-40 mb-6 border-b border-black/10 dark:border-white/10 pb-2">
+                  Bill of Sale
+                </div>
 
-              <div className="space-y-3 text-[12px]">
-                <div className="flex justify-between">
-                  <span className="opacity-60">Item price</span>
-                  <span className="font-bold">GHS {product.price.toLocaleString('en-GH', { minimumFractionDigits: 2 })}</span>
+                <div className="space-y-4 text-[12px] font-mono">
+                  <div className="flex justify-between items-center">
+                    <span className="opacity-60 uppercase">Subtotal</span>
+                    <span className="font-black">GHS {product.price.toLocaleString('en-GH')}</span>
+                  </div>
+                  <div className="flex justify-between items-center text-[#2e7d32] dark:text-emerald-400">
+                    <span className="opacity-60 uppercase text-[10px]">Processing fee</span>
+                    <span className="font-black italic">Free</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="opacity-60 uppercase">Logistics</span>
+                    <span className="font-black">{form.deliveryMethod === 'delivery' ? 'TBD' : 'GHS 0.00'}</span>
+                  </div>
+                  <div className="border-t-2 border-dashed border-black/20 dark:border-white/20 pt-4 flex justify-between items-baseline">
+                    <span className="font-black uppercase text-sm">Amount Due</span>
+                    <span className="font-black text-2xl tracking-tighter">
+                      GHS {product.price.toLocaleString('en-GH', { minimumFractionDigits: 2 })}
+                    </span>
+                  </div>
                 </div>
-                <div className="flex justify-between">
-                  <span className="opacity-60">Delivery fee</span>
-                  <span className="font-bold">{form.deliveryMethod === 'delivery' ? 'Calculated later' : 'Free'}</span>
-                </div>
-                <div className="border-t border-black pt-3 flex justify-between font-bold text-base">
-                  <span>Total</span>
-                  <span>GHS {product.price.toLocaleString('en-GH', { minimumFractionDigits: 2 })}</span>
+
+                <button
+                  onClick={handleSubmit}
+                  disabled={submitting || (form.deliveryMethod === 'delivery' && !form.deliveryAddress.trim())}
+                  className="w-full border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-text)] mt-8 px-4 py-4 text-[13px] font-black uppercase text-[var(--bulletin-bg)] shadow-[4px_4px_0_0_var(--bulletin-shadow)] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[3px_3px_0_0_var(--bulletin-shadow)] active:translate-x-[4px] active:translate-y-[4px] active:shadow-none transition-all disabled:opacity-40"
+                >
+                  {submitting ? 'Authenticating...' : 'Authorize Transaction →'}
+                </button>
+
+                <div className="mt-6 flex items-center justify-center gap-2 opacity-30">
+                  <Shield className="h-3 w-3" />
+                  <span className="text-[9px] font-black uppercase tracking-widest">
+                    Encrypted Protocol v2.4
+                  </span>
                 </div>
               </div>
 
-              <button
-                onClick={handleSubmit}
-                disabled={submitting || (form.deliveryMethod === 'delivery' && !form.deliveryAddress.trim())}
-                className="w-full border border-black bg-black mt-6 px-4 py-3 text-[11px] font-bold uppercase text-white shadow-[3px_3px_0_0_rgba(0,0,0,1)] hover:bg-white hover:text-black transition-colors disabled:opacity-40"
-              >
-                {submitting ? 'Processing...' : 'Place Order'}
-              </button>
-
-              <div className="mt-4 text-[10px] opacity-40 text-center">
-                You won't be charged yet
+              {/* Decorative stamp effect */}
+              <div className="mt-6 border-2 border-[var(--bulletin-border)]/10 p-3 flex items-center gap-3 grayscale opacity-30 select-none pointer-events-none rotate-[-1deg]">
+                <Package className="h-5 w-5" />
+                <div className="text-[9px] leading-tight font-black uppercase">
+                  Shipment handled by<br/>UMaT Logistics Center
+                </div>
               </div>
-            </BulletinCard>
+            </div>
           </div>
         </div>
       </BulletinSection>
