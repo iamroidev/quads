@@ -40,7 +40,15 @@ const proximityOptions = [
   { value: 'Recognition Hostel', label: 'Recognition' },
   { value: 'Osborn Hostel', label: 'Osborn' },
   { value: 'Tandoh Hostel', label: 'Tandoh' },
+  { value: 'Good Shepherd Hostel', label: 'Good Shepherd' },
+  { value: 'Agrich Hostel', label: 'Agrich' },
+  { value: 'Kiviz Executive Lodge', label: 'Kiviz Lodge' },
+  { value: 'Platinum Hostel', label: 'Platinum' },
+  { value: 'Global Hostel', label: 'Global' },
+  { value: 'Hill View Hostel', label: 'Hill View' },
+  { value: 'AdeJoe Hostel', label: 'AdeJoe' },
   { value: 'Off-campus', label: 'Off-campus' },
+  { value: 'Other', label: 'Other' },
 ];
 
 const Products: React.FC = () => {

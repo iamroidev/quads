@@ -130,15 +130,15 @@ export const BulletinLayout: React.FC<BulletinLayoutProps> = ({
               <div className="hidden lg:flex items-center gap-6 text-[10px] font-black uppercase tracking-widest">
                 {user?.role === 'seller' ? (
                   <>
-                    <Link to="/seller/analytics" className="hover:text-[#ff6b6b]">Analytics</Link>
-                    <Link to="/my-listings" className="hover:text-[#ff6b6b]">My Shop</Link>
+                    <Link to="/seller/analytics" className="hover:text-[#ff6b6b]">Shop Insights</Link>
+                    <Link to="/my-listings" className="hover:text-[#ff6b6b]">My Listings</Link>
                     <Link to="/seller/onboarding" className="hover:text-[#ff6b6b]">Payouts</Link>
                   </>
                 ) : (
                   <>
-                    <Link to="/products" className="hover:text-[#ff6b6b]">Shop</Link>
+                    <Link to="/products" className="hover:text-[#ff6b6b]">Full Catalog</Link>
                     <Link to="/saved" className="hover:text-[#ff6b6b]">Wishlist</Link>
-                    <Link to="/orders" className="hover:text-[#ff6b6b]">Orders</Link>
+                    <Link to="/orders" className="hover:text-[#ff6b6b]">Order History</Link>
                   </>
                 )}
               </div>
@@ -306,6 +306,7 @@ export const BulletinLayout: React.FC<BulletinLayoutProps> = ({
                   {user?.role === 'seller' ? (
                     <>
                       <Link to="/seller/analytics" className="block hover:text-[#ff6b6b]">Shop Insights</Link>
+                      <Link to="/orders?role=seller" className="block hover:text-[#ff6b6b]">Sales History</Link>
                       <Link to="/seller/onboarding" className="block hover:text-[#ff6b6b]">Payout Settings</Link>
                       <Link to="/disputes" className="block hover:text-[#ff6b6b]">Support Center</Link>
                     </>

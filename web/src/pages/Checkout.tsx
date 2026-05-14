@@ -19,6 +19,7 @@ import { useAuth } from '../context/AuthContext';
 import { ProductPopulated, PaymentMethod, PAYMENT_METHODS } from '../types';
 import { LoadingSpinner } from '../components/ui';
 import { BulletinLayout, BulletinSection, BulletinCard } from '../components/layout/BulletinLayout';
+import paymentService from '../services/payment.service';
 
 interface CheckoutFormState {
   deliveryMethod: 'pickup' | 'delivery';
@@ -79,6 +80,7 @@ const Checkout: React.FC = () => {
     };
     fetchProduct();
   }, [id, navigate]);
+
   const handleSubmit = async () => {
     if (!product || !user) {
       toast.error('Please log in to continue');
@@ -87,6 +89,7 @@ const Checkout: React.FC = () => {
 
     setSubmitting(true);
     try {
+      // 1. Create the order
       const res = await orderService.createOrder({
         productId: product._id,
         deliveryMethod: form.deliveryMethod,
@@ -96,11 +99,29 @@ const Checkout: React.FC = () => {
       });
 
       if (res.success) {
-        navigate(`/orders/${res.data.order._id}`);
-        toast.success('Order placed!');
+        const orderId = res.data.order._id;
+        
+        // 2. Initiate payment
+        toast.loading('Initiating secure payment...', { id: 'payment-init' });
+        
+        const callbackUrl = `${window.location.origin}/payment/verify`;
+        const payRes = await paymentService.initiatePayment(
+          orderId,
+          form.paymentMethod,
+          callbackUrl
+        );
+
+        if (payRes.success && payRes.data.authorizationUrl) {
+          toast.success('Redirecting to secure payment...', { id: 'payment-init' });
+          // Redirect to Paystack
+          window.location.href = payRes.data.authorizationUrl;
+        } else {
+          toast.error('Failed to initialize payment gateway', { id: 'payment-init' });
+          navigate(`/orders/${orderId}`);
+        }
       }
     } catch (err: any) {
-      toast.error(err.response?.data?.message || 'Failed to place order');
+      toast.error(err.response?.data?.message || 'Failed to place order', { id: 'payment-init' });
     } finally {
       setSubmitting(false);
     }
