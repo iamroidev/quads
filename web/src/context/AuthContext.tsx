@@ -2,7 +2,7 @@ import React, { createContext, useContext, useState, useEffect, useCallback } fr
 import authService, { RegisterData, UpdateProfileData, ChangePasswordData } from '../services/auth.service';
 import { User } from '../types';
 import toast from 'react-hot-toast';
-import { supabase } from '../services/supabase';
+import { supabase, isSupabaseConfigured } from '../services/supabase';
 
 interface AuthContextType {
   user: User | null;
@@ -51,6 +51,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [token]);
 
   const register = useCallback(async (data: Omit<RegisterData, 'supabaseAccessToken'> & { email: string; password: string }) => {
+    if (!isSupabaseConfigured) {
+      toast.error('Authentication service is currently offline. Please contact the administrator.');
+      throw new Error('Supabase is not configured.');
+    }
+
     const { data: authData, error } = await supabase.auth.signUp({
       email: data.email.toLowerCase(),
       password: data.password,
@@ -87,6 +92,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const login = useCallback(async (data: { email: string; password: string }) => {
+    if (!isSupabaseConfigured) {
+      toast.error('Authentication service is currently offline. Please contact the administrator.');
+      throw new Error('Supabase is not configured.');
+    }
+
     const { data: authData, error } = await supabase.auth.signInWithPassword({
       email: data.email.toLowerCase(),
       password: data.password,

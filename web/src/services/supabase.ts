@@ -1,15 +1,23 @@
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string | undefined;
-const supabaseKey = import.meta.env.VITE_SUPABASE_KEY as string | undefined;
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+const supabaseKey = import.meta.env.VITE_SUPABASE_KEY;
 
-if (!supabaseUrl || !supabaseKey) {
-  throw new Error('Missing Supabase web env vars: VITE_SUPABASE_URL and VITE_SUPABASE_KEY');
+export const isSupabaseConfigured = !!(supabaseUrl && supabaseKey);
+
+// Defensive check to prevent app-wide crash if env vars are missing at build time
+if (!isSupabaseConfigured) {
+  console.error('❌ CRITICAL: Supabase environment variables are missing! Check Vercel settings for VITE_SUPABASE_URL and VITE_SUPABASE_KEY.');
 }
 
-export const supabase = createClient(supabaseUrl, supabaseKey, {
-  auth: {
-    persistSession: false,
-    autoRefreshToken: false,
-  },
-});
+// Initialize with placeholders to prevent crash, but log error above
+export const supabase = createClient(
+  supabaseUrl || 'https://placeholder.supabase.co', 
+  supabaseKey || 'placeholder-key',
+  {
+    auth: {
+      persistSession: true,
+      autoRefreshToken: true,
+    },
+  }
+);
