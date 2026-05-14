@@ -1,8 +1,8 @@
 {
-  "framework": "vite",
-  "buildCommand": "npx vite build",
   "outputDirectory": "dist",
-  "installCommand": "npm install --ignore-scripts",
+  "buildCommand": null,
+  "installCommand": null,
+  "framework": null,
   "rewrites": [
     {
       "source": "/(.*)",

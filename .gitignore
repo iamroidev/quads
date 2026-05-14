@@ -47,3 +47,5 @@ mobile/ios/
 
 # Misc
 *.tsbuildinfo
+
+.vercel

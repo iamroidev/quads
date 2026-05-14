@@ -13,8 +13,8 @@ export default defineConfig({
                 importScripts: ['/push-sw.js'],
             },
             manifest: {
-                name: 'CampusMarketplace - UMaT',
-                short_name: 'CampusMarket',
+                name: 'QUADS - UMaT Marketplace',
+                short_name: 'QUADS',
                 description: 'Buy and sell on UMaT Campus',
                 theme_color: '#0a0a0a',
                 background_color: '#0a0a0a',
