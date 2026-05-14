@@ -70,7 +70,7 @@ const HomePage: React.FC = () => {
           
           {/* ── LARGE MAIN POSTER ── */}
           <div 
-            className="absolute top-10 left-6 md:top-20 md:left-20 max-w-[90%] md:max-w-2xl border-4 border-black bg-[#faf8f5] p-10 md:p-16 shadow-[12px_12px_0_0_rgba(0,0,0,1)] z-20 transition-transform hover:scale-[1.01]"
+            className="absolute top-10 left-6 md:top-20 md:left-20 max-w-[90%] md:max-w-2xl border-4 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] p-10 md:p-16 shadow-[12px_12px_0_0_var(--bulletin-shadow)] z-20 transition-transform hover:scale-[1.01]"
             style={{ transform: 'rotate(-1.5deg)' }}
           >
             {/* Pinned tape at top */}
@@ -79,10 +79,10 @@ const HomePage: React.FC = () => {
             <div className="mb-6 inline-block border-2 border-[#ff6b6b] px-4 py-1.5 text-[11px] font-black uppercase tracking-[0.3em] text-[#ff6b6b]">
               Verified Network
             </div>
-            <p className="text-4xl md:text-5xl font-black uppercase tracking-tighter leading-none mb-10 text-black dark:text-white">
+            <p className="text-4xl md:text-5xl font-black uppercase tracking-tighter leading-none mb-10 text-[var(--bulletin-text)]">
               BROWSE VERIFIED <br/>CAMPUS LISTINGS
             </p>
-            <p className="text-lg md:text-xl font-bold leading-relaxed opacity-70 text-black mb-10 max-w-xl">
+            <p className="text-lg md:text-xl font-bold leading-relaxed opacity-70 text-[var(--bulletin-text)] mb-10 max-w-xl">
               Buy, sell, and trade with verified UMaT students. From textbooks to electronics, we've built the most trusted network for your hostel life.
             </p>
             
@@ -118,7 +118,7 @@ const HomePage: React.FC = () => {
           <div className="absolute top-10 right-6 md:top-20 md:right-20 flex flex-col gap-8 z-10 w-full max-w-[280px] pointer-events-none md:pointer-events-auto">
             {/* Stat 01 */}
             <div 
-              className="border-4 border-black bg-white p-6 shadow-[8px_8px_0_0_#ff6b6b] ml-auto w-full"
+              className="border-4 border-black bg-white dark:bg-[#eee] p-6 shadow-[8px_8px_0_0_#ff6b6b] ml-auto w-full"
               style={{ transform: 'rotate(1.2deg)' }}
             >
               <div className="text-4xl font-black text-[#ff6b6b] mb-1">0%</div>
@@ -128,7 +128,7 @@ const HomePage: React.FC = () => {
 
             {/* Stat 02 */}
             <div 
-              className="border-4 border-black bg-[#e0f2f7] p-6 shadow-[8px_8px_0_0_var(--bulletin-shadow)] mr-4 w-full"
+              className="border-4 border-black bg-[#e0f2f7] dark:bg-[#cde9f0] p-6 shadow-[8px_8px_0_0_var(--bulletin-shadow)] mr-4 w-full"
               style={{ transform: 'rotate(-2.5deg)' }}
             >
               <div className="text-4xl font-black text-black mb-1">{totalProducts || '...'}</div>
@@ -138,7 +138,7 @@ const HomePage: React.FC = () => {
 
             {/* Stat 03 */}
             <div 
-              className="border-4 border-black bg-[#fce4ec] p-6 shadow-[8px_8px_0_0_var(--bulletin-shadow)] ml-2 w-full"
+              className="border-4 border-black bg-[#fce4ec] dark:bg-[#f8d0de] p-6 shadow-[8px_8px_0_0_var(--bulletin-shadow)] ml-2 w-full"
               style={{ transform: 'rotate(0.5deg)' }}
             >
               <div className="text-4xl font-black text-black mb-1">{totalSellers || '...'}</div>
