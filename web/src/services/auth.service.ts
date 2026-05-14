@@ -47,6 +47,17 @@ export interface ChangePasswordData {
   newPassword?: string;
 }
 
+export interface UserStats {
+  activeListings: number;
+  totalSales: number;
+  rating: number;
+  totalReviews: number;
+  totalOrders: number;
+  unreadNotifications: number;
+  responseTime: number;
+  responseRate: number;
+}
+
 const authService = {
   register: async (data: RegisterData) => {
     const response = await api.post('/auth/register', data);
@@ -58,8 +69,8 @@ const authService = {
     return response.data;
   },
 
-  googleLogin: async (credential: string, role?: 'buyer' | 'seller') => {
-    const response = await api.post('/auth/google', { credential, role });
+  googleLogin: async (credential: string, role?: 'buyer' | 'seller', profileData?: any) => {
+    const response = await api.post('/auth/google', { credential, role, profileData });
     return response.data;
   },
 
@@ -98,6 +109,11 @@ const authService = {
   logout: async () => {
     const response = await api.post('/auth/logout');
     return response.data;
+  },
+
+  getUserStats: async () => {
+    const response = await api.get('/auth/profile/stats');
+    return response.data.data.stats as UserStats;
   },
 };
 

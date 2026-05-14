@@ -11,7 +11,7 @@ interface AuthContextType {
   isAuthenticated: boolean;
   register: (data: Omit<RegisterData, 'supabaseAccessToken'> & { email: string; password: string }) => Promise<void>;
   login: (data: { email: string; password: string }) => Promise<void>;
-  googleLogin: (credential: string, role?: 'buyer' | 'seller') => Promise<{ needsProfileCompletion: boolean; isNewUser?: boolean }>;
+  googleLogin: (credential: string, role?: 'buyer' | 'seller', profileData?: Partial<User>) => Promise<{ needsProfileCompletion: boolean; isNewUser?: boolean }>;
   logout: () => Promise<void>;
   updateProfile: (data: UpdateProfileData) => Promise<void>;
   changePassword: (data: ChangePasswordData) => Promise<void>;
@@ -106,7 +106,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     toast.success(`Welcome back, ${newUser.name}!`, { duration: 1200 });
   }, []);
 
-  const googleLogin = useCallback(async (credential: string, role: 'buyer' | 'seller' | undefined = 'buyer') => {
+  const googleLogin = useCallback(async (credential: string, role: 'buyer' | 'seller' | undefined = 'buyer', profileData?: Partial<User>) => {
     // 1. Exchange Google ID token for Supabase session
     const { data: { session }, error } = await supabase.auth.signInWithIdToken({
       provider: 'google',
@@ -118,7 +118,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
 
     // 2. Send Supabase access token to our backend
-    const response = await authService.googleLogin(session.access_token, role);
+    const response = await authService.googleLogin(session.access_token, role, profileData);
     const { user: newUser, token: newToken } = response.data;
 
     localStorage.setItem('token', newToken);

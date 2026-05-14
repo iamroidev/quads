@@ -32,6 +32,17 @@ const deliveryOptions = [
   { value: 'both', label: 'Pickup or Delivery' },
 ];
 
+const proximityOptions = [
+  { value: '', label: 'Entire Campus' },
+  { value: 'Chamber of Mines Hall', label: 'Chamber of Mines' },
+  { value: 'Gold Refinery Hall', label: 'Gold Refinery' },
+  { value: 'KT Hall', label: 'K.T. Hall' },
+  { value: 'Recognition Hostel', label: 'Recognition' },
+  { value: 'Osborn Hostel', label: 'Osborn' },
+  { value: 'Tandoh Hostel', label: 'Tandoh' },
+  { value: 'Off-campus', label: 'Off-campus' },
+];
+
 const Products: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -49,6 +60,7 @@ const Products: React.FC = () => {
   const minPrice = searchParams.get('minPrice') || '';
   const maxPrice = searchParams.get('maxPrice') || '';
   const deliveryOption = searchParams.get('delivery') || '';
+  const pickupLocation = searchParams.get('pickupLocation') || '';
   const page = parseInt(searchParams.get('page') || '1', 10);
 
   // Fetch categories
@@ -71,6 +83,7 @@ const Products: React.FC = () => {
           minPrice: minPrice ? parseFloat(minPrice) : undefined,
           maxPrice: maxPrice ? parseFloat(maxPrice) : undefined,
           deliveryOption: (deliveryOption as DeliveryOption) || undefined,
+          pickupLocation: pickupLocation || undefined,
           page,
           limit: 20,
         });
@@ -106,26 +119,26 @@ const Products: React.FC = () => {
     setSearchParams({});
   };
 
-  const hasActiveFilters = category || condition || minPrice || maxPrice || deliveryOption;
+  const hasActiveFilters = category || condition || minPrice || maxPrice || deliveryOption || pickupLocation;
 
   return (
     <BulletinLayout 
-      title={search ? `Manifest: "${search}"` : 'Market Manifest'}
-      subtitle={pagination ? `${pagination.total} Verified Entities` : 'Auditing...'}
+      title={search ? `Results: "${search}"` : 'Product Catalog'}
+      subtitle={pagination ? `${pagination.total} Items Available` : 'Syncing...'}
       section="02"
     >
       <BulletinSection bgColor="bg-[var(--bulletin-bg)]">
         <div className="mb-12 flex flex-col md:flex-row md:items-center justify-between gap-6 border-b-4 border-black pb-8">
           <div>
-            <h2 className="text-[10px] font-black uppercase tracking-[0.3em] opacity-40 text-[var(--bulletin-text)] mb-2">Resource Repository</h2>
-            <p className="text-[14px] font-bold text-[var(--bulletin-text)] opacity-60">Audit the active board for campus utility and equipment.</p>
+            <h2 className="text-[10px] font-black uppercase tracking-[0.3em] opacity-40 text-[var(--bulletin-text)] mb-2">Campus Inventory</h2>
+            <p className="text-[14px] font-bold text-[var(--bulletin-text)] opacity-60">Browse active listings for books, electronics, and essentials.</p>
           </div>
           <button
             onClick={() => setShowFilters(!showFilters)}
             className="flex items-center justify-center gap-3 border-4 border-black bg-[var(--bulletin-card)] px-8 py-4 text-[12px] font-black uppercase tracking-widest shadow-[8px_8px_0_0_var(--bulletin-shadow)] transition-all md:hidden text-[var(--bulletin-text)] hover:shadow-none hover:translate-x-1 hover:translate-y-1"
           >
             <Filter className="h-5 w-5" />
-            Control Preferences
+            Filter Results
             {hasActiveFilters && (
               <span className="ml-2 flex h-6 w-6 items-center justify-center bg-[#ff6b6b] text-[10px] text-white border-2 border-black">
                 !
@@ -147,7 +160,7 @@ const Products: React.FC = () => {
               <div className="relative group">
                 <div className="absolute -top-3 left-6 h-6 w-24 bg-[#ffd700]/60 rotate-[-1deg] z-10" />
                 <div className="border-4 border-black bg-[var(--bulletin-card)] p-6 shadow-[8px_8px_0_0_var(--bulletin-shadow)]">
-                  <div className="mb-6 text-[10px] font-black uppercase tracking-widest opacity-40 text-[var(--bulletin-text)]">Department</div>
+                  <div className="mb-6 text-[10px] font-black uppercase tracking-widest opacity-40 text-[var(--bulletin-text)]">Categories</div>
                   <div className="space-y-2">
                     <button
                       onClick={() => updateFilter('category', '')}
@@ -157,7 +170,7 @@ const Products: React.FC = () => {
                           : 'bg-transparent text-[var(--bulletin-text)] border-transparent hover:border-black/20'
                       }`}
                     >
-                      Global Manifest
+                      Full Catalog
                     </button>
                     {categories.map((cat) => (
                       <button
@@ -178,7 +191,7 @@ const Products: React.FC = () => {
 
               {/* Condition filter */}
               <div className="border-4 border-black bg-[var(--bulletin-card)] p-6 shadow-[8px_8px_0_0_var(--bulletin-shadow)]">
-                <div className="mb-6 text-[10px] font-black uppercase tracking-widest opacity-40 text-[var(--bulletin-text)]">Asset Integrity</div>
+                <div className="mb-6 text-[10px] font-black uppercase tracking-widest opacity-40 text-[var(--bulletin-text)]">Item Condition</div>
                 <select
                   value={condition}
                   onChange={(e) => updateFilter('condition', e.target.value)}
@@ -192,7 +205,7 @@ const Products: React.FC = () => {
 
               {/* Price range */}
               <div className="border-4 border-black bg-[var(--bulletin-card)] p-6 shadow-[8px_8px_0_0_var(--bulletin-shadow)]">
-                <div className="mb-6 text-[10px] font-black uppercase tracking-widest opacity-40 text-[var(--bulletin-text)]">Price Cap (GHS)</div>
+                <div className="mb-6 text-[10px] font-black uppercase tracking-widest opacity-40 text-[var(--bulletin-text)]">Price Range (GHS)</div>
                 <div className="grid grid-cols-2 gap-4">
                   <input
                     type="number"
@@ -215,7 +228,7 @@ const Products: React.FC = () => {
 
               {/* Delivery option */}
               <div className="border-4 border-black bg-[var(--bulletin-card)] p-6 shadow-[8px_8px_0_0_var(--bulletin-shadow)]">
-                <div className="mb-6 text-[10px] font-black uppercase tracking-widest opacity-40 text-[var(--bulletin-text)]">Transfer Logistics</div>
+                <div className="mb-6 text-[10px] font-black uppercase tracking-widest opacity-40 text-[var(--bulletin-text)]">Delivery & Pickup</div>
                 <select
                   value={deliveryOption}
                   onChange={(e) => updateFilter('delivery', e.target.value)}
@@ -227,12 +240,32 @@ const Products: React.FC = () => {
                 </select>
               </div>
 
+              {/* Campus Proximity */}
+              <div className="border-4 border-black bg-[var(--bulletin-card)] p-6 shadow-[8px_8px_0_0_var(--bulletin-shadow)] relative overflow-hidden group">
+                <div className="absolute top-2 right-2 opacity-10 group-hover:opacity-100 transition-opacity">
+                  <Filter className="h-4 w-4" />
+                </div>
+                <div className="mb-6 text-[10px] font-black uppercase tracking-widest opacity-40 text-[var(--bulletin-text)]">Pickup Locations</div>
+                <select
+                  value={pickupLocation}
+                  onChange={(e) => updateFilter('pickupLocation', e.target.value)}
+                  className="w-full border-4 border-black bg-[var(--bulletin-bg)] p-4 text-[13px] font-black uppercase focus:outline-none text-[var(--bulletin-text)]"
+                >
+                  {proximityOptions.map((opt) => (
+                    <option key={opt.value} value={opt.value}>{opt.label}</option>
+                  ))}
+                </select>
+                <div className="mt-4 text-[9px] font-bold opacity-40 uppercase leading-tight">
+                  Discover resources within specific residence zones for zero-latency retrieval.
+                </div>
+              </div>
+
               {hasActiveFilters && (
                 <button
                   onClick={clearFilters}
                   className="w-full border-4 border-black bg-[#ff6b6b] px-6 py-5 text-[12px] font-black uppercase text-white shadow-[8px_8px_0_0_var(--bulletin-shadow)] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all"
                 >
-                  Purge Preferences
+                  Clear All Filters
                 </button>
               )}
             </div>
@@ -243,7 +276,7 @@ const Products: React.FC = () => {
             {/* Sort bar */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-12 gap-6 pb-8 border-b-4 border-black">
               <div className="flex items-center gap-4">
-                <span className="text-[10px] font-black uppercase tracking-[0.2em] opacity-40 text-[var(--bulletin-text)]">Hierarchy:</span>
+                <span className="text-[10px] font-black uppercase tracking-[0.2em] opacity-40 text-[var(--bulletin-text)]">Sort by:</span>
                 <select
                   value={sort}
                   onChange={(e) => updateFilter('sort', e.target.value)}
@@ -279,7 +312,7 @@ const Products: React.FC = () => {
                 <h3 className="text-4xl font-black uppercase tracking-tighter text-black dark:text-yellow-200 leading-none">
                   {search
                     ? `No matches for "${search}"`
-                    : 'The Manifest is Clear.'}
+                    : 'No items found.'}
                 </h3>
                 <p className="mt-6 text-[14px] font-bold opacity-60 text-black dark:text-yellow-200">Adjust your criteria or post a new listing.</p>
               </div>
@@ -300,7 +333,7 @@ const Products: React.FC = () => {
                         {/* Tape effect */}
                         <div className="absolute -top-4 left-1/2 -translate-x-1/2 h-8 w-32 bg-[#ffd700]/40 rotate-[-2deg] z-10 opacity-60 group-hover:opacity-100 transition-opacity" />
                         
-                        <div className="border-4 border-black bg-[var(--bulletin-card)] p-5 shadow-[12px_12px_0_0_var(--bulletin-shadow)] group-hover:shadow-[20px_20px_0_0_var(--bulletin-shadow)] group-hover:-translate-y-3 transition-all">
+                        <div className="border-4 border-black bg-[var(--bulletin-card)] p-5 shadow-[12px_12px_0_0_var(--bulletin-shadow),-4px_4px_0_0_#ff6b6b] group-hover:shadow-[20px_20px_0_0_var(--bulletin-shadow),-8px_8px_0_0_#ff6b6b] group-hover:-translate-y-3 transition-all">
                           <div className="relative aspect-[4/5] overflow-hidden border-4 border-black bg-black/5">
                             <img
                               src={getImage(product)}
@@ -314,11 +347,11 @@ const Products: React.FC = () => {
                             <div className="text-lg font-black uppercase tracking-tight text-[var(--bulletin-text)] leading-none line-clamp-2 min-h-[2.4em]">{product.title}</div>
                             <div className="flex items-end justify-between border-t-2 border-black/5 pt-4">
                               <div className="flex flex-col">
-                                <span className="text-[9px] font-black uppercase opacity-40 text-[var(--bulletin-text)]">Valuation</span>
+                                <span className="text-[9px] font-black uppercase opacity-40 text-[var(--bulletin-text)]">Price</span>
                                 <span className="text-2xl font-black text-[var(--bulletin-text)] tracking-tighter">GHS {product.price.toLocaleString()}</span>
                               </div>
                               <div className="flex flex-col items-end">
-                                <span className="text-[9px] font-black uppercase opacity-40 text-[var(--bulletin-text)]">Dept.</span>
+                                <span className="text-[9px] font-black uppercase opacity-40 text-[var(--bulletin-text)]">Category</span>
                                 <span className="text-[11px] font-black uppercase tracking-tighter text-[var(--bulletin-text)]">
                                   {typeof product.category === 'string' ? '' : product.category.name}
                                 </span>

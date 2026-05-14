@@ -5,6 +5,7 @@ export interface CreateProductData {
   title: string;
   description: string;
   price: number;
+  originalPrice?: number;
   category: string;
   condition: string;
   deliveryOption?: string;
@@ -23,6 +24,7 @@ export interface UpdateProductData {
   title?: string;
   description?: string;
   price?: number;
+  originalPrice?: number;
   category?: string;
   condition?: string;
   status?: string;
@@ -197,6 +199,7 @@ const productService = {
     formData.append('title', data.title);
     formData.append('description', data.description);
     formData.append('price', String(data.price));
+    if (data.originalPrice !== undefined) formData.append('originalPrice', String(data.originalPrice));
     formData.append('category', data.category);
     formData.append('condition', data.condition);
 
@@ -234,6 +237,7 @@ const productService = {
     if (data.title) formData.append('title', data.title);
     if (data.description) formData.append('description', data.description);
     if (data.price !== undefined) formData.append('price', String(data.price));
+    if (data.originalPrice !== undefined) formData.append('originalPrice', String(data.originalPrice));
     if (data.category) formData.append('category', data.category);
     if (data.condition) formData.append('condition', data.condition);
     if (data.status) formData.append('status', data.status);

@@ -9,14 +9,15 @@ export interface IProductDocument extends Document {
   _id: mongoose.Types.ObjectId;
   title: string;
   description: string;
-  price: number;
-  category: mongoose.Types.ObjectId;
-  seller: mongoose.Types.ObjectId;
-  images: IProductImage[];
-  condition: 'new' | 'like-new' | 'good' | 'fair' | 'poor';
-  status: 'active' | 'sold' | 'reserved' | 'draft' | 'removed';
-  deliveryOption: 'pickup' | 'delivery' | 'both';
-  pickupLocation: string;
+    price: number;
+    originalPrice?: number;
+    category: mongoose.Types.ObjectId;
+    seller: mongoose.Types.ObjectId;
+    images: IProductImage[];
+    condition: 'new' | 'like-new' | 'good' | 'fair' | 'poor';
+    status: 'active' | 'sold' | 'reserved' | 'draft' | 'removed';
+    deliveryOption: 'pickup' | 'delivery' | 'both';
+    pickupLocation: string;
   tags: string[];
   stock: number;
   availableFrom?: Date;
@@ -60,6 +61,11 @@ const productSchema = new Schema<IProductDocument>(
       required: [true, 'Price is required'],
       min: [0.5, 'Price must be at least GHS 0.50'],
       max: [100000, 'Price cannot exceed GHS 100,000'],
+    },
+    originalPrice: {
+      type: Number,
+      min: [0.5, 'Original price must be at least GHS 0.50'],
+      max: [100000, 'Original price cannot exceed GHS 100,000'],
     },
     category: {
       type: Schema.Types.ObjectId,

@@ -19,6 +19,7 @@ interface ProductFilters {
   seller?: string;
   search?: string;
   deliveryOption?: string;
+  pickupLocation?: string;
   sort?: string;
   page?: number;
   limit?: number;
@@ -64,6 +65,7 @@ class ProductService {
       title: string;
       description: string;
       price: number;
+      originalPrice?: number;
       category: string;
       condition: string;
       deliveryOption?: string;
@@ -115,6 +117,7 @@ class ProductService {
       title: data.title,
       description: data.description,
       price: data.price,
+      originalPrice: data.originalPrice,
       category: resolvedCategoryId,
       seller: sellerId,
       images,
@@ -178,6 +181,11 @@ class ProductService {
     // Delivery option filter
     if (filters.deliveryOption) {
       query.deliveryOption = filters.deliveryOption;
+    }
+
+    // Proximity (Pickup Location) filter
+    if (filters.pickupLocation) {
+      query.pickupLocation = { $regex: filters.pickupLocation, $options: 'i' };
     }
 
     // Price range
@@ -295,6 +303,7 @@ class ProductService {
       title?: string;
       description?: string;
       price?: number;
+      originalPrice?: number;
       category?: string;
       condition?: string;
       status?: string;
@@ -360,6 +369,7 @@ class ProductService {
       'title',
       'description',
       'price',
+      'originalPrice',
       'category',
       'condition',
       'status',

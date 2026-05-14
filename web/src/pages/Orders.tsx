@@ -15,6 +15,7 @@ import {
   PaginationInfo,
 } from '../types';
 import { BulletinLayout, BulletinSection, BulletinCard } from '../components/layout/BulletinLayout';
+import { BulletinEmptyState } from '../components/ui/BulletinEmptyState';
 
 const STATUS_TABS: { value: OrderStatus | ''; label: string }[] = [
   { value: '', label: 'All' },
@@ -98,21 +99,22 @@ const Orders: React.FC = () => {
             <LoadingSpinner text="Fetching your purchases..." />
           </div>
         ) : orders.length === 0 ? (
-          <div className="border-4 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] p-12 text-center shadow-[8px_8px_0_0_var(--bulletin-shadow)]">
-            <ShoppingBag className="h-12 w-12 mx-auto opacity-20 mb-4 text-[var(--bulletin-text)]" />
-            <div className="text-[10px] font-black uppercase tracking-widest opacity-40 mb-2 text-[var(--bulletin-text)]">Empty Inventory</div>
-            <div className="text-2xl font-black uppercase tracking-tight mb-6 text-[var(--bulletin-text)]">
-              {statusFilter
-                ? `No ${statusFilter} orders found`
-                : 'You haven\'t bought anything yet'}
-            </div>
-            <Link
-              to="/products"
-              className="inline-block border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-text)] px-8 py-3 text-[10px] font-black uppercase text-[var(--bulletin-bg)] transition-all hover:bg-[#ff6b6b] hover:text-white shadow-[4px_4px_0_0_var(--bulletin-shadow)]"
-            >
-              Start Shopping
-            </Link>
-          </div>
+          <BulletinEmptyState
+            title={statusFilter ? `No ${statusFilter} orders` : "Order Inventory Empty"}
+            message={statusFilter 
+              ? `You don't have any purchases currently in ${statusFilter} status.` 
+              : "The manifest shows no past acquisitions. Browse the marketplace to acquire resources."
+            }
+            icon={<ShoppingBag className="h-12 w-12 opacity-20" />}
+            action={
+              <Link
+                to="/products"
+                className="inline-block border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-text)] px-8 py-3 text-[10px] font-black uppercase text-[var(--bulletin-bg)] transition-all hover:-translate-y-1 shadow-[4px_4px_0_0_var(--bulletin-shadow)]"
+              >
+                Start Shopping
+              </Link>
+            }
+          />
         ) : (
           <div className="space-y-4">
             {orders.map((order, idx) => {

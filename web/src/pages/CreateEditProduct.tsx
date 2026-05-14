@@ -17,12 +17,14 @@ const productSchema = z.object({
   title: z.string().min(3, 'Title must be at least 3 characters').max(120, 'Title too long'),
   description: z.string().min(10, 'Description must be at least 10 characters').max(2000, 'Description too long'),
   price: z.number({ invalid_type_error: 'Price is required' }).min(0.5, 'Min price is GHS 0.50').max(100000, 'Max price is GHS 100,000'),
+  originalPrice: z.number().min(0.5, 'Min price is GHS 0.50').max(100000, 'Max price is GHS 100,000').optional().or(z.literal('')).transform((v) => v === '' ? undefined : v),
   category: z.string().min(1, 'Category is required'),
   condition: z.enum(['new', 'like-new', 'good', 'fair', 'poor'], { required_error: 'Condition is required' }),
   deliveryOption: z.enum(['pickup', 'delivery', 'both']).default('pickup'),
   pickupLocation: z.string().optional(),
   tags: z.string().optional(),
   status: z.enum(['active', 'draft']).default('active'),
+  stock: z.number().min(1, 'Stock must be at least 1').max(10000, 'Stock is too high').optional().or(z.literal('')).transform((v) => v === '' ? undefined : v),
 });
 
 type ProductFormData = z.infer<typeof productSchema>;
@@ -93,12 +95,14 @@ const CreateEditProduct: React.FC = () => {
             title: p.title,
             description: p.description,
             price: p.price,
+            originalPrice: p.originalPrice,
             category: typeof p.category === 'string' ? p.category : p.category._id,
             condition: p.condition,
             deliveryOption: p.deliveryOption,
             pickupLocation: p.pickupLocation,
             tags: p.tags.join(', '),
             status: p.status === 'active' || p.status === 'draft' ? p.status : 'active',
+            stock: p.stock,
           });
           setExistingImages(p.images);
         }
@@ -144,12 +148,14 @@ const CreateEditProduct: React.FC = () => {
           title: data.title,
           description: data.description,
           price: data.price,
+          originalPrice: data.originalPrice,
           category: data.category,
           condition: data.condition,
           deliveryOption: data.deliveryOption,
           pickupLocation: data.pickupLocation,
           tags,
           status: data.status,
+          stock: data.stock,
           images: images.length > 0 ? images : undefined,
         });
         toast.success('Product updated successfully!');
@@ -158,12 +164,14 @@ const CreateEditProduct: React.FC = () => {
           title: data.title,
           description: data.description,
           price: data.price,
+          originalPrice: data.originalPrice,
           category: data.category,
           condition: data.condition,
           deliveryOption: data.deliveryOption,
           pickupLocation: data.pickupLocation,
           tags,
           status: data.status,
+          stock: data.stock,
           images: images.length > 0 ? images : undefined,
         });
         toast.success('Product listed successfully!');
@@ -288,10 +296,10 @@ const CreateEditProduct: React.FC = () => {
             {errors.description && <p className="mt-1 text-[11px] text-red-600 font-bold">{errors.description.message}</p>}
           </BulletinCard>
 
-          {/* Price + Condition */}
+          {/* Price + Original Price + Condition + Stock */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <BulletinCard rotation={0.3} bgColor="bg-[var(--bulletin-card)]">
-              <label className={labelBase}>Price (GHS)</label>
+              <label className={labelBase}>Discounted Price (GHS)</label>
               <input
                 type="number"
                 step="0.01"
@@ -305,6 +313,20 @@ const CreateEditProduct: React.FC = () => {
             </BulletinCard>
 
             <BulletinCard rotation={-0.3} bgColor="bg-[var(--bulletin-card)]">
+              <label className={labelBase}>Original Price (GHS) — Optional</label>
+              <input
+                type="number"
+                step="0.01"
+                min="0.5"
+                max="100000"
+                placeholder="Crossed out if lower than price"
+                className={`${fieldBase} mt-2 ${errors.originalPrice ? fieldError : ''}`}
+                {...register('originalPrice', { valueAsNumber: true })}
+              />
+              {errors.originalPrice && <p className="mt-1 text-[11px] text-red-600 font-bold">{errors.originalPrice.message}</p>}
+            </BulletinCard>
+
+            <BulletinCard rotation={-0.3} bgColor="bg-[var(--bulletin-card)]">
               <label className={labelBase}>Condition</label>
               <select className={`${fieldBase} mt-2 ${errors.condition ? fieldError : ''}`} {...register('condition')}>
                 <option value="">Select condition</option>
@@ -315,6 +337,19 @@ const CreateEditProduct: React.FC = () => {
                 <option value="poor">Poor</option>
               </select>
               {errors.condition && <p className="mt-1 text-[11px] text-red-600 font-bold">{errors.condition.message}</p>}
+            </BulletinCard>
+
+            <BulletinCard rotation={0.3} bgColor="bg-[var(--bulletin-card)]">
+              <label className={labelBase}>Stock Quantity</label>
+              <input
+                type="number"
+                min="1"
+                max="10000"
+                placeholder="1"
+                className={`${fieldBase} mt-2 ${errors.stock ? fieldError : ''}`}
+                {...register('stock', { valueAsNumber: true })}
+              />
+              {errors.stock && <p className="mt-1 text-[11px] text-red-600 font-bold">{errors.stock.message}</p>}
             </BulletinCard>
           </div>
 

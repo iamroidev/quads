@@ -6,6 +6,7 @@ import savedItemService from '../services/savedItem.service';
 import { ProductPopulated, PaginationInfo } from '../types';
 import { BulletinLayout, BulletinSection } from '../components/layout/BulletinLayout';
 import { Link } from 'react-router-dom';
+import { BulletinEmptyState } from '../components/ui/BulletinEmptyState';
 
 const SavedItems: React.FC = () => {
   const [products, setProducts] = useState<ProductPopulated[]>([]);
@@ -58,19 +59,19 @@ const SavedItems: React.FC = () => {
             ))}
           </div>
         ) : products.length === 0 ? (
-          <div className="border-4 border-[var(--bulletin-border)] bg-[#fffacd] dark:bg-yellow-900/10 p-12 text-center shadow-[8px_8px_0_0_var(--bulletin-shadow)]">
-            <div className="mb-6">
-              <Heart className="h-16 w-16 mx-auto opacity-20 text-[var(--bulletin-text)]" />
-            </div>
-            <div className="text-[10px] font-black uppercase tracking-widest opacity-40 mb-2 text-[var(--bulletin-text)]">Wishlist Empty</div>
-            <div className="text-2xl font-black uppercase tracking-tight mb-8 text-[var(--bulletin-text)]">You haven't saved any items yet</div>
-            <Link
-              to="/products"
-              className="inline-block border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-text)] px-8 py-3 text-[10px] font-black uppercase text-[var(--bulletin-bg)] transition-all hover:bg-[var(--bulletin-card)] hover:text-[var(--bulletin-text)] shadow-[4px_4px_0_0_var(--bulletin-shadow)]"
-            >
-              Browse products →
-            </Link>
-          </div>
+          <BulletinEmptyState
+            title="Wishlist Empty"
+            message="You haven't saved any items yet. The manifest is clear of personal interests."
+            icon={<Heart className="h-12 w-12 opacity-20" />}
+            action={
+              <Link
+                to="/products"
+                className="inline-block border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-text)] px-8 py-3 text-[10px] font-black uppercase text-[var(--bulletin-bg)] transition-all hover:-translate-y-1 shadow-[4px_4px_0_0_var(--bulletin-shadow)]"
+              >
+                Browse products →
+              </Link>
+            }
+          />
         ) : (
           <>
             <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">

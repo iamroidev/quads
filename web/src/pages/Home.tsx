@@ -79,9 +79,9 @@ const HomePage: React.FC = () => {
             <div className="mb-6 inline-block border-2 border-[#ff6b6b] px-4 py-1.5 text-[11px] font-black uppercase tracking-[0.3em] text-[#ff6b6b]">
               Verified Network
             </div>
-            <h1 className="text-6xl md:text-8xl font-black uppercase tracking-tighter leading-[0.85] text-black mb-8">
-              THE<br/>QUADS.
-            </h1>
+            <p className="text-4xl md:text-5xl font-black uppercase tracking-tighter leading-none mb-10 text-black dark:text-white">
+              BROWSE VERIFIED <br/>CAMPUS LISTINGS
+            </p>
             <p className="text-lg md:text-xl font-bold leading-relaxed opacity-70 text-black mb-10 max-w-xl">
               Buy, sell, and trade with verified UMaT students. From textbooks to electronics, we've built the most trusted network for your hostel life.
             </p>
@@ -255,7 +255,7 @@ const HomePage: React.FC = () => {
             </>
           ) : featuredProducts.map((product, idx) => (
             <Link key={product._id} to={`/products/${product._id}`} className="group relative">
-              <div className="border-4 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] p-5 shadow-[8px_8px_0_0_var(--bulletin-shadow)] transition-all hover:-translate-y-2 hover:shadow-[12px_12px_0_0_var(--bulletin-shadow)]"
+              <div className="border-4 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] p-5 shadow-[8px_8px_0_0_var(--bulletin-shadow),-4px_4px_0_0_#ff6b6b] transition-all hover:-translate-y-2 hover:shadow-[12px_12px_0_0_var(--bulletin-shadow),-8px_8px_0_0_#ff6b6b]"
                 style={{ transform: `rotate(${(idx % 3 - 1) * 1.2}deg)` }}>
                 <div className="relative aspect-square overflow-hidden border-4 border-[var(--bulletin-border)] bg-[var(--bulletin-bg)]">
                   <img src={getImage(product)} alt={product.title} className="h-full w-full object-cover" />
@@ -286,7 +286,7 @@ const HomePage: React.FC = () => {
             </>
           ) : recentProducts.slice(0, 8).map((product, idx) => (
             <Link key={product._id} to={`/products/${product._id}`} className="group relative">
-              <div className="border-4 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] p-5 shadow-[8px_8px_0_0_var(--bulletin-shadow)] transition-all hover:-translate-y-2 hover:shadow-[12px_12px_0_0_var(--bulletin-shadow)]"
+              <div className="border-4 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] p-5 shadow-[8px_8px_0_0_var(--bulletin-shadow),-4px_4px_0_0_#ff6b6b] transition-all hover:-translate-y-2 hover:shadow-[12px_12px_0_0_var(--bulletin-shadow),-8px_8px_0_0_#ff6b6b]"
                 style={{ transform: `rotate(${(idx % 2 === 0 ? 0.8 : -0.8)}deg)` }}>
                 <div className="aspect-square border-4 border-[var(--bulletin-border)] bg-[var(--bulletin-bg)] overflow-hidden mb-6 relative">
                   <img src={getImage(product)} alt={product.title} className="w-full h-full object-cover" />

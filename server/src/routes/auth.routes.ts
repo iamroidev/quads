@@ -14,6 +14,7 @@ import {
   deleteAccount,
   updateSellerOnboarding,
   switchRole,
+  getUserStats,
 } from '../controllers/auth.controller';
 import { authenticate } from '../middleware/auth';
 import { validate } from '../middleware/validate';
@@ -66,6 +67,9 @@ router.post('/google', googleLogin);
 
 // @route   GET /api/auth/me
 router.get('/me', authenticate, getMe);
+
+// @route   GET /api/auth/profile/stats
+router.get('/profile/stats', authenticate, getUserStats);
 
 // @route   PUT /api/auth/profile
 router.put(

@@ -7,6 +7,7 @@ import { uploadToCloudinary, deleteFromCloudinary } from '../utils/imageUpload';
 import fs from 'fs';
 import path from 'path';
 import growthService from '../services/growth.service';
+import userService from '../services/user.service';
 
 /**
  * @route   POST /api/auth/register
@@ -116,6 +117,29 @@ export const getMe = async (
       success: true,
       message: 'Profile fetched successfully.',
       data: { user },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * @route   GET /api/auth/profile/stats
+ * @desc    Get user performance statistics
+ * @access  Private
+ */
+export const getUserStats = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const stats = await userService.getUserStats(req.user!._id.toString());
+
+    res.status(200).json({
+      success: true,
+      message: 'Statistics fetched successfully.',
+      data: { stats },
     });
   } catch (error) {
     next(error);
@@ -429,13 +453,13 @@ export const googleLogin = async (
   next: NextFunction
 ): Promise<void> => {
   try {
-    const { credential, role } = req.body;
+    const { credential, role, profileData } = req.body;
     if (!credential) {
       res.status(400).json({ success: false, message: 'Google credential missing' });
       return;
     }
 
-    const { user, token, isNewUser, needsProfileCompletion } = await authService.googleLogin(credential, role);
+    const { user, token, isNewUser, needsProfileCompletion } = await authService.googleLogin(credential, role, profileData);
 
     // Set cookie
     res.cookie('token', token, {

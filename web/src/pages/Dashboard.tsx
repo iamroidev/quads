@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import productService from '../services/product.service';
+import authService, { UserStats } from '../services/auth.service';
 import categoryService, { CategoryWithCount } from '../services/category.service';
 import { ProductPopulated } from '../types';
 import { BulletinLayout, BulletinSection } from '../components/layout/BulletinLayout';
@@ -32,6 +33,8 @@ const Dashboard: React.FC = () => {
   const [loadingMyListings, setLoadingMyListings] = useState(true);
   const [viewMode, setViewMode] = useState<'seller' | 'buyer'>('buyer');
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+  const [stats, setStats] = useState<UserStats | null>(null);
+  const [loadingStats, setLoadingStats] = useState(false);
 
   const isSeller = user?.role === 'seller' || user?.role === 'admin';
 
@@ -59,6 +62,12 @@ const Dashboard: React.FC = () => {
 
     // Seller data
     if (isSeller) {
+      setLoadingStats(true);
+      authService.getUserStats()
+        .then(setStats)
+        .catch(console.error)
+        .finally(() => setLoadingStats(false));
+
       productService.getMyListings({ limit: 10 } as any)
         .then((res) => { if (res.success) setMyListings(res.data); })
         .catch(() => { })
@@ -107,19 +116,19 @@ const Dashboard: React.FC = () => {
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <div className="border border-black dark:border-white/20 bg-[var(--bulletin-card)] p-6 shadow-[4px_4px_0_0_var(--bulletin-shadow)]">
               <div className="text-[10px] uppercase font-bold opacity-40 mb-1">Active Listings</div>
-              <div className="text-3xl font-black">{myListings.filter(p => p.status === 'active').length}</div>
+              <div className="text-3xl font-black">{loadingStats ? '...' : (stats?.activeListings ?? 0)}</div>
             </div>
             <div className="border border-black dark:border-white/20 bg-[#fffacd] dark:bg-yellow-900/20 p-6 shadow-[4px_4px_0_0_var(--bulletin-shadow)]">
-              <div className="text-[10px] uppercase font-bold opacity-40 mb-1">Store Views</div>
-              <div className="text-3xl font-black">1.2k</div>
+              <div className="text-[10px] uppercase font-bold opacity-40 mb-1">Rating</div>
+              <div className="text-3xl font-black">{loadingStats ? '...' : (stats?.rating ? `${stats.rating}/5` : 'N/A')}</div>
             </div>
             <div className="border border-black dark:border-white/20 bg-[#e0f2f7] dark:bg-sky-900/20 p-6 shadow-[4px_4px_0_0_var(--bulletin-shadow)]">
               <div className="text-[10px] uppercase font-bold opacity-40 mb-1">Open Orders</div>
-              <div className="text-3xl font-black">--</div>
+              <div className="text-3xl font-black">{loadingStats ? '...' : (stats?.totalOrders ?? 0)}</div>
             </div>
             <Link to="/seller/analytics" className="border border-black dark:border-white/20 bg-[#fce4ec] dark:bg-pink-900/20 p-6 shadow-[4px_4px_0_0_var(--bulletin-shadow)] hover:-translate-y-1 transition-transform">
-              <div className="text-[10px] uppercase font-bold opacity-40 mb-1">Total Revenue</div>
-              <div className="text-xl font-black">View Analytics →</div>
+              <div className="text-[10px] uppercase font-bold opacity-40 mb-1">Total Sales</div>
+              <div className="text-3xl font-black">{loadingStats ? '...' : (stats?.totalSales ?? 0)}</div>
             </Link>
           </div>
         </BulletinSection>
@@ -147,7 +156,7 @@ const Dashboard: React.FC = () => {
                   className="group flex-shrink-0"
                   style={{ transform: `rotate(${(idx % 2) * 1 - 0.5}deg)` }}
                 >
-                  <div className="border border-black dark:border-white/20 bg-[var(--bulletin-card)] p-3 shadow-[4px_4px_0_0_var(--bulletin-shadow)] w-48">
+                  <div className="border border-black dark:border-white/20 bg-[var(--bulletin-card)] p-3 shadow-[4px_4px_0_0_var(--bulletin-shadow),-2px_2px_0_0_#ff6b6b] w-48">
                     <div className="aspect-square border border-black/10 overflow-hidden mb-3">
                       <img src={getImage(product)} alt={product.title} className="w-full h-full object-cover" />
                     </div>
@@ -275,7 +284,7 @@ const Dashboard: React.FC = () => {
                 onMouseEnter={(e: React.MouseEvent<HTMLAnchorElement>) => { e.currentTarget.style.transform = 'rotate(0deg) translateY(-8px)'; }}
                 onMouseLeave={(e: React.MouseEvent<HTMLAnchorElement>) => { e.currentTarget.style.transform = `rotate(${(idx % 3 - 1) * 0.8}deg)`; }}
               >
-                <div className="border border-black dark:border-white/20 bg-[var(--bulletin-card)] p-3 shadow-[6px_6px_0_0_var(--bulletin-shadow)]">
+                <div className="border border-black dark:border-white/20 bg-[var(--bulletin-card)] p-3 shadow-[6px_6px_0_0_var(--bulletin-shadow),-3px_3px_0_0_#ff6b6b]">
                   <div className="relative aspect-square overflow-hidden border border-black/10 bg-gray-100">
                     <img src={getImage(product)} alt={product.title} className="h-full w-full object-cover" />
                     <div className="absolute -top-2 left-1/2 h-4 w-16 -translate-x-1/2 bg-[#ffd700]/30 opacity-60" style={{ transform: 'translateX(-50%) rotate(-2deg)' }} />

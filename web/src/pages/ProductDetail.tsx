@@ -287,7 +287,7 @@ const ProductDetail: React.FC = () => {
   return (
     <BulletinLayout
       title={product.title}
-      subtitle="Detailed Inventory Entry"
+      subtitle="Detailed Product View"
       section="03"
     >
       <BulletinSection bgColor="bg-[var(--bulletin-bg)]">
@@ -375,6 +375,69 @@ const ProductDetail: React.FC = () => {
                 ))}
               </div>
             )}
+
+            {/* Product reviews - Moved beneath image */}
+            <div className="mt-12 pt-12 border-t-2 border-[var(--bulletin-border)]/10">
+              <div className="flex items-center justify-between mb-8">
+                <div className="text-[10px] font-black uppercase tracking-[0.3em] opacity-40 text-[var(--bulletin-text)]">Customer Feedback</div>
+                {reviews.length > 0 && (
+                   <div className="flex items-center gap-2">
+                     <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                     <span className="text-sm font-black text-[var(--bulletin-text)]">{sellerRating?.averageRating.toFixed(1) || '0.0'}</span>
+                   </div>
+                )}
+              </div>
+              
+              {reviews.length > 0 ? (
+                <div className="space-y-6">
+                  {reviews.map((review, idx) => (
+                    <div
+                      key={review._id}
+                      className="border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] p-6 shadow-[4px_4px_0_0_var(--bulletin-shadow)]"
+                      style={{ transform: `rotate(${(idx % 2) * 0.5}deg)` }}
+                    >
+                      <div className="flex items-start justify-between gap-4">
+                        <div>
+                          <div className="text-xs font-black uppercase tracking-tight text-[var(--bulletin-text)]">{review.reviewer.name}</div>
+                          <div className="text-[9px] font-black uppercase tracking-widest opacity-40 mt-0.5 text-[var(--bulletin-text)]">
+                            {new Date(review.createdAt).toLocaleDateString('en-GH')}
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-0.5">
+                          {[1, 2, 3, 4, 5].map((star) => (
+                            <Star
+                              key={star}
+                              className={`h-3.5 w-3.5 ${star <= review.rating ? 'fill-yellow-400 text-yellow-400' : 'text-[var(--bulletin-border)] opacity-20'}`}
+                            />
+                          ))}
+                        </div>
+                      </div>
+                      <div className="text-sm font-medium leading-relaxed mt-4 italic text-[var(--bulletin-text)]">"{review.comment}"</div>
+                      {review.reply && (
+                        <div className="mt-4 border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-bg)] p-4 ml-4 shadow-[2px_2px_0_0_var(--bulletin-shadow)]">
+                          <div className="text-[8px] font-black uppercase tracking-widest opacity-40 mb-1 text-[var(--bulletin-text)]">Seller Response</div>
+                          <div className="text-[12px] font-medium text-[var(--bulletin-text)] leading-relaxed">{review.reply}</div>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="border-4 border-dashed border-[var(--bulletin-border)]/20 p-12 text-center relative overflow-hidden group">
+                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-[0.03] select-none pointer-events-none group-hover:opacity-[0.05] transition-opacity">
+                    <Sparkles className="h-40 w-40" />
+                  </div>
+                  <div className="relative z-10">
+                    <div className="h-16 w-16 bg-[var(--bulletin-card)] border-2 border-[var(--bulletin-border)] flex items-center justify-center mx-auto mb-6 shadow-[4px_4px_0_0_var(--bulletin-shadow)] rotate-[-3deg]">
+                       <Star className="h-8 w-8 text-[var(--bulletin-border)] opacity-20" />
+                    </div>
+                    <div className="text-[10px] font-black uppercase tracking-widest opacity-40 text-[var(--bulletin-text)] mb-2">Pristine Record</div>
+                    <div className="text-sm font-black uppercase tracking-tight text-[var(--bulletin-text)]">No feedback recorded yet.</div>
+                    <p className="mt-2 text-[11px] font-bold opacity-40 max-w-[200px] mx-auto text-[var(--bulletin-text)]">Be the first to verify this entity after a successful transaction.</p>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Right: Details */}
@@ -384,7 +447,7 @@ const ProductDetail: React.FC = () => {
               to={`/products?category=${category.slug}`}
               className="text-[10px] font-black uppercase tracking-widest opacity-40 hover:opacity-100 hover:underline transition-opacity text-[var(--bulletin-text)]"
             >
-              {category.name} Repository
+              {category.name} Listings
             </Link>
 
             {/* Title */}
@@ -444,7 +507,7 @@ const ProductDetail: React.FC = () => {
               </div>
               <div className="flex items-center gap-3 text-sm font-black uppercase tracking-tight text-[var(--bulletin-text)]">
                 <Clock className="h-5 w-5 opacity-40" />
-                Catalogued {new Date(product.createdAt).toLocaleDateString('en-GH', {
+                Listed on {new Date(product.createdAt).toLocaleDateString('en-GH', {
                   year: 'numeric',
                   month: 'long',
                   day: 'numeric',
@@ -454,7 +517,7 @@ const ProductDetail: React.FC = () => {
 
             {/* Description */}
             <div className="mb-8">
-              <h3 className="text-[10px] font-black uppercase tracking-widest mb-3 opacity-40 text-[var(--bulletin-text)]">Context & Details</h3>
+              <h3 className="text-[10px] font-black uppercase tracking-widest mb-3 opacity-40 text-[var(--bulletin-text)]">Product Description</h3>
               <p className="text-[14px] leading-relaxed font-medium text-[var(--bulletin-text)] opacity-80 whitespace-pre-wrap">
                 {product.description}
               </p>
@@ -496,7 +559,7 @@ const ProductDetail: React.FC = () => {
                     onClick={() => navigate(`/checkout/${product._id}`)}
                   >
                     <ShoppingCart className="inline-block h-5 w-5 mr-2" />
-                    Secure Transaction
+                    Buy Now
                   </button>
                   <button
                     className="flex-1 border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] px-8 py-4 text-[11px] font-black uppercase tracking-widest text-[var(--bulletin-text)] transition-all hover:bg-[var(--bulletin-text)] hover:text-[var(--bulletin-bg)] shadow-[6px_6px_0_0_var(--bulletin-shadow)] hover:translate-y-1 hover:shadow-none disabled:opacity-20"
@@ -504,7 +567,7 @@ const ProductDetail: React.FC = () => {
                     onClick={handleContactSeller}
                   >
                     <MessageCircle className="inline-block h-5 w-5 mr-2" />
-                    {contacting ? '...' : 'Direct Message'}
+                    {contacting ? '...' : 'Chat with Seller'}
                   </button>
                   <button
                     onClick={handleToggleSaved}
@@ -539,7 +602,7 @@ const ProductDetail: React.FC = () => {
       {/* Seller info */}
       <BulletinSection bgColor="bg-[var(--bulletin-bg)]">
         <div className="border-4 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] p-8 shadow-[12px_12px_0_0_var(--bulletin-shadow)]" style={{ transform: 'rotate(-0.5deg)' }}>
-          <div className="text-[10px] font-black uppercase tracking-widest opacity-40 mb-6 text-[var(--bulletin-text)]">Counterparty Profile</div>
+          <div className="text-[10px] font-black uppercase tracking-widest opacity-40 mb-6 text-[var(--bulletin-text)]">Seller Profile</div>
           <div className="flex flex-col md:flex-row items-center gap-8">
             <div className="h-24 w-24 border-4 border-[var(--bulletin-border)] bg-[var(--bulletin-bg)] flex items-center justify-center font-black text-3xl overflow-hidden shadow-[6px_6px_0_0_var(--bulletin-shadow)] text-[var(--bulletin-text)]">
               {seller.avatar ? (
@@ -570,7 +633,7 @@ const ProductDetail: React.FC = () => {
                     </span>
                   </div>
                   <span className="text-[11px] font-black uppercase tracking-widest opacity-40 text-[var(--bulletin-text)]">
-                    {sellerRating.totalReviews} Community Reviews
+                    {sellerRating.totalReviews} Customer Reviews
                   </span>
                 </div>
               )}
@@ -608,48 +671,9 @@ const ProductDetail: React.FC = () => {
         </div>
       </BulletinSection>
 
-      {/* Product reviews */}
-      {reviews.length > 0 && (
-        <BulletinSection title="Community Feedback" subtitle="Verification" bgColor="bg-[var(--bulletin-bg)]">
-          <div className="space-y-6">
-            {reviews.map((review, idx) => (
-              <div
-                key={review._id}
-                className="border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] p-8 shadow-[6px_6px_0_0_var(--bulletin-shadow)]"
-                style={{ transform: `rotate(${(idx % 2) * 0.8}deg)` }}
-              >
-                <div className="flex items-start justify-between gap-4">
-                  <div>
-                    <div className="text-sm font-black uppercase tracking-tight text-[var(--bulletin-text)]">{review.reviewer.name}</div>
-                    <div className="text-[10px] font-black uppercase tracking-widest opacity-40 mt-1 text-[var(--bulletin-text)]">
-                      {new Date(review.createdAt).toLocaleDateString('en-GH')}
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    {[1, 2, 3, 4, 5].map((star) => (
-                      <Star
-                        key={star}
-                        className={`h-5 w-5 ${star <= review.rating ? 'fill-yellow-400 text-yellow-400' : 'text-[var(--bulletin-border)] opacity-20'}`}
-                      />
-                    ))}
-                  </div>
-                </div>
-                <div className="text-sm font-medium leading-relaxed mt-4 italic text-[var(--bulletin-text)]">"{review.comment}"</div>
-                {review.reply && (
-                  <div className="mt-6 border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-bg)] p-6 ml-6 shadow-[4px_4px_0_0_var(--bulletin-shadow)]">
-                    <div className="text-[10px] font-black uppercase tracking-widest opacity-40 mb-2 text-[var(--bulletin-text)]">Counterparty Response</div>
-                    <div className="text-sm font-medium text-[var(--bulletin-text)] leading-relaxed">{review.reply}</div>
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-        </BulletinSection>
-      )}
-
       {/* Related products */}
       {relatedProducts.length > 0 && (
-        <BulletinSection title="Similar Findings" subtitle="Related Repository" bgColor="bg-[var(--bulletin-bg)]">
+        <BulletinSection title="You May Also Like" subtitle="Similar Products" bgColor="bg-[var(--bulletin-bg)]">
           <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
             {relatedProducts.map((rp, idx) => (
               <Link

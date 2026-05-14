@@ -7,6 +7,7 @@ import { LoadingSpinner } from '../components/ui';
 import { ProductPopulated, PaginationInfo, ProductStatus } from '../types';
 import { BulletinLayout, BulletinSection, BulletinCard } from '../components/layout/BulletinLayout';
 import { useAuth } from '../context/AuthContext';
+import { BulletinEmptyState } from '../components/ui/BulletinEmptyState';
 
 const statusStyles: Record<string, string> = {
   active: 'bg-[#fffacd] dark:bg-yellow-900/30 text-black dark:text-yellow-200',
@@ -564,19 +565,23 @@ const MyListings: React.FC = () => {
         {loading ? (
           <LoadingSpinner text="Loading your listings..." />
         ) : products.length === 0 ? (
-          <div className="border border-[var(--bulletin-border)] bg-[#fffacd] dark:bg-yellow-900/20 p-12 text-center shadow-[4px_4px_0_0_var(--bulletin-shadow)]">
-            <Package className="h-12 w-12 mx-auto opacity-40 mb-4" />
-            <div className="text-[10px] uppercase tracking-wider opacity-60 mb-2">Empty</div>
-            <div className="text-lg font-bold mb-4">No Listings Yet</div>
-            <div className="text-[12px] opacity-60 mb-6">Start selling by creating your first listing.</div>
-            <Link
-              to="/sell"
-              className="inline-block border border-[var(--bulletin-border)] bg-[var(--bulletin-text)] px-4 py-2 text-[10px] font-bold uppercase text-[var(--bulletin-bg)] transition-colors hover:bg-[var(--bulletin-card)] hover:text-[var(--bulletin-text)] shadow-[2px_2px_0_0_var(--bulletin-shadow)]"
-            >
-              <Plus className="inline-block h-3 w-3 mr-1" />
-              Create Listing
-            </Link>
-          </div>
+          <BulletinEmptyState
+            title={statusFilter ? `No ${statusFilter} listings` : "No Listings Yet"}
+            message={statusFilter 
+              ? `You don't have any items currently marked as ${statusFilter}.` 
+              : "Your shop is looking a bit quiet. Start selling by creating your first listing."
+            }
+            icon={<Package className="h-12 w-12 opacity-20" />}
+            action={
+              <Link
+                to="/sell"
+                className="inline-block border border-[var(--bulletin-border)] bg-[var(--bulletin-text)] px-8 py-3 text-[10px] font-bold uppercase text-[var(--bulletin-bg)] transition-all hover:-translate-y-1 shadow-[4px_4px_0_0_var(--bulletin-shadow)]"
+              >
+                <Plus className="inline-block h-3 w-3 mr-2" />
+                Create Listing
+              </Link>
+            }
+          />
         ) : (
           <div className="space-y-3">
             {products.map((product) => {

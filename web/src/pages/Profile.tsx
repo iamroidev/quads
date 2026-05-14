@@ -22,7 +22,7 @@ import {
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import toast from 'react-hot-toast';
-import authService from '../services/auth.service';
+import authService, { UserStats } from '../services/auth.service';
 import { BulletinLayout, BulletinSection } from '../components/layout/BulletinLayout';
 
 const PROGRAMS = [
@@ -43,12 +43,19 @@ const PROGRAMS = [
 ];
 
 const RESIDENCE_HALLS = [
-  'D. A. Opoku Mensah (D.A.O.) Hall',
-  'J. C. S. Hagan Hall',
-  'A. A. Adumua-Bossman Hall',
-  'Mensah Sarbah Hall',
-  'Jubilee Hall',
-  'Tarkwaian Hostel',
+  'Chamber of Mines Hall',
+  'Gold Refinery Hall',
+  'KT Hall',
+  'Recognition Hostel',
+  'Osborn Hostel',
+  'Tandoh Hostel',
+  'Good Shepherd Hostel',
+  'Agrich Hostel',
+  'Kiviz Executive Lodge',
+  'Platinum Hostel',
+  'Global Hostel',
+  'Hill View Hostel',
+  'AdeJoe Hostel',
   'Off-campus',
   'Other',
 ];
@@ -112,8 +119,11 @@ const ProfilePage: React.FC = () => {
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [switchingRole, setSwitchingRole] = useState(false);
   const [showRoleModal, setShowRoleModal] = useState(false);
+  const [stats, setStats] = useState<UserStats | null>(null);
+  const [loadingStats, setLoadingStats] = useState(false);
 
-  const isSeller = user?.role === 'seller' || user?.role === 'admin';
+  const isAdmin = user?.role === 'admin';
+  const isSeller = user?.role === 'seller';
   const otherRole = isSeller ? 'buyer' : 'seller';
 
   const {
@@ -136,6 +146,21 @@ const ProfilePage: React.FC = () => {
       bio: user?.bio || '',
     },
   });
+
+  React.useEffect(() => {
+    const fetchStats = async () => {
+      setLoadingStats(true);
+      try {
+        const s = await authService.getUserStats();
+        setStats(s);
+      } catch (err) {
+        console.error('Failed to fetch stats:', err);
+      } finally {
+        setLoadingStats(false);
+      }
+    };
+    if (user) fetchStats();
+  }, [user]);
 
   React.useEffect(() => {
     if (user) {
@@ -165,7 +190,6 @@ const ProfilePage: React.FC = () => {
     setIsUpdating(true);
     try {
       await updateProfile(data);
-      toast.success('Identity Updated Successfully');
     } catch (err: any) {
       toast.error(err.response?.data?.message || 'Failed to update profile');
     } finally {
@@ -178,7 +202,6 @@ const ProfilePage: React.FC = () => {
     try {
       await changePassword({ currentPassword: data.currentPassword, newPassword: data.newPassword });
       resetPw();
-      toast.success('Password Access Updated');
     } catch (err: any) {
       toast.error(err.response?.data?.message || 'Failed to change password');
     } finally {
@@ -206,7 +229,7 @@ const ProfilePage: React.FC = () => {
     try {
       await authService.uploadAvatar(file);
       await refreshUser();
-      toast.success('Identity Photo Updated');
+      toast.success('Profile Photo Updated');
     } catch (err: any) {
       toast.error(err.response?.data?.message || 'Failed to upload photo');
     } finally {
@@ -239,7 +262,7 @@ const ProfilePage: React.FC = () => {
 
   return (
     <BulletinLayout section="09" hideBreadcrumbs={true}>
-      {/* Identity Statement Header */}
+      {/* Profile Header */}
       <div className="relative border-b-4 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] overflow-hidden">
         <div className="absolute inset-0 opacity-[0.03] pointer-events-none" 
              style={{ backgroundImage: `radial-gradient(circle, var(--bulletin-text) 1px, transparent 1px)`, backgroundSize: '24px 24px' }} />
@@ -267,7 +290,7 @@ const ProfilePage: React.FC = () => {
               <div className="text-center md:text-left">
                 <div className="inline-flex items-center gap-2 mb-4">
                   <span className={`px-3 py-1 border-2 border-[var(--bulletin-border)] text-[10px] font-black uppercase tracking-widest ${isSeller ? 'bg-[#ff6b6b] text-white' : 'bg-sky-500 text-white'}`}>
-                    {user?.role} Perspective
+                    {user?.role} View
                   </span>
                   {user?.isVerified && (
                     <span className="flex items-center gap-1 border-2 border-[var(--bulletin-border)] bg-emerald-50 dark:bg-emerald-900/20 px-3 py-1 text-[10px] font-black uppercase tracking-widest text-emerald-700 dark:text-emerald-400">
@@ -278,21 +301,29 @@ const ProfilePage: React.FC = () => {
                 <h1 className="text-5xl md:text-7xl font-black uppercase tracking-tighter leading-none mb-4">
                   {user?.name}
                 </h1>
-                <div className="flex flex-wrap justify-center md:justify-start items-center gap-6 text-[11px] font-black uppercase tracking-widest opacity-40">
+                <div className="flex flex-wrap justify-center md:justify-start items-center gap-6 text-[11px] font-black uppercase tracking-widest opacity-40 text-[var(--bulletin-text)]">
                   <div className="flex items-center gap-2"><MapPin className="h-3.5 w-3.5" /> {user?.location || 'Campus Resident'}</div>
-                  <div className="flex items-center gap-2"><Calendar className="h-3.5 w-3.5" /> Joined {joinYear}</div>
+                  <div className="flex items-center gap-2"><Calendar className="h-3.5 w-3.5" /> Member Since {joinYear}</div>
                   <div className="flex items-center gap-2"><Phone className="h-3.5 w-3.5" /> {user?.phone}</div>
                 </div>
               </div>
             </div>
 
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-2 gap-4 w-full lg:w-72">
-              {[
-                { label: 'Active Listings', value: '12', color: 'bg-[var(--bulletin-card)]' },
-                { label: 'Rating', value: '4.9', color: 'bg-[#fffacd] dark:bg-yellow-900/20' },
-                { label: 'Sales', value: '24', color: 'bg-[var(--bulletin-card)]' },
-                { label: 'Response', value: '98%', color: 'bg-[var(--bulletin-card)]' },
-              ].map((stat, i) => (
+              {(isSeller 
+                ? [
+                    { label: 'Active Listings', value: loadingStats ? '...' : (stats?.activeListings || '0'), color: 'bg-[var(--bulletin-card)]' },
+                    { label: 'Rating', value: loadingStats ? '...' : (stats?.rating ? `${stats.rating}/5` : 'N/A'), color: 'bg-[#fffacd] dark:bg-yellow-900/20' },
+                    { label: 'Sales', value: loadingStats ? '...' : (stats?.totalSales || '0'), color: 'bg-[var(--bulletin-card)]' },
+                    { label: 'Response', value: loadingStats ? '...' : `${stats?.responseRate || 100}%`, color: 'bg-[var(--bulletin-card)]' },
+                  ]
+                : [
+                    { label: 'Total Orders', value: loadingStats ? '...' : (stats?.totalOrders || '0'), color: 'bg-[var(--bulletin-card)]' },
+                    { label: 'Wishlist Items', value: user?.savedItems?.length || '0', color: 'bg-[#e0f2f7] dark:bg-sky-900/20' },
+                    { label: 'Alerts', value: loadingStats ? '...' : (stats?.unreadNotifications || '0'), color: 'bg-[var(--bulletin-card)]' },
+                    { label: 'Verified', value: user?.isVerified ? 'YES' : 'NO', color: 'bg-[var(--bulletin-card)]' },
+                  ]
+              ).map((stat, i) => (
                 <div key={i} className={`border-2 border-[var(--bulletin-border)] p-4 shadow-[4px_4px_0_0_var(--bulletin-shadow)] ${stat.color}`}>
                   <div className="text-[10px] font-black uppercase tracking-widest opacity-40 mb-1 text-[var(--bulletin-text)]">{stat.label}</div>
                   <div className="text-2xl font-black uppercase tracking-tighter text-[var(--bulletin-text)]">{stat.value}</div>
@@ -313,19 +344,21 @@ const ProfilePage: React.FC = () => {
                       : 'bg-[var(--bulletin-card)] text-[var(--bulletin-text)] hover:bg-[var(--bulletin-bg)] hover:-translate-y-0.5'
                   }`}
                 >
-                  {t === 'profile' ? 'Account Identity' : 'Security Access'}
+                  {t === 'profile' ? 'Profile Details' : 'Password & Security'}
                 </button>
               ))}
             </div>
 
-            <button
-              onClick={handleRoleSwitchClick}
-              disabled={switchingRole}
-              className="flex items-center gap-2 px-8 py-3 text-xs font-black uppercase tracking-widest border-2 border-[var(--bulletin-border)] bg-[#fffacd] dark:bg-yellow-900/20 text-[var(--bulletin-text)] shadow-[4px_4px_0_0_var(--bulletin-shadow)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all disabled:opacity-40 group"
-            >
-              <Repeat className={`h-4 w-4 group-hover:rotate-180 transition-transform duration-500 ${switchingRole ? 'animate-spin' : ''}`} />
-              {switchingRole ? 'Switching...' : `Enter ${isSeller ? 'Buyer' : 'Seller'} Hub`}
-            </button>
+            {!isAdmin && (
+              <button
+                onClick={handleRoleSwitchClick}
+                disabled={switchingRole}
+                className="flex items-center gap-2 px-8 py-3 text-xs font-black uppercase tracking-widest border-2 border-[var(--bulletin-border)] bg-[#fffacd] dark:bg-yellow-900/20 text-[var(--bulletin-text)] shadow-[4px_4px_0_0_var(--bulletin-shadow)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all disabled:opacity-40 group"
+              >
+                <Repeat className={`h-4 w-4 group-hover:rotate-180 transition-transform duration-500 ${switchingRole ? 'animate-spin' : ''}`} />
+                {switchingRole ? 'Switching...' : `Switch to ${isSeller ? 'Buyer' : 'Seller'} View`}
+              </button>
+            )}
           </div>
         </div>
       </div>
@@ -333,7 +366,7 @@ const ProfilePage: React.FC = () => {
       <BulletinSection bgColor="bg-[var(--bulletin-bg)]">
         <div className="grid grid-cols-1 gap-12 lg:grid-cols-[300px_1fr] lg:gap-20">
           <aside className="space-y-8">
-            <div className="border-4 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] shadow-[8px_8px_0_0_var(--bulletin-shadow)] relative overflow-hidden group">
+            <div className="border-4 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] p-5 shadow-[8px_8px_0_0_var(--bulletin-shadow),-4px_4px_0_0_#ff6b6b] transition-all hover:-translate-y-2 hover:shadow-[12px_12px_0_0_var(--bulletin-shadow),-8px_8px_0_0_#ff6b6b] relative overflow-hidden group">
               <div className="absolute top-0 left-0 w-full h-1 bg-[#ff6b6b]" />
               <div className="p-6">
                 <div className="flex items-center gap-4 mb-6">
@@ -347,8 +380,8 @@ const ProfilePage: React.FC = () => {
                     </div>
                   )}
                   <div>
-                    <div className="text-[10px] font-black uppercase tracking-widest opacity-30 text-[var(--bulletin-text)]">Campus ID</div>
-                    <div className="text-sm font-black uppercase tracking-tight truncate text-[var(--bulletin-text)]">{user?.name}</div>
+                    <div className="text-[10px] font-black uppercase tracking-widest opacity-30 text-[var(--bulletin-text)]">Profile ID</div>
+                    <div className="text-sm font-black uppercase tracking-tight truncate text-[var(--bulletin-text)]">{user?.studentId || 'UNK-001'}</div>
                   </div>
                 </div>
 
@@ -378,9 +411,9 @@ const ProfilePage: React.FC = () => {
             </div>
 
             <div className="bg-[var(--bulletin-text)] text-[var(--bulletin-bg)] p-6 border-2 border-[var(--bulletin-border)] shadow-[4px_4px_0_0_var(--bulletin-shadow)]">
-               <div className="text-[9px] font-black uppercase tracking-widest opacity-50 mb-4">Identity Statement</div>
+               <div className="text-[9px] font-black uppercase tracking-widest opacity-50 mb-4">About Me</div>
                <p className="text-[11px] leading-relaxed italic">
-                 "{user?.bio || 'No bio provided yet. Update your profile to tell the community more about yourself.'}"
+                 "{user?.bio || 'No bio provided.'}"
                </p>
             </div>
           </aside>
@@ -391,23 +424,23 @@ const ProfilePage: React.FC = () => {
                 <div className="border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] p-8 shadow-[6px_6px_0_0_var(--bulletin-shadow)]">
                   <div className="mb-8">
                     <div className="inline-block bg-[#fffacd] dark:bg-yellow-900/40 border border-[var(--bulletin-border)] px-2 py-0.5 text-[8px] font-black uppercase tracking-widest mb-2 text-black dark:text-white">Section 01</div>
-                    <h3 className="text-2xl font-black uppercase tracking-tighter text-[var(--bulletin-text)]">Personal Identity</h3>
+                    <h3 className="text-2xl font-black uppercase tracking-tighter text-[var(--bulletin-text)]">Personal Details</h3>
                   </div>
                   
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                     <div>
-                      <label className={labelBase}>Full Legal Name</label>
+                      <label className={labelBase}>Full Name</label>
                       <input type="text" className={fieldBase} {...rp('name')} />
                       {pe.name && <p className={errorBase}>{pe.name.message}</p>}
                     </div>
                     <div>
-                      <label className={labelBase}>Campus Residence</label>
+                      <label className={labelBase}>Current Location</label>
                       <input type="text" className={fieldBase} {...rp('location')} />
                     </div>
                   </div>
 
                   <div className="mt-8 pt-8 border-t-2 border-[var(--bulletin-border)]/5">
-                    <label className={labelBase}>Bio & Perspective <span className="normal-case font-normal opacity-40">— Tell us your story</span></label>
+                    <label className={labelBase}>About Me <span className="normal-case font-normal opacity-40">— Brief biography</span></label>
                     <textarea rows={3} className={`${fieldBase} resize-none`} {...rp('bio')} maxLength={500} />
                   </div>
                 </div>
@@ -436,7 +469,10 @@ const ProfilePage: React.FC = () => {
                     </div>
                     <div>
                       <label className={labelBase}>Residence Hall</label>
-                      <input type="text" className={fieldBase} {...rp('residenceHall')} />
+                      <select className={selectBase} {...rp('residenceHall')}>
+                        <option value="">Select Residence</option>
+                        {RESIDENCE_HALLS.map(h => <option key={h} value={h}>{h}</option>)}
+                      </select>
                     </div>
                   </div>
                 </div>
@@ -447,7 +483,7 @@ const ProfilePage: React.FC = () => {
                       Section 03
                     </div>
                     <h3 className="text-2xl font-black uppercase tracking-tighter text-[var(--bulletin-text)]">
-                      {isSeller ? 'Commerce Identity' : 'Secure Contact'}
+                      {isSeller ? 'Store Profile' : 'Contact Details'}
                     </h3>
                   </div>
 
@@ -459,13 +495,13 @@ const ProfilePage: React.FC = () => {
                           <input type="text" className={fieldBase} {...rp('storeName')} />
                         </div>
                         <div>
-                          <label className={labelBase}>Legal Brand ID</label>
+                          <label className={labelBase}>Registration ID</label>
                           <input type="text" className={fieldBase} {...rp('brandName')} />
                         </div>
                       </>
                     )}
                     <div>
-                      <label className={labelBase}>Direct Phone Line</label>
+                      <label className={labelBase}>Mobile Number</label>
                       <input type="tel" className={fieldBase} {...rp('phone')} />
                       {pe.phone && <p className={errorBase}>{pe.phone.message}</p>}
                     </div>
@@ -478,15 +514,15 @@ const ProfilePage: React.FC = () => {
 
                 <div className="flex items-center justify-between border-4 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] p-6 shadow-[8px_8px_0_0_var(--bulletin-shadow)]">
                   <div className="hidden md:block">
-                    <div className="text-[10px] font-black uppercase tracking-widest opacity-30 text-[var(--bulletin-text)]">Status</div>
-                    <div className="text-xs font-bold text-[var(--bulletin-text)]">Updates apply to all marketplace modes</div>
+                    <div className="text-[10px] font-black uppercase tracking-widest opacity-30 text-[var(--bulletin-text)]">Update Settings</div>
+                    <div className="text-xs font-bold text-[var(--bulletin-text)]">Changes are applied immediately across the marketplace.</div>
                   </div>
                   <button
                     type="submit"
                     disabled={isUpdating}
                     className="w-full md:w-auto border-4 border-[var(--bulletin-border)] bg-[var(--bulletin-text)] text-[var(--bulletin-bg)] px-10 py-4 text-sm font-black uppercase tracking-widest hover:bg-[#ff6b6b] hover:text-white transition-all shadow-[4px_4px_0_0_rgba(255,107,107,1)] active:translate-y-1 active:shadow-none"
                   >
-                    {isUpdating ? 'Saving Changes...' : 'Save Profile Update'}
+                    {isUpdating ? 'Saving...' : 'Update Profile'}
                   </button>
                 </div>
               </form>
@@ -497,7 +533,7 @@ const ProfilePage: React.FC = () => {
                 <div className="border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] p-8 shadow-[6px_6px_0_0_var(--bulletin-shadow)]">
                   <div className="mb-8">
                     <div className="inline-block bg-[#ff6b6b] border border-[var(--bulletin-border)] px-2 py-0.5 text-[8px] font-black uppercase tracking-widest text-white mb-2">Security</div>
-                    <h3 className="text-2xl font-black uppercase tracking-tighter text-[var(--bulletin-text)]">Access Security</h3>
+                    <h3 className="text-2xl font-black uppercase tracking-tighter text-[var(--bulletin-text)]">Password & Security</h3>
                   </div>
 
                   <div className="space-y-6">
@@ -517,7 +553,7 @@ const ProfilePage: React.FC = () => {
                         <input type={showNew ? 'text' : 'password'} className={fieldBase} {...rpw('newPassword')} />
                       </div>
                       <div>
-                        <label className={labelBase}>Confirm New</label>
+                        <label className={labelBase}>Confirm New Password</label>
                         <input type={showConfirm ? 'text' : 'password'} className={fieldBase} {...rpw('confirmNewPassword')} />
                       </div>
                     </div>
@@ -526,9 +562,9 @@ const ProfilePage: React.FC = () => {
                   <button
                     type="submit"
                     disabled={isChangingPassword}
-                    className="mt-10 w-full border-4 border-[var(--bulletin-border)] bg-[var(--bulletin-text)] text-[var(--bulletin-bg)] py-4 text-xs font-black uppercase tracking-widest hover:bg-[#ff6b6b] hover:text-white transition-colors"
+                    className="mt-10 w-full border-4 border-[var(--bulletin-border)] bg-[var(--bulletin-text)] text-[var(--bulletin-bg)] py-4 text-xs font-black uppercase tracking-widest hover:bg-[#ff6b6b] hover:text-white transition-colors shadow-[4px_4px_0_0_rgba(255,107,107,1)]"
                   >
-                    {isChangingPassword ? 'Updating Security...' : 'Update Password Access'}
+                    {isChangingPassword ? 'Updating...' : 'Update Password'}
                   </button>
                 </div>
               </form>
@@ -550,12 +586,12 @@ const ProfilePage: React.FC = () => {
             <div className="mb-4">
                <Repeat className="h-8 w-8 mb-3" />
                <h2 className="text-xl font-black uppercase tracking-tight">
-                 {isSeller ? 'Switch to Buying?' : 'Start Selling?'}
+                 {isSeller ? 'Switch to Buyer View?' : 'Switch to Seller View?'}
                </h2>
                <p className="text-sm opacity-70 mt-2 leading-relaxed">
                  {isSeller 
-                   ? "You'll switch to the buyer view. Your store and active listings remain visible to others, and you can switch back here at any time."
-                   : "You'll switch to the seller dashboard to manage listings, track store analytics, and process orders. You can switch back anytime."}
+                   ? "You'll switch to the buyer dashboard. Your store and active listings remain visible to the community, and you can switch back at any time."
+                   : "You'll switch to the seller dashboard to manage your products, track store analytics, and process orders. You can switch back anytime."}
                </p>
             </div>
 

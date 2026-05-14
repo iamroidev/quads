@@ -217,7 +217,7 @@ class AuthService {
   /**
    * Google Login
    */
-  async googleLogin(credential: string, role?: 'buyer' | 'seller'): Promise<AuthResult> {
+  async googleLogin(credential: string, role?: 'buyer' | 'seller', profileData?: any): Promise<AuthResult> {
     const payload = await verifySupabaseToken(credential);
     const supabaseId = payload.sub;
     const email = (payload.email || '').toLowerCase();
@@ -243,12 +243,17 @@ class AuthService {
       supabaseId,
       name: profileName || 'User',
       email,
-      phone: '',
+      phone: profileData?.phone || '',
       role: normalizedRole,
       isVerified: true,
       emailVerified: true, // Google OAuth verifies the email
       phoneVerified: false,
       avatar: profileAvatar || fallbackAvatar,
+      studentId: profileData?.studentId || '',
+      department: profileData?.department || '',
+      residenceHall: profileData?.residenceHall || '',
+      currentLevel: profileData?.currentLevel || '',
+      location: profileData?.location || '',
       password: this.randomPassword(),
     });
     isNewUser = true;
@@ -272,12 +277,22 @@ class AuthService {
         user.isVerified = true;
         shouldSave = true;
       }
-      if (shouldSave) {
-        await user.save();
-      }
-
       if (normalizedRole && user.role !== normalizedRole) {
         user.role = normalizedRole;
+        shouldSave = true;
+      }
+      
+      if (profileData) {
+        if (profileData.studentId) user.studentId = profileData.studentId;
+        if (profileData.department) user.department = profileData.department;
+        if (profileData.residenceHall) user.residenceHall = profileData.residenceHall;
+        if (profileData.currentLevel) user.currentLevel = profileData.currentLevel;
+        if (profileData.location) user.location = profileData.location;
+        if (profileData.phone) user.phone = profileData.phone;
+        shouldSave = true;
+      }
+
+      if (shouldSave) {
         await user.save();
       }
     }

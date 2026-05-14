@@ -19,16 +19,6 @@ type Tab = 'notifications' | 'privacy' | 'account';
 const labelBase = 'text-[10px] font-black uppercase tracking-widest opacity-40 text-[var(--bulletin-text)]';
 const descBase = 'text-[11px] font-bold opacity-60 mt-1 text-[var(--bulletin-text)]';
 
-interface NotifPrefs {
-  newMessage: boolean;
-  newOrder: boolean;
-  orderUpdate: boolean;
-  promotion: boolean;
-  newFollower: boolean;
-  featuredListings: boolean;
-  [key: string]: boolean;
-}
-
 interface TabConfig {
   id: Tab;
   label: string;
@@ -53,17 +43,24 @@ async function registerServiceWorker() {
   }
 }
 
+interface NotifPrefs {
+  orderUpdates: boolean;
+  messages: boolean;
+  reviews: boolean;
+  promotions: boolean;
+  systemAlerts: boolean;
+  [key: string]: boolean;
+}
+
 const SettingsPage: React.FC = () => {
   const { user } = useAuth();
-  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<Tab>('notifications');
   const [notifPrefs, setNotifPrefs] = useState<NotifPrefs>({
-    newMessage: true,
-    newOrder: true,
-    orderUpdate: true,
-    promotion: false,
-    newFollower: false,
-    featuredListings: false,
+    orderUpdates: true,
+    messages: true,
+    reviews: true,
+    promotions: false,
+    systemAlerts: true,
   });
   const [savingNotif, setSavingNotif] = useState(false);
   const [pushEnabled, setPushEnabled] = useState(Notification.permission === 'granted');
@@ -74,39 +71,31 @@ const SettingsPage: React.FC = () => {
   const [deleteConfirmation, setDeleteConfirmation] = useState('');
   const [deleting, setDeleting] = useState(false);
 
-  const isSeller = user?.role === 'seller' || user?.role === 'admin';
-  const isSellerView = isSeller;
-
   useEffect(() => {
-    const stored = localStorage.getItem('notifPrefs');
-    if (stored) {
-      try {
-        const parsed = JSON.parse(stored);
-        setNotifPrefs((p) => ({ ...p, ...parsed }));
-      } catch {}
+    if (user?.notificationPrefs) {
+      setNotifPrefs(user.notificationPrefs);
     }
-  }, []);
+  }, [user]);
 
-  const notificationItems = [
-    ...(isSellerView
-      ? [
-          { key: 'newOrder', label: 'New orders', desc: 'Alert when a buyer places an order' },
-          { key: 'promotion', label: 'Promotions', desc: 'Feature discounts and campaign opportunities' },
-          { key: 'featuredListings', label: 'Featured opportunities', desc: 'Get notified about featured slot availability' },
-        ]
-      : [
-          { key: 'orderUpdate', label: 'Order updates', desc: 'Status changes on your purchases' },
-          { key: 'promotion', label: 'Deals & offers', desc: 'Promotional offers from sellers' },
-        ]),
-    { key: 'newMessage', label: 'New messages', desc: 'When someone sends you a chat' },
-    ...(isSellerView ? [{ key: 'newFollower', label: 'New followers', desc: 'When someone follows your store' }] : []),
-  ];
+  const isAdmin = user?.role === 'admin';
+  const isSeller = user?.role === 'seller';
+
+  const notificationItems = isAdmin
+    ? [
+        { key: 'systemAlerts', label: 'System critical alerts', desc: 'High-priority server and platform health notices' },
+        { key: 'messages', label: 'Direct communications', desc: 'Internal system messages and staff inquiries' },
+      ]
+    : [
+        { key: 'messages', label: 'New messages', desc: 'When someone sends you a chat' },
+        { key: 'orderUpdates', label: 'Order updates', desc: 'Status changes on your sales or purchases' },
+        { key: 'reviews', label: 'Marketplace feedback', desc: 'Notifications for new reviews and ratings' },
+        { key: 'promotions', label: 'Deals & offers', desc: 'Promotional offers and featured opportunities' },
+      ];
 
   const saveNotifPrefs = async () => {
     setSavingNotif(true);
     try {
-      localStorage.setItem('notifPrefs', JSON.stringify(notifPrefs));
-      await api.put('/notifications/preferences', notifPrefs);
+      await api.put('/auth/settings/notifications', notifPrefs);
       toast.success('Notification preferences saved');
     } catch (err: any) {
       toast.error(err.response?.data?.message || 'Failed to save preferences');
@@ -219,7 +208,9 @@ const SettingsPage: React.FC = () => {
             </div>
 
             <p className="text-[12px] font-bold opacity-70 mb-8 max-w-xl text-[var(--bulletin-text)]">
-              {isSellerView
+              {isAdmin 
+                ? 'Configure delivery channels for platform health telemetry and administrative inquiries.'
+                : isSeller
                 ? 'Configure delivery channels for sales alerts, buyer inquiries, and growth opportunities.'
                 : 'Configure delivery channels for order status, seller replies, and promotional drops.'}
             </p>
@@ -255,7 +246,7 @@ const SettingsPage: React.FC = () => {
                 disabled={savingNotif}
                 className="border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-text)] px-8 py-3 text-[11px] font-black uppercase tracking-widest text-[var(--bulletin-bg)] shadow-[4px_4px_0_0_var(--bulletin-shadow)] hover:translate-y-1 hover:shadow-none transition-all disabled:opacity-40"
               >
-                {savingNotif ? 'Committing...' : 'Commit Preferences'}
+                {savingNotif ? 'Saving...' : 'Save Preferences'}
               </button>
             </div>
 
@@ -275,7 +266,9 @@ const SettingsPage: React.FC = () => {
                     <div>
                       <div className="text-[14px] font-black uppercase tracking-tight text-[var(--bulletin-text)]">Browser Push Active</div>
                       <div className={descBase}>
-                        {isSellerView
+                        {isAdmin
+                          ? 'Maintain real-time situational awareness for platform critical events.'
+                          : isSeller
                           ? 'Maintain real-time situational awareness for incoming sales.'
                           : 'Receive instant ping on order dispatch and tracking updates.'}
                       </div>
@@ -306,7 +299,7 @@ const SettingsPage: React.FC = () => {
                   className="border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] px-6 py-3 text-[10px] font-black uppercase tracking-widest shadow-[4px_4px_0_0_var(--bulletin-shadow)] hover:translate-y-1 hover:shadow-none disabled:opacity-40 transition-all text-[var(--bulletin-text)]"
                 >
                   <Bell className="inline-block h-3 w-3 mr-2" />
-                  {testingPush ? 'Transmitting...' : 'Ping Device'}
+                  {testingPush ? 'Sending...' : 'Test Notification'}
                 </button>
               </div>
             </div>
@@ -333,7 +326,7 @@ const SettingsPage: React.FC = () => {
                       Modify your cryptographic authentication keys from the profile module.
                     </div>
                     <Link to="/profile" className="mt-4 inline-block border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-text)] px-4 py-2 text-[10px] font-black uppercase tracking-widest text-[var(--bulletin-bg)] transition-all hover:-translate-y-1 shadow-[4px_4px_0_0_var(--bulletin-shadow)]">
-                      Initialize Key Rotation →
+                      Change Password →
                     </Link>
                   </div>
                 </div>

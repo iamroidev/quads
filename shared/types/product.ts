@@ -30,6 +30,7 @@ export interface IProduct {
   title: string;
   description: string;
   price: number;
+  originalPrice?: number;
   category: string; // Category ID or populated ICategory
   seller: string; // User ID or populated IUser
   images: IProductImage[];
@@ -38,6 +39,7 @@ export interface IProduct {
   deliveryOption: DeliveryOption;
   pickupLocation: string;
   tags: string[];
+  stock: number;
   views: number;
   isFeatured: boolean;
   isFlagged: boolean;

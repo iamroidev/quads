@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -27,12 +27,19 @@ const PROGRAMS = [
 ];
 
 const RESIDENCE_HALLS = [
-  'D. A. Opoku Mensah (D.A.O.) Hall',
-  'J. C. S. Hagan Hall',
-  'A. A. Adumua-Bossman Hall',
-  'Mensah Sarbah Hall',
-  'Jubilee Hall',
-  'Tarkwaian Hostel',
+  'Chamber of Mines Hall',
+  'Gold Refinery Hall',
+  'KT Hall',
+  'Recognition Hostel',
+  'Osborn Hostel',
+  'Tandoh Hostel',
+  'Good Shepherd Hostel',
+  'Agrich Hostel',
+  'Kiviz Executive Lodge',
+  'Platinum Hostel',
+  'Global Hostel',
+  'Hill View Hostel',
+  'AdeJoe Hostel',
   'Off-campus',
   'Other',
 ];
@@ -151,6 +158,34 @@ const RegisterPage: React.FC = () => {
   const selectedRole = watch('role');
   const isRoleChosen = selectedRole === 'buyer' || selectedRole === 'seller';
 
+  // Prefill Google data if available
+  useEffect(() => {
+    if (isGoogleFlow) {
+      const cred = sessionStorage.getItem('google_credential');
+      if (cred) {
+        try {
+          const base64Url = cred.split('.')[1];
+          const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+          const jsonPayload = decodeURIComponent(
+            atob(base64)
+              .split('')
+              .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+              .join('')
+          );
+          const payload = JSON.parse(jsonPayload);
+          
+          if (payload.name) setValue('name', payload.name);
+          if (payload.email) setValue('email', payload.email);
+          
+          // If we have data, skip role choice if already set (usually via step 1)
+          // Actually, step 1 is role choice, so we still need that.
+        } catch (err) {
+          console.error('Failed to decode google credential', err);
+        }
+      }
+    }
+  }, [isGoogleFlow, setValue]);
+
   const goNext = async () => {
     let fields: (keyof RegisterFormData)[] = [];
     if (step === 1) fields = ['role'];
@@ -170,8 +205,8 @@ const RegisterPage: React.FC = () => {
           navigate('/register');
           return;
         }
-        await googleLogin(googleCredential, data.role);
-        toast.success('Account created with Google!', { duration: 1400 });
+        const { confirmPassword, ...registerData } = data;
+        await googleLogin(googleCredential, data.role, registerData as any);
         sessionStorage.removeItem('google_credential');
         navigate('/');
         return;
@@ -368,13 +403,15 @@ const RegisterPage: React.FC = () => {
                 <div className="space-y-6">
                   <div>
                     <label className="block text-[11px] font-black uppercase tracking-[0.2em] opacity-40 mb-3 text-[var(--bulletin-text)]">Full name</label>
-                    <input type="text" placeholder="Kwame Asante" autoComplete="name" autoFocus className={fieldBase} {...register('name')} />
+                    <input type="text" placeholder="Kwame Asante" autoComplete="name" autoFocus className={fieldBase} {...register('name')} readOnly={isGoogleFlow} />
                     {errors.name && <p className="mt-2 text-[12px] text-red-600 font-black uppercase tracking-widest">{errors.name.message}</p>}
+                    {isGoogleFlow && <p className="mt-2 text-[9px] font-bold opacity-40 uppercase tracking-widest text-[var(--bulletin-text)]">Linked to Google Account</p>}
                   </div>
                   <div>
                     <label className="block text-[11px] font-black uppercase tracking-[0.2em] opacity-40 mb-3 text-[var(--bulletin-text)]">Email</label>
-                    <input type="email" placeholder="you@example.com" autoComplete="email" className={fieldBase} {...register('email')} />
+                    <input type="email" placeholder="you@example.com" autoComplete="email" className={fieldBase} {...register('email')} readOnly={isGoogleFlow} />
                     {errors.email && <p className="mt-2 text-[12px] text-red-600 font-black uppercase tracking-widest">{errors.email.message}</p>}
+                    {isGoogleFlow && <p className="mt-2 text-[9px] font-bold opacity-40 uppercase tracking-widest text-[var(--bulletin-text)]">Verified by Google</p>}
                   </div>
                   <div>
                     <label className="block text-[11px] font-black uppercase tracking-[0.2em] opacity-40 mb-3 text-[var(--bulletin-text)]">Phone</label>
@@ -402,7 +439,12 @@ const RegisterPage: React.FC = () => {
                   </div>
                   <div>
                     <label className="block text-[11px] font-black uppercase tracking-[0.2em] opacity-40 mb-3 text-[var(--bulletin-text)]">Residence Hall</label>
-                    <input type="text" placeholder="e.g. Jubilee Hall" className={fieldBase} {...register('residenceHall')} />
+                    <select className={selectBase} {...register('residenceHall')}>
+                      <option value="">Select hall</option>
+                      {RESIDENCE_HALLS.map((h) => (
+                        <option key={h} value={h}>{h}</option>
+                      ))}
+                    </select>
                     {errors.residenceHall && <p className="mt-2 text-[12px] text-red-600 font-black uppercase tracking-widest">{errors.residenceHall.message}</p>}
                   </div>
                   <div>

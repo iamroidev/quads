@@ -1,62 +1,80 @@
-# Bulletin Board Design - Implementation Progress
+# QUADS - Implementation Progress
 
-## ✅ COMPLETED (25/25 pages - 100%)
+## ✅ COMPLETED (29/29 pages - 100%)
 
+### Core Pages
 1. **Home.tsx** ✅ 
 2. **Products.tsx** ✅ 
 3. **Dashboard.tsx** ✅ 
 4. **Categories.tsx** ✅ 
 5. **SavedItems.tsx** ✅ 
-6. **Layout.tsx** ✅ 
-7. **ProductDetail.tsx** ✅ 
-8. **MyListings.tsx** ✅ 
-9. **Orders.tsx** ✅ 
-10. **OrderDetail.tsx** ✅ 
-11. **Messages.tsx** ✅ 
-12. **ChatRoom.tsx** ✅ 
-13. **Notifications.tsx** ✅ 
-14. **Settings.tsx** ✅ 
-15. **CreateEditProduct.tsx** ✅ 
-16. **SellerOrders.tsx** ✅ 
-17. **SellerAnalytics.tsx** ✅ 
-18. **SellerOnboarding.tsx** ✅ 
-19. **AdminDashboard.tsx** ✅ 
-20. **AdminGrowth.tsx** ✅ 
-21. **DisputeCenter.tsx** ✅ 
-22. **NotFound.tsx** ✅ 
-23. **Checkout.tsx** ✅ 
-24. **PaymentVerification.tsx** ✅ 
-25. **CollectionDetail.tsx** ✅ 
+6. **ProductDetail.tsx** ✅ 
+7. **Collections.tsx** ✅ 
 
-### Keep As-Is (Premium Designs)
-- ✅ Login.tsx - Already has premium split-screen design
-- ✅ Register.tsx - Already has premium multi-step design
-- ✅ Profile.tsx - Already has premium dark hero design
+### Transactional & Orders
+8. **Checkout.tsx** ✅ 
+9. **PaymentVerification.tsx** ✅ 
+10. **Orders.tsx** ✅ 
+11. **OrderDetail.tsx** ✅ 
 
-## 🎨 LATEST CHANGES
+### Social & Messaging
+12. **Messages.tsx** ✅ 
+13. **ChatRoom.tsx** ✅ 
+14. **Notifications.tsx** ✅ 
 
-### SavedItems.tsx
-- Wrapped with `BulletinLayout`
-- Product grid uses polaroid-style cards with rotation
-- Added heart badge on each saved item card
-- Empty state with yellow notice card
-- Pagination styled with bulletin buttons
-- Removed dependency on `ProductGrid` component
+### Account & Identity
+15. **Profile.tsx** ✅ 
+16. **Settings.tsx** ✅ 
+17. **Login.tsx** ✅ (Standalone)
+18. **Register.tsx** ✅ (Standalone)
+19. **ForgotPassword.tsx** ✅ (Standalone)
+20. **ResetPassword.tsx** ✅ (Standalone)
 
-### Layout.tsx
-- **REMOVED** old Header and Footer components
-- Now just wraps `<Outlet />` 
-- BulletinLayout provides its own header/footer for each page
+### Seller Operations
+21. **MyListings.tsx** ✅ 
+22. **CreateEditProduct.tsx** ✅ 
+23. **SellerOrders.tsx** ✅ 
+24. **SellerAnalytics.tsx** ✅ 
+25. **SellerOnboarding.tsx** ✅ 
+
+### Administration
+26. **AdminDashboard.tsx** ✅ 
+27. **AdminGrowth.tsx** ✅ 
+28. **DisputeCenter.tsx** ✅ 
+
+### Utilities
+29. **NotFound.tsx** ✅ 
+
+## 🎨 LATEST CHANGES (May 2026)
+
+### Brand Sanitization
+- Removed "Campus Marketplace" and institutional institutional branding from all screens.
+- Updated deep-linking scheme to `quads://`.
+- Synchronized mobile configuration (`app.json`).
+
+### Design Hardening
+- [x] Implement Bulletin Announcements marquee
+- [x] Implement Campus Proximity filters
+- [x] Implement Empty States with scrawled placeholders
+- [x] Verify and test changes
+- Implemented **Standalone Security Subsystem** for auth pages (no global headers/footers).
+- Redesigned **Toast Notifications** to use Bulletin-style "Pinned Notice" art with JetBrains Mono.
+- Verified 100% adherence to the "No-Slop" policy.
+
+### Admin & Data Hardening
+- **Real-time Analytics**: Replaced all mocked statistics in Admin and User dashboards with real-time database aggregations.
+- **Role Isolation**: Strictly enforced admin role separation in Profile/Settings views to prevent account state bleed.
+- **Preference Persistence**: Connected notification settings to the MongoDB user model.
+- Integrated demo account seeding (`admin@quads.app`).
+- Added automatic admin redirect to `/admin` from the root route.
 
 ## 📊 STATISTICS
 
-- **Total Pages**: 25
-- **Completed**: 25 (100%)
-- **Remaining**: 0 (0%)
-- **Design System**: Fully established
-- **Components**: BulletinLayout, BulletinSection, BulletinCard
+- **Total Pages**: 29
+- **Completed**: 29 (100%)
+- **Status**: Platform Hardened
+- **Next Phase**: Production Pilot
 
 ---
-
-**Last Updated**: Now
-**Next Target**: MyListings.tsx, Orders.tsx, Notifications.tsx
+**Last Updated**: 2026-05-14
+**Next Target**: Production Deployment & MongoDB Atlas Migration.

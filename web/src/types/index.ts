@@ -31,6 +31,19 @@ export interface User {
     completedAt?: string;
   };
   savedItems: string[];
+  notificationPrefs?: {
+    orderUpdates: boolean;
+    messages: boolean;
+    reviews: boolean;
+    promotions: boolean;
+    systemAlerts: boolean;
+  };
+  privacyPrefs?: {
+    showPhone: boolean;
+    showLocation: boolean;
+    allowMessages: boolean;
+    showOnlineStatus: boolean;
+  };
   createdAt: string;
   updatedAt: string;
 }
@@ -59,8 +72,9 @@ export interface Product {
   title: string;
   description: string;
   price: number;
+  originalPrice?: number;
   category: Category | string;
-  seller: Pick<User, '_id' | 'name' | 'storeName' | 'brandName' | 'avatar' | 'isVerified' | 'location'> | string;
+  seller: Pick<User, '_id' | 'name' | 'storeName' | 'brandName' | 'avatar' | 'isVerified' | 'location' | 'residenceHall'> | string;
   images: ProductImage[];
   condition: ProductCondition;
   status: ProductStatus;
@@ -95,6 +109,7 @@ export interface ProductFilters {
   seller?: string;
   search?: string;
   deliveryOption?: DeliveryOption;
+  pickupLocation?: string;
   sort?: string;
   page?: number;
   limit?: number;
