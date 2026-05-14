@@ -34,7 +34,7 @@ interface EnvConfig {
 const env: EnvConfig = {
   PORT: parseInt(process.env.PORT || '5000', 10),
   NODE_ENV: process.env.NODE_ENV || 'development',
-  MONGODB_URI: process.env.MONGODB_URI || 'mongodb://localhost:27017/campusmarketplace',
+  MONGODB_URI: process.env.MONGODB_URI || 'mongodb://localhost:27017/quads',
   JWT_SECRET: process.env.JWT_SECRET || 'default-secret-change-me',
   JWT_EXPIRE: process.env.JWT_EXPIRE || '7d',
   JWT_REFRESH_EXPIRE: process.env.JWT_REFRESH_EXPIRE || '30d',
@@ -49,12 +49,12 @@ const env: EnvConfig = {
   AWS_ACCESS_KEY_ID: process.env.AWS_ACCESS_KEY_ID || '',
   AWS_SECRET_ACCESS_KEY: process.env.AWS_SECRET_ACCESS_KEY || '',
   AWS_REGION: process.env.AWS_REGION || 'us-east-1',
-  AWS_SNS_SENDER_ID: process.env.AWS_SNS_SENDER_ID || 'CAMPUS',
+  AWS_SNS_SENDER_ID: process.env.AWS_SNS_SENDER_ID || 'QUADS',
   SMTP_HOST: process.env.SMTP_HOST || 'smtp.ethereal.email',
   SMTP_PORT: process.env.SMTP_PORT || '587',
   SMTP_USER: process.env.SMTP_USER || '',
   SMTP_PASS: process.env.SMTP_PASS || '',
-  SMTP_FROM: process.env.SMTP_FROM || 'noreply@campusmarketplace.com',
+  SMTP_FROM: process.env.SMTP_FROM || 'support@quadsmarket.tech',
   PLATFORM_COMMISSION: parseInt(process.env.PLATFORM_COMMISSION || '10', 10),
 };
 

@@ -57,7 +57,7 @@ class VerificationService {
     const html = `
       <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; background: #ffffff; padding: 32px; border: 2px solid #000;">
         <div style="text-align: center; margin-bottom: 24px;">
-          <div style="font-size: 12px; letter-spacing: 2px; text-transform: uppercase; color: #666;">CampusMarketplace</div>
+          <div style="font-size: 12px; letter-spacing: 2px; text-transform: uppercase; color: #666;">QUADS</div>
         </div>
         <h1 style="font-size: 18px; font-weight: bold; margin-bottom: 16px;">Verify your email</h1>
         <p style="color: #555; line-height: 1.6; margin-bottom: 24px;">
@@ -76,7 +76,7 @@ class VerificationService {
 
     await emailService.sendEmail({
       to: email,
-      subject: 'Verify your CampusMarketplace email',
+      subject: 'Verify your QUADS email',
       html,
     });
   }
@@ -115,7 +115,7 @@ class VerificationService {
 
     try {
       await sns.send(new PublishCommand({
-        Message: `Your CampusMarketplace verification code is: ${code}. Valid for 10 minutes.`,
+        Message: `Your QUADS verification code is: ${code}. Valid for 10 minutes.`,
         PhoneNumber: formattedPhone,
         MessageAttributes: {
           // 'AWS.SNS.SMS.SenderID': {

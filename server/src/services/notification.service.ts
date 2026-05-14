@@ -10,7 +10,7 @@ dotenv.config();
 
 if (process.env.VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY) {
   webpush.setVapidDetails(
-    process.env.VAPID_SUBJECT || 'mailto:admin@campusmarketplace.com',
+    process.env.VAPID_SUBJECT || 'mailto:admin@quadsmarket.tech',
     process.env.VAPID_PUBLIC_KEY,
     process.env.VAPID_PRIVATE_KEY
   );
@@ -137,7 +137,7 @@ class NotificationService {
   async sendTestPushNotification(userId: string): Promise<void> {
     await this.sendPushNotification(userId, {
       title: 'Push Notifications Active',
-      body: 'This is a test notification from CampusMarketplace.',
+      body: 'This is a test notification from QUADS.',
       url: '/notifications',
       icon: '/pwa-192x192.png',
       badge: '/pwa-192x192.png',

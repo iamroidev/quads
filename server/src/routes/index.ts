@@ -14,6 +14,7 @@ import growthRoutes from './growth.routes';
 import verificationRoutes from './verification.routes';
 import payoutRoutes from './payout.routes';
 import autoPayoutRoutes from './autoPayout.routes';
+import supportRoutes from './support.routes';
 
 const router = Router();
 
@@ -21,7 +22,7 @@ const router = Router();
 router.get('/health', (_req, res) => {
   res.status(200).json({
     success: true,
-    message: 'CampusMarketplace API is running',
+    message: 'QUADS API is running',
     timestamp: new Date().toISOString(),
   });
 });
@@ -42,5 +43,6 @@ router.use('/growth', growthRoutes);
 router.use('/verification', verificationRoutes);
 router.use('/payouts', payoutRoutes);
 router.use('/auto-payouts', autoPayoutRoutes);
+router.use('/support', supportRoutes);
 
 export default router;

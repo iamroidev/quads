@@ -3,19 +3,21 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { 
   ChevronRight, 
   Home, 
-  ArrowLeft,
   ChevronDown,
   User,
   Settings,
-  Package,
   LogOut,
   Repeat,
   Bell,
   Sun,
-  Moon
+  Moon,
+  Mail,
+  MessageCircle,
+  Twitter
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { BulletinMarquee } from '../ui/BulletinMarquee';
+import BrandMark from './BrandMark';
 
 interface BulletinLayoutProps {
   children: React.ReactNode;
@@ -83,20 +85,6 @@ export const BulletinLayout: React.FC<BulletinLayoutProps> = ({
     }
   };
 
-  const handleStartSelling = async (e: React.MouseEvent) => {
-    e.preventDefault();
-    setIsSwitching(true);
-    try {
-      await switchRole('seller');
-      navigate('/seller/onboarding');
-    } catch (err) {
-      console.error('Failed to transition to seller', err);
-    } finally {
-      setIsSwitching(false);
-    }
-  };
-
-  // Unified footer logic: Always show 4 stable columns
   return (
     <div className="min-h-screen bg-[var(--bulletin-bg)] text-[var(--bulletin-text)] font-sans selection:bg-[#ff6b6b] selection:text-white overflow-x-hidden">
       {/* Heavy Header Border */}
@@ -260,100 +248,55 @@ export const BulletinLayout: React.FC<BulletinLayoutProps> = ({
           {children}
         </div>
 
-        {/* High-Contrast Bulletin Footer */}
-        <div className="border-t-4 border-[var(--bulletin-border)] bg-[var(--bulletin-card)]">
-          {/* Yellow Accent Strip */}
-          <div className="h-1.5 bg-[#fffacd] dark:bg-yellow-900/40 border-b border-[var(--bulletin-border)] w-full" />
-          
-          <div className="mx-auto max-w-[1400px] p-8 md:p-16">
-            <div className="grid gap-12 sm:grid-cols-2 md:grid-cols-4">
+        {/* ── SIMPLIFIED BULLETIN FOOTER ── */}
+        <div className="border-t-4 border-black bg-[var(--bulletin-card)] px-6 py-16 md:px-12">
+          <div className="mx-auto max-w-[1400px]">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-12">
               
-              {/* Column 1: Mode-Aware Marketplace */}
-              <div className="border-l-2 border-black/10 pl-6 first:border-l-0 first:pl-0">
-                <div className="mb-6 inline-block border border-black bg-black px-2 py-0.5 text-[9px] font-black uppercase tracking-widest text-white">
-                  {user?.role === 'seller' ? 'Store Management' : 'Marketplace'}
+              {/* Institutional Branding */}
+              <div className="flex items-center gap-6">
+                <div className="border-4 border-black bg-white p-4 shadow-[6px_6px_0_0_#ff6b6b] rotate-[-2deg]">
+                  <BrandMark className="h-10 w-10 text-black" />
                 </div>
-                <div className="space-y-3 text-[12px] font-bold">
-                  {user?.role === 'seller' ? (
-                    <>
-                      <Link to="/my-listings" className="block hover:text-[#ff6b6b]">My Listings</Link>
-                      <Link to="/seller/orders" className="block hover:text-[#ff6b6b]">Sales History</Link>
-                      <Link to="/sell" className="block hover:text-[#ff6b6b]">Add New Item</Link>
-                    </>
-                  ) : (
-                    <>
-                      <Link to="/products" className="block hover:text-[#ff6b6b]">Browse Products</Link>
-                      <Link to="/categories" className="block hover:text-[#ff6b6b]">Categories</Link>
-                      {user?.role !== 'admin' && (
-                        <button 
-                          onClick={handleStartSelling}
-                          disabled={isSwitching}
-                          className="block text-left hover:text-[#ff6b6b] disabled:opacity-50"
-                        >
-                          {isSwitching ? 'Switching...' : 'Start Selling'}
-                        </button>
-                      )}
-                    </>
-                  )}
-                </div>
-              </div>
-               {/* Column 2: Account & Support */}
-              <div className="border-l-2 border-black/10 pl-6">
-                <div className="mb-6 inline-block border border-black bg-black px-2 py-0.5 text-[9px] font-black uppercase tracking-widest text-white">
-                  {user?.role === 'seller' ? 'Seller Hub' : 'Member Hub'}
-                </div>
-                <div className="space-y-3 text-[12px] font-bold">
-                  {user?.role === 'seller' ? (
-                    <>
-                      <Link to="/seller/analytics" className="block hover:text-[#ff6b6b]">Shop Insights</Link>
-                      <Link to="/orders?role=seller" className="block hover:text-[#ff6b6b]">Sales History</Link>
-                      <Link to="/seller/onboarding" className="block hover:text-[#ff6b6b]">Payout Settings</Link>
-                      <Link to="/disputes" className="block hover:text-[#ff6b6b]">Support Center</Link>
-                    </>
-                  ) : (
-                    <>
-                      <Link to="/dashboard" className="block hover:text-[#ff6b6b]">My Dashboard</Link>
-                      <Link to="/saved" className="block hover:text-[#ff6b6b]">My Wishlist</Link>
-                      <Link to="/orders" className="block hover:text-[#ff6b6b]">Order History</Link>
-                    </>
-                  )}
+                <div>
+                  <h2 className="text-2xl font-black uppercase tracking-tighter text-[var(--bulletin-text)]">QUADS Marketplace</h2>
+                  <p className="text-[10px] font-black uppercase tracking-[0.4em] opacity-40 text-[var(--bulletin-text)] mt-1">Official Institutional Exchange · Tarkwa</p>
                 </div>
               </div>
 
-              {/* Column 3: Identity & Security */}
-              <div className="border-l-2 border-black/10 pl-6">
-                <div className="mb-6 inline-block border border-black bg-[#ff6b6b] px-2 py-0.5 text-[9px] font-black uppercase tracking-widest text-white">
-                  Commerce
-                </div>
-                <div className="space-y-3 text-[12px] font-bold">
-                  <Link to="/verification" className="block hover:text-[#ff6b6b]">Verification</Link>
-                  <Link to="/profile" className="block hover:text-[#ff6b6b]">Public Profile</Link>
-                  <Link to="/messages" className="block hover:text-[#ff6b6b]">Messages</Link>
-                </div>
+              {/* Essential Links */}
+              <div className="flex flex-wrap gap-8 md:gap-12 text-[11px] font-black uppercase tracking-widest text-[var(--bulletin-text)]">
+                <Link to="/support" className="hover:text-[#ff6b6b] transition-colors border-b-2 border-transparent hover:border-[#ff6b6b] pb-1">Help Hub</Link>
+                <Link to="/terms" className="hover:text-[#ff6b6b] transition-colors border-b-2 border-transparent hover:border-[#ff6b6b] pb-1">Protocols</Link>
+                <Link to="/contact" className="hover:text-[#ff6b6b] transition-colors border-b-2 border-transparent hover:border-[#ff6b6b] pb-1">Assistance</Link>
               </div>
 
-              {/* Column 4: Assistance */}
-              <div className="border-l-2 border-black/10 pl-6">
-                <div className="mb-6 inline-block border border-black bg-black px-2 py-0.5 text-[9px] font-black uppercase tracking-widest text-white">
-                  Assistance
-                </div>
-                <div className="space-y-3 text-[12px] font-bold">
-                  <Link to="/support" className="block hover:text-[#ff6b6b]">Help Hub</Link>
-                  <Link to="/contact" className="block hover:text-[#ff6b6b]">Contact Support</Link>
-                  <Link to="/terms" className="block hover:text-[#ff6b6b]">Privacy & Terms</Link>
+              {/* Secure Channels */}
+              <div className="flex items-center gap-4 border-l-4 border-black pl-8">
+                <div className="text-[9px] font-black uppercase tracking-[0.2em] opacity-40 text-[var(--bulletin-text)] mr-4">Direct Channels:</div>
+                <div className="flex items-center gap-6">
+                  <a href="mailto:support@quadsmarket.tech" title="Email Support" className="text-[var(--bulletin-text)] hover:text-[#ff6b6b] transition-all hover:scale-110">
+                    <Mail className="h-5 w-5" />
+                  </a>
+                  <a href="https://wa.me/233551500736" target="_blank" rel="noopener noreferrer" title="WhatsApp Support" className="text-[var(--bulletin-text)] hover:text-[#25D366] transition-all hover:scale-110">
+                    <MessageCircle className="h-5 w-5" />
+                  </a>
+                  <a href="https://twitter.com/quadsmarket" target="_blank" rel="noopener noreferrer" title="Follow on X" className="text-[var(--bulletin-text)] hover:text-[#1DA1F2] transition-all hover:scale-110">
+                    <Twitter className="h-5 w-5" />
+                  </a>
                 </div>
               </div>
 
             </div>
 
-            <div className="mt-16 border-t-2 border-[var(--bulletin-border)] pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
-              <div className="text-[10px] font-black uppercase tracking-widest opacity-30">
-                QUADS · 2026 / Tarkwa
+            {/* Legal / Metadata */}
+            <div className="mt-16 flex flex-col md:flex-row items-center justify-between border-t-2 border-black/10 pt-8 gap-6">
+              <div className="flex items-center gap-3">
+                <div className="h-1.5 w-1.5 rounded-full bg-[#ff6b6b] animate-pulse" />
+                <span className="text-[9px] font-black uppercase tracking-[0.3em] opacity-30 text-[var(--bulletin-text)]">System Online · {new Date().getFullYear()} Operations</span>
               </div>
-              <div className="flex items-center gap-6 text-[10px] font-black uppercase tracking-widest">
-                <span className="opacity-20 select-none">///</span>
-                <span>SECURE ESCROW ACTIVE</span>
-                <span className="opacity-20 select-none">///</span>
+              <div className="text-[9px] font-black uppercase tracking-[0.5em] opacity-30 text-[var(--bulletin-text)]">
+                /// QUADS DEPLOYMENT V2.4.0 ///
               </div>
             </div>
           </div>

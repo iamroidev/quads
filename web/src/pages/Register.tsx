@@ -3,7 +3,7 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Eye, EyeOff, Check, ArrowRight, Scissors } from 'lucide-react';
+import { Eye, EyeOff, Check, ArrowRight, Scissors, Pin } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import toast from 'react-hot-toast';
 import { GoogleLogin } from '@react-oauth/google';
@@ -66,6 +66,9 @@ const registerSchema = z
     residenceHall: z.string().optional(),
     currentLevel: z.string().optional(),
     location: z.string().optional(),
+    termsAccepted: z.literal(true, {
+      errorMap: () => ({ message: 'You must agree to the Terms and Privacy Policy' }),
+    }),
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: 'Passwords do not match',
@@ -476,7 +479,29 @@ const RegisterPage: React.FC = () => {
                   <>
                     <div className="mb-8 p-6 border-4 border-[var(--bulletin-border)] bg-[#e0f2f7] dark:bg-sky-900/40 shadow-[8px_8px_0_0_var(--bulletin-shadow)]" style={{ transform: 'rotate(-1deg)' }}>
                       <h1 className="text-3xl font-black uppercase tracking-tighter mb-2 text-[var(--bulletin-text)]">Final Verification</h1>
-                      <p className="text-[14px] font-bold opacity-80 text-[var(--bulletin-text)]">Your account will use Google authentication. No password needed.</p>
+                      <p className="text-[14px] font-bold opacity-80 text-[var(--bulletin-text)] mb-8">Your account will use Google authentication.</p>
+                      
+                      <div className="mt-8 p-6 border-2 border-dashed border-[var(--bulletin-border)] bg-[var(--bulletin-bg)] relative">
+                        <div className="absolute -top-3 left-4 bg-red-500 text-white text-[9px] font-black px-2 py-0.5 shadow-[2px_2px_0_0_rgba(0,0,0,1)]">
+                          LEGAL PROTOCOL
+                        </div>
+                        <div className="flex items-start gap-4">
+                          <label className="relative flex h-8 w-8 cursor-pointer items-center justify-center border-2 border-black bg-white shadow-[3px_3px_0_0_var(--bulletin-shadow)] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-none transition-all">
+                            <input
+                              type="checkbox"
+                              className="peer sr-only"
+                              {...register('termsAccepted')}
+                            />
+                            <Pin className="h-4 w-4 text-gray-300 peer-checked:text-red-600 peer-checked:rotate-45 transition-all" />
+                          </label>
+                          <div className="flex-1">
+                            <p className="text-[11px] font-black uppercase tracking-tight text-[var(--bulletin-text)] leading-tight">
+                              I verify that I have read and agree to the <Link to="/terms" target="_blank" className="underline decoration-2 underline-offset-2 hover:text-[#ff6b6b]">Institutional Terms</Link> & <Link to="/terms#privacy" target="_blank" className="underline decoration-2 underline-offset-2 hover:text-[#ff6b6b]">Privacy Charter</Link>.
+                            </p>
+                          </div>
+                        </div>
+                        {errors.termsAccepted && <p className="mt-3 text-[12px] text-red-600 font-black uppercase tracking-widest">{errors.termsAccepted.message}</p>}
+                      </div>
                     </div>
                     <div className="flex gap-4 mt-10">
                       <button type="button" onClick={() => setStep(3)} className="flex-1 border-4 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] px-4 py-4 text-[12px] font-black uppercase shadow-[6px_6px_0_0_var(--bulletin-shadow)] hover:-translate-y-1 hover:shadow-[4px_4px_0_0_var(--bulletin-shadow)] transition-all text-[var(--bulletin-text)]">← Back</button>
@@ -515,6 +540,29 @@ const RegisterPage: React.FC = () => {
                         {errors.confirmPassword && <p className="mt-2 text-[12px] text-red-600 font-black uppercase tracking-widest">{errors.confirmPassword.message}</p>}
                       </div>
                     </div>
+
+                    <div className="mt-10 p-6 border-2 border-dashed border-[var(--bulletin-border)] bg-[var(--bulletin-bg)] relative">
+                      <div className="absolute -top-3 left-4 bg-red-500 text-white text-[9px] font-black px-2 py-0.5 shadow-[2px_2px_0_0_rgba(0,0,0,1)]">
+                        LEGAL PROTOCOL
+                      </div>
+                      <div className="flex items-start gap-4">
+                        <label className="relative flex h-8 w-8 cursor-pointer items-center justify-center border-2 border-black bg-white shadow-[3px_3px_0_0_var(--bulletin-shadow)] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-none transition-all">
+                          <input
+                            type="checkbox"
+                            className="peer sr-only"
+                            {...register('termsAccepted')}
+                          />
+                          <Pin className="h-4 w-4 text-gray-300 peer-checked:text-red-600 peer-checked:rotate-45 transition-all" />
+                        </label>
+                        <div className="flex-1">
+                          <p className="text-[11px] font-black uppercase tracking-tight text-[var(--bulletin-text)] leading-tight">
+                            I verify that I have read and agree to the <Link to="/terms" target="_blank" className="underline decoration-2 underline-offset-2 hover:text-[#ff6b6b]">Institutional Terms</Link> & <Link to="/terms#privacy" target="_blank" className="underline decoration-2 underline-offset-2 hover:text-[#ff6b6b]">Privacy Charter</Link>.
+                          </p>
+                        </div>
+                      </div>
+                      {errors.termsAccepted && <p className="mt-3 text-[12px] text-red-600 font-black uppercase tracking-widest">{errors.termsAccepted.message}</p>}
+                    </div>
+
                     <div className="flex gap-4 mt-10">
                       <button type="button" onClick={() => setStep(3)} className="flex-1 border-4 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] px-4 py-4 text-[12px] font-black uppercase shadow-[6px_6px_0_0_var(--bulletin-shadow)] hover:-translate-y-1 hover:shadow-[4px_4px_0_0_var(--bulletin-shadow)] transition-all text-[var(--bulletin-text)]">← Back</button>
                       <button type="submit" disabled={isSubmitting} className="flex-[2] border-4 border-[var(--bulletin-border)] bg-[var(--bulletin-text)] px-4 py-4 text-[14px] font-black uppercase text-[var(--bulletin-bg)] shadow-[6px_6px_0_0_var(--bulletin-shadow)] hover:-translate-y-1 hover:shadow-[4px_4px_0_0_var(--bulletin-shadow)] disabled:opacity-40 transition-all tracking-widest">

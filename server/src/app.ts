@@ -10,8 +10,11 @@ import env from './config/env';
 import connectDB from './config/db';
 import routes from './routes';
 import { errorHandler, notFoundHandler } from './middleware/errorHandler';
+import { apiLimiter, authLimiter, paymentLimiter, uploadLimiter } from './middleware/rateLimit';
+import { sanitizeInput, validateBodySize } from './middleware/validateRequest';
 import { setupSocketHandlers } from './socket';
 import { startPayoutScheduler } from './services/payoutScheduler';
+
 // Initialize Express app
 const app = express();
 const httpServer = createServer(app);
@@ -19,7 +22,9 @@ const httpServer = createServer(app);
 // Socket.io setup
 const io = new SocketServer(httpServer, {
   cors: {
-    origin: [env.CLIENT_URL, 'http://localhost:5173', 'http://localhost:19006'],
+    origin: env.NODE_ENV === 'production'
+      ? [env.CLIENT_URL]
+      : [env.CLIENT_URL, 'http://localhost:5173', 'http://localhost:19006'],
     credentials: true,
   },
 });
@@ -42,14 +47,24 @@ app.use(
 );
 
 // CORS
+const allowedOrigins = env.NODE_ENV === 'production'
+  ? [env.CLIENT_URL]
+  : [env.CLIENT_URL, 'http://localhost:5173', 'http://localhost:19006'];
+
 app.use(
   cors({
-    origin: [env.CLIENT_URL, 'http://localhost:5173', 'http://localhost:19006'],
+    origin: allowedOrigins,
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
     allowedHeaders: ['Content-Type', 'Authorization'],
   })
 );
+
+// Input sanitization — runs on every request BEFORE body parsing
+app.use(sanitizeInput);
+
+// Body size validation
+app.use(validateBodySize(10 * 1024 * 1024)); // 10MB max
 
 // Body parsing — capture raw body for Paystack webhook signature validation
 app.use(
@@ -77,6 +92,21 @@ if (env.NODE_ENV === 'development') {
 app.use('/uploads', express.static('uploads'));
 
 // ========================
+// Rate Limiting
+// ========================
+// Global API rate limiting — 100 requests per 15 minutes
+app.use('/api', apiLimiter);
+
+// Auth routes — stricter limits to prevent brute force
+app.use('/api/auth', authLimiter);
+
+// Payment routes — protect against payment abuse
+app.use('/api/payments', paymentLimiter);
+
+// Upload routes — protect storage abuse
+app.use('/api/products', uploadLimiter); // product creation has image uploads
+
+// ========================
 // Routes
 // ========================
 app.use('/api', routes);
@@ -102,12 +132,6 @@ app.use(errorHandler);
 // ========================
 const startServer = async () => {
   try {
-    // Connect to MongoDB
-    await connectDB();
-
-    // Start background payout scheduler (auto-processes every 15 min)
-    startPayoutScheduler(15);
-
     // Start listening
     httpServer.listen(env.PORT, () => {
       console.log('='.repeat(50));
@@ -117,6 +141,17 @@ const startServer = async () => {
       console.log(`  URL: http://localhost:${env.PORT}`);
       console.log('='.repeat(50));
     });
+
+    // Connect to MongoDB (non-blocking)
+    connectDB()
+      .then(() => {
+        console.log('MongoDB connection established');
+        // Start background payout scheduler only after DB is ready
+        startPayoutScheduler(15);
+      })
+      .catch((err) => {
+        console.error('Initial MongoDB connection failed:', err);
+      });
   } catch (error) {
     console.error('Failed to start server:', error);
     process.exit(1);

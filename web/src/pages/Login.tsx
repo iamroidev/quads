@@ -152,18 +152,6 @@ const LoginPage: React.FC = () => {
           <div className="mt-2 text-[12px] font-bold opacity-70 text-black dark:text-red-200">Payments held securely until you confirm.</div>
         </PinnedNote>
 
-        {/* ── DEMO ADMIN ACCESS NOTE ── */}
-        <PinnedNote bg="bg-emerald-500" rotation={1.5} top="75%" left="25%" w="240px">
-          <div className="text-[10px] font-black uppercase tracking-[0.2em] text-white/60">🔑 Demo Access</div>
-          <div className="mt-2 text-xl font-black uppercase text-white tracking-tighter">Admin Credentials</div>
-          <div className="mt-2 space-y-1">
-            <div className="text-[11px] font-black text-white/90">E: <span className="bg-black/20 px-1 select-all">admin@quads.app</span></div>
-            <div className="text-[11px] font-black text-white/90">P: <span className="bg-black/20 px-1 select-all">password123</span></div>
-          </div>
-          <div className="mt-3 text-[10px] font-bold text-white/50 italic border-t border-white/10 pt-2">
-            Explore the Command Center.
-          </div>
-        </PinnedNote>
 
         {/* Large polaroid-style ID card */}
         <div
@@ -252,6 +240,26 @@ const LoginPage: React.FC = () => {
                   >
                     Forgot password?
                   </Link>
+                </div>
+                <div className="mt-8 p-5 border-2 border-dashed border-[var(--bulletin-border)] bg-[var(--bulletin-bg)] relative">
+                  <div className="absolute -top-3 left-4 bg-red-500 text-white text-[9px] font-black px-2 py-0.5 shadow-[2px_2px_0_0_rgba(0,0,0,1)]">
+                    SESSION PROTOCOL
+                  </div>
+                  <div className="flex items-start gap-4">
+                    <label className="relative flex h-8 w-8 cursor-pointer items-center justify-center border-2 border-black bg-white shadow-[3px_3px_0_0_var(--bulletin-shadow)] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-none transition-all">
+                      <input
+                        type="checkbox"
+                        className="peer sr-only"
+                        required
+                      />
+                      <Pin className="h-4 w-4 text-gray-300 peer-checked:text-red-600 peer-checked:rotate-45 transition-all" />
+                    </label>
+                    <div className="flex-1">
+                      <p className="text-[10px] font-black uppercase tracking-tight text-[var(--bulletin-text)] leading-tight">
+                        I acknowledge the <Link to="/terms" className="underline decoration-2 underline-offset-2">Honor Code</Link> & <Link to="/terms#privacy" className="underline decoration-2 underline-offset-2">Safety Protocols</Link> for this session.
+                      </p>
+                    </div>
+                  </div>
                 </div>
               </div>
               <button type="submit" disabled={isSubmitting}

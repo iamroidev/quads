@@ -25,7 +25,7 @@ class EmailService {
   async sendEmail(options: EmailOptions): Promise<boolean> {
     try {
       const mailOptions = {
-        from: `"CampusMarketplace" <${process.env.SMTP_FROM || 'noreply@campusmarketplace.com'}>`,
+        from: `"QUADS" <${process.env.SMTP_FROM || 'noreply@quadsmarket.com'}>`,
         to: options.to,
         subject: options.subject,
         html: options.html,
@@ -48,12 +48,12 @@ class EmailService {
 
   // Templates
   async sendWelcomeEmail(to: string, name: string): Promise<boolean> {
-    const subject = 'Welcome to CampusMarketplace!';
+    const subject = 'Welcome to QUADS!';
     const html = `
       <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; background-color: #ffffff; padding: 20px;">
         <h1 style="color: #0a0a0a; text-transform: uppercase; letter-spacing: 1px;">Welcome, ${name}!</h1>
         <p style="color: #555555; line-height: 1.6;">
-          We're thrilled to have you on board. CampusMarketplace is the easiest way to buy and sell items directly on campus.
+          We're thrilled to have you on board. QUADS is the easiest way to buy and sell items directly on campus.
         </p>
         <p style="color: #555555; line-height: 1.6;">
           Start browsing listings or post your own items today.

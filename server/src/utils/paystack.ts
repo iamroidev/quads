@@ -78,7 +78,7 @@ export const initializeTransaction = async (
         {
           display_name: 'Platform',
           variable_name: 'platform',
-          value: 'CampusMarketplace',
+          value: 'QUADS',
         },
       ],
     },
