@@ -50,16 +50,27 @@ app.use(
 );
 
 // CORS
-const allowedOrigins = env.NODE_ENV === 'production'
+const allowedOrigins = (env.NODE_ENV === 'production'
   ? [env.CLIENT_URL, 'https://quadsmarket.tech', 'https://www.quadsmarket.tech']
-  : [env.CLIENT_URL, 'http://localhost:5173', 'http://localhost:19006'];
+  : [env.CLIENT_URL, 'http://localhost:5173', 'http://localhost:19006']
+).filter(Boolean); // Remove empty/null values
 
 app.use(
   cors({
-    origin: allowedOrigins,
+    origin: (origin, callback) => {
+      // Allow requests with no origin (like mobile apps or curl)
+      if (!origin) return callback(null, true);
+      
+      if (allowedOrigins.indexOf(origin) !== -1 || allowedOrigins.includes('*')) {
+        callback(null, true);
+      } else {
+        console.warn(`CORS blocked for origin: ${origin}`);
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
     credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
   })
 );
 

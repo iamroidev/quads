@@ -13,6 +13,12 @@ const Notifications: React.FC = () => {
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(true);
   const [markingAll, setMarkingAll] = useState(false);
+  const [isSubscribing, setIsSubscribing] = useState(false);
+  const [pushSupported, setPushSupported] = useState(false);
+
+  useEffect(() => {
+    setPushSupported('serviceWorker' in navigator && 'PushManager' in window);
+  }, []);
 
   const fetchNotifications = async (targetPage: number) => {
     setLoading(true);
@@ -72,6 +78,21 @@ const Notifications: React.FC = () => {
     }
   };
 
+  const handleEnablePush = async () => {
+    setIsSubscribing(true);
+    try {
+      const res = await notificationService.subscribeToPush();
+      if (res.success) {
+        toast.success('Browser notifications enabled!');
+      }
+    } catch (err: any) {
+      console.error('Push subscription error:', err);
+      toast.error(err.message || 'Failed to enable notifications');
+    } finally {
+      setIsSubscribing(false);
+    }
+  };
+
   if (loading && page === 1) {
     return <LoadingSpinner text="Loading notifications..." fullScreen />;
   }
@@ -80,18 +101,29 @@ const Notifications: React.FC = () => {
     <BulletinLayout title="Notifications" subtitle="Inbox" section="08">
       <BulletinSection bgColor="bg-[var(--bulletin-bg)]">
         {/* Header bar */}
-        <div className="flex items-center justify-between mb-8 border-b-4 border-[var(--bulletin-border)] pb-4">
+        <div className="flex flex-col sm:flex-row items-center justify-between mb-8 border-b-4 border-[var(--bulletin-border)] pb-4 gap-4">
           <div className="text-[12px] font-black uppercase tracking-widest opacity-60 text-[var(--bulletin-text)]">
             {pagination ? `${pagination.total} notification${pagination.total !== 1 ? 's' : ''}` : ''}
           </div>
-          <button
-            onClick={handleMarkAllAsRead}
-            disabled={markingAll}
-            className="border-4 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] px-4 py-2 text-[10px] font-black uppercase shadow-[4px_4px_0_0_var(--bulletin-shadow)] hover:-translate-y-1 hover:shadow-[6px_6px_0_0_var(--bulletin-shadow)] disabled:opacity-40 transition-all text-[var(--bulletin-text)]"
-          >
-            <CheckCheck className="inline-block h-4 w-4 mr-2" />
-            {markingAll ? 'Marking...' : 'Mark all read'}
-          </button>
+          <div className="flex gap-4">
+            {pushSupported && (
+              <button
+                onClick={handleEnablePush}
+                disabled={isSubscribing}
+                className="border-4 border-[var(--bulletin-border)] bg-blue-500 text-white px-4 py-2 text-[10px] font-black uppercase shadow-[4px_4px_0_0_var(--bulletin-shadow)] hover:-translate-y-1 hover:shadow-[6px_6px_0_0_var(--bulletin-shadow)] disabled:opacity-40 transition-all"
+              >
+                {isSubscribing ? 'Enabling...' : 'Enable Notifications'}
+              </button>
+            )}
+            <button
+              onClick={handleMarkAllAsRead}
+              disabled={markingAll}
+              className="border-4 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] px-4 py-2 text-[10px] font-black uppercase shadow-[4px_4px_0_0_var(--bulletin-shadow)] hover:-translate-y-1 hover:shadow-[6px_6px_0_0_var(--bulletin-shadow)] disabled:opacity-40 transition-all text-[var(--bulletin-text)]"
+            >
+              <CheckCheck className="inline-block h-4 w-4 mr-2" />
+              {markingAll ? 'Marking...' : 'Mark all read'}
+            </button>
+          </div>
         </div>
 
         {notifications.length === 0 ? (
