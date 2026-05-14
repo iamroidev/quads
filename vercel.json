@@ -1,8 +1,8 @@
 {
   "framework": "vite",
-  "buildCommand": "npx vite build",
-  "outputDirectory": "dist",
-  "installCommand": "npm install --ignore-scripts",
+  "buildCommand": "npm run build --workspace=web",
+  "outputDirectory": "web/dist",
+  "installCommand": "npm install",
   "rewrites": [
     {
       "source": "/(.*)",
