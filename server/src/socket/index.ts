@@ -4,6 +4,8 @@ import User from '../models/User';
 import chatService from '../services/chat.service';
 
 // Track online users: userId -> Set of socketIds
+// Note: For multi-server scaling, consider Redis adapter or socket.io-redis
+// See: https://socket.io/docs/v4/using-multiple-nodes/
 const onlineUsers = new Map<string, Set<string>>();
 
 interface AuthenticatedSocket extends Socket {

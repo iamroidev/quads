@@ -4,7 +4,7 @@ import { VitePWA } from 'vite-plugin-pwa';
 import path from 'path';
 
 export default defineConfig({
-  envDir: '..', // Read .env from project root instead of web/
+  envDir: '..',
   plugins: [
     react(),
     VitePWA({
@@ -55,6 +55,18 @@ export default defineConfig({
       '/api': {
         target: 'http://localhost:5000',
         changeOrigin: true,
+      },
+    },
+  },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: ['react', 'react-dom'],
+          router: ['react-router-dom'],
+          ui: ['lucide-react', 'goober'],
+          query: ['@tanstack/react-query'],
+        },
       },
     },
   },
