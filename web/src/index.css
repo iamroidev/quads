@@ -74,10 +74,20 @@
       padding-right: 1rem;
     }
     
-    /* Prevent Tawk.to from covering content if it does appear */
+    /* Prevent Tawk.to from covering content on mobile */
+    .tawk-min-container, 
     #tawk-chat-container {
-      bottom: 80px !important;
+      bottom: 12px !important;
+      right: 12px !important;
+      transform: scale(0.85);
+      transform-origin: bottom right;
     }
+
+    /* Fluid Typography */
+    h1 { font-size: clamp(2.5rem, 8vw, 5rem) !important; }
+    h2 { font-size: clamp(1.8rem, 6vw, 3.5rem) !important; }
+    .text-5xl { font-size: clamp(2.2rem, 7vw, 3.5rem) !important; }
+    .text-4xl { font-size: clamp(1.8rem, 6vw, 2.5rem) !important; }
   }
 }
 
