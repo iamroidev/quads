@@ -110,7 +110,7 @@ const Notifications: React.FC = () => {
               <button
                 onClick={handleEnablePush}
                 disabled={isSubscribing}
-                className="border-4 border-[var(--bulletin-border)] bg-blue-500 text-white px-4 py-2 text-[10px] font-black uppercase shadow-[4px_4px_0_0_var(--bulletin-shadow)] hover:-translate-y-1 hover:shadow-[6px_6px_0_0_var(--bulletin-shadow)] disabled:opacity-40 transition-all"
+                className="border-4 border-black bg-black text-white px-4 py-2 text-[10px] font-black uppercase shadow-[4px_4px_0_0_#ff6b6b] hover:-translate-y-1 hover:shadow-[6px_6px_0_0_#ff6b6b] disabled:opacity-40 transition-all"
               >
                 {isSubscribing ? 'Enabling...' : 'Enable Notifications'}
               </button>
