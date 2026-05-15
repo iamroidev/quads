@@ -8,11 +8,11 @@ import path from 'path';
 const storage = multer.memoryStorage();
 
 const fileFilter = (_req: any, file: Express.Multer.File, cb: multer.FileFilterCallback) => {
-  const allowedMimes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+  const allowedMimes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'video/mp4', 'video/quicktime', 'video/webm'];
   if (allowedMimes.includes(file.mimetype)) {
     cb(null, true);
   } else {
-    cb(new Error('Invalid file type. Only JPEG, PNG, GIF, and WebP images are allowed.'));
+    cb(new Error('Invalid file type. Only images (JPEG, PNG, GIF, WebP) and videos (MP4, MOV, WebM) are allowed.'));
   }
 };
 
@@ -20,10 +20,39 @@ export const upload = multer({
   storage,
   fileFilter,
   limits: {
-    fileSize: 5 * 1024 * 1024, // 5MB per file
-    files: 5, // Max 5 files
+    fileSize: 15 * 1024 * 1024, // 15MB total (videos can be large)
+    files: 6, // Max 5 images + 1 video
   },
 });
+
+/**
+ * Upload a single video buffer to Cloudinary
+ */
+export const uploadVideoToCloudinary = (
+  buffer: Buffer,
+  folder: string = 'quads/products/videos'
+): Promise<{ url: string; publicId: string }> => {
+  return new Promise((resolve, reject) => {
+    const uploadStream = cloudinary.uploader.upload_stream(
+      {
+        folder,
+        resource_type: 'video',
+        chunk_size: 6000000, // 6MB chunks for stability
+      },
+      (error, result) => {
+        if (error) {
+          reject(ApiError.internal(`Failed to upload video to cloud storage: ${error.message || 'unknown error'}`));
+        } else if (result) {
+          resolve({
+            url: result.secure_url,
+            publicId: result.public_id,
+          });
+        }
+      }
+    );
+    uploadStream.end(buffer);
+  });
+};
 
 /**
  * Upload a single image buffer to Cloudinary

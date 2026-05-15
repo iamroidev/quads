@@ -18,6 +18,7 @@ export interface CreateProductData {
   flashSalePrice?: number;
   flashSaleEndsAt?: string;
   images?: File[];
+  video?: File;
 }
 
 export interface UpdateProductData {
@@ -37,6 +38,7 @@ export interface UpdateProductData {
   flashSalePrice?: number;
   flashSaleEndsAt?: string;
   images?: File[];
+  video?: File;
 }
 
 interface ApiProductResponse {
@@ -221,6 +223,9 @@ const productService = {
         formData.append('images', file);
       });
     }
+    if (data.video) {
+      formData.append('video', data.video);
+    }
 
     const response = await api.post('/products', formData, {
       headers: { 'Content-Type': 'multipart/form-data' },
@@ -256,6 +261,10 @@ const productService = {
       data.images.forEach((file) => {
         formData.append('images', file);
       });
+    }
+
+    if (data.video) {
+      formData.append('video', data.video);
     }
 
     const response = await api.put(`/products/${id}`, formData, {

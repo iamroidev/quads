@@ -4,7 +4,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import toast from 'react-hot-toast';
-import { ArrowLeft, ShieldOff } from 'lucide-react';
+import { ArrowLeft, ShieldOff, Video, X, Play, UploadCloud } from 'lucide-react';
 import productService from '../services/product.service';
 import growthService from '../services/growth.service';
 import categoryService from '../services/category.service';
@@ -45,7 +45,9 @@ const CreateEditProduct = () => {
   const [currentStep, setCurrentStep] = useState(1);
   const [categories, setCategories] = useState<Category[]>([]);
   const [images, setImages] = useState<File[]>([]);
+  const [video, setVideo] = useState<File | null>(null);
   const [existingImages, setExistingImages] = useState<{ url: string; publicId: string }[]>([]);
+  const [existingVideo, setExistingVideo] = useState<{ url: string; publicId: string } | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [loadingProduct, setLoadingProduct] = useState(isEdit);
   const [removedImageIds, setRemovedImageIds] = useState<string[]>([]);
@@ -98,6 +100,7 @@ const CreateEditProduct = () => {
             stock: p.stock,
           });
           setExistingImages(p.images);
+          if (p.video) setExistingVideo(p.video);
         }
       } catch {
         toast.error('Failed to load product');
@@ -186,6 +189,7 @@ const CreateEditProduct = () => {
         status: data.status,
         stock: data.stock,
         images: images.length > 0 ? images : undefined,
+        video: video || undefined,
       };
 
       if (isEdit) {
@@ -224,6 +228,7 @@ const CreateEditProduct = () => {
         tags,
         status: 'draft' as const,
         images: images.length > 0 ? images : undefined,
+        video: video || undefined,
       };
 
       if (isEdit) {
@@ -346,6 +351,61 @@ const CreateEditProduct = () => {
                       onRemoveExisting={handleRemoveExistingImage}
                       maxImages={5}
                     />
+
+                    {/* Video Upload Section */}
+                    <div className="mt-10 border-t-2 border-black/5 pt-10">
+                       <div className="text-[10px] sm:text-[12px] font-black uppercase tracking-[0.2em] mb-6 flex items-center gap-4">
+                        <div className="h-0.5 sm:h-1 flex-1 bg-black/10" />
+                        Motion Proof (Video)
+                        <div className="h-0.5 sm:h-1 flex-1 bg-black/10" />
+                      </div>
+
+                      {(video || existingVideo) ? (
+                        <div className="relative aspect-video border-4 border-black bg-black overflow-hidden group">
+                           {video ? (
+                             <video 
+                              src={URL.createObjectURL(video)} 
+                              className="w-full h-full object-contain"
+                              controls
+                             />
+                           ) : (
+                             <video 
+                              src={existingVideo?.url} 
+                              className="w-full h-full object-contain"
+                              controls
+                             />
+                           )}
+                           <button 
+                            type="button"
+                            onClick={() => { setVideo(null); setExistingVideo(null); if (existingVideo) setRemovedImageIds(prev => [...prev, existingVideo.publicId]); }}
+                            className="absolute top-4 right-4 bg-[#ff6b6b] text-white p-2 border-2 border-black shadow-[4px_4px_0_0_black] hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all z-20"
+                           >
+                             <X className="h-4 w-4" />
+                           </button>
+                        </div>
+                      ) : (
+                        <label className="flex flex-col items-center justify-center border-4 border-dashed border-black/20 bg-black/5 p-12 cursor-pointer hover:bg-black/10 transition-colors group">
+                           <UploadCloud className="h-12 w-12 opacity-20 mb-4 group-hover:scale-110 transition-transform" />
+                           <div className="text-[11px] font-black uppercase tracking-widest opacity-40">Upload Product Video</div>
+                           <div className="text-[8px] font-black uppercase opacity-20 mt-2">MP4, MOV or WebM (Max 15MB)</div>
+                           <input 
+                            type="file" 
+                            accept="video/*" 
+                            className="hidden" 
+                            onChange={(e) => {
+                              const file = e.target.files?.[0];
+                              if (file) {
+                                if (file.size > 15 * 1024 * 1024) {
+                                  toast.error('Video too large (Max 15MB)');
+                                  return;
+                                }
+                                setVideo(file);
+                              }
+                            }}
+                           />
+                        </label>
+                      )}
+                    </div>
                   </BulletinCard>
                 </div>
 
