@@ -268,7 +268,7 @@ const Dashboard: React.FC = () => {
         </BulletinSection>
       )}
 
-      {/* Discovery strips (Recent/Trending) */}
+      {/* Just Listed (Recent) */}
       <BulletinSection title="Just listed" subtitle="Section 03" action={<Link to="/products" className="text-[11px] underline">View all →</Link>}>
         {loadingRecent ? (
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
@@ -276,6 +276,11 @@ const Dashboard: React.FC = () => {
             <ProductCardSkeleton />
             <ProductCardSkeleton />
             <ProductCardSkeleton />
+          </div>
+        ) : recentProducts.length === 0 ? (
+          <div className="py-12 border-4 border-dashed border-black/10 text-center opacity-40">
+             <div className="text-3xl mb-2">🔭</div>
+             <div className="text-[10px] font-black uppercase tracking-widest">No listings found in the system.</div>
           </div>
         ) : (
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
@@ -287,7 +292,6 @@ const Dashboard: React.FC = () => {
                 <div className="border border-black dark:border-white/20 bg-[var(--bulletin-card)] p-3 shadow-[6px_6px_0_0_var(--bulletin-shadow),-3px_3px_0_0_#ff6b6b]">
                   <div className="relative aspect-square overflow-hidden border border-black/10 bg-gray-100">
                     <img src={getImage(product)} alt={product.title} className="h-full w-full object-cover" />
-                    <div className="absolute -top-2 left-1/2 h-4 w-16 -translate-x-1/2 bg-[#ffd700]/30 opacity-60" style={{ transform: 'translateX(-50%) rotate(-2deg)' }} />
                   </div>
                   <div className="mt-3 space-y-1">
                     <div className="truncate font-black leading-tight uppercase text-[11px] tracking-tight">{product.title}</div>
@@ -302,6 +306,31 @@ const Dashboard: React.FC = () => {
           </div>
         )}
       </BulletinSection>
+
+      {/* Trending (High Engagement) */}
+      {!loadingTrending && trendingProducts.length > 0 && (
+        <BulletinSection title="Campus Trends" subtitle="Section 04" bgColor="bg-[#fffacd] dark:bg-yellow-900/10">
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            {trendingProducts.map((product, idx) => (
+              <Link key={product._id} to={`/products/${product._id}`} className="group relative" style={{ transform: `rotate(${(idx % 3 - 1) * -0.6}deg)`, transition: 'transform 0.2s' }}>
+                <div className="border border-black dark:border-white/20 bg-[var(--bulletin-card)] p-3 shadow-[6px_6px_0_0_var(--bulletin-shadow),-3px_3px_0_0_#ffd700]">
+                  <div className="relative aspect-square overflow-hidden border border-black/10 bg-gray-100">
+                    <img src={getImage(product)} alt={product.title} className="h-full w-full object-cover" />
+                    <div className="absolute top-2 right-2 bg-black text-white text-[8px] font-black px-2 py-0.5 rounded-sm animate-pulse">HOT</div>
+                  </div>
+                  <div className="mt-3 space-y-1">
+                    <div className="truncate font-black leading-tight uppercase text-[11px] tracking-tight">{product.title}</div>
+                    <div className="flex items-baseline justify-between">
+                      <span className="text-base font-black">GHS {product.price}</span>
+                      <span className="text-[9px] uppercase font-bold opacity-30">Trending Now</span>
+                    </div>
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </BulletinSection>
+      )}
 
       {/* Upgrade CTA for buyers */}
       {user?.role === 'buyer' && (
