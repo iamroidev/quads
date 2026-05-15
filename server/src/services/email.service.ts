@@ -1,4 +1,4 @@
-import { Resend } from 'resend';
+import axios from 'axios';
 
 interface EmailOptions {
   to: string;
@@ -7,12 +7,12 @@ interface EmailOptions {
 }
 
 class EmailService {
-  private resend: Resend;
+  private readonly apiKey: string;
+  private readonly apiUrl: string = 'https://api.resend.com/emails';
 
   constructor() {
     // We use SMTP_PASS as the API key for Resend since that's where the user stored it
-    const apiKey = process.env.SMTP_PASS || 're_123456789';
-    this.resend = new Resend(apiKey);
+    this.apiKey = process.env.SMTP_PASS || 're_123456789';
   }
 
   private getBaseStyles(): string {
@@ -25,7 +25,7 @@ class EmailService {
         .header span { color: #ff6b6b; }
         .content { padding: 40px 32px; color: #1a1a1a; line-height: 1.6; font-size: 16px; }
         .content h2 { color: #000000; font-size: 24px; font-weight: 900; margin-top: 0; text-transform: uppercase; letter-spacing: -0.5px; }
-        .btn { display: inline-block; background: #000000; color: #ffffff !important; text-decoration: none; padding: 16px 32px; font-weight: 900; text-transform: uppercase; font-size: 13px; letter-spacing: 1px; margin: 24px 0; border: none; transition: all 0.2s; }
+        .btn { display: inline-block; background: #000000; color: #ffffff !important; text-decoration: none; padding: 16px 32px; font-weight: 900; text-transform: uppercase; font-size: 13px; letter-spacing: 1px; margin: 24px 0; border: none; }
         .btn-primary { background: #ff6b6b; color: #ffffff !important; }
         .footer { background: #faf8f5; padding: 32px; text-align: center; font-size: 11px; color: #666666; border-top: 2px solid #eeeeee; }
         .footer a { color: #000000; text-decoration: underline; font-weight: 700; }
@@ -67,24 +67,37 @@ class EmailService {
   async sendEmail(options: EmailOptions): Promise<boolean> {
     try {
       const fromEmail = process.env.SMTP_FROM || 'support@quadsmarket.tech';
-      console.log(`[EmailService] Attempting to send to ${options.to} via Resend API`);
+      console.log(`[EmailService] Posting to Resend API for: ${options.to}`);
       
-      const { data, error } = await this.resend.emails.send({
-        from: `QUADS <${fromEmail}>`,
-        to: options.to,
-        subject: options.subject,
-        html: options.html,
-      });
+      const response = await axios.post(
+        this.apiUrl,
+        {
+          from: `QUADS <${fromEmail}>`,
+          to: options.to,
+          subject: options.subject,
+          html: options.html,
+        },
+        {
+          headers: {
+            'Authorization': `Bearer ${this.apiKey}`,
+            'Content-Type': 'application/json',
+          },
+        }
+      );
 
-      if (error) {
-        console.error('[EmailService] Resend API Error:', error);
-        return false;
+      if (response.status === 200 || response.status === 201) {
+        console.log('[EmailService] Success! Email ID:', response.data?.id);
+        return true;
       }
 
-      console.log('[EmailService] Success! Email ID:', data?.id);
-      return true;
-    } catch (error) {
-      console.error('[EmailService] Fatal Error:', error);
+      console.error('[EmailService] Resend API Non-200 Response:', response.status, response.data);
+      return false;
+    } catch (error: any) {
+      if (error.response) {
+        console.error('[EmailService] Resend API Error:', error.response.status, error.response.data);
+      } else {
+        console.error('[EmailService] Fatal Error:', error.message);
+      }
       return false;
     }
   }

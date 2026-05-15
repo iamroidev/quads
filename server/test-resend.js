@@ -1,12 +1,12 @@
 const dotenv = require('dotenv');
 const path = require('path');
-const { Resend } = require('resend');
+const axios = require('axios');
 
 // Load env from quads folder (one level up)
 dotenv.config({ path: path.join(__dirname, '../.env') });
 
 async function test() {
-  console.log('--- STARTING EMAIL CONNECTIVITY TEST (JS) ---');
+  console.log('--- STARTING EMAIL CONNECTIVITY TEST (AXIOS) ---');
   console.log('Using FROM:', process.env.SMTP_FROM);
   
   const apiKey = process.env.SMTP_PASS;
@@ -15,26 +15,37 @@ async function test() {
     return;
   }
   
-  const resend = new Resend(apiKey);
   const target = 'richieamaro6@gmail.com';
-  
   console.log(`Sending test email to: ${target}...`);
   
   try {
-    const { data, error } = await resend.emails.send({
-      from: `QUADS <${process.env.SMTP_FROM || 'support@quadsmarket.tech'}>`,
-      to: target,
-      subject: '🚨 QUADS System Connectivity Test',
-      html: '<h1>Connection Success!</h1><p>If you are reading this, the QUADS server is successfully talking to the Resend API via SDK.</p>'
-    });
+    const response = await axios.post(
+      'https://api.resend.com/emails',
+      {
+        from: `QUADS <${process.env.SMTP_FROM || 'support@quadsmarket.tech'}>`,
+        to: target,
+        subject: '🚨 QUADS System Connectivity Test (Axios)',
+        html: '<h1>Connection Success!</h1><p>If you are reading this, the QUADS server is successfully talking to the Resend API via Axios.</p>'
+      },
+      {
+        headers: {
+          'Authorization': `Bearer ${apiKey}`,
+          'Content-Type': 'application/json',
+        },
+      }
+    );
 
-    if (error) {
-      console.error('❌ TEST FAILED (Resend Error):', error);
+    if (response.status === 200 || response.status === 201) {
+      console.log('✅ TEST PASSED: Email sent successfully. ID:', response.data.id);
     } else {
-      console.log('✅ TEST PASSED: Email sent successfully. ID:', data.id);
+      console.error('❌ TEST FAILED (API Error):', response.status, response.data);
     }
   } catch (err) {
-    console.error('❌ FATAL ERROR:', err);
+    if (err.response) {
+      console.error('❌ TEST FAILED (API Response Error):', err.response.status, err.response.data);
+    } else {
+      console.error('❌ FATAL ERROR:', err.message);
+    }
   }
 }
 
