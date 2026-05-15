@@ -1,33 +1,33 @@
 # QUADS — Deployment Status & Final Steps
 
-## ✅ Completed
-- [x] **Production Security**: Generated secure 32-byte `JWT_SECRET` and updated production env.
-- [x] **Server Deployment**: Built and deployed backend to AWS EC2 (`54.167.221.2`).
-- [x] **Environment Optimization**: Configured Node 16 for GLIBC compatibility and PM2 for process management.
-- [x] **Reverse Proxy**: Set up Nginx to handle port 80/443 traffic.
-- [x] **Domain & SSL**: Linked `api.quadsmarket.tech` to EC2 and provisioned a **Let's Encrypt SSL certificate**.
-- [x] **Official Branding**: Integrated `support@quadsmarket.tech` and `admin@quadsmarket.tech` for all system communications.
-- [x] **Web App Sync**: Updated `web/.env.production` with the secure API URL.
+## ✅ Completed (May 2026)
+- [x] **Firebase Phone Auth**: Implemented secure phone verification with Firebase Admin SDK.
+- [x] **CORS & Routing**: Fixed production 503 errors and cross-origin blocks for Google Login.
+- [x] **Mobile Excellence**: Implemented fluid typography and fixed chat widget overlap.
+- [x] **Web Push Notifications**: Wired up VAPID keys and Service Worker for real-time alerts.
+- [x] **Session Protocol**: Enforced mandatory agreement checkbox for all auth flows.
+- [x] **Production Infrastructure**: AWS EC2 is live with SSL, PM2, and hardened `.env`.
 
-## 📍 Production Details
-- **API URL**: `https://api.quadsmarket.tech/api`
+## 📍 Production Access
+- **Frontend**: [https://quadsmarket.tech](https://quadsmarket.tech)
+- **API Hub**: `https://api.quadsmarket.tech/api`
 - **Socket URL**: `https://api.quadsmarket.tech`
-- **Nginx Config**: `/etc/nginx/conf.d/quads.conf`
-- **PM2 Process**: `quads-api`
+- **Server IP**: `54.167.221.2`
 
-## 🚀 Action Items for User
-1. **Supabase Fix (URGENT)**:
-   - Add `VITE_SUPABASE_URL` and `VITE_SUPABASE_KEY` to **Vercel Settings** -> Environment Variables.
-   - **Redeploy** on Vercel after adding them.
-2. **Cloudflare Settings**:
-   - Set **SSL/TLS** to **"Full (Strict)"**.
-   - Enable **"Always Use HTTPS"**.
-3. **Redeploy Web App**: 
-   - Ensure `VITE_API_URL=https://api.quadsmarket.tech/api` is also set in Vercel.
-   - Trigger a new deployment.
+## 🚀 Final Polish Sprint
+1.  **SEO & Social (High Priority)**: 
+    - Update `index.html` with dynamic OpenGraph meta tags so product links look premium when shared on WhatsApp/Twitter.
+2.  **Image Optimization**: 
+    - Update `ProductCard.tsx` to use Cloudinary's `f_auto,q_auto` flags to reduce image size for campus users.
+3.  **Email Verification**: 
+    - Perform a "Test Sign Up" to verify Resend delivery from `support@quadsmarket.tech`.
+4.  **Analytics Pulse**: 
+    - Add `captureEvent` calls to the "Add to Cart" and "Start Chat" buttons to populate the Growth Dashboard.
 
-## 🛠️ Maintenance Commands
+## 🛠️ Maintenance & Sync
+- **Sync Local to Server**: Run `./sync-platform.sh` to push local fixes to EC2.
 - **Check Logs**: `pm2 logs quads-api`
 - **Restart API**: `pm2 restart quads-api`
-- **Check Nginx Status**: `sudo systemctl status nginx`
-- **SSL Renewal**: Certbot is set to auto-renew, but you can test with `sudo certbot renew --dry-run`.
+
+---
+*Status updated by Antigravity AI*
