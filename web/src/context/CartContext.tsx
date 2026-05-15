@@ -53,6 +53,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
           quantity,
           sellerId: product.seller._id,
           sellerName: product.seller.storeName || product.seller.name,
+          pickupLocation: product.pickupLocation,
         },
       ];
     });
