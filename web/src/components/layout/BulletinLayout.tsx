@@ -128,12 +128,18 @@ export const BulletinLayout: React.FC<BulletinLayoutProps> = ({
                       Payouts
                     </Link>
                   </>
-                ) : (
+                ) : location.pathname === '/' ? (
                   <>
                     <Link to="/products" className="hover:text-[#ff6b6b]">The Board</Link>
                     <Link to="/sellers" className="hover:text-[#ff6b6b]">Merchants</Link>
                     <Link to="/pulse" className="hover:text-[#ff6b6b]">Pulse</Link>
                     <Link to="/safety" className="hover:text-[#ff6b6b]">Protocol</Link>
+                  </>
+                ) : (
+                  <>
+                    <Link to="/products" className="hover:text-[#ff6b6b]">Marketplace</Link>
+                    <Link to="/saved" className="hover:text-[#ff6b6b]">Wishlist</Link>
+                    <Link to="/orders" className="hover:text-[#ff6b6b]">Orders</Link>
                   </>
                 )}
               </div>
