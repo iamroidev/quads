@@ -11,7 +11,7 @@ import {
 } from 'lucide-react';
 import adminService from '../services/admin.service';
 import { BulletinLayout, BulletinSection, BulletinCard } from '../components/layout/BulletinLayout';
-import { useAuth } from '../hooks/useAuth';
+import { useAuth } from '../context/AuthContext';
 
 const SellerPayouts: React.FC = () => {
   const { user } = useAuth();
