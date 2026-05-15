@@ -1,4 +1,4 @@
-import nodemailer from 'nodemailer';
+import { Resend } from 'resend';
 
 interface EmailOptions {
   to: string;
@@ -7,37 +7,31 @@ interface EmailOptions {
 }
 
 class EmailService {
-  private transporter: nodemailer.Transporter;
+  private resend: Resend;
 
   constructor() {
-    const port = parseInt(process.env.SMTP_PORT || '587', 10);
-    this.transporter = nodemailer.createTransport({
-      host: process.env.SMTP_HOST || 'smtp.ethereal.email',
-      port,
-      secure: port === 465,
-      auth: {
-        user: process.env.SMTP_USER || '',
-        pass: process.env.SMTP_PASS || '',
-      },
-    });
+    // We use SMTP_PASS as the API key for Resend since that's where the user stored it
+    const apiKey = process.env.SMTP_PASS || 're_123456789';
+    this.resend = new Resend(apiKey);
   }
 
   private getBaseStyles(): string {
     return `
       <style>
-        body { margin: 0; padding: 0; background: #0a0a0a; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
-        .container { max-width: 600px; margin: 0 auto; background: #ffffff; }
-        .header { background: #0a0a0a; padding: 32px 24px; text-align: center; }
-        .header h1 { color: #ffffff; margin: 0; font-size: 24px; font-weight: 800; letter-spacing: 3px; text-transform: uppercase; }
-        .header span { color: #fbbf24; }
-        .content { padding: 32px 24px; color: #374151; line-height: 1.7; font-size: 15px; }
-        .content h2 { color: #0a0a0a; font-size: 20px; font-weight: 700; margin-top: 0; }
-        .btn { display: inline-block; background: #0a0a0a; color: #ffffff; text-decoration: none; padding: 14px 32px; font-weight: 700; text-transform: uppercase; font-size: 12px; letter-spacing: 2px; border-radius: 4px; margin: 16px 0; }
-        .btn-primary { background: #fbbf24; color: #0a0a0a; }
-        .footer { background: #f3f4f6; padding: 24px; text-align: center; font-size: 12px; color: #9ca3af; }
-        .footer a { color: #6b7280; text-decoration: none; }
-        .divider { height: 1px; background: #e5e7eb; margin: 24px 0; }
-        .highlight { background: #fef3c7; padding: 2px 6px; font-weight: 600; border-radius: 3px; }
+        body { margin: 0; padding: 0; background: #faf8f5; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+        .container { max-width: 600px; margin: 20px auto; background: #ffffff; border: 4px solid #000000; box-shadow: 12px 12px 0 0 rgba(0,0,0,0.1); }
+        .header { background: #000000; padding: 40px 24px; text-align: center; }
+        .header h1 { color: #ffffff; margin: 0; font-size: 28px; font-weight: 900; letter-spacing: -1px; text-transform: uppercase; }
+        .header span { color: #ff6b6b; }
+        .content { padding: 40px 32px; color: #1a1a1a; line-height: 1.6; font-size: 16px; }
+        .content h2 { color: #000000; font-size: 24px; font-weight: 900; margin-top: 0; text-transform: uppercase; letter-spacing: -0.5px; }
+        .btn { display: inline-block; background: #000000; color: #ffffff !important; text-decoration: none; padding: 16px 32px; font-weight: 900; text-transform: uppercase; font-size: 13px; letter-spacing: 1px; margin: 24px 0; border: none; transition: all 0.2s; }
+        .btn-primary { background: #ff6b6b; color: #ffffff !important; }
+        .footer { background: #faf8f5; padding: 32px; text-align: center; font-size: 11px; color: #666666; border-top: 2px solid #eeeeee; }
+        .footer a { color: #000000; text-decoration: underline; font-weight: 700; }
+        .divider { height: 4px; background: #000000; margin: 32px 0; opacity: 0.1; }
+        .highlight { background: #fffacd; padding: 2px 6px; font-weight: 700; border: 1px solid #000; }
+        .role-badge { display: inline-block; background: #000; color: #fff; padding: 4px 12px; font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 16px; }
       </style>
     `;
   }
@@ -60,9 +54,9 @@ class EmailService {
             ${body}
           </div>
           <div class="footer">
-            <p>QUADS — UMaT Campus Marketplace</p>
+            <p><strong>QUADS Marketplace</strong> — Institutional Exchange</p>
             <p><a href="${process.env.CLIENT_URL || 'https://quadsmarket.tech'}">quadsmarket.tech</a> · Support: support@quadsmarket.tech</p>
-            <p style="font-size: 11px; margin-top: 12px;">You received this email because you're a member of the QUADS marketplace.</p>
+            <p style="margin-top: 16px;">This is an official system transmission. Please do not reply directly to this address.</p>
           </div>
         </div>
       </body>
@@ -72,23 +66,25 @@ class EmailService {
 
   async sendEmail(options: EmailOptions): Promise<boolean> {
     try {
-      const mailOptions = {
-        from: `"QUADS" <${process.env.SMTP_FROM || 'noreply@quadsmarket.tech'}>`,
+      const fromEmail = process.env.SMTP_FROM || 'support@quadsmarket.tech';
+      console.log(`[EmailService] Attempting to send to ${options.to} via Resend API`);
+      
+      const { data, error } = await this.resend.emails.send({
+        from: `QUADS <${fromEmail}>`,
         to: options.to,
         subject: options.subject,
         html: options.html,
-      };
+      });
 
-      const info = await this.transporter.sendMail(mailOptions);
-      console.log('Message sent: %s', info.messageId);
-
-      if (process.env.NODE_ENV !== 'production' && info.messageId) {
-        console.log('Preview URL: %s', nodemailer.getTestMessageUrl(info));
+      if (error) {
+        console.error('[EmailService] Resend API Error:', error);
+        return false;
       }
 
+      console.log('[EmailService] Success! Email ID:', data?.id);
       return true;
     } catch (error) {
-      console.error('Error sending email:', error);
+      console.error('[EmailService] Fatal Error:', error);
       return false;
     }
   }
@@ -96,105 +92,115 @@ class EmailService {
   // ─── Templates ─────────────────────────────────────
 
   async sendWelcomeEmail(to: string, name: string, role: string = 'buyer'): Promise<boolean> {
-    const subject = `Welcome to QUADS — You're ready to ${role === 'seller' ? 'Sell' : 'Shop'}! 🎉`;
+    const isSeller = role === 'seller' || role === 'admin';
+    const subject = `Welcome to QUADS — Ready to ${isSeller ? 'Sell' : 'Shop'}? 🎉`;
     
-    const roleSpecificContent = role === 'seller' 
+    const roleContent = isSeller 
       ? `
-        <div style="background: #fffacd; padding: 20px; border-radius: 8px; border: 2px solid #000; margin: 20px 0;">
-          <h3 style="margin-top: 0; text-transform: uppercase; font-size: 14px;">🚀 Seller Quickstart</h3>
-          <p style="margin-bottom: 0;">You've joined as a <strong>Seller</strong>. Start by creating your first listing to reach students across the UMaT campus!</p>
+        <div class="role-badge">SELLER ACCOUNT ACTIVATED</div>
+        <h2>Start your campus empire, ${name}!</h2>
+        <p>Your seller profile is now live. You can now list items, track sales, and grow your brand within the UMaT community.</p>
+        
+        <div style="background: #fffacd; padding: 20px; border: 2px solid #000; margin: 24px 0;">
+          <p style="margin: 0; font-weight: 700;">NEXT STEPS:</p>
+          <ul style="margin: 12px 0 0 0; padding-left: 20px;">
+            <li>Complete your <strong>Payout Setup</strong> in the dashboard</li>
+            <li>List your first item with clear photos</li>
+            <li>Share your shop link with friends</li>
+          </ul>
         </div>
-        <ul>
-          <li>📦 <strong>List Items</strong> — Upload photos and set your price</li>
-          <li>📈 <strong>Analytics</strong> — Track your shop performance</li>
-          <li>💸 <strong>Earnings</strong> — Get paid directly via MoMo or Bank</li>
-        </ul>
       `
       : `
-        <p>You're now part of <strong>QUADS</strong> — the safest and smartest way to buy and sell on the UMaT campus.</p>
-        <ul>
-          <li>🛍️ <strong>Browse</strong> — Discover items from verified campus sellers</li>
-          <li>💬 <strong>Chat</strong> — Negotiate prices and arrange meetups securely</li>
-          <li>🔒 <strong>Pay safely</strong> — Escrow-protected payments via Paystack</li>
-        </ul>
+        <div class="role-badge">BUYER ACCOUNT ACTIVATED</div>
+        <h2>Welcome to the Market, ${name}!</h2>
+        <p>You now have access to hundreds of verified listings from students across campus.</p>
+        <p>From electronics to textbooks, find what you need securely.</p>
       `;
 
     const body = `
-      <h2>Welcome aboard, ${name}!</h2>
-      ${roleSpecificContent}
+      ${roleContent}
       
-      <div style="text-align: center; margin-top: 30px;">
-        <a href="${process.env.CLIENT_URL || 'https://quadsmarket.tech'}/dashboard" class="btn btn-primary">Go to Dashboard</a>
+      <div style="text-align: center;">
+        <a href="${process.env.CLIENT_URL || 'https://quadsmarket.tech'}/dashboard" class="btn btn-primary">Enter Dashboard</a>
       </div>
       
       <div class="divider"></div>
       
-      <p style="font-size: 13px; color: #6b7280;">
-        💡 <strong>Pro tip:</strong> Always meet in public "Safe Zones" on campus for exchanges.
+      <p style="font-size: 13px; color: #666;">
+        <strong>Safety First:</strong> Always meet in public spaces like the library or campus cafeterias for item handovers.
       </p>
+    `;
+    
+    return this.sendEmail({ to, subject, html: this.wrapEmail(body) });
+  }
+
+  async sendVerificationEmail(to: string, name: string, code: string): Promise<boolean> {
+    const subject = `${code} is your QUADS verification code`;
+    const body = `
+      <h2>Identity Verification</h2>
+      <p>Hi ${name}, use the security code below to verify your account action:</p>
+      
+      <div style="background: #000000; color: #ff6b6b; padding: 32px; text-align: center; margin: 24px 0; font-size: 42px; font-weight: 900; letter-spacing: 10px;">
+        ${code}
+      </div>
+      
+      <p style="font-size: 12px; color: #666; text-align: center;">This code expires in 10 minutes. If you did not request this, please secure your account.</p>
     `;
     return this.sendEmail({ to, subject, html: this.wrapEmail(body) });
   }
 
   async sendOrderUpdateEmail(to: string, orderId: string, status: string): Promise<boolean> {
     const statusMessages: Record<string, string> = {
-      pending: 'Your order is awaiting seller confirmation.',
-      confirmed: 'The seller has confirmed your order!',
-      ready: 'Your order is ready for pickup!',
-      completed: 'Your order has been completed. Enjoy!',
-      cancelled: 'Your order has been cancelled.',
+      pending: 'Waiting for seller confirmation.',
+      confirmed: 'Seller has confirmed! Preparing for handover.',
+      ready: 'Item is ready for pickup/delivery!',
+      completed: 'Transaction successful. Thank you!',
+      cancelled: 'Order has been cancelled.',
     };
 
     const subject = `Order Update: ${status.toUpperCase()}`;
     const body = `
       <h2>Order Status Update</h2>
-      <p>Your order <strong>#${orderId.slice(-8).toUpperCase()}</strong> has been updated.</p>
+      <p>Your order <strong>#${orderId.slice(-8).toUpperCase()}</strong> has shifted status:</p>
       
-      <div style="background: #f3f4f6; padding: 16px; border-radius: 8px; text-align: center; margin: 20px 0;">
-        <span style="font-size: 28px; font-weight: 800; color: #0a0a0a;">${status.toUpperCase()}</span>
+      <div style="background: #faf8f5; border: 2px solid #000; padding: 24px; text-align: center; margin: 24px 0;">
+        <span style="font-size: 24px; font-weight: 900; text-transform: uppercase;">${status}</span>
+        <p style="margin-top: 8px; font-size: 14px; opacity: 0.6;">${statusMessages[status] || ''}</p>
       </div>
       
-      <p>${statusMessages[status] || 'Your order status has changed.'}</p>
-      
       <div style="text-align: center;">
-        <a href="${process.env.CLIENT_URL || 'https://quadsmarket.tech'}/orders/${orderId}" class="btn">View Order</a>
+        <a href="${process.env.CLIENT_URL || 'https://quadsmarket.tech'}/orders/${orderId}" class="btn">View Order Details</a>
       </div>
     `;
     return this.sendEmail({ to, subject, html: this.wrapEmail(body) });
   }
 
   async sendPaymentReceiptEmail(to: string, orderId: string, amount: number): Promise<boolean> {
-    const subject = 'Payment Receipt — QUADS';
+    const subject = 'Receipt for Order #' + orderId.slice(-8).toUpperCase();
     const body = `
-      <h2>Payment Successful ✓</h2>
-      <p>Thank you for your purchase on <strong>QUADS</strong>!</p>
+      <h2>Payment Confirmed ✓</h2>
+      <p>Your payment has been received and is being held securely in escrow.</p>
       
-      <div style="background: #f3f4f6; padding: 20px; border-radius: 8px; margin: 20px 0;">
-        <p style="margin: 4px 0;"><strong>Order:</strong> #${orderId.slice(-8).toUpperCase()}</p>
-        <p style="margin: 4px 0;"><strong>Amount:</strong> GHS ${amount.toFixed(2)}</p>
-        <p style="margin: 4px 0;"><strong>Status:</strong> <span style="color: #059669;">Paid & Secured</span></p>
+      <div style="background: #faf8f5; border: 2px solid #000; padding: 24px; margin: 24px 0;">
+        <table style="width: 100%; border-collapse: collapse;">
+          <tr>
+            <td style="padding: 8px 0; font-size: 13px; opacity: 0.6;">REFERENCE</td>
+            <td style="padding: 8px 0; font-size: 13px; font-weight: 700; text-align: right;">#${orderId.slice(-8).toUpperCase()}</td>
+          </tr>
+          <tr>
+            <td style="padding: 8px 0; font-size: 13px; opacity: 0.6;">AMOUNT PAID</td>
+            <td style="padding: 8px 0; font-size: 13px; font-weight: 700; text-align: right;">GHS ${amount.toFixed(2)}</td>
+          </tr>
+          <tr>
+            <td style="padding: 8px 0; font-size: 13px; opacity: 0.6;">PROTECTION</td>
+            <td style="padding: 8px 0; font-size: 13px; font-weight: 700; text-align: right; color: #059669;">QUADS ESCROW</td>
+          </tr>
+        </table>
       </div>
-      
-      <p>The seller has been notified and will process your order shortly. Your payment is held securely until you confirm receipt.</p>
       
       <div style="text-align: center;">
-        <a href="${process.env.CLIENT_URL || 'https://quadsmarket.tech'}/orders/${orderId}" class="btn btn-primary">Track Order</a>
+        <a href="${process.env.CLIENT_URL || 'https://quadsmarket.tech'}/orders/${orderId}" class="btn btn-primary">Track Progress</a>
       </div>
-    `;
-    return this.sendEmail({ to, subject, html: this.wrapEmail(body) });
-  }
-
-  async sendVerificationEmail(to: string, name: string, code: string): Promise<boolean> {
-    const subject = 'Your QUADS Verification Code';
-    const body = `
-      <h2>Hi ${name},</h2>
-      <p>Use the code below to verify your action on <strong>QUADS</strong>:</p>
-      
-      <div style="background: #0a0a0a; padding: 24px; border-radius: 8px; text-align: center; margin: 24px 0;">
-        <span style="font-size: 36px; font-weight: 800; color: #fbbf24; letter-spacing: 8px;">${code}</span>
-      </div>
-      
-      <p style="font-size: 13px; color: #6b7280;">This code expires in 10 minutes. If you didn't request this, you can safely ignore this email.</p>
     `;
     return this.sendEmail({ to, subject, html: this.wrapEmail(body) });
   }
