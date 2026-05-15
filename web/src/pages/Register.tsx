@@ -491,18 +491,6 @@ const RegisterPage: React.FC = () => {
                     {errors.residenceHall && <p className="mt-2 text-[12px] text-red-600 font-black uppercase tracking-widest">{errors.residenceHall.message}</p>}
                   </div>
 
-                  {selectedHall === 'Other' && (
-                    <div className="animate-in fade-in slide-in-from-top-2 duration-300">
-                      <label className="block text-[11px] font-black uppercase tracking-[0.2em] opacity-40 mb-3 text-[var(--bulletin-text)]">Specify Hostel / Residence</label>
-                      <input 
-                        type="text" 
-                        placeholder="Type name of your residence" 
-                        className={fieldBase} 
-                        {...register('customHostel')}
-                        autoFocus
-                      />
-                    </div>
-                  )}
                   <div>
                     <label className="block text-[11px] font-black uppercase tracking-[0.2em] opacity-40 mb-3 text-[var(--bulletin-text)]">Academic Level / Status</label>
                     <input 

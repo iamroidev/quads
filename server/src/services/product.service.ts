@@ -51,13 +51,13 @@ class ProductService {
 
     for (const part of parts) {
       const slug = part.toLowerCase().replace(/[^a-z0-9]/g, '-');
-      let category = await Category.findOne({
+      let category: ICategoryDocument | null = await Category.findOne({
         $or: [
           { slug },
           { name: { $regex: `^${part}$`, $options: 'i' } }
         ],
         parent: parentId
-      }) as ICategoryDocument | null;
+      });
 
       if (!category) {
         category = await Category.create({
