@@ -41,6 +41,7 @@ import ContactPage from './pages/Contact';
 import TermsPage from './pages/Terms';
 import CartPage from './pages/Cart';
 import MaintenancePage from './pages/Maintenance';
+import SellersPage from './pages/Sellers';
 
 import { LoadingSpinner } from './components/ui';
 
@@ -245,6 +246,7 @@ const App: React.FC = () => {
         <Route path="/contact" element={<ContactPage />} />
         <Route path="/terms" element={<TermsPage />} />
         <Route path="/maintenance" element={<MaintenancePage />} />
+        <Route path="/sellers" element={<SellersPage />} />
         <Route
           path="/admin"
           element={
