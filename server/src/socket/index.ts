@@ -41,6 +41,18 @@ export const setupSocketHandlers = (io: SocketServer): void => {
   });
 
   // ========================
+  // Service Event Listeners
+  // ========================
+  chatService.on('message', (message) => {
+    const conversationId = message.conversation.toString();
+    io.to(`conversation:${conversationId}`).emit('message:new', message);
+    
+    // Also emit conversation:updated to participants
+    // We'll let the clients fetch the updated list or just notify them
+    io.to(`conversation:${conversationId}`).emit('conversation:refreshed', { conversationId });
+  });
+
+  // ========================
   // Connection Handler
   // ========================
   io.on('connection', (rawSocket: Socket) => {
@@ -84,28 +96,14 @@ export const setupSocketHandlers = (io: SocketServer): void => {
         if (!content || !content.trim()) return;
 
         // Save message via service
-        const message = await chatService.sendMessage(
+        // The broadcast will be handled by the chatService 'message' listener above
+        await chatService.sendMessage(
           conversationId,
           userId,
           content,
           type || 'text',
           { offer, quickReplyLabel, attachments }
         );
-
-        // Broadcast the new message to everyone in the conversation room
-        io.to(`conversation:${conversationId}`).emit('message:new', message);
-
-        // Also emit a conversation:updated event to all participants
-        // (so conversation list updates with new lastMessage)
-        const conversations = await chatService.getUserConversations(userId);
-        const updatedConv = conversations.find(
-          (c) => c._id.toString() === conversationId
-        );
-
-        if (updatedConv) {
-          // Emit to the conversation room for participants currently viewing
-          io.to(`conversation:${conversationId}`).emit('conversation:updated', updatedConv);
-        }
       } catch (error) {
         console.error('Socket message:send error:', error);
         socket.emit('error', { message: 'Failed to send message' });

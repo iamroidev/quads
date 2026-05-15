@@ -1,8 +1,11 @@
 import mongoose from 'mongoose';
+import { EventEmitter } from 'events';
 import Conversation, { IConversationDocument } from '../models/Conversation';
 import Message, { IMessageDocument } from '../models/Message';
 import User from '../models/User';
 import ApiError from '../utils/ApiError';
+import aiService from './ai.service';
+import { emailService } from './email.service';
 
 interface PaginatedMessages {
   messages: IMessageDocument[];
@@ -14,7 +17,7 @@ interface PaginatedMessages {
   };
 }
 
-class ChatService {
+class ChatService extends EventEmitter {
   /**
    * Get or create a conversation between two users, optionally about a product
    */
@@ -204,7 +207,87 @@ class ChatService {
     await conversation.save();
 
     // Populate and return
-    return message.populate('sender', 'name avatar');
+    const populatedMessage = await message.populate('sender', 'name avatar');
+
+    // Emit event for real-time handlers
+    this.emit('message', populatedMessage);
+
+    // Trigger AI response if the recipient is the AI Support user
+    this.handleAiResponse(conversationId, senderId, content.trim()).catch(err => {
+      console.error('Failed to trigger AI response:', err);
+    });
+
+    return populatedMessage;
+  }
+
+  /**
+   * Handle AI response logic
+   */
+  private async handleAiResponse(conversationId: string, senderId: string, userContent: string) {
+    const AI_SUPPORT_EMAIL = 'support@quadsmarket.tech'; // We'll use this as the AI account
+
+    const conversation = await Conversation.findById(conversationId).populate('participants');
+    if (!conversation) return;
+
+    const aiUser = await User.findOne({ email: AI_SUPPORT_EMAIL });
+    if (!aiUser) return;
+
+    const isAiParticipant = conversation.participants.some((p: any) => p._id.toString() === aiUser._id.toString());
+    if (!isAiParticipant) return;
+
+    // Don't respond to self
+    if (senderId === aiUser._id.toString()) return;
+
+    // Get chat history for context (last 10 messages)
+    const historyRes = await this.getMessages(conversationId, aiUser._id.toString(), 1, 10);
+    const history = historyRes.messages.map(m => ({
+      role: (m.sender as any)._id.toString() === aiUser._id.toString() ? 'assistant' : 'user' as 'assistant' | 'user',
+      content: m.content
+    }));
+
+    // Generate AI response
+    const aiResponse = await aiService.generateResponse(userContent, history, {
+      product: conversation.product,
+      participants: conversation.participants
+    });
+
+    // Send AI response
+    await this.sendMessage(conversationId, aiUser._id.toString(), aiResponse, 'text');
+
+    // Handle Escalation
+    if (aiResponse.includes('ESCALATING TO HUMAN SUPPORT')) {
+      this.notifyAdminsOfEscalation(conversationId, userContent, aiResponse).catch(err => {
+        console.error('Failed to notify admins of escalation:', err);
+      });
+    }
+  }
+
+  /**
+   * Notify admins when AI escalates a conversation
+   */
+  private async notifyAdminsOfEscalation(conversationId: string, lastUserMsg: string, aiResp: string) {
+    const ADMIN_EMAIL = process.env.SMTP_FROM || 'admin@quadsmarket.tech';
+    
+    await emailService.sendEmail({
+      to: ADMIN_EMAIL,
+      subject: `🚨 Chat Escalation - Conversation ${conversationId}`,
+      html: `
+        <div style="font-family: sans-serif; padding: 20px; border: 4px solid #000; background: #fff5f5;">
+          <h2 style="text-transform: uppercase; font-weight: 900;">AI Support Escalation</h2>
+          <p>A conversation has been escalated to human support.</p>
+          <hr style="border: 2px solid #000;" />
+          <p><strong>Conversation ID:</strong> <code style="background: #eee; padding: 2px 4px;">${conversationId}</code></p>
+          <p><strong>Last User Message:</strong><br /><em>${lastUserMsg}</em></p>
+          <p><strong>AI Response:</strong><br /><em>${aiResp}</em></p>
+          <div style="margin-top: 20px;">
+            <a href="${process.env.CLIENT_URL}/messages/${conversationId}" 
+               style="display: inline-block; background: #000; color: #fff; padding: 10px 20px; text-decoration: none; font-weight: bold; text-transform: uppercase;">
+               Open Conversation
+            </a>
+          </div>
+        </div>
+      `
+    });
   }
 
   /**
