@@ -13,7 +13,7 @@ const schema = z.object({
 type FormData = z.infer<typeof schema>;
 
 const fieldBase =
-  'w-full border-4 border-black bg-[var(--bulletin-bg)] px-5 py-5 text-[15px] font-black focus:outline-none focus:ring-0 text-[var(--bulletin-text)] placeholder:text-[var(--bulletin-text)] placeholder:opacity-20 shadow-[6px_6px_0_0_var(--bulletin-shadow)]';
+  'w-full border-4 border-black bg-[var(--bulletin-bg)] px-5 py-5 text-[16px] font-black focus:outline-none focus:ring-0 text-[var(--bulletin-text)] placeholder:text-[var(--bulletin-text)] placeholder:opacity-20 shadow-[6px_6px_0_0_var(--bulletin-shadow)]';
 
 const ForgotPasswordPage: React.FC = () => {
   const [sent, setSent] = useState(false);
@@ -134,7 +134,6 @@ const ForgotPasswordPage: React.FC = () => {
                     type="email"
                     placeholder="you@student.umat.edu.gh"
                     autoComplete="email"
-                    autoFocus
                     className={`${fieldBase} pl-16`}
                     {...register('email')}
                   />

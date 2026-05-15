@@ -237,7 +237,7 @@ const Checkout: React.FC = () => {
                   onChange={(e) => setForm((f) => ({ ...f, deliveryAddress: e.target.value }))}
                   placeholder="Enter your delivery address"
                   rows={2}
-                  className="w-full border border-[var(--bulletin-border)] bg-[var(--bulletin-card)] p-2 text-[12px] font-bold focus:outline-none focus:ring-2 focus:ring-[var(--bulletin-text)] resize-none"
+                  className="w-full border border-[var(--bulletin-border)] bg-[var(--bulletin-card)] p-2 text-[16px] font-bold focus:outline-none focus:ring-2 focus:ring-[var(--bulletin-text)] resize-none"
                 />
               )}
             </BulletinCard>
@@ -250,7 +250,7 @@ const Checkout: React.FC = () => {
                 onChange={(e) => setForm((f) => ({ ...f, note: e.target.value }))}
                 placeholder="Optional — e.g. I'll be there at 2pm..."
                 rows={2}
-                className="w-full border border-[var(--bulletin-border)] bg-[var(--bulletin-card)] p-2 text-[12px] font-bold focus:outline-none focus:ring-2 focus:ring-[var(--bulletin-text)] resize-none"
+                className="w-full border border-[var(--bulletin-border)] bg-[var(--bulletin-card)] p-2 text-[16px] font-bold focus:outline-none focus:ring-2 focus:ring-[var(--bulletin-text)] resize-none"
               />
             </BulletinCard>
 

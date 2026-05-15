@@ -572,8 +572,7 @@ const ChatRoom: React.FC = () => {
             value={inputValue}
             onChange={handleInputChange}
             onKeyDown={handleKeyDown}
-            className="flex-1 border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] p-2 text-[12px] font-bold focus:outline-none focus:ring-2 focus:ring-[#ff6b6b] placeholder:text-[var(--bulletin-muted)] text-[var(--bulletin-text)]"
-            autoFocus
+            className="flex-1 border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] p-2 text-[16px] font-bold focus:outline-none focus:ring-2 focus:ring-[#ff6b6b] placeholder:text-[var(--bulletin-muted)] text-[var(--bulletin-text)]"
           />
           <button
             onClick={handleSend}

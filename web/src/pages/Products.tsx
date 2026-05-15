@@ -203,7 +203,7 @@ const Products: React.FC = () => {
                 <select
                   value={condition}
                   onChange={(e) => updateFilter('condition', e.target.value)}
-                  className="w-full border-4 border-black bg-[var(--bulletin-bg)] p-4 text-[13px] font-black uppercase focus:outline-none text-[var(--bulletin-text)]"
+                  className="w-full border-4 border-black bg-[var(--bulletin-bg)] p-4 text-[16px] font-black uppercase focus:outline-none text-[var(--bulletin-text)]"
                 >
                   {conditionOptions.map((opt) => (
                     <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -220,7 +220,7 @@ const Products: React.FC = () => {
                     placeholder="Floor"
                     value={minPrice}
                     onChange={(e) => updateFilter('minPrice', e.target.value)}
-                    className="w-full border-4 border-black bg-[var(--bulletin-bg)] p-4 text-[13px] font-black focus:outline-none placeholder:opacity-20 text-[var(--bulletin-text)]"
+                    className="w-full border-4 border-black bg-[var(--bulletin-bg)] p-4 text-[16px] font-black focus:outline-none placeholder:opacity-20 text-[var(--bulletin-text)]"
                     min="0"
                   />
                   <input
@@ -228,7 +228,7 @@ const Products: React.FC = () => {
                     placeholder="Ceiling"
                     value={maxPrice}
                     onChange={(e) => updateFilter('maxPrice', e.target.value)}
-                    className="w-full border-4 border-black bg-[var(--bulletin-bg)] p-4 text-[13px] font-black focus:outline-none placeholder:opacity-20 text-[var(--bulletin-text)]"
+                    className="w-full border-4 border-black bg-[var(--bulletin-bg)] p-4 text-[16px] font-black focus:outline-none placeholder:opacity-20 text-[var(--bulletin-text)]"
                     min="0"
                   />
                 </div>
@@ -240,7 +240,7 @@ const Products: React.FC = () => {
                 <select
                   value={deliveryOption}
                   onChange={(e) => updateFilter('delivery', e.target.value)}
-                  className="w-full border-4 border-black bg-[var(--bulletin-bg)] p-4 text-[13px] font-black uppercase focus:outline-none text-[var(--bulletin-text)]"
+                  className="w-full border-4 border-black bg-[var(--bulletin-bg)] p-4 text-[16px] font-black uppercase focus:outline-none text-[var(--bulletin-text)]"
                 >
                   {deliveryOptions.map((opt) => (
                     <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -257,7 +257,7 @@ const Products: React.FC = () => {
                 <select
                   value={pickupLocation}
                   onChange={(e) => updateFilter('pickupLocation', e.target.value)}
-                  className="w-full border-4 border-black bg-[var(--bulletin-bg)] p-4 text-[13px] font-black uppercase focus:outline-none text-[var(--bulletin-text)]"
+                  className="w-full border-4 border-black bg-[var(--bulletin-bg)] p-4 text-[16px] font-black uppercase focus:outline-none text-[var(--bulletin-text)]"
                 >
                   {proximityOptions.map((opt) => (
                     <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -288,7 +288,7 @@ const Products: React.FC = () => {
                 <select
                   value={sort}
                   onChange={(e) => updateFilter('sort', e.target.value)}
-                  className="border-4 border-black bg-[var(--bulletin-card)] px-6 py-3 text-[12px] font-black uppercase focus:outline-none text-[var(--bulletin-text)]"
+                  className="border-4 border-black bg-[var(--bulletin-card)] px-6 py-3 text-[16px] font-black uppercase focus:outline-none text-[var(--bulletin-text)]"
                 >
                   {sortOptions.map((opt) => (
                     <option key={opt.value} value={opt.value}>{opt.label}</option>
