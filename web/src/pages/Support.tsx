@@ -91,24 +91,15 @@ const Support: React.FC = () => {
               </div>
             </div>
 
-            {/* AI Assistant Promo */}
-            <div className="border-4 border-[var(--bulletin-border)] bg-[#ffd700] dark:bg-yellow-900/40 p-8 shadow-[8px_8px_0_0_var(--bulletin-shadow)] rotate-[1deg]">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="h-10 w-10 bg-black flex items-center justify-center text-white font-black rounded-sm">🤖</div>
-                <div className="text-[10px] font-black uppercase tracking-widest text-black dark:text-yellow-200">Instant Help</div>
+            <div>
+              <div className="border-4 border-[var(--bulletin-border)] bg-[#e0f2f7] dark:bg-sky-900/40 p-8 shadow-[8px_8px_0_0_var(--bulletin-shadow)] rotate-[-1deg]">
+                <div className="text-[10px] font-black uppercase tracking-widest opacity-40 mb-2 text-sky-900 dark:text-sky-200">Institutional Safety</div>
+                <h3 className="text-xl font-black uppercase tracking-tight mb-4 text-sky-900 dark:text-sky-200">Official Protocols</h3>
+                <p className="text-[13px] font-bold opacity-60 mb-6 leading-tight text-sky-900 dark:text-sky-200">Read our community guidelines and safety documentation to ensure secure transactions.</p>
+                <Link to="/terms" className="w-full inline-block border-2 border-black bg-black text-white py-3 text-center text-[11px] font-black uppercase tracking-widest hover:bg-white hover:text-black transition-all">
+                  Read Protocols →
+                </Link>
               </div>
-              <h3 className="text-xl font-black uppercase tracking-tight text-black dark:text-yellow-200 mb-4">Talk to QUADS AI</h3>
-              <p className="text-[13px] font-bold text-black/70 dark:text-yellow-200/70 mb-6 leading-tight">Get instant answers about escrow, verification, and marketplace rules.</p>
-              <button 
-                onClick={async () => {
-                  // This will redirect to the support chat handled by AI
-                  // We'll use a special path that ChatService handles
-                  window.location.href = '/messages?support=true';
-                }}
-                className="w-full border-2 border-black bg-black text-white py-3 text-[11px] font-black uppercase tracking-widest hover:bg-white hover:text-black transition-all"
-              >
-                Launch Smart Chat
-              </button>
             </div>
           </div>
         </div>

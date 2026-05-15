@@ -85,11 +85,18 @@ const SettingsPage: React.FC = () => {
         { key: 'systemAlerts', label: 'System critical alerts', desc: 'High-priority server and platform health notices' },
         { key: 'messages', label: 'Direct communications', desc: 'Internal system messages and staff inquiries' },
       ]
+    : isSeller
+    ? [
+        { key: 'messages', label: 'Inquiries & Chats', desc: 'When a potential buyer sends you a message' },
+        { key: 'orderUpdates', label: 'Sales & Orders', desc: 'Notifications for new sales and status updates' },
+        { key: 'reviews', label: 'Store Feedback', desc: 'When a buyer leaves a review or rating' },
+        { key: 'promotions', label: 'Seller Growth', desc: 'Tips and promotional opportunities for your shop' },
+      ]
     : [
-        { key: 'messages', label: 'New messages', desc: 'When someone sends you a chat' },
-        { key: 'orderUpdates', label: 'Order updates', desc: 'Status changes on your sales or purchases' },
-        { key: 'reviews', label: 'Marketplace feedback', desc: 'Notifications for new reviews and ratings' },
-        { key: 'promotions', label: 'Deals & offers', desc: 'Promotional offers and featured opportunities' },
+        { key: 'messages', label: 'Seller Replies', desc: 'When a seller responds to your inquiry' },
+        { key: 'orderUpdates', label: 'Order Tracking', desc: 'Status updates on your purchases' },
+        { key: 'reviews', label: 'Review Reminders', desc: 'Nudges to leave feedback for recent purchases' },
+        { key: 'promotions', label: 'Deals & Drops', desc: 'Exclusive offers and new item notifications' },
       ];
 
   const saveNotifPrefs = async () => {
