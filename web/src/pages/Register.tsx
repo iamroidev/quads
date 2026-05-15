@@ -9,32 +9,6 @@ import toast from 'react-hot-toast';
 import { GoogleLogin } from '@react-oauth/google';
 import BrandMark from '../components/layout/BrandMark';
 
-const PROGRAMS = [
-  'Computer Science & Engineering',
-  'Geological Engineering',
-  'Mining Engineering',
-  'Petroleum Engineering',
-  'Electrical & Electronic Engineering',
-  'Mechanical Engineering',
-  'Chemical Engineering',
-  'Mathematics',
-  'Physics',
-  'Environmental Science',
-  'Business Administration',
-  'Accounting & Finance',
-  'Humanities & Social Sciences',
-  'Other',
-];
-
-const ACADEMIC_LEVELS = [
-  '100',
-  '200',
-  '300',
-  '400',
-  'Graduate',
-  'Staff',
-];
-
 const registerSchema = z
   .object({
     name: z.string().min(2, 'Name must be at least 2 characters').max(50, 'Name cannot exceed 50 characters'),
@@ -46,7 +20,7 @@ const registerSchema = z
     studentId: z.string().optional(),
     department: z.string().min(2, 'Please enter your program of study'),
     residenceHall: z.string().min(2, 'Please enter your residence hall/hostel'),
-    currentLevel: z.string().optional(),
+    currentLevel: z.string().min(1, 'Please enter your academic level or status'),
     location: z.string().optional(),
     termsAccepted: z.literal(true, {
       errorMap: () => ({ message: 'You must agree to the Terms and Privacy Policy' }),
@@ -530,13 +504,13 @@ const RegisterPage: React.FC = () => {
                     </div>
                   )}
                   <div>
-                    <label className="block text-[11px] font-black uppercase tracking-[0.2em] opacity-40 mb-3 text-[var(--bulletin-text)]">Academic Level</label>
-                    <select className={selectBase} {...register('currentLevel')}>
-                      <option value="">Select level</option>
-                      {ACADEMIC_LEVELS.map((l) => (
-                        <option key={l} value={l}>{l}</option>
-                      ))}
-                    </select>
+                    <label className="block text-[11px] font-black uppercase tracking-[0.2em] opacity-40 mb-3 text-[var(--bulletin-text)]">Academic Level / Status</label>
+                    <input 
+                      type="text" 
+                      placeholder="e.g. 400, Graduate, or Staff" 
+                      className={fieldBase} 
+                      {...register('currentLevel')} 
+                    />
                     {errors.currentLevel && <p className="mt-2 text-[12px] text-red-600 font-black uppercase tracking-widest">{errors.currentLevel.message}</p>}
                   </div>
                   <div>

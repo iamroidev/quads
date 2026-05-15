@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 import Product, { IProductDocument } from '../models/Product';
-import Category from '../models/Category';
+import Category, { ICategoryDocument } from '../models/Category';
 import User from '../models/User';
 import Order from '../models/Order';
 import ApiError from '../utils/ApiError';
@@ -57,10 +57,9 @@ class ProductService {
           { name: { $regex: `^${part}$`, $options: 'i' } }
         ],
         parent: parentId
-      });
+      }) as ICategoryDocument | null;
 
       if (!category) {
-        // Create new category on the fly
         category = await Category.create({
           name: part,
           slug,
