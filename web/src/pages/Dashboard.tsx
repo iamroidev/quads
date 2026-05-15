@@ -390,30 +390,45 @@ const Dashboard: React.FC = () => {
       ) : (
         <React.Fragment>
           {/* Ghost Collections for Empty State */}
-          <BulletinSection title="Engineer's Toolkit" subtitle="Ghost Collection 01" bgColor="bg-[#e0f2f7] dark:bg-sky-900/10">
+          <BulletinSection title="New Student Essentials" subtitle="Freshers Starter Packs" bgColor="bg-[#fffacd] dark:bg-yellow-900/10">
              <div className="grid gap-6 md:grid-cols-3">
                 <div className="md:col-span-1 p-6 border-4 border-dashed border-black/20 bg-white/50 flex flex-col justify-center">
-                   <p className="text-[12px] font-bold opacity-30 italic leading-relaxed">"Waiting for calculus essentials, drawing boards, and lab gear to be pinned to the board."</p>
+                   <p className="text-[12px] font-bold opacity-30 italic leading-relaxed">"Curating mattresses, buckets, and room essentials for the new intake. Stock arriving from graduating seniors soon."</p>
                 </div>
                 <div className="md:col-span-2 flex gap-4 overflow-x-auto pb-4 scrollbar-hide">
                    {[1, 2, 3, 4].map(n => (
                      <div key={n} className="flex-shrink-0 w-44 border-4 border-dashed border-black/5 bg-black/[0.02] flex items-center justify-center aspect-[3/4]">
-                        <div className="text-[8px] font-black uppercase tracking-[0.3em] opacity-10 rotate-[-90deg]">Reserved for Gear</div>
+                        <div className="text-[8px] font-black uppercase tracking-[0.3em] opacity-10 rotate-[-90deg]">Reserved for Starter Gear</div>
                      </div>
                    ))}
                 </div>
              </div>
           </BulletinSection>
 
-          <BulletinSection title="Hostel Essentials" subtitle="Ghost Collection 02" bgColor="bg-[#fce4ec] dark:bg-red-900/10">
+          <BulletinSection title="Graduating Sales" subtitle="End-of-Study Clear Out" bgColor="bg-[#f0e8f4] dark:bg-purple-900/10">
              <div className="grid gap-6 md:grid-cols-3">
                 <div className="md:col-span-1 p-6 border-4 border-dashed border-black/20 bg-white/50 flex flex-col justify-center">
-                   <p className="text-[12px] font-bold opacity-30 italic leading-relaxed">"Kettles, fans, and room decor are currently being audited. Check back soon for fresh stock."</p>
+                   <p className="text-[12px] font-bold opacity-30 italic leading-relaxed">"High-quality items from our finishing students. Pre-auditing electronics and appliances for this section."</p>
                 </div>
                 <div className="md:col-span-2 flex gap-4 overflow-x-auto pb-4 scrollbar-hide">
                    {[1, 2, 3, 4].map(n => (
                      <div key={n} className="flex-shrink-0 w-44 border-4 border-dashed border-black/5 bg-black/[0.02] flex items-center justify-center aspect-[3/4]">
-                        <div className="text-[8px] font-black uppercase tracking-[0.3em] opacity-10 rotate-[-90deg]">Pending Listing</div>
+                        <div className="text-[8px] font-black uppercase tracking-[0.3em] opacity-10 rotate-[-90deg]">Pending Senior Listing</div>
+                     </div>
+                   ))}
+                </div>
+             </div>
+          </BulletinSection>
+
+          <BulletinSection title="Engineering & Tech" subtitle="Professional Tools" bgColor="bg-[#e0f2f7] dark:bg-sky-900/10">
+             <div className="grid gap-6 md:grid-cols-3">
+                <div className="md:col-span-1 p-6 border-4 border-dashed border-black/20 bg-white/50 flex flex-col justify-center">
+                   <p className="text-[12px] font-bold opacity-30 italic leading-relaxed">"Calipers, drawing boards, and tech gear. Professional equipment for the technical creative."</p>
+                </div>
+                <div className="md:col-span-2 flex gap-4 overflow-x-auto pb-4 scrollbar-hide">
+                   {[1, 2, 3, 4].map(n => (
+                     <div key={n} className="flex-shrink-0 w-44 border-4 border-dashed border-black/5 bg-black/[0.02] flex items-center justify-center aspect-[3/4]">
+                        <div className="text-[8px] font-black uppercase tracking-[0.3em] opacity-10 rotate-[-90deg]">Reserved for Technical Gear</div>
                      </div>
                    ))}
                 </div>
