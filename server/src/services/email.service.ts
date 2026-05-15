@@ -95,31 +95,42 @@ class EmailService {
 
   // ─── Templates ─────────────────────────────────────
 
-  async sendWelcomeEmail(to: string, name: string): Promise<boolean> {
-    const subject = 'Welcome to QUADS — Your Campus Marketplace 🎉';
+  async sendWelcomeEmail(to: string, name: string, role: string = 'buyer'): Promise<boolean> {
+    const subject = `Welcome to QUADS — You're ready to ${role === 'seller' ? 'Sell' : 'Shop'}! 🎉`;
+    
+    const roleSpecificContent = role === 'seller' 
+      ? `
+        <div style="background: #fffacd; padding: 20px; border-radius: 8px; border: 2px solid #000; margin: 20px 0;">
+          <h3 style="margin-top: 0; text-transform: uppercase; font-size: 14px;">🚀 Seller Quickstart</h3>
+          <p style="margin-bottom: 0;">You've joined as a <strong>Seller</strong>. Start by creating your first listing to reach students across the UMaT campus!</p>
+        </div>
+        <ul>
+          <li>📦 <strong>List Items</strong> — Upload photos and set your price</li>
+          <li>📈 <strong>Analytics</strong> — Track your shop performance</li>
+          <li>💸 <strong>Earnings</strong> — Get paid directly via MoMo or Bank</li>
+        </ul>
+      `
+      : `
+        <p>You're now part of <strong>QUADS</strong> — the safest and smartest way to buy and sell on the UMaT campus.</p>
+        <ul>
+          <li>🛍️ <strong>Browse</strong> — Discover items from verified campus sellers</li>
+          <li>💬 <strong>Chat</strong> — Negotiate prices and arrange meetups securely</li>
+          <li>🔒 <strong>Pay safely</strong> — Escrow-protected payments via Paystack</li>
+        </ul>
+      `;
+
     const body = `
       <h2>Welcome aboard, ${name}!</h2>
-      <p>You're now part of <strong>QUADS</strong> — the safest and smartest way to buy and sell on the UMaT campus.</p>
+      ${roleSpecificContent}
       
-      <div class="divider"></div>
-      
-      <p><strong>Here's what you can do right now:</strong></p>
-      <ul>
-        <li>🛍️ <strong>Browse</strong> — Discover items from verified campus sellers</li>
-        <li>📦 <strong>Sell</strong> — List your items and reach thousands of students</li>
-        <li>💬 <strong>Chat</strong> — Negotiate prices and arrange meetups securely</li>
-        <li>🔒 <strong>Pay safely</strong> — Escrow-protected payments via Paystack</li>
-      </ul>
-      
-      <div style="text-align: center;">
-        <a href="${process.env.CLIENT_URL || 'https://quadsmarket.tech'}/explore" class="btn btn-primary">Start Exploring</a>
+      <div style="text-align: center; margin-top: 30px;">
+        <a href="${process.env.CLIENT_URL || 'https://quadsmarket.tech'}/dashboard" class="btn btn-primary">Go to Dashboard</a>
       </div>
       
       <div class="divider"></div>
       
       <p style="font-size: 13px; color: #6b7280;">
-        💡 <strong>Pro tip:</strong> Verified sellers with the <span class="highlight">🏛️ Scholar badge</span> get more visibility. 
-        Complete your profile to build trust!
+        💡 <strong>Pro tip:</strong> Always meet in public "Safe Zones" on campus for exchanges.
       </p>
     `;
     return this.sendEmail({ to, subject, html: this.wrapEmail(body) });

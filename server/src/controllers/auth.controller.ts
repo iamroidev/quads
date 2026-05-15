@@ -34,9 +34,9 @@ export const register = async (
       location,
     });
 
-    // Send Welcome Email asynchronously
-    emailService.sendWelcomeEmail(user.email, user.name).catch((err) => {
-      console.error('Failed to send welcome email:', err);
+    // Send welcome email
+    emailService.sendWelcomeEmail(user.email, user.name, user.role).catch((err) => {
+      console.error('Welcome email failed:', err);
     });
 
     // Set cookie
@@ -480,6 +480,13 @@ export const googleLogin = async (
     growthService.captureEvent(user._id.toString(), isNewUser ? 'signup' : 'login', { method: 'google' }).catch((err) => {
       console.error('[GoogleLogin] Analytics capture failed:', err);
     });
+
+    // Send welcome email if new user
+    if (isNewUser) {
+      emailService.sendWelcomeEmail(user.email, user.name, user.role).catch((err) => {
+        console.error('[GoogleLogin] Welcome email failed:', err);
+      });
+    }
   } catch (error: any) {
     console.error('[GoogleLogin] CRITICAL ERROR:', error.message, error.stack);
     next(error);
