@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { BulletinLayout, BulletinSection } from '../components/layout/BulletinLayout';
-import { productService } from '../services/product.service';
+import productService from '../services/product.service';
 import { LoadingSpinner } from '../components/ui';
 import { Star, Verified, ShoppingBag, ArrowRight, Search, Trophy } from 'lucide-react';
 
@@ -12,7 +12,7 @@ const SellersPage: React.FC = () => {
 
   useEffect(() => {
     productService.getTopSellers(20)
-      .then(res => {
+      .then((res: any) => {
         if (res.success) setSellers(res.data);
       })
       .finally(() => setLoading(false));
