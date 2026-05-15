@@ -181,7 +181,7 @@ export const BulletinLayout: React.FC<BulletinLayoutProps> = ({
                       <div className="fixed inset-0 z-[-1]" onClick={() => setIsProfileOpen(false)} />
                       <div className="absolute right-0 mt-3 w-64 border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] shadow-[8px_8px_0_0_var(--bulletin-shadow)] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-100">
                         <div className="px-4 py-3 border-b-2 border-[var(--bulletin-border)] bg-[#fffacd] dark:bg-yellow-900/20">
-                           <div className="text-[8px] font-black uppercase tracking-widest opacity-40 text-black dark:text-white">Active Perspective</div>
+                           <div className="text-[8px] font-black uppercase tracking-widest opacity-40 dark:opacity-70 text-black dark:text-white">Active Perspective</div>
                            <div className="text-[10px] font-black uppercase tracking-widest flex items-center gap-2 text-black dark:text-white">
                              <div className={`h-2 w-2 rounded-full ${user?.role === 'seller' ? 'bg-[#ff6b6b]' : 'bg-sky-500'} animate-pulse`} />
                              {user?.role?.toUpperCase()} VIEW

@@ -113,17 +113,17 @@ const HomePage: React.FC = () => {
           <div className="relative lg:absolute lg:top-20 lg:right-20 flex flex-col sm:flex-row lg:flex-col gap-4 lg:gap-8 z-10 px-4 md:px-8 pb-8 lg:pb-0 lg:max-w-[280px]">
             <div className="border-4 border-black bg-white dark:bg-[#eee] p-4 md:p-6 shadow-[4px_4px_0_0_#ff6b6b] md:shadow-[8px_8px_0_0_#ff6b6b] lg:ml-auto w-full sm:w-1/3 lg:w-full" style={{ transform: 'rotate(1.2deg)' }}>
               <div className="text-2xl md:text-4xl font-black text-[#ff6b6b] mb-1">0%</div>
-              <div className="text-[8px] md:text-[10px] font-black uppercase tracking-widest opacity-40 text-black">Trading Fees</div>
+              <div className="text-[8px] md:text-[10px] font-black uppercase tracking-widest opacity-40 dark:opacity-70 text-black">Trading Fees</div>
               <div className="text-[10px] md:text-[12px] font-bold text-black mt-1">Free for every student.</div>
             </div>
             <div className="border-4 border-black bg-[#e0f2f7] dark:bg-[#cde9f0] p-4 md:p-6 shadow-[4px_4px_0_0_var(--bulletin-shadow)] md:shadow-[8px_8px_0_0_var(--bulletin-shadow)] w-full sm:w-1/3 lg:w-full" style={{ transform: 'rotate(-2.5deg)' }}>
               <div className="text-2xl md:text-4xl font-black text-black mb-1">{totalProducts || '...'}</div>
-              <div className="text-[8px] md:text-[10px] font-black uppercase tracking-widest opacity-40 text-black">Listings</div>
+              <div className="text-[8px] md:text-[10px] font-black uppercase tracking-widest opacity-40 dark:opacity-70 text-black">Listings</div>
               <div className="text-[10px] md:text-[12px] font-bold text-black mt-1">Live campus inventory.</div>
             </div>
             <div className="border-4 border-black bg-[#fce4ec] dark:bg-[#f8d0de] p-4 md:p-6 shadow-[4px_4px_0_0_var(--bulletin-shadow)] md:shadow-[8px_8px_0_0_var(--bulletin-shadow)] w-full sm:w-1/3 lg:w-full" style={{ transform: 'rotate(0.5deg)' }}>
               <div className="text-2xl md:text-4xl font-black text-black mb-1">{totalSellers || '...'}</div>
-              <div className="text-[8px] md:text-[10px] font-black uppercase tracking-widest opacity-40 text-black">Sellers</div>
+              <div className="text-[8px] md:text-[10px] font-black uppercase tracking-widest opacity-40 dark:opacity-70 text-black">Sellers</div>
               <div className="text-[10px] md:text-[12px] font-bold text-black mt-1">Verified UMaT students.</div>
             </div>
           </div>
@@ -141,7 +141,7 @@ const HomePage: React.FC = () => {
             {recentProducts.map(p => <ProductCard key={p._id} product={p} />)}
           </div>
         ) : (
-          <div className="text-center py-10 opacity-30 uppercase font-black tracking-widest">No listings found</div>
+          <div className="text-center py-10 opacity-30 dark:opacity-60 uppercase font-black tracking-widest">No listings found</div>
         )}
         {!loading && recentProducts.length > 0 && (
            <div className="mt-12 text-center">
@@ -235,7 +235,7 @@ const HomePage: React.FC = () => {
             <div className="flex-1">
               <div className="text-[10px] font-black uppercase tracking-[0.3em] text-[#ff6b6b] mb-6">Partner Opportunity</div>
               <h2 className="text-4xl md:text-5xl font-black uppercase tracking-tighter text-[var(--bulletin-text)] leading-none mb-6">Your Store.<br />Your Rules.</h2>
-              <p className="text-[15px] font-bold opacity-60 text-[var(--bulletin-text)] max-w-sm mb-8">Ready to turn your extra items into cash? Post a listing in under 2 minutes and reach the entire campus community.</p>
+              <p className="text-[15px] font-bold opacity-60 dark:opacity-80 text-[var(--bulletin-text)] max-w-sm mb-8">Ready to turn your extra items into cash? Post a listing in under 2 minutes and reach the entire campus community.</p>
               {!isAuthenticated ? (
                 <Link to="/register" className="inline-block border-4 border-[#ff6b6b] bg-transparent px-8 py-4 text-[13px] font-black uppercase tracking-widest text-[#ff6b6b] shadow-[6px_6px_0_0_#ff6b6b] hover:-translate-y-1 transition-all">
                   Start Selling Now →

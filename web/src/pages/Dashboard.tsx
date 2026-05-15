@@ -117,19 +117,19 @@ const Dashboard: React.FC = () => {
         <BulletinSection bgColor="bg-[#faf8f5] dark:bg-black/20" title="Performance" subtitle="Real-time">
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <div className="border border-black dark:border-white/20 bg-[var(--bulletin-card)] p-6 shadow-[4px_4px_0_0_var(--bulletin-shadow)]">
-              <div className="text-[10px] uppercase font-bold opacity-40 mb-1">Active Listings</div>
+              <div className="text-[10px] uppercase font-bold opacity-40 dark:opacity-70 mb-1">Active Listings</div>
               <div className="text-3xl font-black">{loadingStats ? '...' : (stats?.activeListings ?? 0)}</div>
             </div>
             <div className="border border-black dark:border-white/20 bg-[#fffacd] dark:bg-yellow-900/20 p-6 shadow-[4px_4px_0_0_var(--bulletin-shadow)]">
-              <div className="text-[10px] uppercase font-bold opacity-40 mb-1">Rating</div>
+              <div className="text-[10px] uppercase font-bold opacity-40 dark:opacity-70 mb-1">Rating</div>
               <div className="text-3xl font-black">{loadingStats ? '...' : (stats?.rating ? `${stats.rating}/5` : 'N/A')}</div>
             </div>
             <div className="border border-black dark:border-white/20 bg-[#e0f2f7] dark:bg-sky-900/20 p-6 shadow-[4px_4px_0_0_var(--bulletin-shadow)]">
-              <div className="text-[10px] uppercase font-bold opacity-40 mb-1">Open Orders</div>
+              <div className="text-[10px] uppercase font-bold opacity-40 dark:opacity-70 mb-1">Open Orders</div>
               <div className="text-3xl font-black">{loadingStats ? '...' : (stats?.totalOrders ?? 0)}</div>
             </div>
             <Link to="/seller/analytics" className="border border-black dark:border-white/20 bg-[#fce4ec] dark:bg-pink-900/20 p-6 shadow-[4px_4px_0_0_var(--bulletin-shadow)] hover:-translate-y-1 transition-transform">
-              <div className="text-[10px] uppercase font-bold opacity-40 mb-1">Total Sales</div>
+              <div className="text-[10px] uppercase font-bold opacity-40 dark:opacity-70 mb-1">Total Sales</div>
               <div className="text-3xl font-black">{loadingStats ? '...' : (stats?.totalSales ?? 0)}</div>
             </Link>
           </div>
@@ -146,7 +146,7 @@ const Dashboard: React.FC = () => {
             </div>
           ) : myListings.length === 0 ? (
             <div className="border-2 border-dashed border-black dark:border-white/10 p-12 text-center">
-              <div className="text-[10px] uppercase font-bold opacity-40 mb-2">No active listings</div>
+              <div className="text-[10px] uppercase font-bold opacity-40 dark:opacity-70 mb-2">No active listings</div>
               <Link to="/sell" className="inline-block border border-black dark:border-white bg-black dark:bg-white text-white dark:text-black px-6 py-3 text-[11px] font-bold uppercase">Create your first listing</Link>
             </div>
           ) : (
@@ -182,15 +182,15 @@ const Dashboard: React.FC = () => {
           <div className="grid gap-4 md:grid-cols-3">
             <Link to="/seller/analytics" className="border border-black dark:border-white/20 bg-[var(--bulletin-card)] p-5 hover:shadow-[4px_4px_0_0_var(--bulletin-shadow)] transition-all">
               <div className="font-bold text-sm mb-1 uppercase tracking-tighter italic underline">Campaigns</div>
-              <p className="text-[10px] opacity-60 leading-tight">Schedule featured listing boosts to reach more students.</p>
+              <p className="text-[10px] opacity-60 dark:opacity-80 leading-tight">Schedule featured listing boosts to reach more students.</p>
             </Link>
             <Link to="/seller/analytics" className="border border-black dark:border-white/20 bg-[var(--bulletin-card)] p-5 hover:shadow-[4px_4px_0_0_var(--bulletin-shadow)] transition-all">
               <div className="font-bold text-sm mb-1 uppercase tracking-tighter italic underline">Coupons</div>
-              <p className="text-[10px] opacity-60 leading-tight">Create discount codes for your loyal buyers.</p>
+              <p className="text-[10px] opacity-60 dark:opacity-80 leading-tight">Create discount codes for your loyal buyers.</p>
             </Link>
             <Link to="/seller/analytics" className="border border-black dark:border-white/20 bg-[var(--bulletin-card)] p-5 hover:shadow-[4px_4px_0_0_var(--bulletin-shadow)] transition-all">
               <div className="font-bold text-sm mb-1 uppercase tracking-tighter italic underline">Bundles</div>
-              <p className="text-[10px] opacity-60 leading-tight">Offer price drops when buyers purchase multiple items.</p>
+              <p className="text-[10px] opacity-60 dark:opacity-80 leading-tight">Offer price drops when buyers purchase multiple items.</p>
             </Link>
           </div>
         </BulletinSection>
