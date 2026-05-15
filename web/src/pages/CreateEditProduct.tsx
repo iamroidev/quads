@@ -53,6 +53,7 @@ const CreateEditProduct: React.FC = () => {
     !user?.emailVerified &&
     !user?.phoneVerified;
 
+  const [currentStep, setCurrentStep] = useState(1);
   const [categories, setCategories] = useState<Category[]>([]);
   const [images, setImages] = useState<File[]>([]);
   const [existingImages, setExistingImages] = useState<{ url: string; publicId: string }[]>([]);
@@ -64,11 +65,14 @@ const CreateEditProduct: React.FC = () => {
   const {
     register,
     handleSubmit,
-    formState: { errors },
+    formState: { errors, isValid },
     reset,
     watch,
+    trigger,
+    setValue,
   } = useForm<ProductFormData>({
     resolver: zodResolver(productSchema),
+    mode: 'onChange',
     defaultValues: {
       deliveryOption: 'pickup',
       status: 'active',
@@ -76,6 +80,7 @@ const CreateEditProduct: React.FC = () => {
   });
 
   const deliveryOption = watch('deliveryOption');
+  const watchedStatus = watch('status');
 
   useEffect(() => {
     categoryService.getCategories().then((res) => {
@@ -101,7 +106,7 @@ const CreateEditProduct: React.FC = () => {
             deliveryOption: p.deliveryOption,
             pickupLocation: p.pickupLocation,
             tags: p.tags.join(', '),
-            status: p.status === 'active' || p.status === 'draft' ? p.status : 'active',
+            status: (p.status === 'active' || p.status === 'draft') ? p.status as 'active' | 'draft' : 'active',
             stock: p.stock,
           });
           setExistingImages(p.images);
@@ -126,13 +131,26 @@ const CreateEditProduct: React.FC = () => {
       .catch(() => {});
   }, [id, isEdit]);
 
-  const onSubmit = async (data: ProductFormData) => {
-    const totalImages = existingImages.length + images.length;
-    if (totalImages === 0 && !isEdit) {
-      toast.error('Please add at least one image');
-      return;
+  const nextStep = async () => {
+    let fieldsToValidate: any[] = [];
+    if (currentStep === 1) {
+      fieldsToValidate = ['title'];
+      const totalImages = existingImages.length + images.length;
+      if (totalImages === 0 && !isEdit) {
+        toast.error('Add at least one photo');
+        return;
+      }
+    } else if (currentStep === 2) {
+      fieldsToValidate = ['description', 'category', 'condition'];
     }
 
+    const result = await trigger(fieldsToValidate);
+    if (result) setCurrentStep(prev => prev + 1);
+  };
+
+  const prevStep = () => setCurrentStep(prev => prev - 1);
+
+  const onSubmit = async (data: ProductFormData) => {
     setSubmitting(true);
     try {
       if (isEdit && removedImageIds.length > 0) {
@@ -143,38 +161,27 @@ const CreateEditProduct: React.FC = () => {
         ? data.tags.split(',').map((t) => t.trim()).filter(Boolean)
         : [];
 
+      const payload = {
+        title: data.title,
+        description: data.description,
+        price: data.price,
+        originalPrice: data.originalPrice,
+        category: data.category,
+        condition: data.condition,
+        deliveryOption: data.deliveryOption,
+        pickupLocation: data.pickupLocation,
+        tags,
+        status: data.status,
+        stock: data.stock,
+        images: images.length > 0 ? images : undefined,
+      };
+
       if (isEdit) {
-        await productService.updateProduct(id!, {
-          title: data.title,
-          description: data.description,
-          price: data.price,
-          originalPrice: data.originalPrice,
-          category: data.category,
-          condition: data.condition,
-          deliveryOption: data.deliveryOption,
-          pickupLocation: data.pickupLocation,
-          tags,
-          status: data.status,
-          stock: data.stock,
-          images: images.length > 0 ? images : undefined,
-        });
-        toast.success('Product updated successfully!');
+        await productService.updateProduct(id!, payload);
+        toast.success(data.status === 'draft' ? 'Draft updated!' : 'Product updated!');
       } else {
-        await productService.createProduct({
-          title: data.title,
-          description: data.description,
-          price: data.price,
-          originalPrice: data.originalPrice,
-          category: data.category,
-          condition: data.condition,
-          deliveryOption: data.deliveryOption,
-          pickupLocation: data.pickupLocation,
-          tags,
-          status: data.status,
-          stock: data.stock,
-          images: images.length > 0 ? images : undefined,
-        });
-        toast.success('Product listed successfully!');
+        await productService.createProduct(payload);
+        toast.success(data.status === 'draft' ? 'Listing saved as draft!' : 'Product listed successfully!');
       }
 
       navigate('/my-listings');
@@ -186,22 +193,35 @@ const CreateEditProduct: React.FC = () => {
     }
   };
 
+  const handleSaveDraft = async () => {
+    setValue('status', 'draft');
+    // For drafts, we relax some validations if needed, but here we just try to submit
+    const data = watch();
+    if (!data.title) {
+      toast.error('Title is required even for drafts');
+      return;
+    }
+    handleSubmit(onSubmit)();
+  };
+
   const handleRemoveExistingImage = (publicId: string) => {
     setExistingImages((prev) => prev.filter((img) => img.publicId !== publicId));
     setRemovedImageIds((prev) => [...prev, publicId]);
   };
 
   if (loadingProduct) {
-    return <BulletinLayout title="Loading..." subtitle={isEdit ? 'Edit' : 'New'} section="14">
-      <BulletinSection bgColor="bg-[var(--bulletin-bg)]">
-        <div className="flex items-center justify-center py-20">
-          <div className="animate-spin h-8 w-8 border-b-2 border-[var(--bulletin-border)]" />
-        </div>
-      </BulletinSection>
-    </BulletinLayout>;
+    return (
+      <BulletinLayout title="Loading..." subtitle={isEdit ? 'Edit' : 'New'} section="14">
+        <BulletinSection bgColor="bg-[var(--bulletin-bg)]">
+          <div className="flex items-center justify-center py-20">
+            <div className="animate-spin h-8 w-8 border-b-2 border-[var(--bulletin-border)]" />
+          </div>
+        </BulletinSection>
+      </BulletinLayout>
+    );
   }
 
-  // Verification gate — shown before the form for new listings only
+  // Verification gate
   if (isUnverifiedSeller) {
     return (
       <BulletinLayout title="Verification Required" subtitle="Seller" section="14">
@@ -215,21 +235,12 @@ const CreateEditProduct: React.FC = () => {
             <p className="text-[13px] opacity-60 mb-2">
               Sellers must verify their <strong>email</strong> or <strong>phone</strong> before creating listings.
             </p>
-            <p className="text-[12px] opacity-50 mb-8">
-              Use your <strong>@st.umat.edu.gh</strong> email to confirm you're a UMaT student, or verify your phone via SMS.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+            <div className="flex flex-col sm:flex-row gap-3 justify-center mt-8">
               <button
                 onClick={() => navigate('/verification')}
                 className="border border-[var(--bulletin-border)] bg-[var(--bulletin-text)] px-6 py-3 text-[11px] font-bold uppercase text-[var(--bulletin-bg)] shadow-[3px_3px_0_0_var(--bulletin-shadow)] hover:bg-[var(--bulletin-card)] hover:text-[var(--bulletin-text)] transition-colors"
               >
                 Verify My Account
-              </button>
-              <button
-                onClick={() => navigate(-1)}
-                className="border border-[var(--bulletin-border)] bg-[var(--bulletin-card)] px-6 py-3 text-[11px] font-bold uppercase shadow-[3px_3px_0_0_var(--bulletin-shadow)] hover:shadow-[4px_4px_0_0_var(--bulletin-shadow)] transition-all"
-              >
-                Go Back
               </button>
             </div>
           </div>
@@ -240,12 +251,12 @@ const CreateEditProduct: React.FC = () => {
 
   return (
     <BulletinLayout
-      title={isEdit ? 'Edit Listing' : 'Create Listing'}
-      subtitle={isEdit ? 'Edit listing' : 'New listing'}
+      title={isEdit ? 'Edit listing' : 'New listing'}
+      subtitle={isEdit ? 'Update details' : 'pin to board'}
       section="14"
     >
       <div className="border-b border-[var(--bulletin-border)] bg-[var(--bulletin-bg)] p-4 md:p-6">
-        <div className="mx-auto max-w-[1400px]">
+        <div className="mx-auto max-w-[1400px] flex justify-between items-center">
           <button
             onClick={() => navigate(-1)}
             className="flex items-center gap-1 text-[12px] font-bold hover:underline"
@@ -253,248 +264,243 @@ const CreateEditProduct: React.FC = () => {
             <ArrowLeft className="h-4 w-4" />
             Back
           </button>
+          
+          <div className="flex items-center gap-4">
+            {[1, 2, 3].map(step => (
+              <div key={step} className="flex items-center gap-2">
+                <div className={`h-6 w-6 border-2 border-black flex items-center justify-center text-[10px] font-black ${currentStep === step ? 'bg-black text-white' : currentStep > step ? 'bg-[#ff6b6b] text-white' : 'bg-white text-black'}`}>
+                  {step}
+                </div>
+                {step < 3 && <div className="h-0.5 w-4 bg-black/10" />}
+              </div>
+            ))}
+          </div>
         </div>
       </div>
 
       <BulletinSection bgColor="bg-[var(--bulletin-bg)]">
-        <form onSubmit={handleSubmit(onSubmit)} className="max-w-2xl mx-auto space-y-8">
-          {/* Images */}
-          <BulletinCard rotation={-0.3} bgColor="bg-[var(--bulletin-card)]">
-            <div className={labelBase}>Photos</div>
-            <div className="mt-3">
-              <ImageUpload
-                images={images}
-                existingImages={existingImages}
-                onChange={setImages}
-                onRemoveExisting={handleRemoveExistingImage}
-                maxImages={5}
-              />
+        <form onSubmit={handleSubmit(onSubmit)} className="max-w-2xl mx-auto">
+          
+          {/* STEP 1: IDENTITY & VISUALS */}
+          {currentStep === 1 && (
+            <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+               <div className="border-l-4 border-[#ff6b6b] pl-4 mb-8">
+                 <h2 className="text-3xl font-black uppercase tracking-tighter">Step 1: Visual Identity</h2>
+                 <p className="text-[12px] font-bold opacity-50 uppercase">Show them what you've got</p>
+               </div>
+
+              <BulletinCard rotation={-0.5} bgColor="bg-[var(--bulletin-card)]">
+                <div className={labelBase}>Item Gallery (Max 5)</div>
+                <div className="mt-3">
+                  <ImageUpload
+                    images={images}
+                    existingImages={existingImages}
+                    onChange={setImages}
+                    onRemoveExisting={handleRemoveExistingImage}
+                    maxImages={5}
+                  />
+                </div>
+              </BulletinCard>
+
+              <BulletinCard rotation={0.3} bgColor="bg-[var(--bulletin-card)]">
+                <label className={labelBase}>Listing Title</label>
+                <input
+                  type="text"
+                  placeholder="e.g., iPhone 15 Pro Max — MINT CONDITION"
+                  className={`${fieldBase} mt-2 text-lg py-4 ${errors.title ? fieldError : ''}`}
+                  {...register('title')}
+                />
+                {errors.title && <p className="mt-1 text-[11px] text-red-600 font-bold">{errors.title.message}</p>}
+              </BulletinCard>
+
+              <div className="flex justify-end pt-4">
+                <button
+                  type="button"
+                  onClick={nextStep}
+                  className="bg-black text-white px-10 py-4 text-[12px] font-black uppercase tracking-widest hover:bg-[#ff6b6b] transition-all shadow-[8px_8px_0_0_rgba(0,0,0,0.2)] active:shadow-none active:translate-x-1 active:translate-y-1"
+                >
+                  Next: The Details →
+                </button>
+              </div>
             </div>
-          </BulletinCard>
-
-          {/* Title */}
-          <BulletinCard rotation={0.3} bgColor="bg-[var(--bulletin-card)]">
-            <label className={labelBase}>Title</label>
-            <input
-              type="text"
-              placeholder="e.g., Samsung Galaxy S24 Ultra — 256GB"
-              className={`${fieldBase} mt-2 ${errors.title ? fieldError : ''}`}
-              {...register('title')}
-            />
-            {errors.title && <p className="mt-1 text-[11px] text-red-600 font-bold">{errors.title.message}</p>}
-          </BulletinCard>
-
-          {/* Description */}
-          <BulletinCard rotation={-0.3} bgColor="bg-[var(--bulletin-card)]">
-            <label className={labelBase}>Description</label>
-            <textarea
-              placeholder="Describe your item — condition details, why you're selling, any defects, etc."
-              rows={5}
-              className={`${fieldBase} mt-2 resize-none ${errors.description ? fieldError : ''}`}
-              {...register('description')}
-            />
-            {errors.description && <p className="mt-1 text-[11px] text-red-600 font-bold">{errors.description.message}</p>}
-          </BulletinCard>
-
-          {/* Price + Original Price + Condition + Stock */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <BulletinCard rotation={0.3} bgColor="bg-[var(--bulletin-card)]">
-              <label className={labelBase}>Discounted Price (GHS)</label>
-              <input
-                type="number"
-                step="0.01"
-                min="0.5"
-                max="100000"
-                placeholder="0.00"
-                className={`${fieldBase} mt-2 ${errors.price ? fieldError : ''}`}
-                {...register('price', { valueAsNumber: true })}
-              />
-              {errors.price && <p className="mt-1 text-[11px] text-red-600 font-bold">{errors.price.message}</p>}
-            </BulletinCard>
-
-            <BulletinCard rotation={-0.3} bgColor="bg-[var(--bulletin-card)]">
-              <label className={labelBase}>Original Price (GHS)</label>
-              <input
-                type="number"
-                step="0.01"
-                min="0.5"
-                max="100000"
-                placeholder="Crossed out if lower than price"
-                className={`${fieldBase} mt-2 ${errors.originalPrice ? fieldError : ''}`}
-                {...register('originalPrice', { valueAsNumber: true })}
-              />
-              {errors.originalPrice && <p className="mt-1 text-[11px] text-red-600 font-bold">{errors.originalPrice.message}</p>}
-            </BulletinCard>
-
-            <BulletinCard rotation={-0.3} bgColor="bg-[var(--bulletin-card)]">
-              <label className={labelBase}>Condition</label>
-              <select className={`${fieldBase} mt-2 ${errors.condition ? fieldError : ''}`} {...register('condition')}>
-                <option value="">Select condition</option>
-                <option value="new">Brand New</option>
-                <option value="like-new">Like New</option>
-                <option value="good">Good</option>
-                <option value="fair">Fair</option>
-                <option value="poor">Poor</option>
-              </select>
-              {errors.condition && <p className="mt-1 text-[11px] text-red-600 font-bold">{errors.condition.message}</p>}
-            </BulletinCard>
-
-            <BulletinCard rotation={0.3} bgColor="bg-[var(--bulletin-card)]">
-              <label className={labelBase}>Stock Quantity</label>
-              <input
-                type="number"
-                min="1"
-                max="10000"
-                placeholder="1"
-                className={`${fieldBase} mt-2 ${errors.stock ? fieldError : ''}`}
-                {...register('stock', { valueAsNumber: true })}
-              />
-              {errors.stock && <p className="mt-1 text-[11px] text-red-600 font-bold">{errors.stock.message}</p>}
-            </BulletinCard>
-          </div>
-
-          {/* Pricing insights */}
-          {pricingInsights && (
-            <BulletinCard rotation={0} bgColor="bg-[#fffacd] dark:bg-yellow-900/20">
-              <div className="text-[10px] font-bold uppercase tracking-wider opacity-60">Smart pricing assistant</div>
-              <div className="mt-2 text-[12px]">
-                Recommended band: <span className="font-bold">GHS {pricingInsights.recommendedMin}</span> - <span className="font-bold">GHS {pricingInsights.recommendedMax}</span>
-              </div>
-              <div className="mt-1 text-[11px] opacity-70">
-                Sell-through: {Math.round((pricingInsights.sellThroughProbability || 0) * 100)}% · Confidence: {(pricingInsights.confidence || 'low').toUpperCase()}
-              </div>
-            </BulletinCard>
           )}
 
-          {/* Category */}
-          <BulletinCard rotation={0.3} bgColor="bg-[var(--bulletin-card)]">
-            <label className={labelBase}>Category</label>
-            <div className="relative group">
-              <div className="flex gap-2 mt-2">
-                <div className="relative flex-1">
+          {/* STEP 2: THE DETAILS */}
+          {currentStep === 2 && (
+            <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-500">
+               <div className="border-l-4 border-[#ff6b6b] pl-4 mb-8">
+                 <h2 className="text-3xl font-black uppercase tracking-tighter">Step 2: Specifications</h2>
+                 <p className="text-[12px] font-bold opacity-50 uppercase">The nitty-gritty details</p>
+               </div>
+
+              <BulletinCard rotation={-0.3} bgColor="bg-[var(--bulletin-card)]">
+                <label className={labelBase}>Detailed Description</label>
+                <textarea
+                  placeholder="Explain why this is a great deal..."
+                  rows={6}
+                  className={`${fieldBase} mt-2 resize-none ${errors.description ? fieldError : ''}`}
+                  {...register('description')}
+                />
+                {errors.description && <p className="mt-1 text-[11px] text-red-600 font-bold">{errors.description.message}</p>}
+              </BulletinCard>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <BulletinCard rotation={0.2} bgColor="bg-[var(--bulletin-card)]">
+                  <label className={labelBase}>Category</label>
                   <input
                     type="text"
-                    placeholder="Search or type category..."
-                    className={`${fieldBase} ${errors.category ? fieldError : ''}`}
+                    placeholder="Search category..."
+                    className={`${fieldBase} mt-2 ${errors.category ? fieldError : ''}`}
                     {...register('category')}
                     autoComplete="off"
                     list="category-suggestions"
                   />
                   <datalist id="category-suggestions">
                     {categories.map((cat) => (
-                      <option key={cat._id} value={cat.name}>
-                        {cat.name}
-                      </option>
+                      <option key={cat._id} value={cat.name} />
                     ))}
                   </datalist>
-                </div>
-              </div>
-              <div className="mt-2 flex flex-wrap gap-2">
-                {categories.slice(0, 6).map((cat) => (
-                  <button
-                    key={cat._id}
-                    type="button"
-                    onClick={() => reset({ ...watch(), category: cat.name })}
-                    className="px-2 py-1 border-2 border-black/10 bg-black/5 text-[9px] font-black uppercase tracking-widest hover:bg-[#ff6b6b] hover:text-white transition-all"
-                  >
-                    {cat.name}
-                  </button>
-                ))}
-              </div>
-            </div>
-            {errors.category && <p className="mt-1 text-[11px] text-red-600 font-bold">{errors.category.message}</p>}
-          </BulletinCard>
+                  {errors.category && <p className="mt-1 text-[11px] text-red-600 font-bold">{errors.category.message}</p>}
+                </BulletinCard>
 
-          {/* Delivery + Pickup */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <BulletinCard rotation={-0.3} bgColor="bg-[var(--bulletin-card)]">
-              <label className={labelBase}>Delivery Option</label>
-              <select className={`${fieldBase} mt-2`} {...register('deliveryOption')}>
-                <option value="pickup">Campus Pickup</option>
-                <option value="delivery">Hostel Delivery</option>
-                <option value="both">Both Available</option>
-              </select>
-            </BulletinCard>
+                <BulletinCard rotation={-0.2} bgColor="bg-[var(--bulletin-card)]">
+                  <label className={labelBase}>Condition</label>
+                  <select className={`${fieldBase} mt-2 ${errors.condition ? fieldError : ''}`} {...register('condition')}>
+                    <option value="">Select condition</option>
+                    <option value="new">Brand New</option>
+                    <option value="like-new">Like New</option>
+                    <option value="good">Good</option>
+                    <option value="fair">Fair</option>
+                    <option value="poor">Poor</option>
+                  </select>
+                  {errors.condition && <p className="mt-1 text-[11px] text-red-600 font-bold">{errors.condition.message}</p>}
+                </BulletinCard>
+              </div>
 
-            {(deliveryOption === 'pickup' || deliveryOption === 'both') && (
               <BulletinCard rotation={0.3} bgColor="bg-[var(--bulletin-card)]">
-                <label className={labelBase}>Meetup/Pickup Location</label>
-                <div className="relative mt-2">
-                  <input
-                    type="text"
-                    placeholder="e.g. Library Fountain or Unity Hall"
-                    className={`${fieldBase} ${errors.pickupLocation ? fieldError : ''}`}
-                    {...register('pickupLocation')}
-                    autoComplete="off"
-                    list="location-suggestions"
-                  />
-                  <datalist id="location-suggestions">
-                    {CAMPUS_LOCATIONS.map((loc) => (
-                      <option key={loc} value={loc} />
-                    ))}
-                  </datalist>
-                </div>
-                <div className="mt-2 text-[9px] opacity-50 uppercase font-bold tracking-widest">
-                  Tip: Be as specific as possible for faster sales.
-                </div>
+                <label className={labelBase}>Search Tags (Optional)</label>
+                <input
+                  type="text"
+                  placeholder="samsung, phone, laptop..."
+                  className={`${fieldBase} mt-2`}
+                  {...register('tags')}
+                />
               </BulletinCard>
-            )}
-          </div>
 
-          {/* Tags */}
-          <BulletinCard rotation={-0.3} bgColor="bg-[var(--bulletin-card)]">
-            <label className={labelBase}>Tags</label>
-            <input
-              type="text"
-              placeholder="e.g., samsung, phone, electronics"
-              className={`${fieldBase} mt-2`}
-              {...register('tags')}
-            />
-            <div className="mt-1 text-[10px] opacity-50">Comma-separated — max 10</div>
-          </BulletinCard>
-
-          {/* Status */}
-          <BulletinCard rotation={0.3} bgColor="bg-[var(--bulletin-card)]">
-            <div className={labelBase}>Listing Status</div>
-            <div className="flex gap-6 mt-3">
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="radio"
-                  value="active"
-                  {...register('status')}
-                  className="h-4 w-4 accent-[var(--bulletin-text)]"
-                />
-                <span className="text-[12px] font-bold">Publish Now</span>
-              </label>
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="radio"
-                  value="draft"
-                  {...register('status')}
-                  className="h-4 w-4 accent-[var(--bulletin-text)]"
-                />
-                <span className="text-[12px] font-bold">Save as Draft</span>
-              </label>
+              <div className="flex justify-between pt-4">
+                <button
+                  type="button"
+                  onClick={prevStep}
+                  className="px-8 py-4 text-[12px] font-black uppercase tracking-widest border-2 border-black hover:bg-black/5"
+                >
+                  ← Back
+                </button>
+                <button
+                  type="button"
+                  onClick={nextStep}
+                  className="bg-black text-white px-10 py-4 text-[12px] font-black uppercase tracking-widest hover:bg-[#ff6b6b] transition-all shadow-[8px_8px_0_0_rgba(0,0,0,0.2)]"
+                >
+                  Next: Logistics →
+                </button>
+              </div>
             </div>
-          </BulletinCard>
+          )}
 
-          {/* Submit */}
-          <div className="flex gap-3 pt-4">
-            <button
-              type="button"
-              onClick={() => navigate(-1)}
-              className="flex-1 border border-[var(--bulletin-border)] bg-[var(--bulletin-card)] px-4 py-2 text-[10px] font-bold uppercase shadow-[2px_2px_0_0_var(--bulletin-shadow)] hover:shadow-[3px_3px_0_0_var(--bulletin-shadow)] transition-all"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={submitting}
-              className="flex-1 border border-[var(--bulletin-border)] bg-[var(--bulletin-text)] px-4 py-2 text-[10px] font-bold uppercase text-[var(--bulletin-bg)] shadow-[2px_2px_0_0_var(--bulletin-shadow)] hover:bg-[var(--bulletin-card)] hover:text-[var(--bulletin-text)] disabled:opacity-40 transition-all"
-            >
-              {submitting ? 'Saving...' : isEdit ? 'Update Listing' : 'Post Listing'}
-            </button>
-          </div>
+          {/* STEP 3: LOGISTICS & PRICING */}
+          {currentStep === 3 && (
+            <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-500">
+               <div className="border-l-4 border-[#ff6b6b] pl-4 mb-8">
+                 <h2 className="text-3xl font-black uppercase tracking-tighter">Step 3: Final Logistics</h2>
+                 <p className="text-[12px] font-bold opacity-50 uppercase">Set your price and meetup</p>
+               </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <BulletinCard rotation={0.3} bgColor="bg-white dark:bg-black/40">
+                  <label className={labelBase}>Your Asking Price (GHS)</label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    className={`${fieldBase} mt-2 text-xl font-black ${errors.price ? fieldError : ''}`}
+                    {...register('price', { valueAsNumber: true })}
+                  />
+                  {errors.price && <p className="mt-1 text-[11px] text-red-600 font-bold">{errors.price.message}</p>}
+                </BulletinCard>
+
+                <BulletinCard rotation={-0.3} bgColor="bg-[var(--bulletin-card)]">
+                  <label className={labelBase}>Original/Market Price (GHS)</label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    className={`${fieldBase} mt-2 opacity-60`}
+                    {...register('originalPrice', { valueAsNumber: true })}
+                  />
+                </BulletinCard>
+              </div>
+
+              {pricingInsights && (
+                <div className="p-4 border-2 border-dashed border-black bg-[#fffacd] dark:bg-yellow-900/10 rotate-[-1deg]">
+                  <div className="text-[10px] font-black uppercase tracking-widest text-black/40">Smart Recommendation</div>
+                  <div className="text-[13px] font-bold mt-1 text-black">Students are paying GHS {pricingInsights.recommendedMin} - {pricingInsights.recommendedMax} for similar items.</div>
+                </div>
+              )}
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <BulletinCard rotation={-0.2} bgColor="bg-[var(--bulletin-card)]">
+                  <label className={labelBase}>Fulfillment</label>
+                  <select className={`${fieldBase} mt-2`} {...register('deliveryOption')}>
+                    <option value="pickup">Campus Pickup Only</option>
+                    <option value="delivery">Hostel Delivery Only</option>
+                    <option value="both">Both Available</option>
+                  </select>
+                </BulletinCard>
+
+                {(deliveryOption === 'pickup' || deliveryOption === 'both') && (
+                  <BulletinCard rotation={0.2} bgColor="bg-[var(--bulletin-card)]">
+                    <label className={labelBase}>Meetup Location</label>
+                    <input
+                      type="text"
+                      placeholder="e.g. Unity Hall Gate"
+                      className={`${fieldBase} mt-2`}
+                      {...register('pickupLocation')}
+                      list="location-suggestions"
+                    />
+                    <datalist id="location-suggestions">
+                      {CAMPUS_LOCATIONS.map(l => <option key={l} value={l} />)}
+                    </datalist>
+                  </BulletinCard>
+                )}
+              </div>
+
+              <div className="flex flex-col gap-4 pt-8">
+                <button
+                  type="submit"
+                  disabled={submitting}
+                  onClick={() => setValue('status', 'active')}
+                  className="w-full bg-black text-white px-10 py-5 text-[14px] font-black uppercase tracking-[0.3em] hover:bg-[#ff6b6b] transition-all shadow-[12px_12px_0_0_rgba(0,0,0,1)] active:translate-x-1 active:translate-y-1 active:shadow-none"
+                >
+                  {submitting ? 'PROCESSING...' : isEdit ? 'CONFIRM CHANGES' : 'PUBLISH TO BOARD'}
+                </button>
+                
+                <div className="flex gap-4">
+                   <button
+                    type="button"
+                    onClick={prevStep}
+                    className="flex-1 px-8 py-3 text-[11px] font-black uppercase tracking-widest border-2 border-black hover:bg-black/5"
+                  >
+                    ← Back
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleSaveDraft}
+                    disabled={submitting}
+                    className="flex-1 border-2 border-black bg-white dark:bg-black/20 px-8 py-3 text-[11px] font-black uppercase tracking-widest hover:bg-[#fffacd] dark:hover:bg-white/10 transition-colors"
+                  >
+                    Save as Draft
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
         </form>
       </BulletinSection>
     </BulletinLayout>
