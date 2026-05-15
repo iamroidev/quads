@@ -18,7 +18,7 @@ import authService, { UserStats } from '../services/auth.service';
 import categoryService, { CategoryWithCount } from '../services/category.service';
 import { ProductPopulated } from '../types';
 import { BulletinLayout, BulletinSection } from '../components/layout/BulletinLayout';
-import { ProductCardSkeleton, CategorySkeleton } from '../components/ui/BulletinSkeleton';
+import { ProductCardSkeleton, CategorySkeleton, CollectionSkeleton } from '../components/ui/BulletinSkeleton';
 
 const Dashboard: React.FC = () => {
   const { user, switchRole } = useAuth();

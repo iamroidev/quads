@@ -37,6 +37,7 @@ export const BulletinLayout: React.FC<BulletinLayoutProps> = ({
   hideHero = false,
 }) => {
   const { user, isAuthenticated, logout, switchRole } = useAuth();
+  const isSeller = user?.role === 'seller' || user?.role === 'admin';
   const location = useLocation();
   const navigate = useNavigate();
   const [isProfileOpen, setIsProfileOpen] = React.useState(false);
