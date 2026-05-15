@@ -458,8 +458,9 @@ export const googleLogin = async (
       res.status(400).json({ success: false, message: 'Google credential missing' });
       return;
     }
-
+    console.log(`[GoogleLogin] Start: role=${role}`);
     const { user, token, isNewUser, needsProfileCompletion } = await authService.googleLogin(credential, role, profileData);
+    console.log(`[GoogleLogin] Success: ${user.email}`);
 
     // Set cookie
     res.cookie('token', token, {
@@ -475,11 +476,12 @@ export const googleLogin = async (
       data: { user, token, isNewUser, needsProfileCompletion },
     });
 
-    // Fire analytics asynchronously — don't block response or throw after headers sent
+    // Fire analytics asynchronously
     growthService.captureEvent(user._id.toString(), isNewUser ? 'signup' : 'login', { method: 'google' }).catch((err) => {
-      console.error('Analytics google capture failed:', err);
+      console.error('[GoogleLogin] Analytics capture failed:', err);
     });
-  } catch (error) {
+  } catch (error: any) {
+    console.error('[GoogleLogin] CRITICAL ERROR:', error.message, error.stack);
     next(error);
   }
 };
