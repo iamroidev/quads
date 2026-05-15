@@ -139,6 +139,7 @@ export interface CartItem {
   quantity: number;
   sellerId: string;
   sellerName: string;
+  pickupLocation: string;
 }
 
 // Order & Payment types

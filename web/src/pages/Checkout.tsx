@@ -75,7 +75,7 @@ const Checkout: React.FC = () => {
           setIsCartCheckout(true);
           setProducts(cartItems);
           // Default pickup location from first item
-          setForm((prev) => ({ ...prev, pickupLocation: (cartItems[0] as any).pickupLocation || '' }));
+          setForm((prev) => ({ ...prev, pickupLocation: cartItems[0].pickupLocation || '' }));
         }
       } catch (err: any) {
         toast.error('Failed to load checkout details');
