@@ -96,7 +96,7 @@ const CreateEditProduct: React.FC = () => {
             description: p.description,
             price: p.price,
             originalPrice: p.originalPrice,
-            category: typeof p.category === 'string' ? p.category : p.category._id,
+            category: typeof p.category === 'string' ? p.category : p.category.name,
             condition: p.condition,
             deliveryOption: p.deliveryOption,
             pickupLocation: p.pickupLocation,
@@ -369,12 +369,39 @@ const CreateEditProduct: React.FC = () => {
           {/* Category */}
           <BulletinCard rotation={0.3} bgColor="bg-[var(--bulletin-card)]">
             <label className={labelBase}>Category</label>
-            <select className={`${fieldBase} mt-2 ${errors.category ? fieldError : ''}`} {...register('category')}>
-              <option value="">Select a category</option>
-              {categories.map((cat) => (
-                <option key={cat._id} value={cat._id}>{cat.name}</option>
-              ))}
-            </select>
+            <div className="relative group">
+              <div className="flex gap-2 mt-2">
+                <div className="relative flex-1">
+                  <input
+                    type="text"
+                    placeholder="Search or type category..."
+                    className={`${fieldBase} ${errors.category ? fieldError : ''}`}
+                    {...register('category')}
+                    autoComplete="off"
+                    list="category-suggestions"
+                  />
+                  <datalist id="category-suggestions">
+                    {categories.map((cat) => (
+                      <option key={cat._id} value={cat.name}>
+                        {cat.name}
+                      </option>
+                    ))}
+                  </datalist>
+                </div>
+              </div>
+              <div className="mt-2 flex flex-wrap gap-2">
+                {categories.slice(0, 6).map((cat) => (
+                  <button
+                    key={cat._id}
+                    type="button"
+                    onClick={() => reset({ ...watch(), category: cat.name })}
+                    className="px-2 py-1 border-2 border-black/10 bg-black/5 text-[9px] font-black uppercase tracking-widest hover:bg-[#ff6b6b] hover:text-white transition-all"
+                  >
+                    {cat.name}
+                  </button>
+                ))}
+              </div>
+            </div>
             {errors.category && <p className="mt-1 text-[11px] text-red-600 font-bold">{errors.category.message}</p>}
           </BulletinCard>
 
@@ -384,20 +411,32 @@ const CreateEditProduct: React.FC = () => {
               <label className={labelBase}>Delivery Option</label>
               <select className={`${fieldBase} mt-2`} {...register('deliveryOption')}>
                 <option value="pickup">Campus Pickup</option>
-                <option value="delivery">Delivery Available</option>
-                <option value="both">Pickup or Delivery</option>
+                <option value="delivery">Hostel Delivery</option>
+                <option value="both">Both Available</option>
               </select>
             </BulletinCard>
 
             {(deliveryOption === 'pickup' || deliveryOption === 'both') && (
               <BulletinCard rotation={0.3} bgColor="bg-[var(--bulletin-card)]">
-                <label className={labelBase}>Pickup Location</label>
-                <select className={`${fieldBase} mt-2`} {...register('pickupLocation')}>
-                  <option value="">Select location</option>
-                  {CAMPUS_LOCATIONS.map((loc) => (
-                    <option key={loc} value={loc}>{loc}</option>
-                  ))}
-                </select>
+                <label className={labelBase}>Meetup/Pickup Location</label>
+                <div className="relative mt-2">
+                  <input
+                    type="text"
+                    placeholder="e.g. Library Fountain or Unity Hall"
+                    className={`${fieldBase} ${errors.pickupLocation ? fieldError : ''}`}
+                    {...register('pickupLocation')}
+                    autoComplete="off"
+                    list="location-suggestions"
+                  />
+                  <datalist id="location-suggestions">
+                    {CAMPUS_LOCATIONS.map((loc) => (
+                      <option key={loc} value={loc} />
+                    ))}
+                  </datalist>
+                </div>
+                <div className="mt-2 text-[9px] opacity-50 uppercase font-bold tracking-widest">
+                  Tip: Be as specific as possible for faster sales.
+                </div>
               </BulletinCard>
             )}
           </div>
