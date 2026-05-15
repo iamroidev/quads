@@ -9,7 +9,7 @@ import productService from '../services/product.service';
 import growthService from '../services/growth.service';
 import categoryService from '../services/category.service';
 import { ImageUpload } from '../components/product';
-import { Category, ProductPopulated } from '../types';
+import { Category } from '../types';
 import { BulletinLayout, BulletinSection, BulletinCard } from '../components/layout/BulletinLayout';
 import { useAuth } from '../context/AuthContext';
 
@@ -29,23 +29,12 @@ const productSchema = z.object({
 
 type ProductFormData = z.infer<typeof productSchema>;
 
-const CAMPUS_LOCATIONS = [
-  'Main Gate', 'Esther Hall', 'Independence Hall', 'Unity Hall', 'Queens Hall',
-  'Engineering Block', 'Science Block', 'Library', 'Student Center', 'Cafeteria',
-  'Sports Complex', 'Admin Block', 'ICT Center', 'Tarkwa Market',
-];
-
-const fieldBase = 'w-full border border-[var(--bulletin-border)] bg-[var(--bulletin-card)] p-2 text-[12px] font-bold focus:outline-none focus:ring-2 focus:ring-[var(--bulletin-text)] placeholder:text-[var(--bulletin-muted)]';
-const fieldError = 'border-red-500';
-const labelBase = 'block text-[10px] font-bold uppercase tracking-wider opacity-60 mb-1';
-
-const CreateEditProduct: React.FC = () => {
+const CreateEditProduct = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const isEdit = !!id;
   const { user } = useAuth();
 
-  // Block unverified sellers from creating new listings (edit is allowed)
   const isUnverifiedSeller =
     !isEdit &&
     user?.role === 'seller' &&
@@ -65,7 +54,7 @@ const CreateEditProduct: React.FC = () => {
   const {
     register,
     handleSubmit,
-    formState: { errors, isValid },
+    formState: { errors },
     reset,
     watch,
     trigger,
@@ -80,7 +69,6 @@ const CreateEditProduct: React.FC = () => {
   });
 
   const deliveryOption = watch('deliveryOption');
-  const watchedStatus = watch('status');
 
   useEffect(() => {
     categoryService.getCategories().then((res) => {
@@ -156,7 +144,6 @@ const CreateEditProduct: React.FC = () => {
   const prevStep = () => setCurrentStep(prev => prev - 1);
 
   const onSubmit = async (data: ProductFormData) => {
-    // Strict validation for active listings (bypasses zod optionality)
     if (data.status === 'active') {
       if (!data.description || data.description.length < 10) {
         toast.error('Description must be at least 10 characters to publish');
@@ -205,7 +192,7 @@ const CreateEditProduct: React.FC = () => {
         await productService.updateProduct(id!, payload);
         toast.success(data.status === 'draft' ? 'Draft updated!' : 'Product updated!');
       } else {
-        await productService.createProduct(payload);
+        await productService.createProduct(payload as any);
         toast.success(data.status === 'draft' ? 'Listing saved as draft!' : 'Product listed successfully!');
       }
 
@@ -219,11 +206,8 @@ const CreateEditProduct: React.FC = () => {
   };
 
   const handleSaveDraft = async () => {
-    // Manually trigger title validation as it's the bare minimum for a draft
     const isTitleValid = await trigger('title');
     if (!isTitleValid) {
-    const titleValue = watch('title');
-    if (!titleValue || titleValue.length < 3) {
       toast.error('Drafts need at least a title (min 3 chars)');
       return;
     }
@@ -275,7 +259,6 @@ const CreateEditProduct: React.FC = () => {
     );
   }
 
-  // Verification gate
   if (isUnverifiedSeller) {
     return (
       <BulletinLayout title="Verification Required" subtitle="Seller" section="14">
@@ -311,7 +294,6 @@ const CreateEditProduct: React.FC = () => {
       hideHero={true}
     >
       <div className="bg-[var(--bulletin-bg)] min-h-screen pb-20">
-        {/* Navigation / Progress Header */}
         <div className="border-b-4 border-black bg-white px-6 py-6 sticky top-[42px] z-[50]">
           <div className="mx-auto max-w-4xl flex justify-between items-center">
             <button
@@ -338,12 +320,9 @@ const CreateEditProduct: React.FC = () => {
         </div>
 
         <BulletinSection bgColor="bg-[#1a1a1a] dark:bg-[#050505] py-12 md:py-24 relative overflow-hidden">
-          {/* Decorative background grid/elements */}
           <div className="absolute inset-0 opacity-10 pointer-events-none" style={{ backgroundImage: 'radial-gradient(circle, #ffffff 1px, transparent 1px)', backgroundSize: '30px 30px' }} />
 
           <form onSubmit={handleSubmit(onSubmit)} className="max-w-3xl mx-auto relative z-10">
-            
-            {/* STEP 1: IDENTITY & VISUALS */}
             {currentStep === 1 && (
               <div className="space-y-8 sm:space-y-12 animate-card-drop">
                  <div className="bg-white border-2 sm:border-4 border-black p-3 sm:p-4 inline-block -rotate-2 shadow-[4px_4px_0_0_#ff6b6b] sm:shadow-[8px_8px_0_0_#ff6b6b]">
@@ -352,7 +331,6 @@ const CreateEditProduct: React.FC = () => {
                  </div>
 
                 <div className="relative pt-4 sm:pt-6">
-                  {/* Tape top */}
                   <div className="absolute -top-3 sm:-top-4 left-1/2 -translate-x-1/2 h-6 sm:h-8 w-32 sm:w-48 bg-[#ffd700]/40 rotate-1 shadow-sm z-20 border border-black/5" />
                   
                   <BulletinCard rotation={-0.5} bgColor="bg-white" className="border-2 sm:border-4 border-black p-4 sm:p-8 shadow-[6px_6px_0_0_black] sm:shadow-[12px_12px_0_0_black]">
@@ -371,7 +349,7 @@ const CreateEditProduct: React.FC = () => {
                   </BulletinCard>
                 </div>
 
-                <BulletinCard rotation={0.5} bgColor="bg-white" className="border-2 sm:border-4 border-black p-4 sm:p-8 shadow-[6px_6px_0_0_#ff6b6b] sm:shadow-[12px_12px_0_0_#ff6b6b]">
+                <BulletinCard rotation={0.5} bgColor="bg-white" className="border-2 sm:border-4 border-black p-4 sm:p-8 shadow-[6px_6px_0_0_#ff6b6b] sm:shadow-[8px_8px_0_0_#ff6b6b]">
                   <label className="block text-[9px] sm:text-[11px] font-black uppercase tracking-widest mb-2 sm:mb-4">ITEM DESIGNATION (TITLE)</label>
                   <input
                     type="text"
@@ -394,7 +372,6 @@ const CreateEditProduct: React.FC = () => {
               </div>
             )}
 
-            {/* STEP 2: THE DETAILS */}
             {currentStep === 2 && (
               <div className="space-y-8 sm:space-y-12 animate-card-drop">
                  <div className="bg-[#ff6b6b] border-2 sm:border-4 border-black p-3 sm:p-4 inline-block rotate-2 shadow-[4px_4px_0_0_white] sm:shadow-[8px_8px_0_0_white] text-white">
@@ -415,7 +392,6 @@ const CreateEditProduct: React.FC = () => {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
                   <div className="relative">
-                     {/* corner tape */}
                      <div className="absolute -top-2 -left-2 sm:-top-3 sm:-left-3 h-8 w-8 sm:h-10 sm:w-10 bg-black rotate-45 z-20" />
                      <BulletinCard rotation={0.3} bgColor="bg-white" className="border-2 sm:border-4 border-black p-4 sm:p-6 shadow-[6px_6px_0_0_black] sm:shadow-[8px_8px_0_0_black]">
                       <label className="block text-[9px] sm:text-[10px] font-black uppercase tracking-widest mb-2 sm:mb-3">CLASSIFICATION</label>
@@ -469,7 +445,7 @@ const CreateEditProduct: React.FC = () => {
                   <button
                     type="button"
                     onClick={nextStep}
-                    className="order-1 sm:order-2 bg-black text-white px-10 sm:px-12 py-4 sm:py-5 text-[12px] sm:text-[14px] font-black uppercase tracking-[0.2em] sm:tracking-[0.3em] hover:bg-[#ff6b6b] transition-all shadow-[6px_6px_0_0_rgba(255,255,255,0.1)] sm:shadow-[12px_12px_0_0_rgba(255,255,255,0.1)]"
+                    className="order-1 sm:order-2 bg-black text-white px-10 sm:px-12 py-4 sm:py-5 text-[12px] sm:text-[14px] font-black uppercase tracking-[0.2em] sm:tracking-[0.3em] hover:bg-[#ff6b6b] transition-all shadow-[6px_6px_0_0_rgba(255,107,107,0.4)] sm:shadow-[12px_12px_0_0_rgba(255,255,255,0.1)]"
                   >
                     FINAL LOGISTICS →
                   </button>
@@ -477,7 +453,6 @@ const CreateEditProduct: React.FC = () => {
               </div>
             )}
 
-            {/* STEP 3: LOGISTICS & PRICING */}
             {currentStep === 3 && (
               <div className="space-y-8 sm:space-y-12 animate-card-drop">
                  <div className="bg-white border-2 sm:border-4 border-black p-3 sm:p-4 inline-block -rotate-1 shadow-[4px_4px_0_0_#ff6b6b] sm:shadow-[8px_8px_0_0_#ff6b6b]">
@@ -518,7 +493,7 @@ const CreateEditProduct: React.FC = () => {
                 )}
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
-                  <BulletinCard rotation={-0.4} bgColor="bg-white" className="border-2 sm:border-4 border-black p-4 sm:p-6 shadow-[6px_6px_0_0_black] sm:shadow-[8px_8px_0_0_black]">
+                  <BulletinCard rotation={-0.4} bgColor="bg-white" className="border-2 sm:border-4 border-black p-4 sm:p-6 shadow-[6px_6px_0_0_black] sm:shadow-[12px_12px_0_0_black]">
                     <label className="block text-[9px] sm:text-[10px] font-black uppercase tracking-widest mb-2 sm:mb-3">HANDOVER METHOD</label>
                     <select className="w-full border-2 border-black p-2 sm:p-3 text-[11px] sm:text-[12px] font-black uppercase focus:outline-none bg-transparent" {...register('deliveryOption')}>
                       <option value="pickup">CAMPUS PICKUP</option>
@@ -535,7 +510,6 @@ const CreateEditProduct: React.FC = () => {
                         placeholder="LOCATION"
                         className="w-full border-2 border-black p-2 sm:p-3 text-[11px] sm:text-[12px] font-black uppercase focus:outline-none"
                         {...register('pickupLocation')}
-                        list="location-suggestions"
                       />
                     </BulletinCard>
                   )}
