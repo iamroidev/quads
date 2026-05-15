@@ -23,6 +23,7 @@ import toast from 'react-hot-toast';
 import productService from '../services/product.service';
 import chatService from '../services/chat.service';
 import reviewService from '../services/review.service';
+import growthService from '../services/growth.service';
 import savedItemService from '../services/savedItem.service';
 import { LoadingSpinner } from '../components/ui';
 import { useAuth } from '../context/AuthContext';
@@ -185,6 +186,10 @@ const ProductDetail: React.FC = () => {
         product._id
       );
       if (res.success) {
+        await growthService.captureEvent(user._id, 'chat_initiated', {
+          productId: product._id,
+          sellerId: product.seller._id,
+        });
         navigate(`/messages/${res.data.conversation._id}`);
       }
     } catch {
