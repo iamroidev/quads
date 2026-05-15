@@ -165,10 +165,23 @@ const RegisterPage: React.FC = () => {
     }
   }, [isGoogleFlow, user, setValue]);
 
-  // Auto-jump to Step 2 if we already have a role (for returning users with incomplete profiles)
+  // Auto-jump to the appropriate step if we already have data (for returning users with incomplete profiles)
   useEffect(() => {
-    if (isGoogleFlow && user?.role && (user.role === 'buyer' || user.role === 'seller') && step === 1) {
-      setStep(2);
+    if (isGoogleFlow && user && step === 1) {
+      // Step 1: Role
+      if (user.role && (user.role === 'buyer' || user.role === 'seller')) {
+        // Step 2: Account details (name, email, phone)
+        if (user.phone && user.phone.trim().length >= 10) {
+          // Step 3: Campus info (department, residenceHall, level)
+          if (user.department && user.residenceHall && user.currentLevel) {
+            setStep(4);
+          } else {
+            setStep(3);
+          }
+        } else {
+          setStep(2);
+        }
+      }
     }
   }, [isGoogleFlow, user, step]);
 

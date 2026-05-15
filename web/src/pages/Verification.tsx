@@ -152,7 +152,7 @@ const VerificationPage: React.FC = () => {
             </div>
 
             <div className="grid gap-6 sm:grid-cols-2">
-              <div className="border-4 border-[var(--bulletin-bg)] p-6 bg-[var(--bulletin-text)] shadow-[8px_8px_0_0_var(--bulletin-bg)]" style={{ transform: 'rotate(-1deg)' }}>
+              <div className="border-4 border-[var(--bulletin-border)] p-6 bg-[var(--bulletin-text)] shadow-[8px_8px_0_0_var(--bulletin-bg)]" style={{ transform: 'rotate(-1deg)' }}>
                 <div className="flex justify-between items-start mb-6">
                   <div className="p-3 border-2 border-[var(--bulletin-bg)]/20 bg-[var(--bulletin-bg)]/5">
                     <Mail className="h-5 w-5 text-[var(--bulletin-bg)]" />
@@ -167,7 +167,7 @@ const VerificationPage: React.FC = () => {
                 <div className="text-[var(--bulletin-bg)] font-black text-lg truncate">{user?.email}</div>
               </div>
 
-              <div className="border-4 border-[var(--bulletin-bg)] p-6 bg-[var(--bulletin-text)] shadow-[8px_8px_0_0_var(--bulletin-bg)]" style={{ transform: 'rotate(1deg)' }}>
+              <div className="border-4 border-[var(--bulletin-border)] p-6 bg-[var(--bulletin-text)] shadow-[8px_8px_0_0_var(--bulletin-bg)]" style={{ transform: 'rotate(1deg)' }}>
                 <div className="flex justify-between items-start mb-6">
                   <div className="p-3 border-2 border-[var(--bulletin-bg)]/20 bg-[var(--bulletin-bg)]/5">
                     <Smartphone className="h-5 w-5 text-[var(--bulletin-bg)]" />
@@ -302,8 +302,6 @@ const VerificationPage: React.FC = () => {
                         </button>
                       </div>
                     </div>
-                    {/* Invisible ReCAPTCHA Container */}
-                    <div id="recaptcha-container"></div>
                   </div>
                 )}
               </BulletinCard>
@@ -324,6 +322,9 @@ const VerificationPage: React.FC = () => {
                 </Link>
               </div>
             )}
+            
+            {/* Invisible ReCAPTCHA Container - Moved here to be always in DOM */}
+            <div id="recaptcha-container"></div>
           </div>
         </div>
       </BulletinSection>

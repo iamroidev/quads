@@ -16,14 +16,36 @@ export const auth = getAuth(app);
 
 // Helper to setup reCAPTCHA
 export const setupRecaptcha = (containerId: string) => {
-  if (!(window as any).recaptchaVerifier) {
-    (window as any).recaptchaVerifier = new RecaptchaVerifier(auth, containerId, {
-      'size': 'invisible',
-      'callback': () => {
-        // reCAPTCHA solved
-      }
-    });
+  const container = document.getElementById(containerId);
+  if (!container) {
+    console.error(`Recaptcha container with id "${containerId}" not found in DOM`);
   }
+
+  // If we already have a verifier, check if it's still valid
+  // In some cases (HMR or navigation), we might need to recreate it
+  if ((window as any).recaptchaVerifier) {
+    try {
+      // Clear the old one if it exists to be safe
+      (window as any).recaptchaVerifier.clear();
+    } catch (e) {
+      // Ignore errors during clear
+    }
+    (window as any).recaptchaVerifier = null;
+  }
+
+  (window as any).recaptchaVerifier = new RecaptchaVerifier(auth, containerId, {
+    'size': 'invisible',
+    'callback': () => {
+      // reCAPTCHA solved
+    },
+    'expired-callback': () => {
+      // Response expired. Ask user to solve reCAPTCHA again.
+      if ((window as any).recaptchaVerifier) {
+        (window as any).recaptchaVerifier.reset();
+      }
+    }
+  });
+
   return (window as any).recaptchaVerifier;
 };
 
