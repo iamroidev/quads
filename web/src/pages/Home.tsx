@@ -223,6 +223,53 @@ const HomePage: React.FC = () => {
         </div>
       </BulletinSection>
 
+      {/* ── Featured Showcase ── */}
+      {!loading && featuredProducts.length > 0 && (
+        <BulletinSection title="Campus Spotlight" subtitle="Featured" bgColor="bg-white dark:bg-[#111]">
+          <div className="grid gap-6 grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+            {featuredProducts.map((product, idx) => (
+              <Link key={product._id} to={`/products/${product._id}`} className="group relative" style={{ transform: `rotate(${(idx % 3 - 1) * 0.5}deg)` }}>
+                <div className="border-4 border-black bg-white dark:bg-black/40 p-3 shadow-[8px_8px_0_0_#ff6b6b] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all">
+                  <div className="aspect-square bg-gray-100 mb-3 overflow-hidden border-2 border-black/5">
+                    <img src={getImage(product)} alt={product.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
+                  </div>
+                  <div className="text-[11px] font-black uppercase truncate mb-1">{product.title}</div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm font-black">GHS {product.price}</span>
+                    <span className="text-[8px] font-black uppercase opacity-30">Featured</span>
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
+          <div className="mt-12 text-center">
+             <Link to="/products?featured=true" className="text-[11px] font-black uppercase underline tracking-widest hover:text-[#ff6b6b]">View all featured items →</Link>
+          </div>
+        </BulletinSection>
+      )}
+
+      {/* ── Recent Listings ── */}
+      {!loading && recentProducts.length > 0 && (
+        <BulletinSection title="Just Pinned" subtitle="New" bgColor="bg-[#f0e8f4] dark:bg-purple-900/10">
+           <div className="grid gap-6 grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
+            {recentProducts.map((product, idx) => (
+              <Link key={product._id} to={`/products/${product._id}`} className="group relative" style={{ transform: `rotate(${(idx % 2 === 0 ? -0.8 : 0.8)}deg)` }}>
+                <div className="border-2 border-black bg-white dark:bg-black/40 p-2 shadow-[6px_6px_0_0_black] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all">
+                  <div className="aspect-square bg-gray-100 mb-2 overflow-hidden">
+                    <img src={getImage(product)} alt={product.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
+                  </div>
+                  <div className="text-[10px] font-black uppercase truncate">{product.title}</div>
+                  <div className="text-xs font-black">GHS {product.price}</div>
+                </div>
+              </Link>
+            ))}
+          </div>
+           <div className="mt-12 text-center">
+             <Link to="/products" className="bg-black text-white px-8 py-3 text-[11px] font-black uppercase tracking-widest shadow-[6px_6px_0_0_#ff6b6b]">See Full Board</Link>
+          </div>
+        </BulletinSection>
+      )}
+
       {/* ── Category strip ── */}
       <BulletinSection title="Explore Departments" subtitle="Browse" bgColor="bg-[var(--bulletin-bg)] border-t-4 border-[var(--bulletin-border)]">
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6">
