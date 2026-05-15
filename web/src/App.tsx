@@ -35,6 +35,7 @@ import VerificationPage from './pages/Verification';
 import ForgotPasswordPage from './pages/ForgotPassword';
 import ResetPasswordPage from './pages/ResetPassword';
 import SupportPage from './pages/Support';
+import SellerPayoutsPage from './pages/SellerPayouts';
 import ContactPage from './pages/Contact';
 import TermsPage from './pages/Terms';
 import CartPage from './pages/Cart';
@@ -175,6 +176,14 @@ const App: React.FC = () => {
           element={
             <ProtectedRoute roles={['seller', 'admin']}>
               <SellerAnalyticsPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/seller/payouts"
+          element={
+            <ProtectedRoute roles={['seller', 'admin']}>
+              <SellerPayoutsPage />
             </ProtectedRoute>
           }
         />

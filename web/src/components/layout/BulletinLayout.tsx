@@ -120,7 +120,12 @@ export const BulletinLayout: React.FC<BulletinLayoutProps> = ({
                   <>
                     <Link to="/seller/analytics" className="hover:text-[#ff6b6b]">Shop Insights</Link>
                     <Link to="/my-listings" className="hover:text-[#ff6b6b]">My Listings</Link>
-                    <Link to="/seller/onboarding" className="hover:text-[#ff6b6b]">Payouts</Link>
+                    <Link 
+                      to={user?.payoutSetupComplete ? "/seller/payouts" : "/seller/onboarding"} 
+                      className="hover:text-[#ff6b6b]"
+                    >
+                      Payouts
+                    </Link>
                   </>
                 ) : (
                   <>
