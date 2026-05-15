@@ -233,7 +233,7 @@ const ProductDetail: React.FC = () => {
     // Analytics: Track share
     growthService.captureEvent(user?._id, 'product_shared', {
       productId: product?._id,
-      platform: navigator.share ? 'system' : 'clipboard'
+      platform: !!navigator.share ? 'system' : 'clipboard'
     });
 
     if (navigator.share) {
