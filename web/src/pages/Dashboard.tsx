@@ -392,8 +392,8 @@ const Dashboard: React.FC = () => {
           {/* Ghost Collections for Empty State */}
           <BulletinSection title="New Student Essentials" subtitle="Freshers Starter Packs" bgColor="bg-[#fffacd] dark:bg-yellow-900/10">
              <div className="grid gap-6 md:grid-cols-3">
-                <div className="md:col-span-1 p-6 border-4 border-dashed border-black/20 bg-white/50 flex flex-col justify-center">
-                   <p className="text-[12px] font-bold opacity-30 italic leading-relaxed">"Curating mattresses, buckets, and room essentials for the new intake. Stock arriving from graduating seniors soon."</p>
+                <div className="md:col-span-1 p-6 border-4 border-dashed border-black/20 bg-white/50 dark:bg-white/5 flex flex-col justify-center">
+                   <p className="text-[12px] font-bold opacity-30 dark:opacity-80 dark:text-white italic leading-relaxed">"Curating mattresses, buckets, and room essentials for the new intake. Stock arriving from graduating seniors soon."</p>
                 </div>
                 <div className="md:col-span-2 flex gap-4 overflow-x-auto pb-4 scrollbar-hide">
                    {[1, 2, 3, 4].map(n => (
@@ -407,8 +407,8 @@ const Dashboard: React.FC = () => {
 
           <BulletinSection title="Graduating Sales" subtitle="End-of-Study Clear Out" bgColor="bg-[#f0e8f4] dark:bg-purple-900/10">
              <div className="grid gap-6 md:grid-cols-3">
-                <div className="md:col-span-1 p-6 border-4 border-dashed border-black/20 bg-white/50 flex flex-col justify-center">
-                   <p className="text-[12px] font-bold opacity-30 italic leading-relaxed">"High-quality items from our finishing students. Pre-auditing electronics and appliances for this section."</p>
+                <div className="md:col-span-1 p-6 border-4 border-dashed border-black/20 bg-white/50 dark:bg-white/5 flex flex-col justify-center">
+                   <p className="text-[12px] font-bold opacity-30 dark:opacity-80 dark:text-white italic leading-relaxed">"High-quality items from our finishing students. Pre-auditing electronics and appliances for this section."</p>
                 </div>
                 <div className="md:col-span-2 flex gap-4 overflow-x-auto pb-4 scrollbar-hide">
                    {[1, 2, 3, 4].map(n => (
@@ -422,8 +422,8 @@ const Dashboard: React.FC = () => {
 
           <BulletinSection title="Engineering & Tech" subtitle="Professional Tools" bgColor="bg-[#e0f2f7] dark:bg-sky-900/10">
              <div className="grid gap-6 md:grid-cols-3">
-                <div className="md:col-span-1 p-6 border-4 border-dashed border-black/20 bg-white/50 flex flex-col justify-center">
-                   <p className="text-[12px] font-bold opacity-30 italic leading-relaxed">"Calipers, drawing boards, and tech gear. Professional equipment for the technical creative."</p>
+                <div className="md:col-span-1 p-6 border-4 border-dashed border-black/20 bg-white/50 dark:bg-white/5 flex flex-col justify-center">
+                   <p className="text-[12px] font-bold opacity-30 dark:opacity-80 dark:text-white italic leading-relaxed">"Calipers, drawing boards, and tech gear. Professional equipment for the technical creative."</p>
                 </div>
                 <div className="md:col-span-2 flex gap-4 overflow-x-auto pb-4 scrollbar-hide">
                    {[1, 2, 3, 4].map(n => (
