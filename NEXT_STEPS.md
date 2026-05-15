@@ -1,33 +1,40 @@
-# QUADS — Deployment Status & Final Steps
+# QUADS — Phase 2 Roadmap
 
-## ✅ Completed (May 2026)
-- [x] **Firebase Phone Auth**: Implemented secure phone verification with Firebase Admin SDK.
-- [x] **CORS & Routing**: Fixed production 503 errors and cross-origin blocks for Google Login.
-- [x] **Mobile Excellence**: Implemented fluid typography and fixed chat widget overlap.
-- [x] **Web Push Notifications**: Wired up VAPID keys and Service Worker for real-time alerts.
-- [x] **Session Protocol**: Enforced mandatory agreement checkbox for all auth flows.
-- [x] **Production Infrastructure**: AWS EC2 is live with SSL, PM2, and hardened `.env`.
-- [x] **Email Delivery**: Resend SMTP verified — welcome emails, receipts, and order updates all sending.
-- [x] **Environment Consolidation**: Single root `.env` for all packages — no more drift between server/web/mobile configs.
-
-## 📍 Production Access
-- **Frontend**: [https://quadsmarket.tech](https://quadsmarket.tech)
-- **API Hub**: `https://api.quadsmarket.tech/api`
-- **Socket URL**: `https://api.quadsmarket.tech`
-- **Server IP**: `54.167.221.2`
-
-## 🚀 Final Polish Sprint
-1.  **SEO & Social (High Priority)**: 
-    - Update `index.html` with dynamic OpenGraph meta tags so product links look premium when shared on WhatsApp/Twitter.
-2.  **Image Optimization**: 
-    - Update `ProductCard.tsx` to use Cloudinary's `f_auto,q_auto` flags to reduce image size for campus users.
-3.  **Analytics Pulse**: 
-    - Add `captureEvent` calls to the "Add to Cart" and "Start Chat" buttons to populate the Growth Dashboard.
-
-## 🛠️ Maintenance & Sync
-- **Sync Local to Server**: Run `./sync-platform.sh` to push local fixes to EC2.
-- **Check Logs**: `pm2 logs quads-api`
-- **Restart API**: `pm2 restart quads-api`
+## ✅ Completed (Production Launch)
+- [x] **Automatic Payout System**: Secure Paystack disbursement every 15 mins.
+- [x] **Seller Earnings Ledger**: Real-time transaction history for sellers.
+- [x] **Resend API Integration**: 100% email delivery via Axios-based API calls.
+- [x] **Role-Based Branding**: Personalized welcome emails for Buyers and Sellers.
+- [x] **Deployment Sync**: Robust `./sync-platform.ps1` for pushing local updates to EC2.
 
 ---
-*Status updated by Antigravity AI*
+
+## 🚀 Next Phase: Scaling & Engagement
+
+### 1. 📱 Mobile Sync & App Store Prep
+*   **Deep Linking**: Set up universal links so that email notifications (e.g., "New Message") open the mobile app directly.
+*   **Push Notifications**: Finalize Expo Push Token storage in the `User` model to enable real-time mobile alerts.
+*   **EAS Build**: Run production builds for Android/iOS to test end-to-end auth on real devices.
+
+### 2. 💬 Communication & Trust
+*   **SMS Gateway (AWS SNS)**: Integrate SMS alerts for order confirmations, providing a fallback for users without data.
+*   **Verification Badges**: Implement the "Scholar Badge" logic for students who have verified their institutional ID.
+*   **Dispute Center**: Create a basic UI for buyers to flag issues with an order, freezing the payout in escrow.
+
+### 3. 🎨 Marketing & Growth
+*   **Premium Share Previews**: Update `index.html` with dynamic OpenGraph tags so product links look stunning on WhatsApp.
+*   **Analytics Dashboard**: Complete the `GrowthService` wiring to track which categories are trending.
+*   **SEO Audit**: Ensure all product pages are indexable with proper meta descriptions.
+
+---
+
+## 🛠️ Maintenance Commands
+| Goal | Command |
+| :--- | :--- |
+| **Sync Update** | `powershell -File .\sync-platform.ps1 "commit message"` |
+| **Check API Health** | `curl https://api.quadsmarket.tech/api/health` |
+| **View Live Logs** | `ssh ec2 "pm2 logs quads-api"` |
+| **Database Check** | Access MongoDB Atlas Dashboard (Cluster: `quads`) |
+
+---
+*Updated by Antigravity AI — 2026-05-15*

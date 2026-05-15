@@ -42,19 +42,21 @@ const VerificationPage: React.FC = () => {
     return () => clearInterval(timer);
   }, [countdown]);
 
-  const handleSendCode = async () => {
-    if (method === 'email' && !email.trim()) {
+  const handleSendCode = async (overrideMethod?: VerifyMethod) => {
+    const activeMethod = overrideMethod || method;
+    
+    if (activeMethod === 'email' && !email.trim()) {
       toast.error('Enter your email address');
       return;
     }
-    if (method === 'phone' && !phone.trim()) {
+    if (activeMethod === 'phone' && !phone.trim()) {
       toast.error('Enter your phone number');
       return;
     }
 
     setSending(true);
     try {
-      if (method === 'email') {
+      if (activeMethod === 'email') {
         await verificationService.sendEmailOTP(email.trim());
       } else {
         // Firebase Phone Auth
@@ -63,7 +65,6 @@ const VerificationPage: React.FC = () => {
         // Ensure Ghana country code if not present
         let formattedPhone = phone.trim();
         if (!formattedPhone.startsWith('+')) {
-          // If it starts with 0, replace with +233
           if (formattedPhone.startsWith('0')) {
             formattedPhone = '+233' + formattedPhone.substring(1);
           } else {
@@ -77,12 +78,11 @@ const VerificationPage: React.FC = () => {
       setSent(true);
       setStep('enter_code');
       setCountdown(60);
-      toast.success(`Code sent to your ${method === 'email' ? 'email' : 'phone'}!`);
+      toast.success(`Code sent to your ${activeMethod === 'email' ? 'email' : 'phone'}!`);
     } catch (err: any) {
       console.error('Send error:', err);
       toast.error(err.response?.data?.message || err.message || 'Failed to send code');
-      // Reset recaptcha if error
-      if (method === 'phone' && (window as any).grecaptcha) {
+      if (activeMethod === 'phone' && (window as any).grecaptcha) {
         (window as any).grecaptcha.reset();
       }
     } finally {
@@ -228,7 +228,7 @@ const VerificationPage: React.FC = () => {
                     <div className="grid gap-8 sm:grid-cols-2">
                       <button
                         disabled={user?.emailVerified}
-                        onClick={() => { setMethod('email'); handleSendCode(); }}
+                        onClick={() => { setMethod('email'); handleSendCode('email'); }}
                         className={`group relative flex flex-col items-start border-4 border-[var(--bulletin-border)] p-8 text-left transition-all ${user?.emailVerified ? 'opacity-50 cursor-not-allowed bg-[var(--bulletin-bg)]' : 'bg-[var(--bulletin-card)] hover:-translate-y-2 hover:shadow-[8px_8px_0_0_var(--bulletin-shadow)] shadow-[4px_4px_0_0_var(--bulletin-shadow)]'
                           }`}
                       >
@@ -243,7 +243,7 @@ const VerificationPage: React.FC = () => {
 
                       <button
                         disabled={user?.phoneVerified}
-                        onClick={() => { setMethod('phone'); handleSendCode(); }}
+                        onClick={() => { setMethod('phone'); handleSendCode('phone'); }}
                         className={`group relative flex flex-col items-start border-4 border-[var(--bulletin-border)] p-8 text-left transition-all ${user?.phoneVerified ? 'opacity-50 cursor-not-allowed bg-[var(--bulletin-bg)]' : 'bg-[var(--bulletin-card)] hover:-translate-y-2 hover:shadow-[8px_8px_0_0_var(--bulletin-shadow)] shadow-[4px_4px_0_0_var(--bulletin-shadow)]'
                           }`}
                       >
