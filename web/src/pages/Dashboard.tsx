@@ -343,11 +343,8 @@ const Dashboard: React.FC = () => {
       {/* AI Collections */}
       {loadingCollections ? (
         <BulletinSection title="Curating for you..." subtitle="Section 05">
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-             <div className="h-48 bg-gray-200 animate-pulse border-2 border-black/10"></div>
-             <div className="h-48 bg-gray-200 animate-pulse border-2 border-black/10"></div>
-             <div className="h-48 bg-gray-200 animate-pulse border-2 border-black/10"></div>
-          </div>
+           <CollectionSkeleton />
+           <CollectionSkeleton />
         </BulletinSection>
       ) : collections.length > 0 ? (
         <React.Fragment>
