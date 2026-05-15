@@ -135,15 +135,23 @@ const StringLine: React.FC<{ from: string; to: string }> = ({ from, to }) => {
 };
 
 const RegisterPage: React.FC = () => {
-  const { register: registerUser, googleLogin } = useAuth();
+  const { user, register: registerUser, googleLogin } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [step, setStep] = useState<Step>(1);
+  
+  // Initialize step from sessionStorage if available
+  const [step, setStep] = useState<Step>(() => {
+    const saved = sessionStorage.getItem('reg_step');
+    return (saved ? Number(saved) : 1) as Step;
+  });
+  
   const [roleShake, setRoleShake] = useState(false);
-  const [protocolAccepted, setProtocolAccepted] = useState(false);
+  const [protocolAccepted, setProtocolAccepted] = useState(() => {
+    return sessionStorage.getItem('reg_protocol') === 'true';
+  });
 
   const isGoogleFlow = searchParams.get('google') === '1';
 
@@ -162,9 +170,23 @@ const RegisterPage: React.FC = () => {
   const selectedRole = watch('role');
   const isRoleChosen = selectedRole === 'buyer' || selectedRole === 'seller';
 
-  // Prefill Google data if available
+  // Prefill Google data if available OR if user is already logged in (incomplete profile)
   useEffect(() => {
     if (isGoogleFlow) {
+      // 1. Try to pre-fill from existing user object (if backend linked them already)
+      if (user) {
+        if (user.name) setValue('name', user.name);
+        if (user.email) setValue('email', user.email);
+        if (user.phone) setValue('phone', user.phone);
+        if (user.department) setValue('department', user.department);
+        if (user.residenceHall) setValue('residenceHall', user.residenceHall);
+        if (user.currentLevel) setValue('currentLevel', user.currentLevel);
+        if (user.role && (user.role === 'buyer' || user.role === 'seller')) {
+           setValue('role', user.role);
+        }
+      }
+
+      // 2. Fallback to decoding the credential (for first-time signups)
       const cred = sessionStorage.getItem('google_credential');
       if (cred) {
         try {
@@ -178,17 +200,48 @@ const RegisterPage: React.FC = () => {
           );
           const payload = JSON.parse(jsonPayload);
           
-          if (payload.name) setValue('name', payload.name);
-          if (payload.email) setValue('email', payload.email);
-          
-          // If we have data, skip role choice if already set (usually via step 1)
-          // Actually, step 1 is role choice, so we still need that.
+          if (payload.name && !watch('name')) setValue('name', payload.name);
+          if (payload.email && !watch('email')) setValue('email', payload.email);
         } catch (err) {
           console.error('Failed to decode google credential', err);
         }
       }
     }
-  }, [isGoogleFlow, setValue]);
+  }, [isGoogleFlow, user, setValue]);
+
+  // Auto-jump to Step 2 if we already have a role (for returning users with incomplete profiles)
+  useEffect(() => {
+    if (isGoogleFlow && user?.role && (user.role === 'buyer' || user.role === 'seller') && step === 1) {
+      setStep(2);
+    }
+  }, [isGoogleFlow, user, step]);
+
+  // Persist current step and data to handle refreshes
+  useEffect(() => {
+    sessionStorage.setItem('reg_step', step.toString());
+    sessionStorage.setItem('reg_protocol', protocolAccepted.toString());
+  }, [step, protocolAccepted]);
+
+  // Handle data persistence - watch is expensive so we could do it on step change
+  useEffect(() => {
+    const savedData = sessionStorage.getItem('reg_data');
+    if (savedData) {
+      try {
+        const parsed = JSON.parse(savedData);
+        Object.entries(parsed).forEach(([key, val]) => {
+          if (val) setValue(key as any, val);
+        });
+      } catch (e) {
+        console.error('Failed to parse saved registration data', e);
+      }
+    }
+  }, [setValue]);
+
+  // Update saved data on field changes (debounced or on step change is better, but watch() is simplest for now)
+  const formData = watch();
+  useEffect(() => {
+    sessionStorage.setItem('reg_data', JSON.stringify(formData));
+  }, [formData]);
 
   const goNext = async () => {
     let fields: (keyof RegisterFormData)[] = [];
@@ -212,6 +265,9 @@ const RegisterPage: React.FC = () => {
         const { confirmPassword, ...registerData } = data;
         await googleLogin(googleCredential, data.role, registerData as any);
         sessionStorage.removeItem('google_credential');
+        sessionStorage.removeItem('reg_step');
+        sessionStorage.removeItem('reg_data');
+        sessionStorage.removeItem('reg_protocol');
         navigate('/');
         return;
       }
