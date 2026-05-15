@@ -109,6 +109,7 @@ export interface ProductFilters {
   maxPrice?: number;
   seller?: string;
   search?: string;
+  ids?: string[];
   deliveryOption?: DeliveryOption;
   pickupLocation?: string;
   sort?: string;
