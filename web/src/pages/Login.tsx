@@ -16,7 +16,7 @@ const loginSchema = z.object({
 
 type LoginFormData = z.infer<typeof loginSchema>;
 
-const fieldBase = 'w-full border-4 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] px-4 py-4 text-[14px] font-black focus:outline-none focus:ring-2 focus:ring-[var(--bulletin-text)] text-[var(--bulletin-text)] placeholder:text-[var(--bulletin-text)] placeholder:opacity-30 shadow-[4px_4px_0_0_var(--bulletin-shadow)]';
+const fieldBase = 'w-full border-4 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] px-4 py-4 text-[16px] font-black focus:outline-none focus:ring-2 focus:ring-[var(--bulletin-text)] text-[var(--bulletin-text)] placeholder:text-[var(--bulletin-text)] placeholder:opacity-30 shadow-[4px_4px_0_0_var(--bulletin-shadow)]';
 
 /* Zigzag SVG divider */
 const ZigzagDivider = () => (
@@ -222,7 +222,7 @@ const LoginPage: React.FC = () => {
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
               <div>
                 <label className="block text-[11px] font-black uppercase tracking-[0.2em] opacity-40 mb-3 text-[var(--bulletin-text)]">Email</label>
-                <input type="email" placeholder="you@example.com" autoComplete="email" autoFocus className={fieldBase} {...register('email')} />
+                <input type="email" placeholder="you@example.com" autoComplete="email" className={fieldBase} {...register('email')} />
                 {errors.email && <p className="mt-2 text-[12px] text-red-600 font-black uppercase tracking-widest">{errors.email.message}</p>}
               </div>
               <div>

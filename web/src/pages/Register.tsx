@@ -85,9 +85,9 @@ const STEP_LABELS: Record<Step, string> = {
   4: 'Password',
 };
 
-const fieldBase = 'w-full border-4 border-[var(--bulletin-border)] bg-[var(--bulletin-bg)] px-4 py-4 text-[14px] font-black focus:outline-none focus:ring-2 focus:ring-[var(--bulletin-text)] text-[var(--bulletin-text)] placeholder:text-[var(--bulletin-text)] placeholder:opacity-30 shadow-[4px_4px_0_0_var(--bulletin-shadow)]';
+const fieldBase = 'w-full border-4 border-[var(--bulletin-border)] bg-[var(--bulletin-bg)] px-4 py-4 text-[16px] font-black focus:outline-none focus:ring-2 focus:ring-[var(--bulletin-text)] text-[var(--bulletin-text)] placeholder:text-[var(--bulletin-text)] placeholder:opacity-30 shadow-[4px_4px_0_0_var(--bulletin-shadow)]';
 
-const selectBase = 'w-full border-4 border-[var(--bulletin-border)] bg-[var(--bulletin-bg)] px-4 py-4 text-[14px] font-black focus:outline-none focus:ring-2 focus:ring-[var(--bulletin-text)] text-[var(--bulletin-text)] appearance-none shadow-[4px_4px_0_0_var(--bulletin-shadow)] bg-[url("data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22currentColor%22%20stroke-width%3D%224%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E")] bg-[length:16px] bg-[right_16px_center] bg-no-repeat';
+const selectBase = 'w-full border-4 border-[var(--bulletin-border)] bg-[var(--bulletin-bg)] px-4 py-4 text-[16px] font-black focus:outline-none focus:ring-2 focus:ring-[var(--bulletin-text)] text-[var(--bulletin-text)] appearance-none shadow-[4px_4px_0_0_var(--bulletin-shadow)] bg-[url("data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22currentColor%22%20stroke-width%3D%224%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E")] bg-[length:16px] bg-[right_16px_center] bg-no-repeat';
 
 /* Scattered note on the cork board */
 const ScatteredNote: React.FC<{
@@ -434,7 +434,7 @@ const RegisterPage: React.FC = () => {
                 <div className="space-y-6">
                   <div>
                     <label className="block text-[11px] font-black uppercase tracking-[0.2em] opacity-40 mb-3 text-[var(--bulletin-text)]">Full name</label>
-                    <input type="text" placeholder="Kwame Asante" autoComplete="name" autoFocus className={fieldBase} {...register('name')} readOnly={isGoogleFlow} />
+                    <input type="text" placeholder="Kwame Asante" autoComplete="name" className={fieldBase} {...register('name')} readOnly={isGoogleFlow} />
                     {errors.name && <p className="mt-2 text-[12px] text-red-600 font-black uppercase tracking-widest">{errors.name.message}</p>}
                     {isGoogleFlow && <p className="mt-2 text-[9px] font-bold opacity-40 uppercase tracking-widest text-[var(--bulletin-text)]">Linked to Google Account</p>}
                   </div>
@@ -465,7 +465,7 @@ const RegisterPage: React.FC = () => {
                 <div className="space-y-6">
                   <div>
                     <label className="block text-[11px] font-black uppercase tracking-[0.2em] opacity-40 mb-3 text-[var(--bulletin-text)]">Program of Study</label>
-                    <input type="text" placeholder="e.g. Geological Engineering" autoFocus className={fieldBase} {...register('department')} />
+                    <input type="text" placeholder="e.g. Geological Engineering" className={fieldBase} {...register('department')} />
                     {errors.department && <p className="mt-2 text-[12px] text-red-600 font-black uppercase tracking-widest">{errors.department.message}</p>}
                   </div>
                   <div>
@@ -554,7 +554,7 @@ const RegisterPage: React.FC = () => {
                       <div>
                         <label className="block text-[11px] font-black uppercase tracking-[0.2em] opacity-40 mb-3 text-[var(--bulletin-text)]">Password</label>
                         <div className="relative flex items-center">
-                          <input type={showPassword ? 'text' : 'password'} placeholder="At least 6 characters" autoComplete="new-password" autoFocus className={`flex-1 pr-16 ${fieldBase}`} {...register('password')} />
+                          <input type={showPassword ? 'text' : 'password'} placeholder="At least 6 characters" autoComplete="new-password" className={`flex-1 pr-16 ${fieldBase}`} {...register('password')} />
                           <button type="button" onClick={() => setShowPassword((p) => !p)} className="absolute right-4 opacity-40 hover:opacity-100 text-[var(--bulletin-text)]">{showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}</button>
                         </div>
                         {errors.password && <p className="mt-2 text-[12px] text-red-600 font-black uppercase tracking-widest">{errors.password.message}</p>}
