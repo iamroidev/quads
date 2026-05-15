@@ -313,7 +313,7 @@ const CreateEditProduct: React.FC = () => {
             </BulletinCard>
 
             <BulletinCard rotation={-0.3} bgColor="bg-[var(--bulletin-card)]">
-              <label className={labelBase}>Original Price (GHS) — Optional</label>
+              <label className={labelBase}>Original Price (GHS)</label>
               <input
                 type="number"
                 step="0.01"
