@@ -111,12 +111,6 @@ const Dashboard: React.FC = () => {
             <Link to="/seller/orders" className="text-[10px] font-black uppercase text-white/60 hover:text-white">Orders</Link>
             <Link to="/seller/analytics" className="text-[10px] font-black uppercase text-white/60 hover:text-white">Analytics</Link>
           </div>
-          <button
-            onClick={() => setViewMode('buyer')}
-            className="border border-white/20 px-3 py-1 text-[9px] font-black uppercase text-white/40 hover:text-white hover:border-white transition-all"
-          >
-            Switch to Buyer View →
-          </button>
         </div>
 
         {/* Store Stats */}
