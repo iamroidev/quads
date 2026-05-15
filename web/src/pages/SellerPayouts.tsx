@@ -11,8 +11,10 @@ import {
 } from 'lucide-react';
 import adminService from '../services/admin.service';
 import { BulletinLayout, BulletinSection, BulletinCard } from '../components/layout/BulletinLayout';
+import { useAuth } from '../hooks/useAuth';
 
 const SellerPayouts: React.FC = () => {
+  const { user } = useAuth();
   const { data: payoutsData, isLoading } = useQuery({
     queryKey: ['sellerPayouts'],
     queryFn: () => adminService.getSellerPayouts({ limit: 50 }),
