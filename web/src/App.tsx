@@ -1,4 +1,5 @@
 import React, { lazy, Suspense } from 'react';
+import { HelmetProvider } from 'react-helmet-async';
 import { Routes, Route, Navigate, useParams, useSearchParams } from 'react-router-dom';
 import { Layout } from './components/layout';
 import { ProtectedRoute } from './components/auth';
@@ -65,8 +66,9 @@ const RootRoute: React.FC = () => {
 
 const App: React.FC = () => {
   return (
-    <Suspense fallback={<LoadingSpinner fullScreen text="Loading page..." />}>
-      <Routes>
+    <HelmetProvider>
+      <Suspense fallback={<LoadingSpinner fullScreen text="Loading page..." />}>
+        <Routes>
       {/* Public routes with layout */}
       <Route element={<Layout />}>
         <Route path="/" element={<RootRoute />} />
@@ -262,7 +264,8 @@ const App: React.FC = () => {
         <Route path="*" element={<NotFoundPage />} />
       </Route>
       </Routes>
-    </Suspense>
+      </Suspense>
+    </HelmetProvider>
   );
 };
 

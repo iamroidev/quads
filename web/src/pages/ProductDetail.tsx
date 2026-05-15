@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Helmet } from 'react-helmet-async';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import {
   ArrowLeft,
@@ -90,6 +91,12 @@ const ProductDetail: React.FC = () => {
         const res = await productService.getProduct(id);
         if (res.success) {
           setProduct(res.data.product);
+          // Analytics: Track view
+          growthService.captureEvent(user?._id, 'product_viewed', {
+            productId: id,
+            category: res.data.product.category?.name,
+            price: res.data.product.price
+          });
         }
       } catch (err: any) {
         if (err.response?.status === 404) {
@@ -220,19 +227,27 @@ const ProductDetail: React.FC = () => {
   };
 
   const handleShare = async () => {
-    const url = window.location.href;
+    const apiBase = import.meta.env.VITE_API_URL || '/api';
+    const shareUrl = `${apiBase}/products/${product?._id}/share`;
+    
+    // Analytics: Track share
+    growthService.captureEvent(user?._id, 'product_shared', {
+      productId: product?._id,
+      platform: navigator.share ? 'system' : 'clipboard'
+    });
+
     if (navigator.share) {
       try {
         await navigator.share({
           title: product?.title,
           text: `Check out ${product?.title} on QUADS`,
-          url,
+          url: shareUrl,
         });
       } catch {
         // User cancelled
       }
     } else {
-      await navigator.clipboard.writeText(url);
+      await navigator.clipboard.writeText(shareUrl);
       toast.success('Link copied to clipboard!');
     }
   };
@@ -297,6 +312,17 @@ const ProductDetail: React.FC = () => {
       subtitle="Detailed Product View"
       section="03"
     >
+      <Helmet>
+        <title>{product.title} | QUADS Marketplace</title>
+        <meta name="description" content={product.description.slice(0, 160)} />
+        <meta property="og:title" content={product.title} />
+        <meta property="og:description" content={product.description.slice(0, 160)} />
+        <meta property="og:image" content={product.images[0]?.url || ''} />
+        <meta property="og:type" content="product" />
+        <meta property="product:price:amount" content={product.price.toString()} />
+        <meta property="product:price:currency" content="GHS" />
+        <meta name="twitter:card" content="summary_large_image" />
+      </Helmet>
       <BulletinSection bgColor="bg-[var(--bulletin-bg)]">
         <div className="mb-8">
           <button
@@ -564,6 +590,7 @@ const ProductDetail: React.FC = () => {
                     className="flex-1 border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-text)] px-8 py-4 text-[11px] font-black uppercase tracking-widest text-[var(--bulletin-bg)] transition-all hover:bg-[#ff6b6b] hover:text-white shadow-[6px_6px_0_0_var(--bulletin-shadow)] hover:translate-y-1 hover:shadow-none disabled:opacity-20"
                     disabled={product.status !== 'active'}
                     onClick={() => {
+                      growthService.captureEvent(user?._id, 'buy_now_initiated', { productId: product._id, price: product.price });
                       addItem(product);
                       navigate('/cart');
                     }}
@@ -573,7 +600,10 @@ const ProductDetail: React.FC = () => {
                   <button
                     className="flex-1 border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] px-8 py-4 text-[11px] font-black uppercase tracking-widest text-[var(--bulletin-text)] transition-all hover:bg-[#fffacd] hover:text-black shadow-[6px_6px_0_0_var(--bulletin-shadow)] hover:translate-y-1 hover:shadow-none disabled:opacity-20"
                     disabled={product.status !== 'active'}
-                    onClick={() => addItem(product)}
+                    onClick={() => {
+                      growthService.captureEvent(user?._id, 'add_to_cart', { productId: product._id });
+                      addItem(product);
+                    }}
                   >
                     <ShoppingCart className="inline-block h-5 w-5 mr-2" />
                     Add to Cart

@@ -1099,3 +1099,68 @@ export const getCollectionBySlug = async (
     next(error);
   }
 };
+
+/**
+ * @route   GET /api/products/:id/share
+ * @desc    Render a minimal HTML page with OpenGraph tags for social sharing
+ * @access  Public
+ */
+export const renderProductSocialPreview = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const product = await productService.getProductById(req.params.id);
+    if (!product) {
+      res.status(404).send('Product not found');
+      return;
+    }
+
+    const title = `${product.title} | QUADS`;
+    const description = product.description.slice(0, 160);
+    const imageUrl = product.images[0]?.url || '';
+    const productUrl = `${process.env.FRONTEND_URL || 'https://quadsmarket.tech'}/products/${product._id}`;
+    const priceLabel = `GHS ${product.price.toLocaleString()}`;
+
+    // Return minimal HTML with OG tags
+    res.setHeader('Content-Type', 'text/html');
+    res.send(`
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>${title}</title>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1">
+          
+          <!-- Open Graph / Facebook -->
+          <meta property="og:type" content="product">
+          <meta property="og:url" content="${productUrl}">
+          <meta property="og:title" content="${title}">
+          <meta property="og:description" content="${description} - ${priceLabel}">
+          <meta property="og:image" content="${imageUrl}">
+
+          <!-- Twitter -->
+          <meta name="twitter:card" content="summary_large_image">
+          <meta name="twitter:url" content="${productUrl}">
+          <meta name="twitter:title" content="${title}">
+          <meta name="twitter:description" content="${description} - ${priceLabel}">
+          <meta name="twitter:image" content="${imageUrl}">
+
+          <!-- Redirect to the real app for non-crawlers -->
+          <script>
+            window.location.href = "${productUrl}";
+          </script>
+        </head>
+        <body style="font-family: sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; background: #f9f9f9;">
+          <div style="text-align: center;">
+            <p>Redirecting to QUADS Marketplace...</p>
+            <a href="${productUrl}" style="color: #ff6b6b; font-weight: bold;">Click here if not redirected</a>
+          </div>
+        </body>
+      </html>
+    `);
+  } catch (error) {
+    next(error);
+  }
+};
