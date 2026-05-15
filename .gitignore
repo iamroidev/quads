@@ -49,3 +49,4 @@ mobile/ios/
 *.tsbuildinfo
 
 .vercel
+.env.example

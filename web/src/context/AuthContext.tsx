@@ -60,6 +60,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       email: data.email.toLowerCase(),
       password: data.password,
       options: {
+        emailRedirectTo: 'https://quadsmarket.tech/auth/callback',
         data: {
           name: data.name,
           role: data.role,
@@ -67,8 +68,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       },
     });
 
-    if (error || !authData.session?.access_token) {
-      throw new Error(error?.message || 'Registration failed at authentication provider.');
+    if (error) {
+      throw new Error(error.message || 'Registration failed at authentication provider.');
+    }
+
+    // If email verification is enabled, session might be null. 
+    // We should still attempt to create the user record in our DB if we have the user ID.
+    if (!authData.session?.access_token && authData.user) {
+      // For Supabase, if no session is returned, we can't verify the token on the backend yet.
+      // But we can show a success message to the user to check their email.
+      toast.success('Confirmation email sent! Please check your inbox to verify your account.', { duration: 5000 });
+      return;
+    }
+
+    if (!authData.session?.access_token) {
+      throw new Error('Registration succeeded but no session was created. Please check your email.');
     }
 
     const response = await authService.register({

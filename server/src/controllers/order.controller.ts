@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import orderService from '../services/order.service';
+import ApiError from '../utils/ApiError';
 import growthService from '../services/growth.service';
 
 /**
@@ -282,6 +283,40 @@ export const runAutomationSweep = async (
   try {
     const result = await orderService.runAutomationSweep();
     res.status(200).json({ success: true, message: 'Automation sweep completed', data: result });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * @route   POST /api/orders/:orderId/verify-handoff
+ * @desc    Verify pickup handoff code
+ * @access  Private (buyer)
+ */
+export const verifyHandoff = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const { orderId } = req.params;
+    const { code } = req.body;
+
+    if (!orderId || !code) {
+      throw ApiError.badRequest('orderId and code are required');
+    }
+
+    const order = await orderService.verifyHandoff(
+      orderId,
+      req.user!._id.toString(),
+      code
+    );
+
+    res.status(200).json({
+      success: true,
+      message: 'Handoff verified successfully',
+      data: { order }
+    });
   } catch (error) {
     next(error);
   }

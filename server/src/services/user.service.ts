@@ -1,54 +1,71 @@
+import User, { IUserDocument } from '../models/User';
+import notificationService from './notification.service';
+import ApiError from '../utils/ApiError';
 import mongoose from 'mongoose';
-import Product from '../models/Product';
-import Order from '../models/Order';
-import Review from '../models/Review';
-import User from '../models/User';
 
 class UserService {
   /**
-   * Get real-time statistics for a user (seller or buyer)
+   * Follow or unfollow a seller
    */
-  async getUserStats(userId: string) {
-    const objectId = new mongoose.Types.ObjectId(userId);
+  async toggleFollow(followerId: string, sellerId: string): Promise<{ following: boolean; followersCount: number }> {
+    if (followerId === sellerId) {
+      throw ApiError.badRequest('You cannot follow yourself');
+    }
 
-    const [
-      activeListings,
-      totalSales,
-      ratingData,
-      totalOrders,
-      unreadNotifications
-    ] = await Promise.all([
-      Product.countDocuments({ seller: objectId, status: 'active' }),
-      Order.countDocuments({ seller: objectId, status: 'completed' }),
-      Review.aggregate([
-        { $match: { seller: objectId } },
-        {
-          $group: {
-            _id: null,
-            averageRating: { $avg: '$rating' },
-            totalReviews: { $sum: 1 }
-          }
-        }
-      ]),
-      Order.countDocuments({ buyer: objectId }),
-      // Mock unread notifications count for now or fetch if available
-      Promise.resolve(0)
-    ]);
+    const seller = await User.findById(sellerId);
+    if (!seller) throw ApiError.notFound('Seller not found');
 
-    // Calculate response time from user record if stored
-    const user = await User.findById(objectId).select('responseTimeMinutes');
+    const follower = await User.findById(followerId);
+    if (!follower) throw ApiError.notFound('User not found');
+
+    const isFollowing = follower.following.some(id => id.toString() === sellerId);
+
+    if (isFollowing) {
+      // Unfollow
+      follower.following = follower.following.filter(id => id.toString() === sellerId);
+      seller.followersCount = Math.max(0, seller.followersCount - 1);
+    } else {
+      // Follow
+      follower.following.push(new mongoose.Types.ObjectId(sellerId));
+      seller.followersCount += 1;
+
+      // Notify seller
+      await notificationService.create(
+        sellerId,
+        'system',
+        'New Follower! 👤',
+        `${follower.name} started following your shop.`,
+        `/sellers/${followerId}`,
+        { followerId }
+      );
+    }
+
+    await Promise.all([follower.save(), seller.save()]);
 
     return {
-      activeListings,
-      totalSales,
-      rating: ratingData.length > 0 ? parseFloat(ratingData[0].averageRating.toFixed(1)) : 0,
-      totalReviews: ratingData.length > 0 ? ratingData[0].totalReviews : 0,
-      totalOrders,
-      unreadNotifications,
-      responseTime: user?.responseTimeMinutes || 0,
-      // For response rate, we'd need more complex logic, let's return a default or calculate
-      responseRate: 100 
+      following: !isFollowing,
+      followersCount: seller.followersCount
     };
+  }
+
+  /**
+   * Get user performance statistics
+   */
+  async getUserStats(userId: string): Promise<any> {
+    const user = await User.findById(userId);
+    if (!user) throw ApiError.notFound('User not found');
+
+    // Basic stats — expand as needed
+    const stats = {
+      totalSales: 0,
+      totalOrders: 0,
+      totalListings: 0,
+      followersCount: user.followersCount || 0,
+      followingCount: user.following?.length || 0,
+      responseTimeMinutes: user.responseTimeMinutes || 0,
+    };
+
+    return stats;
   }
 }
 

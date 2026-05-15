@@ -8,6 +8,10 @@ export type NotificationType =
   | 'order_completed'
   | 'order_cancelled'
   | 'new_message'
+  | 'new_offer'
+  | 'offer_accepted'
+  | 'offer_declined'
+  | 'handoff_verified'
   | 'new_review'
   | 'review_reply'
   | 'product_sold'
@@ -43,6 +47,10 @@ const notificationSchema = new Schema<INotificationDocument>(
         'order_completed',
         'order_cancelled',
         'new_message',
+        'new_offer',
+        'offer_accepted',
+        'offer_declined',
+        'handoff_verified',
         'new_review',
         'review_reply',
         'product_sold',

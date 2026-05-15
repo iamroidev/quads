@@ -153,11 +153,27 @@ class ProductService {
     // Build query
     const query: Record<string, any> = {};
 
-    // Only show active products by default (unless admin specifies otherwise)
+    // Only show active products by default
     if (filters.status) {
       query.status = filters.status;
     } else {
       query.status = 'active';
+    }
+
+    // Exclude sellers on vacation
+    const vacationingSellers = await User.find({ 'vacationMode.active': true }).distinct('_id');
+    if (vacationingSellers.length > 0) {
+      if (query.seller) {
+        // If filtering by specific seller, and they're on vacation, no products
+        if (vacationingSellers.some(id => id.toString() === filters.seller)) {
+          return {
+            products: [],
+            pagination: { page, limit, total: 0, pages: 0 }
+          };
+        }
+      } else {
+        query.seller = { $nin: vacationingSellers };
+      }
     }
 
     // Category filter

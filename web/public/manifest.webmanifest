@@ -1,7 +1,7 @@
 {
-  "name": "CampusMarketplace - UMaT",
-  "short_name": "CampusMarket",
-  "description": "Buy and sell on UMaT Campus",
+  "name": "QUADS - UMaT",
+  "short_name": "QUADS",
+  "description": "The Official Institutional Marketplace",
   "theme_color": "#0a0a0a",
   "background_color": "#0a0a0a",
   "display": "standalone",

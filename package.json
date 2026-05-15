@@ -1,7 +1,7 @@
 {
-  "name": "campusmarketplace",
+  "name": "quads",
   "version": "1.0.0",
-  "description": "A marketplace for buyers and sellers on UMaT Campus",
+  "description": "QUADS - The Official Institutional Marketplace",
   "private": true,
   "workspaces": [
     "shared",
@@ -14,6 +14,8 @@
     "dev:mobile": "npm run start --workspace=mobile",
     "build:server": "npm run build --workspace=server",
     "build:web": "npm run build --workspace=web",
+    "sync-env": "node scripts/sync-env.js",
+    "predev": "npm run sync-env",
     "dev": "concurrently \"npm run dev:server\" \"npm run dev:web\"",
     "install:all": "npm install"
   },

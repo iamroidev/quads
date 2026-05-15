@@ -1,7 +1,7 @@
 {
-  "name": "server",
+  "name": "quads",
   "version": "1.0.0",
-  "description": "CampusMarketplace API Server",
+  "description": "QUADS - The Official Institutional Marketplace",
   "main": "dist/app.js",
   "scripts": {
     "dev": "ts-node-dev --respawn --transpile-only src/app.ts",

@@ -103,6 +103,7 @@ class OrderService {
         deliveryFee,
         note,
         status: 'pending',
+        handoffCode: deliveryMethod === 'pickup' ? Math.floor(100000 + Math.random() * 900000).toString() : undefined,
       });
 
       createdOrders.push(await order.populate([
@@ -122,6 +123,47 @@ class OrderService {
       ...input
     });
     return orders[0];
+  }
+
+  /**
+   * Verify pickup handoff code
+   */
+  async verifyHandoff(orderId: string, userId: string, code: string): Promise<IOrderDocument> {
+    const order = await Order.findById(orderId);
+    if (!order) throw ApiError.notFound('Order not found');
+
+    if (order.buyer.toString() !== userId) {
+      throw ApiError.forbidden('Only the buyer can verify the handoff');
+    }
+
+    if (order.deliveryMethod !== 'pickup') {
+      throw ApiError.badRequest('This order is not for pickup');
+    }
+
+    if (order.handoffCode !== code) {
+      throw ApiError.badRequest('Invalid handoff code');
+    }
+
+    order.handoffStatus = 'verified';
+    order.status = 'completed';
+    order.completedAt = new Date();
+    await order.save();
+
+    // Notify seller
+    await notificationService.create(
+      order.seller.toString(),
+      'handoff_verified',
+      'Order Completed! 💰',
+      `Handoff for order #${order.orderNumber} was verified. Funds are being processed.`,
+      `/orders/${order._id}`,
+      { orderId: order._id.toString() }
+    );
+
+    return order.populate([
+      { path: 'buyer', select: 'name avatar phone email' },
+      { path: 'seller', select: 'name avatar phone isVerified' },
+      { path: 'items.product', select: 'title price images status seller' },
+    ]);
   }
 
   /**

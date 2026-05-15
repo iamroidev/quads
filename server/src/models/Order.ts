@@ -21,6 +21,8 @@ export interface IOrderDocument extends Document {
   couponCode?: string;
   note?: string;
   payment?: mongoose.Types.ObjectId;
+  handoffCode?: string;
+  handoffStatus?: 'pending' | 'verified';
   cancelReason?: string;
   cancelledBy?: mongoose.Types.ObjectId;
   completedAt?: Date;
@@ -112,6 +114,15 @@ const orderSchema = new Schema<IOrderDocument>(
     payment: {
       type: Schema.Types.ObjectId,
       ref: 'Transaction',
+    },
+    handoffCode: {
+      type: String,
+      length: 6,
+    },
+    handoffStatus: {
+      type: String,
+      enum: ['pending', 'verified'],
+      default: 'pending',
     },
     cancelReason: String,
     cancelledBy: {

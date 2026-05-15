@@ -7,6 +7,8 @@
 - [x] **Web Push Notifications**: Wired up VAPID keys and Service Worker for real-time alerts.
 - [x] **Session Protocol**: Enforced mandatory agreement checkbox for all auth flows.
 - [x] **Production Infrastructure**: AWS EC2 is live with SSL, PM2, and hardened `.env`.
+- [x] **Email Delivery**: Resend SMTP verified — welcome emails, receipts, and order updates all sending.
+- [x] **Environment Consolidation**: Single root `.env` for all packages — no more drift between server/web/mobile configs.
 
 ## 📍 Production Access
 - **Frontend**: [https://quadsmarket.tech](https://quadsmarket.tech)
@@ -19,9 +21,7 @@
     - Update `index.html` with dynamic OpenGraph meta tags so product links look premium when shared on WhatsApp/Twitter.
 2.  **Image Optimization**: 
     - Update `ProductCard.tsx` to use Cloudinary's `f_auto,q_auto` flags to reduce image size for campus users.
-3.  **Email Verification**: 
-    - Perform a "Test Sign Up" to verify Resend delivery from `support@quadsmarket.tech`.
-4.  **Analytics Pulse**: 
+3.  **Analytics Pulse**: 
     - Add `captureEvent` calls to the "Add to Cart" and "Start Chat" buttons to populate the Growth Dashboard.
 
 ## 🛠️ Maintenance & Sync

@@ -38,7 +38,7 @@ interface EnvConfig {
 const env: EnvConfig = {
   PORT: parseInt(process.env.PORT || '5000', 10),
   NODE_ENV: process.env.NODE_ENV || 'development',
-  MONGODB_URI: process.env.MONGODB_URI || 'mongodb://localhost:27017/quads',
+  MONGODB_URI: process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/quads',
   JWT_SECRET: process.env.JWT_SECRET || 'default-secret-change-me',
   JWT_EXPIRE: process.env.JWT_EXPIRE || '7d',
   JWT_REFRESH_EXPIRE: process.env.JWT_REFRESH_EXPIRE || '30d',
@@ -58,7 +58,7 @@ const env: EnvConfig = {
   SMTP_PORT: process.env.SMTP_PORT || '587',
   SMTP_USER: process.env.SMTP_USER || '',
   SMTP_PASS: process.env.SMTP_PASS || '',
-  SMTP_FROM: process.env.SMTP_FROM || 'support@quadsmarket.tech',
+  SMTP_FROM: `"QUADS" <${process.env.SMTP_FROM || 'noreply@quadsmarket.tech'}>`,
   PLATFORM_COMMISSION: parseInt(process.env.PLATFORM_COMMISSION || '10', 10),
   FIREBASE_PROJECT_ID: process.env.FIREBASE_PROJECT_ID || '',
   FIREBASE_CLIENT_EMAIL: process.env.FIREBASE_CLIENT_EMAIL || '',
