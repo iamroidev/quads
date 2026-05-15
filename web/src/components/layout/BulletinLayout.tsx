@@ -270,10 +270,22 @@ export const BulletinLayout: React.FC<BulletinLayoutProps> = ({
               </div>
 
               {/* Essential Links */}
-              <div className="flex flex-wrap gap-8 md:gap-12 text-[11px] font-black uppercase tracking-widest text-[var(--bulletin-text)]">
+              <div className="flex flex-wrap gap-x-8 gap-y-4 md:gap-x-12 text-[11px] font-black uppercase tracking-widest text-[var(--bulletin-text)] max-w-2xl">
                 <Link to="/support" className="hover:text-[#ff6b6b] transition-colors border-b-2 border-transparent hover:border-[#ff6b6b] pb-1">Help Hub</Link>
                 <Link to="/terms" className="hover:text-[#ff6b6b] transition-colors border-b-2 border-transparent hover:border-[#ff6b6b] pb-1">Protocols</Link>
                 <Link to="/contact" className="hover:text-[#ff6b6b] transition-colors border-b-2 border-transparent hover:border-[#ff6b6b] pb-1">Assistance</Link>
+                
+                {isAuthenticated && (
+                  <>
+                    <Link to="/sellers" className="hover:text-[#ff6b6b] transition-colors border-b-2 border-transparent hover:border-[#ff6b6b] pb-1">Merchant Directory</Link>
+                    <Link to="/orders" className="hover:text-[#ff6b6b] transition-colors border-b-2 border-transparent hover:border-[#ff6b6b] pb-1">My Orders</Link>
+                    <Link to="/messages" className="hover:text-[#ff6b6b] transition-colors border-b-2 border-transparent hover:border-[#ff6b6b] pb-1">Discussions</Link>
+                    {user?.role === 'seller' && (
+                      <Link to="/my-listings" className="hover:text-[#ff6b6b] transition-colors border-b-2 border-transparent hover:border-[#ff6b6b] pb-1">Listing Hub</Link>
+                    )}
+                    <Link to="/settings" className="hover:text-[#ff6b6b] transition-colors border-b-2 border-transparent hover:border-[#ff6b6b] pb-1">Preferences</Link>
+                  </>
+                )}
               </div>
 
               {/* Secure Channels */}
