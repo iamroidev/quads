@@ -37,6 +37,7 @@ import ResetPasswordPage from './pages/ResetPassword';
 import SupportPage from './pages/Support';
 import ContactPage from './pages/Contact';
 import TermsPage from './pages/Terms';
+import CartPage from './pages/Cart';
 
 import { LoadingSpinner } from './components/ui';
 
@@ -120,6 +121,15 @@ const App: React.FC = () => {
         />
 
         {/* Order & Payment routes */}
+        <Route path="/cart" element={<CartPage />} />
+        <Route
+          path="/checkout"
+          element={
+            <ProtectedRoute>
+              <CheckoutPage />
+            </ProtectedRoute>
+          }
+        />
         <Route
           path="/checkout/:id"
           element={

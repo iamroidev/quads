@@ -56,8 +56,16 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onSavedChange }) => 
   const sellerName = typeof product.seller === 'string' ? 'Seller' : (product.seller.storeName || product.seller.brandName || product.seller.name);
   const sellerVerified = typeof product.seller === 'string' ? false : product.seller.isVerified;
 
+  /** Optimize Cloudinary URLs with f_auto,q_auto */
+  const optimizeCloudinaryUrl = (url: string) => {
+    if (!url || !url.includes('cloudinary.com')) return url;
+    if (url.includes('f_auto,q_auto')) return url;
+    return url.replace('/upload/', '/upload/f_auto,q_auto/');
+  };
+
   const placeholderImage = `https://placehold.co/400x300/f3f5f7/9ba3a7?text=${encodeURIComponent(product.title.slice(0, 15))}`;
-  const mainImage = product.images.length > 0 ? product.images[0].url : placeholderImage;
+  const rawImage = product.images.length > 0 ? product.images[0].url : placeholderImage;
+  const mainImage = optimizeCloudinaryUrl(rawImage);
 
   const [isSaved, setIsSaved] = React.useState(false);
   const [saving, setSaving] = React.useState(false);

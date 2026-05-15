@@ -129,6 +129,18 @@ export interface PaginatedResponse<T> {
   pagination: PaginationInfo;
 }
 
+// Cart types
+export interface CartItem {
+  _id: string; // Unique ID for the cart entry
+  productId: string;
+  title: string;
+  price: number;
+  image: string;
+  quantity: number;
+  sellerId: string;
+  sellerName: string;
+}
+
 // Order & Payment types
 export type OrderStatus =
   | 'pending'

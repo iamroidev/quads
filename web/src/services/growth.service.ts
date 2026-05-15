@@ -35,6 +35,10 @@ const growthService = {
     const response = await api.get('/growth/ops/overview');
     return response.data;
   },
+
+  captureEvent: async (userId: string | undefined, event: string, context?: any): Promise<void> => {
+    await api.post('/growth/analytics/capture', { userId, event, context });
+  },
 };
 
 export default growthService;

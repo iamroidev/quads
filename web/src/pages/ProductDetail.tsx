@@ -27,6 +27,7 @@ import growthService from '../services/growth.service';
 import savedItemService from '../services/savedItem.service';
 import { LoadingSpinner } from '../components/ui';
 import { useAuth } from '../context/AuthContext';
+import { useCart } from '../context/CartContext';
 import { ProductPopulated, ReviewPopulated, SellerRating } from '../types';
 import { BulletinLayout, BulletinSection, BulletinCard } from '../components/layout/BulletinLayout';
 
@@ -56,6 +57,7 @@ const ProductDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { addItem } = useCart();
 
   const [product, setProduct] = useState<ProductPopulated | null>(null);
   const [relatedProducts, setRelatedProducts] = useState<ProductPopulated[]>([]);
@@ -559,12 +561,22 @@ const ProductDetail: React.FC = () => {
               ) : (
                 <>
                   <button
-                    className="flex-1 border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-text)] px-8 py-4 text-[11px] font-black uppercase tracking-widest text-[var(--bulletin-bg)] transition-all hover:bg-[#ff6b6b] hover:text-white shadow-[6px_6px_0_0_var(--bulletin-shadow)] hover:translate-y-1 hover:shadow-none disabled:opacity-20 disabled:translate-y-0 disabled:shadow-[6px_6px_0_0_var(--bulletin-shadow)]"
-                    disabled={product.status !== 'active' || !user}
-                    onClick={() => navigate(`/checkout/${product._id}`)}
+                    className="flex-1 border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-text)] px-8 py-4 text-[11px] font-black uppercase tracking-widest text-[var(--bulletin-bg)] transition-all hover:bg-[#ff6b6b] hover:text-white shadow-[6px_6px_0_0_var(--bulletin-shadow)] hover:translate-y-1 hover:shadow-none disabled:opacity-20"
+                    disabled={product.status !== 'active'}
+                    onClick={() => {
+                      addItem(product);
+                      navigate('/cart');
+                    }}
+                  >
+                    Buy Now
+                  </button>
+                  <button
+                    className="flex-1 border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] px-8 py-4 text-[11px] font-black uppercase tracking-widest text-[var(--bulletin-text)] transition-all hover:bg-[#fffacd] hover:text-black shadow-[6px_6px_0_0_var(--bulletin-shadow)] hover:translate-y-1 hover:shadow-none disabled:opacity-20"
+                    disabled={product.status !== 'active'}
+                    onClick={() => addItem(product)}
                   >
                     <ShoppingCart className="inline-block h-5 w-5 mr-2" />
-                    Buy Now
+                    Add to Cart
                   </button>
                   <button
                     className="flex-1 border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] px-8 py-4 text-[11px] font-black uppercase tracking-widest text-[var(--bulletin-text)] transition-all hover:bg-[var(--bulletin-text)] hover:text-[var(--bulletin-bg)] shadow-[6px_6px_0_0_var(--bulletin-shadow)] hover:translate-y-1 hover:shadow-none disabled:opacity-20"

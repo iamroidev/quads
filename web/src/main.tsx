@@ -49,49 +49,51 @@ const AppRoot: React.FC = () => {
       <BrowserRouter>
         <QueryClientProvider client={queryClient}>
           <AuthProvider>
-            <SocketProvider>
-              <App />
-              <Toaster
-                position={isMobile ? 'bottom-center' : 'bottom-right'}
-                toastOptions={{
-                  duration: 2500,
-                  className: 'bulletin-toast',
-                  style: {
-                    borderRadius: '0px',
-                    background: '#fffdf8',
-                    color: '#000',
-                    fontSize: '11px',
-                    fontWeight: '900',
-                    letterSpacing: '0.1em',
-                    textTransform: 'uppercase',
-                    border: '4px solid #000',
-                    boxShadow: '8px 8px 0 0 rgba(0,0,0,1)',
-                    padding: '16px 20px',
-                    fontFamily: '"JetBrains Mono", monospace',
-                    maxWidth: '400px',
-                  },
-                  success: {
+            <CartProvider>
+              <SocketProvider>
+                <App />
+                <Toaster
+                  position={isMobile ? 'bottom-center' : 'bottom-right'}
+                  toastOptions={{
+                    duration: 2500,
+                    className: 'bulletin-toast',
                     style: {
-                      background: '#fffacd', // Yellow notice
+                      borderRadius: '0px',
+                      background: '#fffdf8',
+                      color: '#000',
+                      fontSize: '11px',
+                      fontWeight: '900',
+                      letterSpacing: '0.1em',
+                      textTransform: 'uppercase',
+                      border: '4px solid #000',
+                      boxShadow: '8px 8px 0 0 rgba(0,0,0,1)',
+                      padding: '16px 20px',
+                      fontFamily: '"JetBrains Mono", monospace',
+                      maxWidth: '400px',
                     },
-                    iconTheme: {
-                      primary: '#000',
-                      secondary: '#fffacd',
+                    success: {
+                      style: {
+                        background: '#fffacd', // Yellow notice
+                      },
+                      iconTheme: {
+                        primary: '#000',
+                        secondary: '#fffacd',
+                      },
                     },
-                  },
-                  error: {
-                    style: {
-                      background: '#ff6b6b', // Red alert
-                      color: '#fff',
+                    error: {
+                      style: {
+                        background: '#ff6b6b', // Red alert
+                        color: '#fff',
+                      },
+                      iconTheme: {
+                        primary: '#fff',
+                        secondary: '#ff6b6b',
+                      },
                     },
-                    iconTheme: {
-                      primary: '#fff',
-                      secondary: '#ff6b6b',
-                    },
-                  },
-                }}
-              />
-            </SocketProvider>
+                  }}
+                />
+              </SocketProvider>
+            </CartProvider>
           </AuthProvider>
         </QueryClientProvider>
       </BrowserRouter>

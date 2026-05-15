@@ -35,10 +35,12 @@ const Checkout: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { items: cartItems, clearCart, totalPrice: cartTotalPrice } = useCart();
 
-  const [product, setProduct] = useState<ProductPopulated | null>(null);
+  const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [isCartCheckout, setIsCartCheckout] = useState(false);
   const [form, setForm] = useState<CheckoutFormState>({
     deliveryMethod: 'pickup',
     pickupLocation: '',
@@ -49,43 +51,43 @@ const Checkout: React.FC = () => {
   });
 
   useEffect(() => {
-    if (!id) {
-      toast.error('Product ID missing');
-      navigate('/products');
-      setLoading(false);
-      return;
-    }
     const fetchProduct = async () => {
       try {
-        // Timeout after 15 seconds
-        const timeoutPromise = new Promise<never>((_, reject) => 
-          setTimeout(() => reject(new Error('Request timed out. Please check your connection.')), 15000)
-        );
-        const res = await Promise.race([
-          productService.getProduct(id),
-          timeoutPromise,
-        ]) as any;
-        if (res.success) {
-          setProduct(res.data.product);
-          setForm((prev) => ({ ...prev, pickupLocation: res.data.product.pickupLocation }));
+        if (id) {
+          // Direct checkout for single item
+          setIsCartCheckout(false);
+          const res = await productService.getProduct(id) as any;
+          if (res.success) {
+            setProducts([{
+              ...res.data.product,
+              quantity: 1
+            }]);
+            setForm((prev) => ({ ...prev, pickupLocation: res.data.product.pickupLocation }));
+          }
+        } else {
+          // Cart checkout
+          if (cartItems.length === 0) {
+            toast.error('Your cart is empty');
+            navigate('/products');
+            return;
+          }
+          setIsCartCheckout(true);
+          setProducts(cartItems);
+          // Default pickup location from first item
+          setForm((prev) => ({ ...prev, pickupLocation: cartItems[0].pickupLocation || '' }));
         }
       } catch (err: any) {
-        const msg = err?.message || 'Failed to load product';
-        if (msg.includes('timed out') || msg.includes('network')) {
-          toast.error(msg);
-        } else {
-          toast.error('Failed to load product');
-          navigate('/products');
-        }
+        toast.error('Failed to load checkout details');
+        navigate('/products');
       } finally {
         setLoading(false);
       }
     };
     fetchProduct();
-  }, [id, navigate]);
+  }, [id, navigate, cartItems]);
 
   const handleSubmit = async () => {
-    if (!product || !user) {
+    if (products.length === 0 || !user) {
       toast.error('Please log in to continue');
       return;
     }
@@ -97,9 +99,9 @@ const Checkout: React.FC = () => {
 
     setSubmitting(true);
     try {
-      // 1. Create the order
+      // 1. Create the orders
       const res = await orderService.createOrder({
-        productId: product._id,
+        items: products.map(p => ({ productId: p._id || p.productId, quantity: p.quantity })),
         deliveryMethod: form.deliveryMethod,
         pickupLocation: form.deliveryMethod === 'pickup' ? form.pickupLocation : undefined,
         deliveryAddress: form.deliveryMethod === 'delivery' ? form.deliveryAddress : undefined,
@@ -107,25 +109,27 @@ const Checkout: React.FC = () => {
       });
 
       if (res.success) {
-        const orderId = res.data.order._id;
+        const orders = (res.data as any).orders || [res.data.order];
+        const orderIds = orders.map((o: any) => o._id);
         
         // 2. Initiate payment
         toast.loading('Initiating secure payment...', { id: 'payment-init' });
         
         const callbackUrl = `${window.location.origin}/payment/verify`;
         const payRes = await paymentService.initiatePayment(
-          orderId,
+          orderIds,
           form.paymentMethod,
           callbackUrl
         );
 
         if (payRes.success && payRes.data.authorizationUrl) {
           toast.success('Redirecting to secure payment...', { id: 'payment-init' });
+          if (isCartCheckout) clearCart();
           // Redirect to Paystack
           window.location.href = payRes.data.authorizationUrl;
         } else {
           toast.error('Failed to initialize payment gateway', { id: 'payment-init' });
-          navigate(`/orders/${orderId}`);
+          navigate(`/orders/${orderIds[0]}`);
         }
       }
     } catch (err: any) {
@@ -137,9 +141,9 @@ const Checkout: React.FC = () => {
 
   if (loading) return <LoadingSpinner text="Loading checkout..." fullScreen />;
 
-  if (!product) return null;
+  if (products.length === 0) return null;
 
-  const mainImage = product.images[0]?.url || 'https://placehold.co/400x400/e2e8f0/64748b?text=Item';
+  const subtotal = products.reduce((sum, p) => sum + (p.price * p.quantity), 0);
 
   return (
     <BulletinLayout title="Checkout" subtitle="Purchase" section="11">
@@ -162,26 +166,32 @@ const Checkout: React.FC = () => {
             {/* Product Summary */}
             <div className="relative mb-8">
               <div className="absolute -top-3 left-4 bg-[var(--bulletin-text)] text-[var(--bulletin-bg)] text-[9px] font-black px-2 py-0.5 z-10 rotate-[-1deg]">
-                SELECTED ITEM
+                {products.length > 1 ? 'PINNED ITEMS' : 'SELECTED ITEM'}
               </div>
-              <div className="border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] p-5 shadow-[4px_4px_0_0_var(--bulletin-shadow)]">
-                <div className="flex gap-4">
-                  <div className="w-20 h-20 border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-bg)] flex-shrink-0 overflow-hidden shadow-[2px_2px_0_0_var(--bulletin-shadow)]">
-                    <img src={mainImage} alt={product.title} className="w-full h-full object-cover" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="text-[10px] uppercase tracking-wider opacity-40 mb-1">Product</div>
-                    <div className="text-sm font-black uppercase leading-tight line-clamp-1">{product.title}</div>
-                    <div className="flex items-center gap-2 mt-2">
-                      <span className="border border-[var(--bulletin-border)] px-1.5 py-0.5 text-[9px] font-black uppercase bg-[#e0f2f7] dark:bg-sky-900/30">
-                        {product.condition}
-                      </span>
-                      <span className="text-lg font-black tracking-tighter">
-                        GHS {product.price.toLocaleString('en-GH', { minimumFractionDigits: 2 })}
-                      </span>
+              <div className="border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] p-5 shadow-[4px_4px_0_0_var(--bulletin-shadow)] space-y-4">
+                {products.map((p, idx) => (
+                  <div key={p._id || p.productId} className={`flex gap-4 ${idx !== 0 ? 'pt-4 border-t border-black/5' : ''}`}>
+                    <div className="w-16 h-16 border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-bg)] flex-shrink-0 overflow-hidden shadow-[2px_2px_0_0_var(--bulletin-shadow)]">
+                      <img 
+                        src={p.images?.[0]?.url || p.image || 'https://placehold.co/400x400/e2e8f0/64748b?text=Item'} 
+                        alt={p.title} 
+                        className="w-full h-full object-cover" 
+                      />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="text-[9px] uppercase tracking-wider opacity-40 mb-0.5">
+                        {p.sellerName || 'Product'}
+                      </div>
+                      <div className="text-xs font-black uppercase leading-tight line-clamp-1">{p.title}</div>
+                      <div className="flex items-center justify-between mt-1">
+                        <span className="text-[10px] font-bold opacity-60">QTY: {p.quantity}</span>
+                        <span className="text-sm font-black tracking-tighter">
+                          GHS {(p.price * p.quantity).toLocaleString('en-GH')}
+                        </span>
+                      </div>
                     </div>
                   </div>
-                </div>
+                ))}
               </div>
             </div>
 
@@ -294,7 +304,7 @@ const Checkout: React.FC = () => {
                 <div className="space-y-4 text-[12px] font-mono">
                   <div className="flex justify-between items-center">
                     <span className="opacity-60 uppercase">Subtotal</span>
-                    <span className="font-black">GHS {product.price.toLocaleString('en-GH')}</span>
+                    <span className="font-black">GHS {subtotal.toLocaleString('en-GH')}</span>
                   </div>
                   <div className="flex justify-between items-center text-[#2e7d32] dark:text-emerald-400">
                     <span className="opacity-60 uppercase text-[10px]">Processing fee</span>
@@ -307,7 +317,7 @@ const Checkout: React.FC = () => {
                   <div className="border-t-2 border-dashed border-black/20 dark:border-white/20 pt-4 flex justify-between items-baseline">
                     <span className="font-black uppercase text-sm">Amount Due</span>
                     <span className="font-black text-2xl tracking-tighter">
-                      GHS {product.price.toLocaleString('en-GH', { minimumFractionDigits: 2 })}
+                      GHS {subtotal.toLocaleString('en-GH', { minimumFractionDigits: 2 })}
                     </span>
                   </div>
                 </div>
