@@ -295,7 +295,7 @@ const VerificationPage: React.FC = () => {
                         <span className="text-[12px] font-black opacity-40 uppercase tracking-widest text-[var(--bulletin-text)]">Didn't get it?</span>
                         <button
                           disabled={countdown > 0}
-                          onClick={handleSendCode}
+                          onClick={() => handleSendCode()}
                           className={`text-[12px] font-black uppercase tracking-widest text-[var(--bulletin-text)] ${countdown > 0 ? 'opacity-30' : 'underline decoration-2 underline-offset-4'}`}
                         >
                           {countdown > 0 ? `Resend in ${countdown}s` : 'Resend Now'}
