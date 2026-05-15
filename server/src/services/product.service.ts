@@ -111,16 +111,30 @@ class ProductService {
       throw ApiError.badRequest('This category is currently disabled');
     }
 
-    // Upload images if provided
+    // Separate images and video
     let images: { url: string; publicId: string }[] = [];
+    let video: { url: string; publicId: string } | undefined;
+
     if (data.images && data.images.length > 0) {
       images = data.images.slice(0, 5);
     }
+
     if (files && files.length > 0) {
       if (!reqMeta) {
-        throw ApiError.badRequest('Request context missing for image upload.');
+        throw ApiError.badRequest('Request context missing for upload.');
       }
-      images = await uploadMultipleWithFallback(files, reqMeta);
+      
+      const imageFiles = files.filter(f => f.mimetype.startsWith('image/'));
+      const videoFile = files.find(f => f.mimetype.startsWith('video/'));
+
+      if (imageFiles.length > 0) {
+        images = await uploadMultipleWithFallback(imageFiles, reqMeta);
+      }
+
+      if (videoFile) {
+        const { uploadVideoToCloudinary } = await import('../utils/imageUpload');
+        video = await uploadVideoToCloudinary(videoFile.buffer);
+      }
     }
 
     // Sanitize tags
@@ -139,6 +153,7 @@ class ProductService {
       category: resolvedCategoryId,
       seller: sellerId,
       images,
+      video,
       condition: data.condition,
       status: data.status || 'active',
       deliveryOption: data.deliveryOption || 'pickup',

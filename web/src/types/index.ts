@@ -77,6 +77,7 @@ export interface Product {
   category: Category | string;
   seller: Pick<User, '_id' | 'name' | 'storeName' | 'brandName' | 'avatar' | 'isVerified' | 'location' | 'residenceHall'> | string;
   images: ProductImage[];
+  video?: { url: string; publicId: string };
   condition: ProductCondition;
   status: ProductStatus;
   deliveryOption: DeliveryOption;

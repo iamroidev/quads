@@ -5,6 +5,11 @@ export interface IProductImage {
   publicId: string;
 }
 
+export interface IProductVideo {
+  url: string;
+  publicId: string;
+}
+
 export interface IProductDocument extends Document {
   _id: mongoose.Types.ObjectId;
   title: string;
@@ -14,6 +19,7 @@ export interface IProductDocument extends Document {
     category: mongoose.Types.ObjectId;
     seller: mongoose.Types.ObjectId;
     images: IProductImage[];
+    video?: IProductVideo;
     condition: 'new' | 'like-new' | 'good' | 'fair' | 'poor';
     status: 'active' | 'sold' | 'reserved' | 'draft' | 'removed';
     deliveryOption: 'pickup' | 'delivery' | 'both';
@@ -86,6 +92,10 @@ const productSchema = new Schema<IProductDocument>(
         message: 'Maximum 5 images allowed',
       },
       default: [],
+    },
+    video: {
+      url: { type: String },
+      publicId: { type: String },
     },
     condition: {
       type: String,
