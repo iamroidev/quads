@@ -64,87 +64,90 @@ const HomePage: React.FC = () => {
       )}
 
       {/* ── The Bulletin Board Hero ── */}
-      <BulletinSection bgColor="bg-[var(--bulletin-bg)]" className="pt-12 overflow-visible">
-        <div className="relative min-h-[600px] lg:min-h-[700px] w-full">
-          {/* Main "Board" Surface - subtle depth */}
+      <BulletinSection bgColor="bg-[var(--bulletin-bg)]" className="pt-4 md:pt-12 overflow-hidden">
+        {/* Mobile-first: stack layout, no absolute positioning */}
+        <div className="min-h-auto lg:min-h-[700px] w-full relative">
+          {/* Board Surface background */}
           <div className="absolute inset-0 border-4 border-[var(--bulletin-border)] bg-[#1a1a1a] dark:bg-[#0a0a0a] shadow-[16px_16px_0_0_var(--bulletin-shadow)]" />
           
-          {/* ── LARGE MAIN POSTER ── */}
-          <div 
-            className="absolute top-10 left-6 md:top-20 md:left-20 max-w-[90%] md:max-w-2xl border-4 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] p-10 md:p-16 shadow-[12px_12px_0_0_var(--bulletin-shadow)] z-20 transition-transform hover:scale-[1.01]"
-            style={{ transform: 'rotate(-1.5deg)' }}
-          >
-            {/* Pinned tape at top */}
-            <div className="absolute -top-4 left-1/2 -translate-x-1/2 h-8 w-40 bg-[#ffd700]/60 rotate-[2deg] shadow-sm z-30" />
-            
-            <div className="mb-6 inline-block border-2 border-[#ff6b6b] px-4 py-1.5 text-[11px] font-black uppercase tracking-[0.3em] text-[#ff6b6b]">
-              Verified Network
+          <div className="relative z-20 flex flex-col lg:flex-row lg:items-start gap-6 lg:gap-0 p-4 md:p-8 lg:p-12">
+            {/* ── MAIN POSTER ── */}
+            <div 
+              className="w-full lg:w-auto lg:max-w-2xl border-4 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] p-6 md:p-10 lg:p-16 shadow-[8px_8px_0_0_var(--bulletin-shadow)] lg:shadow-[12px_12px_0_0_var(--bulletin-shadow)] transition-transform hover:scale-[1.01] lg:ml-8 lg:mt-8"
+              style={{ transform: 'rotate(-1.5deg)' }}
+            >
+              {/* Pinned tape at top */}
+              <div className="absolute -top-4 left-1/2 -translate-x-1/2 h-8 w-40 bg-[#ffd700]/60 rotate-[2deg] shadow-sm z-30" />
+              
+              <div className="mb-4 md:mb-6 inline-block border-2 border-[#ff6b6b] px-3 md:px-4 py-1.5 text-[9px] md:text-[11px] font-black uppercase tracking-[0.3em] text-[#ff6b6b]">
+                Verified Network
+              </div>
+              <p className="text-3xl md:text-4xl lg:text-5xl font-black uppercase tracking-tighter leading-none mb-4 md:mb-10 text-[var(--bulletin-text)]">
+                BROWSE VERIFIED <br/>CAMPUS LISTINGS
+              </p>
+              <p className="text-sm md:text-lg lg:text-xl font-bold leading-relaxed opacity-70 text-[var(--bulletin-text)] mb-4 md:mb-10 max-w-xl">
+                Buy, sell, and trade with verified UMaT students. From textbooks to electronics, we've built the most trusted network for your hostel life.
+              </p>
+              
+              <div className="flex flex-wrap gap-3 md:gap-4">
+                <Link to="/products" className="border-4 border-black bg-black text-white px-6 md:px-8 py-3 md:py-4 text-[11px] md:text-[14px] font-black uppercase tracking-widest hover:-translate-y-1 shadow-[6px_6px_0_0_rgba(255,107,107,0.5)] transition-all">
+                  Browse Board →
+                </Link>
+              </div>
             </div>
-            <p className="text-4xl md:text-5xl font-black uppercase tracking-tighter leading-none mb-10 text-[var(--bulletin-text)]">
-              BROWSE VERIFIED <br/>CAMPUS LISTINGS
-            </p>
-            <p className="text-lg md:text-xl font-bold leading-relaxed opacity-70 text-[var(--bulletin-text)] mb-10 max-w-xl">
-              Buy, sell, and trade with verified UMaT students. From textbooks to electronics, we've built the most trusted network for your hostel life.
-            </p>
-            
-            <div className="flex flex-wrap gap-4">
-              <Link to="/products" className="border-4 border-black bg-black text-white px-8 py-4 text-[14px] font-black uppercase tracking-widest hover:-translate-y-1 shadow-[6px_6px_0_0_rgba(255,107,107,0.5)] transition-all">
-                Browse Board →
-              </Link>
-            </div>
+
+            {/* ── "JOIN" STICKY NOTE ── */}
+            {!isAuthenticated && (
+              <div 
+                className="w-full lg:w-auto lg:absolute lg:left-[50%] lg:top-12 border-4 border-black bg-[#fffacd] p-6 md:p-8 shadow-[8px_8px_0_0_rgba(0,0,0,1)] lg:shadow-[12px_12px_0_0_rgba(0,0,0,1)] lg:max-w-[280px]"
+                style={{ transform: 'rotate(3deg)' }}
+              >
+                <div className="absolute -top-3 left-1/2 -translate-x-1/2 h-8 w-8 rounded-full bg-red-600 border-2 border-black shadow-inner z-10 flex items-center justify-center">
+                  <div className="h-2 w-2 rounded-full bg-white/60" />
+                </div>
+                <div className="absolute -top-2 left-6 h-6 w-20 bg-[#ffd700]/40 rotate-12 z-0" />
+                
+                <h3 className="text-xl md:text-2xl font-black uppercase tracking-tight text-black mb-3">New here?</h3>
+                <p className="text-[11px] md:text-[13px] font-bold opacity-80 text-black mb-4 md:mb-6 leading-tight">
+                  Connect with the board. <br/>Use your student ID email <br/>to unlock campus trading.
+                </p>
+                <Link to="/register" className="inline-block w-full border-4 border-black bg-black text-white px-4 py-3 text-[10px] md:text-[11px] font-black uppercase text-center hover:bg-[#ff6b6b] transition-all shadow-[4px_4px_0_0_rgba(0,0,0,0.2)]">
+                  Initialize Access →
+                </Link>
+              </div>
+            )}
           </div>
 
-          {/* ── "JOIN" STICKY NOTE (Pinned to top right corner of Quads poster) ── */}
-          {!isAuthenticated && (
-            <div 
-              className="absolute left-[54%] top-[-4%] md:left-[45%] md:top-8 lg:left-[50%] lg:top-12 border-4 border-black bg-[#fffacd] p-8 shadow-[12px_12px_0_0_rgba(0,0,0,1)] z-40 hidden lg:block max-w-[280px]"
-              style={{ transform: 'rotate(3deg)' }}
-            >
-              <div className="absolute -top-3 left-1/2 -translate-x-1/2 h-8 w-8 rounded-full bg-red-600 border-2 border-black shadow-inner z-10 flex items-center justify-center">
-                <div className="h-2 w-2 rounded-full bg-white/60" />
-              </div>
-              <div className="absolute -top-2 left-6 h-6 w-20 bg-[#ffd700]/40 rotate-12 z-0" />
-              
-              <h3 className="text-2xl font-black uppercase tracking-tight text-black mb-3">New here?</h3>
-              <p className="text-[13px] font-bold opacity-80 text-black mb-6 leading-tight">
-                Connect with the board. <br/>Use your student ID email <br/>to unlock campus trading.
-              </p>
-              <Link to="/register" className="inline-block w-full border-4 border-black bg-black text-white px-4 py-3 text-[11px] font-black uppercase text-center hover:bg-[#ff6b6b] transition-all shadow-[4px_4px_0_0_rgba(0,0,0,0.2)]">
-                Initialize Access →
-              </Link>
-            </div>
-          )}
-
-          {/* ── INTELLIGENCE POST-ITS (Floating on right) ── */}
-          <div className="absolute top-10 right-6 md:top-20 md:right-20 flex flex-col gap-8 z-10 w-full max-w-[280px] pointer-events-none md:pointer-events-auto">
+          {/* ── STAT POST-ITS (Mobile: below main content, Desktop: floating right) ── */}
+          <div className="relative lg:absolute lg:top-20 lg:right-20 flex flex-col sm:flex-row lg:flex-col gap-4 lg:gap-8 z-10 px-4 md:px-8 pb-8 lg:pb-0 lg:max-w-[280px]">
             {/* Stat 01 */}
             <div 
-              className="border-4 border-black bg-white dark:bg-[#eee] p-6 shadow-[8px_8px_0_0_#ff6b6b] ml-auto w-full"
+              className="border-4 border-black bg-white dark:bg-[#eee] p-4 md:p-6 shadow-[4px_4px_0_0_#ff6b6b] md:shadow-[8px_8px_0_0_#ff6b6b] lg:ml-auto w-full sm:w-1/3 lg:w-full"
               style={{ transform: 'rotate(1.2deg)' }}
             >
-              <div className="text-4xl font-black text-[#ff6b6b] mb-1">0%</div>
-              <div className="text-[10px] font-black uppercase tracking-widest opacity-40 text-black">Trading Fees</div>
-              <div className="text-[12px] font-bold text-black mt-1">Free for every student.</div>
+              <div className="text-2xl md:text-4xl font-black text-[#ff6b6b] mb-1">0%</div>
+              <div className="text-[8px] md:text-[10px] font-black uppercase tracking-widest opacity-40 text-black">Trading Fees</div>
+              <div className="text-[10px] md:text-[12px] font-bold text-black mt-1">Free for every student.</div>
             </div>
 
             {/* Stat 02 */}
             <div 
-              className="border-4 border-black bg-[#e0f2f7] dark:bg-[#cde9f0] p-6 shadow-[8px_8px_0_0_var(--bulletin-shadow)] mr-4 w-full"
+              className="border-4 border-black bg-[#e0f2f7] dark:bg-[#cde9f0] p-4 md:p-6 shadow-[4px_4px_0_0_var(--bulletin-shadow)] md:shadow-[8px_8px_0_0_var(--bulletin-shadow)] w-full sm:w-1/3 lg:w-full"
               style={{ transform: 'rotate(-2.5deg)' }}
             >
-              <div className="text-4xl font-black text-black mb-1">{totalProducts || '...'}</div>
-              <div className="text-[10px] font-black uppercase tracking-widest opacity-40 text-black">Listings</div>
-              <div className="text-[12px] font-bold text-black mt-1">Live campus inventory.</div>
+              <div className="text-2xl md:text-4xl font-black text-black mb-1">{totalProducts || '...'}</div>
+              <div className="text-[8px] md:text-[10px] font-black uppercase tracking-widest opacity-40 text-black">Listings</div>
+              <div className="text-[10px] md:text-[12px] font-bold text-black mt-1">Live campus inventory.</div>
             </div>
 
             {/* Stat 03 */}
             <div 
-              className="border-4 border-black bg-[#fce4ec] dark:bg-[#f8d0de] p-6 shadow-[8px_8px_0_0_var(--bulletin-shadow)] ml-2 w-full"
+              className="border-4 border-black bg-[#fce4ec] dark:bg-[#f8d0de] p-4 md:p-6 shadow-[4px_4px_0_0_var(--bulletin-shadow)] md:shadow-[8px_8px_0_0_var(--bulletin-shadow)] w-full sm:w-1/3 lg:w-full"
               style={{ transform: 'rotate(0.5deg)' }}
             >
-              <div className="text-4xl font-black text-black mb-1">{totalSellers || '...'}</div>
-              <div className="text-[10px] font-black uppercase tracking-widest opacity-40 text-black">Sellers</div>
-              <div className="text-[12px] font-bold text-black mt-1">Verified UMaT students.</div>
+              <div className="text-2xl md:text-4xl font-black text-black mb-1">{totalSellers || '...'}</div>
+              <div className="text-[8px] md:text-[10px] font-black uppercase tracking-widest opacity-40 text-black">Sellers</div>
+              <div className="text-[10px] md:text-[12px] font-bold text-black mt-1">Verified UMaT students.</div>
             </div>
           </div>
 
