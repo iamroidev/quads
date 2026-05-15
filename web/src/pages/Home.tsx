@@ -235,7 +235,7 @@ const HomePage: React.FC = () => {
             <div className="flex-1">
               <div className="text-[10px] font-black uppercase tracking-[0.3em] text-[#ff6b6b] mb-6">Partner Opportunity</div>
               <h2 className="text-4xl md:text-5xl font-black uppercase tracking-tighter text-[var(--bulletin-text)] leading-none mb-6">Your Store.<br />Your Rules.</h2>
-              <p className="text-[15px] font-bold opacity-60 text-[var(--bulletin-text)] max-w-sm mb-8">Ready to turn your extra items into cash? Post a listing in under 2 minutes and reach thousands of students on campus.</p>
+              <p className="text-[15px] font-bold opacity-60 text-[var(--bulletin-text)] max-w-sm mb-8">Ready to turn your extra items into cash? Post a listing in under 2 minutes and reach the entire campus community.</p>
               {!isAuthenticated ? (
                 <Link to="/register" className="inline-block border-4 border-[#ff6b6b] bg-transparent px-8 py-4 text-[13px] font-black uppercase tracking-widest text-[#ff6b6b] shadow-[6px_6px_0_0_#ff6b6b] hover:-translate-y-1 transition-all">
                   Start Selling Now →
@@ -270,7 +270,7 @@ const HomePage: React.FC = () => {
             </div>
             <div className="text-3xl font-black uppercase tracking-tighter mb-4 text-[var(--bulletin-text)]">Discover</div>
             <p className="text-[14px] font-bold opacity-70 leading-relaxed text-[var(--bulletin-text)]">
-              Browse through hundreds of items listed by fellow students. Filter by category, condition, or campus location.
+              Browse through listings from fellow students. Filter by category, condition, or campus location.
             </p>
           </div>
 

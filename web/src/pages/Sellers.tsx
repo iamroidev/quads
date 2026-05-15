@@ -134,7 +134,7 @@ const SellersPage: React.FC = () => {
          <div className="flex flex-col md:flex-row items-center justify-between gap-8">
             <div className="max-w-xl text-center md:text-left">
                <p className="text-xl font-medium leading-tight opacity-70">
-                 Ready to turn your side-hustle into a verified campus business? Join 50+ students already earning on QUADS.
+                 Ready to turn your side-hustle into a verified campus business? Join the growing network of students already earning on QUADS.
                </p>
             </div>
             <Link to="/seller/onboarding" className="bg-white text-black px-10 py-5 font-black uppercase tracking-widest shadow-[8px_8px_0_0_#ff6b6b] hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all flex items-center gap-3">
