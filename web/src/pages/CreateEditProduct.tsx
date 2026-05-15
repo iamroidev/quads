@@ -15,11 +15,11 @@ import { useAuth } from '../context/AuthContext';
 
 const productSchema = z.object({
   title: z.string().min(3, 'Title must be at least 3 characters').max(120, 'Title too long'),
-  description: z.string().min(10, 'Description must be at least 10 characters').max(2000, 'Description too long'),
-  price: z.number({ invalid_type_error: 'Price is required' }).min(0.5, 'Min price is GHS 0.50').max(100000, 'Max price is GHS 100,000'),
+  description: z.string().min(10, 'Description must be at least 10 characters').max(2000, 'Description too long').optional().or(z.literal('')),
+  price: z.number({ invalid_type_error: 'Price is required' }).min(0.5, 'Min price is GHS 0.50').max(100000, 'Max price is GHS 100,000').optional().or(z.literal('')).transform((v) => v === '' ? undefined : v),
   originalPrice: z.number().min(0.5, 'Min price is GHS 0.50').max(100000, 'Max price is GHS 100,000').optional().or(z.literal('')).transform((v) => v === '' ? undefined : v),
-  category: z.string().min(1, 'Category is required'),
-  condition: z.enum(['new', 'like-new', 'good', 'fair', 'poor'], { required_error: 'Condition is required' }),
+  category: z.string().min(1, 'Category is required').optional().or(z.literal('')),
+  condition: z.enum(['new', 'like-new', 'good', 'fair', 'poor'], { required_error: 'Condition is required' }).optional().or(z.literal('')),
   deliveryOption: z.enum(['pickup', 'delivery', 'both']).default('pickup'),
   pickupLocation: z.string().optional(),
   tags: z.string().optional(),
@@ -141,16 +141,41 @@ const CreateEditProduct: React.FC = () => {
         return;
       }
     } else if (currentStep === 2) {
-      fieldsToValidate = ['description', 'category', 'condition'];
+      fieldsToValidate = ['description', 'category', 'condition', 'price'];
     }
 
     const result = await trigger(fieldsToValidate);
-    if (result) setCurrentStep(prev => prev + 1);
+    if (result) {
+      setCurrentStep(prev => prev + 1);
+      window.scrollTo(0, 0);
+    } else {
+      toast.error('Please complete the required fields for this phase');
+    }
   };
 
   const prevStep = () => setCurrentStep(prev => prev - 1);
 
   const onSubmit = async (data: ProductFormData) => {
+    // Strict validation for active listings (bypasses zod optionality)
+    if (data.status === 'active') {
+      if (!data.description || data.description.length < 10) {
+        toast.error('Description must be at least 10 characters to publish');
+        return;
+      }
+      if (!data.price) {
+        toast.error('Price is required to publish');
+        return;
+      }
+      if (!data.category) {
+        toast.error('Category is required to publish');
+        return;
+      }
+      if (!data.condition) {
+        toast.error('Condition is required to publish');
+        return;
+      }
+    }
+
     setSubmitting(true);
     try {
       if (isEdit && removedImageIds.length > 0) {
@@ -163,11 +188,11 @@ const CreateEditProduct: React.FC = () => {
 
       const payload = {
         title: data.title,
-        description: data.description,
-        price: data.price,
+        description: data.description || '',
+        price: data.price || 0,
         originalPrice: data.originalPrice,
-        category: data.category,
-        condition: data.condition,
+        category: data.category || 'others',
+        condition: data.condition || 'good',
         deliveryOption: data.deliveryOption,
         pickupLocation: data.pickupLocation,
         tags,
@@ -197,14 +222,15 @@ const CreateEditProduct: React.FC = () => {
     // Manually trigger title validation as it's the bare minimum for a draft
     const isTitleValid = await trigger('title');
     if (!isTitleValid) {
-      toast.error('Title is required even for drafts');
+    const titleValue = watch('title');
+    if (!titleValue || titleValue.length < 3) {
+      toast.error('Drafts need at least a title (min 3 chars)');
       return;
     }
 
     const values = watch();
     setSubmitting(true);
     try {
-      // Logic from onSubmit but relaxed for drafts
       const tags = values.tags
         ? values.tags.split(',').map((t) => t.trim()).filter(Boolean)
         : [];
@@ -220,7 +246,7 @@ const CreateEditProduct: React.FC = () => {
         await productService.updateProduct(id!, payload);
         toast.success('Draft updated!');
       } else {
-        await productService.createProduct(payload);
+        await productService.createProduct(payload as any);
         toast.success('Listing saved as draft!');
       }
       navigate('/my-listings');
