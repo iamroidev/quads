@@ -129,12 +129,22 @@ export const BulletinLayout: React.FC<BulletinLayoutProps> = ({
                   </>
                 ) : (
                   <>
-                    <Link to="/products" className="hover:text-[#ff6b6b]">Full Catalog</Link>
-                    <Link to="/saved" className="hover:text-[#ff6b6b]">Wishlist</Link>
-                    <Link to="/orders" className="hover:text-[#ff6b6b]">Order History</Link>
+                    <Link to="/products" className="hover:text-[#ff6b6b]">The Board</Link>
+                    <Link to="/sellers" className="hover:text-[#ff6b6b]">Merchants</Link>
+                    <Link to="/pulse" className="hover:text-[#ff6b6b]">Pulse</Link>
+                    <Link to="/safety" className="hover:text-[#ff6b6b]">Protocol</Link>
                   </>
                 )}
               </div>
+
+              {!isSeller && (
+                <Link 
+                  to="/sell" 
+                  className="hidden md:flex items-center gap-2 border-2 border-black bg-black text-white px-4 py-2 text-[10px] font-black uppercase tracking-widest shadow-[3px_3px_0_0_#ff6b6b] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all"
+                >
+                  Sell on Quads
+                </Link>
+              )}
 
               <button 
                 onClick={toggleTheme}
