@@ -27,6 +27,7 @@ import {
   getCollectionBySlug,
   bulkUpdateProductDetails,
   downloadImportErrorTemplate,
+  renderProductSocialPreview,
 } from '../controllers/product.controller';
 import { authenticate, ensureProfileComplete } from '../middleware/auth';
 import { isSeller, isAdmin } from '../middleware/roleCheck';
@@ -80,6 +81,9 @@ router.get('/:id/related', getRelatedProducts);
 
 // GET /api/products/:id/price-insights — market price insights
 router.get('/:id/price-insights', getPriceInsights);
+
+// GET /api/products/:id/share — social preview for OG tags
+router.get('/:id/share', renderProductSocialPreview);
 
 // ========================
 // Authenticated routes
