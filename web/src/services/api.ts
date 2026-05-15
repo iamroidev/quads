@@ -35,6 +35,12 @@ api.interceptors.response.use(
     const message =
       error.response?.data?.message || error.message || 'Something went wrong';
 
+    // Handle 503 - Service Unavailable (Maintenance)
+    if (error.response?.status === 503) {
+      window.location.href = '/maintenance';
+      return Promise.reject(error);
+    }
+
     // Handle 401 - unauthorized
     if (error.response?.status === 401) {
       localStorage.removeItem('token');
