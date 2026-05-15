@@ -68,24 +68,48 @@ const Support: React.FC = () => {
       
       {/* Hero / Search */}
       <BulletinSection bgColor="bg-[var(--bulletin-bg)]">
-        <div className="max-w-2xl mx-auto py-8">
-          <div className="relative">
-            <Search className="absolute left-6 top-1/2 -translate-y-1/2 h-6 w-6 opacity-40 text-[var(--bulletin-text)]" />
-            <input 
-              type="text" 
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search guides..." 
-              className="w-full border-4 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] p-6 pl-16 text-lg font-black focus:outline-none focus:ring-2 focus:ring-[var(--bulletin-text)] shadow-[8px_8px_0_0_var(--bulletin-shadow)] text-[var(--bulletin-text)] placeholder:opacity-30 placeholder:text-[var(--bulletin-text)]"
-            />
-          </div>
-          <div className="mt-8 flex flex-wrap gap-6 text-[12px] font-black uppercase tracking-widest opacity-60 text-[var(--bulletin-text)]">
-            <span>Quick Links:</span>
-            <a href="#help" className="underline decoration-2 underline-offset-4 hover:opacity-100 transition-all">Help Center</a>
-            <a href="#safety" className="underline decoration-2 underline-offset-4 hover:opacity-100 transition-all">Safety Center</a>
-            <Link to="/contact" className="underline decoration-2 underline-offset-4 hover:opacity-100 transition-all flex items-center gap-2">
-              Contact Support <ArrowRight className="h-4 w-4" />
-            </Link>
+        <div className="max-w-4xl mx-auto py-8">
+          <div className="grid md:grid-cols-[1fr_350px] gap-8 items-start">
+            <div>
+              <div className="relative">
+                <Search className="absolute left-6 top-1/2 -translate-y-1/2 h-6 w-6 opacity-40 text-[var(--bulletin-text)]" />
+                <input 
+                  type="text" 
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search guides..." 
+                  className="w-full border-4 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] p-6 pl-16 text-lg font-black focus:outline-none focus:ring-2 focus:ring-[var(--bulletin-text)] shadow-[8px_8px_0_0_var(--bulletin-shadow)] text-[var(--bulletin-text)] placeholder:opacity-30 placeholder:text-[var(--bulletin-text)]"
+                />
+              </div>
+              <div className="mt-8 flex flex-wrap gap-6 text-[12px] font-black uppercase tracking-widest opacity-60 text-[var(--bulletin-text)]">
+                <span>Quick Links:</span>
+                <a href="#help" className="underline decoration-2 underline-offset-4 hover:opacity-100 transition-all">Help Center</a>
+                <a href="#safety" className="underline decoration-2 underline-offset-4 hover:opacity-100 transition-all">Safety Center</a>
+                <Link to="/contact" className="underline decoration-2 underline-offset-4 hover:opacity-100 transition-all flex items-center gap-2">
+                  Contact Support <ArrowRight className="h-4 w-4" />
+                </Link>
+              </div>
+            </div>
+
+            {/* AI Assistant Promo */}
+            <div className="border-4 border-[var(--bulletin-border)] bg-[#ffd700] dark:bg-yellow-900/40 p-8 shadow-[8px_8px_0_0_var(--bulletin-shadow)] rotate-[1deg]">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="h-10 w-10 bg-black flex items-center justify-center text-white font-black rounded-sm">🤖</div>
+                <div className="text-[10px] font-black uppercase tracking-widest text-black dark:text-yellow-200">Instant Help</div>
+              </div>
+              <h3 className="text-xl font-black uppercase tracking-tight text-black dark:text-yellow-200 mb-4">Talk to QUADS AI</h3>
+              <p className="text-[13px] font-bold text-black/70 dark:text-yellow-200/70 mb-6 leading-tight">Get instant answers about escrow, verification, and marketplace rules.</p>
+              <button 
+                onClick={async () => {
+                  // This will redirect to the support chat handled by AI
+                  // We'll use a special path that ChatService handles
+                  window.location.href = '/messages?support=true';
+                }}
+                className="w-full border-2 border-black bg-black text-white py-3 text-[11px] font-black uppercase tracking-widest hover:bg-white hover:text-black transition-all"
+              >
+                Launch Smart Chat
+              </button>
+            </div>
           </div>
         </div>
       </BulletinSection>

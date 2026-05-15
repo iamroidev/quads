@@ -38,7 +38,26 @@ const Messages: React.FC = () => {
 
   useEffect(() => {
     fetchConversations();
-  }, [fetchConversations]);
+    
+    // Auto-start Support Chat if requested via query param
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('support') === 'true') {
+      const startSupport = async () => {
+        try {
+          const res = await chatService.getAiUser();
+          if (res.success) {
+            const convRes = await chatService.getOrCreateConversation(res.data.userId);
+            if (convRes.success) {
+              navigate(`/messages/${convRes.data.conversation._id}`, { replace: true });
+            }
+          }
+        } catch (err) {
+          console.error('Failed to start AI support:', err);
+        }
+      };
+      startSupport();
+    }
+  }, [fetchConversations, navigate]);
 
   useEffect(() => {
     const unsub = onConversationUpdated((updatedConv) => {
