@@ -18,6 +18,7 @@ interface ProductFilters {
   maxPrice?: number;
   seller?: string;
   search?: string;
+  ids?: string[];
   deliveryOption?: string;
   pickupLocation?: string;
   sort?: string;
@@ -169,6 +170,11 @@ class ProductService {
 
     // Build query
     const query: Record<string, any> = {};
+
+    // ID filtering for collections
+    if (filters.ids && filters.ids.length > 0) {
+      query._id = { $in: filters.ids };
+    }
 
     // Only show active products by default
     if (filters.status) {
@@ -865,7 +871,65 @@ class ProductService {
       .filter((item) => !!item.category);
   }
 
+  private aiCollectionsCache: { data: any[], timestamp: number } | null = null;
+  private readonly CACHE_TTL = 30 * 60 * 1000; // 30 minutes
+
   async getCollections(limit: number = 6): Promise<any[]> {
+    // Return cached if valid
+    if (this.aiCollectionsCache && (Date.now() - this.aiCollectionsCache.timestamp < this.CACHE_TTL)) {
+      return this.aiCollectionsCache.data.slice(0, limit);
+    }
+
+    try {
+      // Fetch a pool of active products to group
+      const products = await Product.find({ status: 'active', isFlagged: false })
+        .sort({ views: -1, createdAt: -1 })
+        .limit(40)
+        .populate('category', 'name')
+        .lean();
+
+      if (products.length < 5) {
+        // Fallback to category-based collections if not enough products
+        return this.getLegacyCollections(limit);
+      }
+
+      const aiService = (await import('./ai.service')).default;
+      const groupings = await aiService.groupProducts(products);
+
+      if (!groupings || groupings.length === 0) {
+        return this.getLegacyCollections(limit);
+      }
+
+      // Hydrate collections with full product data
+      const collections = await Promise.all(groupings.map(async (group: any) => {
+        const heroProduct = await Product.findOne({ _id: { $in: group.productIds }, status: 'active' })
+          .select('title price images')
+          .lean();
+
+        return {
+          slug: group.slug,
+          title: group.title,
+          description: group.description,
+          productIds: group.productIds,
+          listingCount: group.productIds.length,
+          hero: heroProduct ? {
+            productId: heroProduct._id,
+            title: heroProduct.title,
+            price: heroProduct.price,
+            image: heroProduct.images?.[0]?.url || null
+          } : null
+        };
+      }));
+
+      this.aiCollectionsCache = { data: collections, timestamp: Date.now() };
+      return collections.slice(0, limit);
+    } catch (error) {
+      console.error('Failed to generate AI collections:', error);
+      return this.getLegacyCollections(limit);
+    }
+  }
+
+  private async getLegacyCollections(limit: number): Promise<any[]> {
     const safeLimit = Math.min(20, Math.max(1, limit));
     const categories = await Category.find({ isActive: true }).select('name slug icon').lean();
     const counts = await Product.aggregate([
@@ -919,12 +983,20 @@ class ProductService {
       throw ApiError.notFound('Collection not found');
     }
 
-    const productsResult = await this.getProducts({
-      category: collection.categorySlug,
-      sort: 'popular',
-      page: 1,
-      limit: Math.min(50, Math.max(1, productLimit)),
-    });
+    let productsResult;
+    if (collection.productIds && collection.productIds.length > 0) {
+      productsResult = await this.getProducts({
+        ids: collection.productIds, // I should ensure getProducts supports ids
+        limit: Math.min(50, Math.max(1, productLimit)),
+      });
+    } else {
+      productsResult = await this.getProducts({
+        category: collection.categorySlug,
+        sort: 'popular',
+        page: 1,
+        limit: Math.min(50, Math.max(1, productLimit)),
+      });
+    }
 
     return {
       ...collection,

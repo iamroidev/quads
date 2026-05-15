@@ -67,6 +67,84 @@ ${userMessage}
       return "I'm having a bit of trouble processing that. Let me get a human to help you. ESCALATING TO HUMAN SUPPORT.";
     }
   }
+  async groupProducts(products: any[]): Promise<any[]> {
+    if (!this.apiKey) {
+      console.error('OPENROUTER_API_KEY is not set');
+      return [];
+    }
+
+    try {
+      const productList = products.map(p => ({
+        id: p._id,
+        title: p.title,
+        description: p.description,
+        price: p.price,
+        category: p.category?.name || 'Uncategorized'
+      }));
+
+      const prompt = `
+        You are a creative marketplace curator for UMaT (University of Mines and Technology) campus.
+        Below is a list of products currently available on the QUADS marketplace.
+        Group them into 3-5 catchy, relevant campus-themed collections.
+        
+        Examples of collection themes:
+        - "Freshman Starter Pack" (essentials for new students)
+        - "Engineer's Toolkit" (tech, gadgets, tools)
+        - "Hostel Hype" (room decor, comfort items)
+        - "Exam Survival Kit" (snacks, stationery, coffee)
+        - "Graduation Clear-out" (items from departing students)
+        
+        Return ONLY a JSON array of objects with the following structure:
+        [
+          {
+            "title": "Collection Title",
+            "description": "Short catchy description",
+            "slug": "collection-slug",
+            "productIds": ["id1", "id2", "..."]
+          }
+        ]
+
+        Only include products that actually fit the theme. A product can be in multiple collections if it fits.
+        
+        PRODUCTS:
+        ${JSON.stringify(productList)}
+      `;
+
+      const response = await axios.post(
+        this.apiUrl,
+        {
+          model: this.model,
+          messages: [
+            { role: 'system', content: 'You are a professional marketplace curator. Return only valid JSON.' },
+            { role: 'user', content: prompt }
+          ],
+          response_format: { type: 'json_object' }
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${this.apiKey}`,
+            'HTTP-Referer': 'https://quadsmarket.tech',
+            'X-Title': 'QUADS Marketplace',
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+
+      const content = response.data.choices[0].message.content;
+      // Extract JSON array from response
+      const jsonMatch = content.match(/\[.*\]/s);
+      if (jsonMatch) {
+        return JSON.parse(jsonMatch[0]);
+      }
+      
+      // If it's an object with a collections key
+      const data = JSON.parse(content);
+      return data.collections || data;
+    } catch (error: any) {
+      console.error('OpenRouter Grouping Error:', error.response?.data || error.message);
+      return [];
+    }
+  }
 }
 
 export default new AiService();

@@ -298,17 +298,6 @@ const SettingsPage: React.FC = () => {
                   </button>
                 </div>
               </BulletinCard>
-
-              <div className="flex justify-end">
-                <button
-                  onClick={handleTestPush}
-                  disabled={!pushEnabled || testingPush}
-                  className="border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] px-6 py-3 text-[10px] font-black uppercase tracking-widest shadow-[4px_4px_0_0_var(--bulletin-shadow)] hover:translate-y-1 hover:shadow-none disabled:opacity-40 transition-all text-[var(--bulletin-text)]"
-                >
-                  <Bell className="inline-block h-3 w-3 mr-2" />
-                  {testingPush ? 'Sending...' : 'Test Notification'}
-                </button>
-              </div>
             </div>
           </div>
         )}

@@ -44,6 +44,9 @@ const Dashboard: React.FC = () => {
     }
   }, [isSeller]);
 
+  const [collections, setCollections] = useState<any[]>([]);
+  const [loadingCollections, setLoadingCollections] = useState(true);
+
   useEffect(() => {
     // Discovery data
     productService.getRecent(8)
@@ -55,6 +58,11 @@ const Dashboard: React.FC = () => {
       .then((res) => { if (res.success) setTrendingProducts(res.data); })
       .catch(() => { })
       .finally(() => setLoadingTrending(false));
+
+    productService.getCollections(6)
+      .then((res: any) => { if (res.success) setCollections(res.data); })
+      .catch(() => { })
+      .finally(() => setLoadingCollections(false));
 
     categoryService.getCategoriesWithCounts()
       .then((res) => { if (res.success) setCategories(res.data.categories.slice(0, 8)); })
@@ -331,6 +339,61 @@ const Dashboard: React.FC = () => {
           </div>
         </BulletinSection>
       )}
+
+      {/* AI Collections */}
+      {loadingCollections ? (
+        <BulletinSection title="Curating for you..." subtitle="Section 05">
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+             <div className="h-48 bg-gray-200 animate-pulse border-2 border-black/10"></div>
+             <div className="h-48 bg-gray-200 animate-pulse border-2 border-black/10"></div>
+             <div className="h-48 bg-gray-200 animate-pulse border-2 border-black/10"></div>
+          </div>
+        </BulletinSection>
+      ) : collections.map((collection, cIdx) => (
+        <BulletinSection 
+          key={collection.slug} 
+          title={collection.title} 
+          subtitle={`Collection 0${cIdx + 5}`}
+          bgColor={cIdx % 2 === 0 ? 'bg-[#f0e8f4] dark:bg-purple-900/10' : 'bg-[#e0f2f7] dark:bg-sky-900/10'}
+          action={<Link to={`/collections/${collection.slug}`} className="text-[11px] underline font-bold">Explore {collection.listingCount} items →</Link>}
+        >
+          <div className="grid gap-6 md:grid-cols-3 lg:grid-cols-3">
+             <div className="md:col-span-1">
+                <div className="p-6 border-4 border-black dark:border-white/20 bg-white dark:bg-black/40 h-full flex flex-col justify-center">
+                   <p className="text-[13px] font-bold opacity-70 italic leading-relaxed text-[var(--bulletin-text)] mb-4">
+                     "{collection.description}"
+                   </p>
+                   <div className="mt-auto pt-4 border-t border-black/5 flex items-center gap-2">
+                      <div className="w-8 h-8 rounded-full bg-emerald-500 flex items-center justify-center text-[10px] text-white font-black">AI</div>
+                      <span className="text-[9px] font-black uppercase tracking-widest opacity-40">AI-Powered Curation</span>
+                   </div>
+                </div>
+             </div>
+             
+             <div className="md:col-span-2">
+                <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide">
+                  {collection.hero && (
+                    <Link to={`/products/${collection.hero.productId}`} className="flex-shrink-0 group">
+                       <div className="relative border-2 border-black dark:border-white/20 bg-white dark:bg-black/40 p-2 shadow-[6px_6px_0_0_var(--bulletin-shadow)] transition-all hover:-translate-y-1 w-44">
+                          <div className="aspect-square bg-gray-100 mb-2 overflow-hidden">
+                             <img src={collection.hero.image || 'https://placehold.co/200'} alt={collection.hero.title} className="w-full h-full object-cover" />
+                          </div>
+                          <div className="text-[10px] font-black truncate uppercase mb-1">{collection.hero.title}</div>
+                          <div className="text-sm font-black">GHS {collection.hero.price}</div>
+                       </div>
+                    </Link>
+                  )}
+                  {/* Placeholder ghosts for visual variety */}
+                  {[1, 2, 3].map((n) => (
+                    <div key={n} className="flex-shrink-0 w-44 border-2 border-dashed border-black/10 bg-black/5 flex items-center justify-center p-4 text-center">
+                       <div className="text-[9px] font-black uppercase tracking-widest opacity-20">Space for Listing #{n}</div>
+                    </div>
+                  ))}
+                </div>
+             </div>
+          </div>
+        </BulletinSection>
+      ))}
 
       {/* Upgrade CTA for buyers */}
       {user?.role === 'buyer' && (
