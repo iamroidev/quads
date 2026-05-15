@@ -210,13 +210,13 @@ const LoginPage: React.FC = () => {
 
         <div className="flex flex-1 items-center justify-center p-6 md:p-12 lg:p-20">
           <div className="w-full max-w-md">
-            <div className="mb-12 border-b-4 border-[var(--bulletin-border)] pb-6">
+            <div className="mb-8 md:mb-12 border-b-4 border-[var(--bulletin-border)] pb-4 md:pb-6">
               <Link to="/" className="hidden md:inline-flex items-center gap-3 mb-8 hover:opacity-70 transition-opacity">
                 <BrandMark className="h-6 w-6 text-[var(--bulletin-text)]" />
                 <span className="text-[14px] font-black uppercase tracking-[0.2em] text-[var(--bulletin-text)]">QUADS</span>
               </Link>
-              <h1 className="text-5xl font-black uppercase tracking-tighter text-[var(--bulletin-text)] leading-none">Authentication</h1>
-              <p className="text-[12px] font-bold opacity-60 mt-4 text-[var(--bulletin-text)] uppercase tracking-widest">Sign in to your account.</p>
+              <h1 className="text-3xl md:text-5xl font-black uppercase tracking-tighter text-[var(--bulletin-text)] leading-none">Authentication</h1>
+              <p className="text-[10px] md:text-[12px] font-bold opacity-60 mt-2 md:mt-4 text-[var(--bulletin-text)] uppercase tracking-widest">Sign in to your account.</p>
             </div>
 
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
@@ -234,7 +234,7 @@ const LoginPage: React.FC = () => {
                   </button>
                 </div>
                 {errors.password && <p className="mt-2 text-[12px] text-red-600 font-black uppercase tracking-widest">{errors.password.message}</p>}
-                <div className="mt-4 flex justify-end">
+                <div className="mt-2 md:mt-4 flex justify-end">
                   <Link
                     to="/forgot-password"
                     className="text-[11px] font-black uppercase tracking-widest text-[var(--bulletin-text)] opacity-60 hover:opacity-100 underline decoration-2 underline-offset-4 transition-all"
@@ -242,12 +242,12 @@ const LoginPage: React.FC = () => {
                     Forgot password?
                   </Link>
                 </div>
-                <div className="mt-8 p-5 border-2 border-dashed border-[var(--bulletin-border)] bg-[var(--bulletin-bg)] relative">
+                <div className="mt-4 md:mt-8 p-3 md:p-5 border-2 border-dashed border-[var(--bulletin-border)] bg-[var(--bulletin-bg)] relative">
                   <div className="absolute -top-3 left-4 bg-red-500 text-white text-[9px] font-black px-2 py-0.5 shadow-[2px_2px_0_0_rgba(0,0,0,1)]">
                     SESSION PROTOCOL
                   </div>
-                  <div className="flex items-start gap-4">
-                    <label className="relative flex h-8 w-8 cursor-pointer items-center justify-center border-2 border-black bg-white shadow-[3px_3px_0_0_var(--bulletin-shadow)] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-none transition-all">
+              <div className="flex items-start gap-2 md:gap-4">
+                <label className="relative flex h-6 w-6 md:h-8 md:w-8 flex-shrink-0 cursor-pointer items-center justify-center border-2 border-black bg-white shadow-[2px_2px_0_0_var(--bulletin-shadow)] md:shadow-[3px_3px_0_0_var(--bulletin-shadow)] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-none transition-all">
                       <input
                         type="checkbox"
                         className="peer sr-only"
@@ -266,18 +266,18 @@ const LoginPage: React.FC = () => {
                 </div>
               </div>
               <button type="submit" disabled={isSubmitting || !protocolAccepted}
-                className="w-full border-4 border-[var(--bulletin-border)] bg-[var(--bulletin-text)] px-8 py-5 text-[14px] font-black uppercase tracking-widest text-[var(--bulletin-bg)] shadow-[8px_8px_0_0_var(--bulletin-shadow)] hover:translate-y-1 hover:shadow-[4px_4px_0_0_var(--bulletin-shadow)] disabled:opacity-40 transition-all">
+                className="w-full border-4 border-[var(--bulletin-border)] bg-[var(--bulletin-text)] px-6 md:px-8 py-4 md:py-5 text-[12px] md:text-[14px] font-black uppercase tracking-widest text-[var(--bulletin-bg)] shadow-[6px_6px_0_0_var(--bulletin-shadow)] md:shadow-[8px_8px_0_0_var(--bulletin-shadow)] hover:translate-y-1 hover:shadow-[4px_4px_0_0_var(--bulletin-shadow)] disabled:opacity-40 transition-all">
                 {isSubmitting ? 'Authenticating...' : 'Sign In'}
               </button>
             </form>
 
-            <div className="flex items-center gap-4 my-12">
+            <div className="flex items-center gap-3 md:gap-4 my-6 md:my-12">
               <div className="flex-1 h-1 bg-[var(--bulletin-border)] opacity-20" />
-              <span className="text-[12px] font-black uppercase tracking-widest opacity-40 text-[var(--bulletin-text)]">Or</span>
+              <span className="text-[10px] md:text-[12px] font-black uppercase tracking-widest opacity-40 text-[var(--bulletin-text)]">Or</span>
               <div className="flex-1 h-1 bg-[var(--bulletin-border)] opacity-20" />
             </div>
 
-            <div className="flex justify-center mb-12">
+            <div className="flex justify-center mb-6 md:mb-12">
               <div 
                 className={`border-4 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] shadow-[6px_6px_0_0_var(--bulletin-shadow)] transition-all overflow-hidden ${!protocolAccepted ? 'opacity-40 grayscale cursor-not-allowed' : 'hover:-translate-y-1 hover:shadow-[10px_10px_0_0_var(--bulletin-shadow)]'}`} 
                 style={{ transform: 'rotate(-0.5deg)' }}
@@ -300,8 +300,8 @@ const LoginPage: React.FC = () => {
               </div>
             </div>
 
-            <div className="border-t-4 border-[var(--bulletin-border)] pt-8 text-center bg-[var(--bulletin-card)] p-6 border-2 shadow-[8px_8px_0_0_var(--bulletin-shadow)]" style={{ transform: 'rotate(1deg)' }}>
-              <p className="text-[12px] font-bold text-[var(--bulletin-text)] uppercase tracking-widest">
+            <div className="border-t-4 border-[var(--bulletin-border)] pt-6 md:pt-8 text-center bg-[var(--bulletin-card)] p-4 md:p-6 border-2 shadow-[4px_4px_0_0_var(--bulletin-shadow)] md:shadow-[8px_8px_0_0_var(--bulletin-shadow)]" style={{ transform: 'rotate(1deg)' }}>
+              <p className="text-[10px] md:text-[12px] font-bold text-[var(--bulletin-text)] uppercase tracking-widest">
                 No account?{' '}
                 <Link to="/register" className="font-black underline decoration-2 underline-offset-4 hover:no-underline">Create one</Link>
               </p>
