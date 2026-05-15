@@ -3,6 +3,9 @@ import { generateToken } from '../utils/jwt';
 import ApiError from '../utils/ApiError';
 import { verifySupabaseToken } from '../utils/supabaseJwt';
 import { emailService } from './email.service';
+import env from '../config/env';
+
+const INSTITUTIONAL_DOMAINS = env.INSTITUTIONAL_DOMAINS.split(',').map(d => d.trim().toLowerCase());
 
 interface RegisterData {
   supabaseAccessToken: string;
@@ -54,9 +57,8 @@ class AuthService {
   }
 
   private isInstitutionalEmail(email: string): boolean {
-    const institutionalDomains = ['umat.edu.gh', 'student.umat.edu.gh'];
-    const domain = email.split('@')[1];
-    return institutionalDomains.includes(domain);
+    const domain = email.split('@')[1]?.toLowerCase();
+    return INSTITUTIONAL_DOMAINS.includes(domain);
   }
 
   /**

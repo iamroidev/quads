@@ -202,24 +202,32 @@ class PayoutService {
     totalPayoutAmount: number;
     totalCommissionEarned: number;
   }> {
-    const [pending, processing, completed, failed, payouts] = await Promise.all([
+    const [pending, processing, completed, failed, totals] = await Promise.all([
       Payout.countDocuments({ status: 'pending' }),
       Payout.countDocuments({ status: 'processing' }),
       Payout.countDocuments({ status: 'completed' }),
       Payout.countDocuments({ status: 'failed' }),
-      Payout.find({ status: 'completed' }),
+      Payout.aggregate([
+        { $match: { status: 'completed' } },
+        {
+          $group: {
+            _id: null,
+            totalPayoutAmount: { $sum: '$netAmount' },
+            totalCommissionEarned: { $sum: '$commissionAmount' },
+          },
+        },
+      ]),
     ]);
 
-    const totalPayoutAmount = payouts.reduce((sum, p) => sum + p.netAmount, 0);
-    const totalCommissionEarned = payouts.reduce((sum, p) => sum + p.commissionAmount, 0);
+    const result = totals[0] || { totalPayoutAmount: 0, totalCommissionEarned: 0 };
 
     return {
       totalPending: pending,
       totalProcessing: processing,
       totalCompleted: completed,
       totalFailed: failed,
-      totalPayoutAmount,
-      totalCommissionEarned,
+      totalPayoutAmount: result.totalPayoutAmount,
+      totalCommissionEarned: result.totalCommissionEarned,
     };
   }
 

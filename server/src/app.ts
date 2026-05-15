@@ -52,13 +52,12 @@ app.use(
 
 // CORS
 const allowedOrigins = [
-  env.CLIENT_URL,
-  'https://quadsmarket.tech',
-  'https://www.quadsmarket.tech',
-  'http://localhost:5173',
-  'http://localhost:19006',
-  'https://web-3q1q9bvna-roi-dev.vercel.app'
-].filter(Boolean); // Always allow these critical origins
+   env.CLIENT_URL,
+   'https://quadsmarket.tech',
+   'https://www.quadsmarket.tech',
+   'http://localhost:5173',
+   'http://localhost:19006',
+].filter(Boolean);
 
 app.use(
   cors({

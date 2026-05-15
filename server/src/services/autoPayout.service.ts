@@ -56,6 +56,7 @@ class AutoPayoutService {
           // Since this is automated, find any admin user to use as "processedBy"
           const admin = await User.findOne({ role: 'admin' }).select('_id');
           if (!admin) {
+            console.error('[AutoPayout] No admin user found in system - cannot process payout', payout._id.toString());
             failed++;
             details.push({
               payoutId: payout._id.toString(),
