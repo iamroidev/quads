@@ -148,6 +148,7 @@ export const BulletinLayout: React.FC<BulletinLayoutProps> = ({
                 <Link 
                   to={isAuthenticated ? "/seller/onboarding" : "/register"} 
                   className="hidden md:flex items-center gap-2 border-2 border-black bg-black text-white px-4 py-2 text-[10px] font-black uppercase tracking-widest shadow-[3px_3px_0_0_#ff6b6b] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all"
+                  id="sell-on-quads-btn"
                 >
                   Sell on Quads
                 </Link>
@@ -287,55 +288,61 @@ export const BulletinLayout: React.FC<BulletinLayoutProps> = ({
               </div>
 
               {/* Footer Link Columns */}
-              <div className="flex-1 grid grid-cols-2 md:grid-cols-3 gap-12 text-[var(--bulletin-text)]">
+              <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-12 lg:gap-24 text-[var(--bulletin-text)] mb-12">
                 
                 {/* Marketplace Column */}
                 <div className="flex flex-col gap-4">
                   <div className="text-[10px] font-black uppercase tracking-[0.3em] opacity-30 mb-2">Marketplace</div>
-                  <Link to="/products" className="text-[11px] font-black uppercase tracking-widest hover:text-[#ff6b6b] transition-colors">All Listings</Link>
-                  <Link to="/categories" className="text-[11px] font-black uppercase tracking-widest hover:text-[#ff6b6b] transition-colors">Categories</Link>
-                  <Link to="/sellers" className="text-[11px] font-black uppercase tracking-widest hover:text-[#ff6b6b] transition-colors">Merchant Directory</Link>
+                  <Link to="/products" className="text-[14px] font-black uppercase tracking-widest hover:text-[#ff6b6b] transition-colors">All Listings</Link>
+                  <Link to="/categories" className="text-[14px] font-black uppercase tracking-widest hover:text-[#ff6b6b] transition-colors">Categories</Link>
+                  <Link to="/sellers" className="text-[14px] font-black uppercase tracking-widest hover:text-[#ff6b6b] transition-colors">Merchant Directory</Link>
                 </div>
 
-                {/* Support Column */}
+                {/* Protocols Column */}
                 <div className="flex flex-col gap-4">
                   <div className="text-[10px] font-black uppercase tracking-[0.3em] opacity-30 mb-2">Protocols</div>
-                  <Link to="/support" className="text-[11px] font-black uppercase tracking-widest hover:text-[#ff6b6b] transition-colors">Help Hub</Link>
-                  <Link to="/terms" className="text-[11px] font-black uppercase tracking-widest hover:text-[#ff6b6b] transition-colors">Terms of Service</Link>
-                  <Link to="/contact" className="text-[11px] font-black uppercase tracking-widest hover:text-[#ff6b6b] transition-colors">Direct Assistance</Link>
+                  <Link to="/support" className="text-[14px] font-black uppercase tracking-widest hover:text-[#ff6b6b] transition-colors">Help Hub</Link>
+                  <Link to="/terms" className="text-[14px] font-black uppercase tracking-widest hover:text-[#ff6b6b] transition-colors">Terms of Service</Link>
+                  <Link to="/contact" className="text-[14px] font-black uppercase tracking-widest hover:text-[#ff6b6b] transition-colors">Direct Assistance</Link>
                 </div>
 
-                {/* Personal Column (Conditional) */}
-                {isAuthenticated && (
-                  <div className="flex flex-col gap-4">
-                    <div className="text-[10px] font-black uppercase tracking-[0.3em] opacity-30 mb-2">My Hub</div>
-                    <Link to="/orders" className="text-[11px] font-black uppercase tracking-widest hover:text-[#ff6b6b] transition-colors">My Orders</Link>
-                    <Link to="/messages" className="text-[11px] font-black uppercase tracking-widest hover:text-[#ff6b6b] transition-colors">Discussions</Link>
-                    <Link to="/settings" className="text-[11px] font-black uppercase tracking-widest hover:text-[#ff6b6b] transition-colors">Preferences</Link>
-                  </div>
-                )}
+                {/* My Hub Column */}
+                <div className="flex flex-col gap-4">
+                  <div className="text-[10px] font-black uppercase tracking-[0.3em] opacity-30 mb-2">My Hub</div>
+                  {isAuthenticated ? (
+                    <>
+                      <Link to="/orders" className="text-[14px] font-black uppercase tracking-widest hover:text-[#ff6b6b] transition-colors">My Orders</Link>
+                      <Link to="/messages" className="text-[14px] font-black uppercase tracking-widest hover:text-[#ff6b6b] transition-colors">Discussions</Link>
+                      <Link to="/settings" className="text-[14px] font-black uppercase tracking-widest hover:text-[#ff6b6b] transition-colors">Preferences</Link>
+                    </>
+                  ) : (
+                    <>
+                      <Link to="/login" className="text-[14px] font-black uppercase tracking-widest hover:text-[#ff6b6b] transition-colors italic opacity-40">Login to Hub</Link>
+                      <Link to="/register" className="text-[14px] font-black uppercase tracking-widest hover:text-[#ff6b6b] transition-colors">Create Account</Link>
+                    </>
+                  )}
+                </div>
               </div>
 
               {/* Secure Channels / CTA */}
-              <div className="flex flex-col gap-6 md:border-l-4 border-black md:pl-12">
-                <div>
-                   <div className="text-[10px] font-black uppercase tracking-[0.4em] opacity-30 mb-4">Official Channels</div>
-                   <div className="flex items-center gap-6">
-                      <a href="mailto:support@quadsmarket.tech" title="Email Support" className="text-[var(--bulletin-text)] hover:text-[#ff6b6b] transition-all hover:scale-110">
-                        <Mail className="h-5 w-5" />
-                      </a>
-                      <a href="https://wa.me/233551500736" target="_blank" rel="noopener noreferrer" title="WhatsApp Support" className="text-[var(--bulletin-text)] hover:text-[#25D366] transition-all hover:scale-110">
-                        <MessageCircle className="h-5 w-5" />
-                      </a>
-                      <a href="https://twitter.com/quadsmarket" target="_blank" rel="noopener noreferrer" title="Follow on X" className="text-[var(--bulletin-text)] hover:text-[#1DA1F2] transition-all hover:scale-110">
-                        <Twitter className="h-5 w-5" />
-                      </a>
-                   </div>
+              <div className="flex flex-col md:flex-row items-center justify-between border-t-4 border-black pt-12 gap-8">
+                <div className="flex items-center gap-8">
+                   <a href="mailto:support@quadsmarket.tech" title="Email Support" className="text-[var(--bulletin-text)] hover:text-[#ff6b6b] transition-all">
+                     <Mail className="h-5 w-5" />
+                   </a>
+                   <a href="https://wa.me/233551500736" target="_blank" rel="noopener noreferrer" title="WhatsApp Support" className="text-[var(--bulletin-text)] hover:text-[#25D366] transition-all">
+                     <MessageCircle className="h-5 w-5" />
+                   </a>
+                   <a href="https://twitter.com/quadsmarket" target="_blank" rel="noopener noreferrer" title="Follow on X" className="text-[var(--bulletin-text)] hover:text-[#1DA1F2] transition-all">
+                     <Twitter className="h-5 w-5" />
+                   </a>
                 </div>
-                
-                <div className="border-4 border-black bg-[#fffacd] dark:bg-yellow-900/20 p-4 shadow-[4px_4px_0_0_#000]">
-                   <div className="text-[8px] font-black uppercase tracking-widest opacity-40">System Node</div>
-                   <div className="text-[10px] font-black">TARKWA-HQ-01</div>
+
+                <div className="border-4 border-black bg-[#fffacd] dark:bg-yellow-900/20 px-6 py-2 shadow-[4px_4px_0_0_#000]">
+                   <div className="text-[10px] font-black uppercase tracking-tighter flex items-center gap-2">
+                     <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
+                     SYSTEM NODE: TARKWA-HQ-01
+                   </div>
                 </div>
               </div>
 
