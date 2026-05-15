@@ -26,24 +26,6 @@ const PROGRAMS = [
   'Other',
 ];
 
-const RESIDENCE_HALLS = [
-  'Chamber of Mines Hall',
-  'Gold Refinery Hall',
-  'KT Hall',
-  'Recognition Hostel',
-  'Osborn Hostel',
-  'Tandoh Hostel',
-  'Good Shepherd Hostel',
-  'Agrich Hostel',
-  'Kiviz Executive Lodge',
-  'Platinum Hostel',
-  'Global Hostel',
-  'Hill View Hostel',
-  'AdeJoe Hostel',
-  'Off-campus',
-  'Other',
-];
-
 const ACADEMIC_LEVELS = [
   '100',
   '200',
@@ -62,8 +44,8 @@ const registerSchema = z
     confirmPassword: z.string(),
     role: z.enum(['buyer', 'seller']),
     studentId: z.string().optional(),
-    department: z.string().optional(),
-    residenceHall: z.string().optional(),
+    department: z.string().min(2, 'Please enter your program of study'),
+    residenceHall: z.string().min(2, 'Please enter your residence hall/hostel'),
     currentLevel: z.string().optional(),
     location: z.string().optional(),
     termsAccepted: z.literal(true, {
@@ -525,15 +507,28 @@ const RegisterPage: React.FC = () => {
                     {errors.department && <p className="mt-2 text-[12px] text-red-600 font-black uppercase tracking-widest">{errors.department.message}</p>}
                   </div>
                   <div>
-                    <label className="block text-[11px] font-black uppercase tracking-[0.2em] opacity-40 mb-3 text-[var(--bulletin-text)]">Residence Hall</label>
-                    <select className={selectBase} {...register('residenceHall')}>
-                      <option value="">Select hall</option>
-                      {RESIDENCE_HALLS.map((h) => (
-                        <option key={h} value={h}>{h}</option>
-                      ))}
-                    </select>
+                    <label className="block text-[11px] font-black uppercase tracking-[0.2em] opacity-40 mb-3 text-[var(--bulletin-text)]">Residence Hall / Hostel</label>
+                    <input 
+                      type="text" 
+                      placeholder="e.g. Chamber of Mines Hall" 
+                      className={fieldBase} 
+                      {...register('residenceHall')} 
+                    />
                     {errors.residenceHall && <p className="mt-2 text-[12px] text-red-600 font-black uppercase tracking-widest">{errors.residenceHall.message}</p>}
                   </div>
+
+                  {selectedHall === 'Other' && (
+                    <div className="animate-in fade-in slide-in-from-top-2 duration-300">
+                      <label className="block text-[11px] font-black uppercase tracking-[0.2em] opacity-40 mb-3 text-[var(--bulletin-text)]">Specify Hostel / Residence</label>
+                      <input 
+                        type="text" 
+                        placeholder="Type name of your residence" 
+                        className={fieldBase} 
+                        {...register('customHostel')}
+                        autoFocus
+                      />
+                    </div>
+                  )}
                   <div>
                     <label className="block text-[11px] font-black uppercase tracking-[0.2em] opacity-40 mb-3 text-[var(--bulletin-text)]">Academic Level</label>
                     <select className={selectBase} {...register('currentLevel')}>

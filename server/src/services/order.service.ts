@@ -297,14 +297,18 @@ class OrderService {
 
     if (newStatus === 'completed') {
       order.completedAt = new Date();
-      // Mark product as sold
-      await Product.findByIdAndUpdate(order.items[0].product, { status: 'sold' });
+      // Mark all products as sold
+      for (const item of order.items) {
+        await Product.findByIdAndUpdate(item.product, { status: 'sold' });
+      }
     }
 
     if (newStatus === 'cancelled') {
       order.cancelledBy = new mongoose.Types.ObjectId(userId);
-      // Restore product to active
-      await Product.findByIdAndUpdate(order.items[0].product, { status: 'active' });
+      // Restore all products to active
+      for (const item of order.items) {
+        await Product.findByIdAndUpdate(item.product, { status: 'active' });
+      }
     }
 
     await order.save();
@@ -351,8 +355,10 @@ class OrderService {
     order.cancelReason = reason || 'No reason provided';
     order.cancelledBy = new mongoose.Types.ObjectId(userId);
 
-    // Restore product to active
-    await Product.findByIdAndUpdate(order.items[0].product, { status: 'active' });
+    // Restore all products to active
+    for (const item of order.items) {
+      await Product.findByIdAndUpdate(item.product, { status: 'active' });
+    }
 
     await order.save();
 
