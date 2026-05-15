@@ -128,6 +128,14 @@ const chatService = {
     );
     return response.data;
   },
+  
+  /**
+   * Get the AI Support user ID
+   */
+  getAiUser: async (): Promise<{ success: boolean; data: { userId: string, name: string, avatar?: string } }> => {
+    const response = await api.get('/support/ai-user');
+    return response.data;
+  },
 };
 
 export default chatService;
