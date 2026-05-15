@@ -137,7 +137,7 @@ const LoginPage: React.FC = () => {
         {/* Scattered pinned notes */}
         <PinnedNote bg="bg-[#fffacd] dark:bg-yellow-900" rotation={-3} top="8%" left="8%" w="200px">
           <div className="text-[10px] font-black uppercase tracking-[0.2em] opacity-40 text-black dark:text-yellow-200">📌 Notice</div>
-          <div className="mt-2 text-2xl font-black uppercase text-black dark:text-yellow-200 tracking-tighter">2,400+ listings</div>
+          <div className="mt-2 text-2xl font-black uppercase text-black dark:text-yellow-200 tracking-tighter">Student listings</div>
           <div className="mt-2 text-[12px] font-bold opacity-70 leading-relaxed text-black dark:text-yellow-200">Browse textbooks, gadgets & fashion from students.</div>
         </PinnedNote>
 
