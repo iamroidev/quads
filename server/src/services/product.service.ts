@@ -37,23 +37,41 @@ interface PaginatedResult {
 
 class ProductService {
   private async resolveCategoryId(categoryInput: string): Promise<string> {
+    if (!categoryInput) throw ApiError.badRequest('Category is required');
+
+    // 1. If it's a valid ID, return it
     if (mongoose.Types.ObjectId.isValid(categoryInput)) {
       const existing = await Category.findById(categoryInput);
       if (existing) return existing._id.toString();
     }
 
-    const category = await Category.findOne({
-      $or: [
-        { slug: categoryInput.toLowerCase().trim() },
-        { name: { $regex: `^${categoryInput.trim()}$`, $options: 'i' } },
-      ],
-    });
+    // 2. Handle breadcrumbs like "Electronics > Smartphones"
+    const parts = categoryInput.split('>').map((p) => p.trim());
+    let parentId: string | null = null;
 
-    if (!category) {
-      throw ApiError.badRequest('Invalid category');
+    for (const part of parts) {
+      const slug = part.toLowerCase().replace(/[^a-z0-9]/g, '-');
+      let category = await Category.findOne({
+        $or: [
+          { slug },
+          { name: { $regex: `^${part}$`, $options: 'i' } }
+        ],
+        parent: parentId
+      });
+
+      if (!category) {
+        // Create new category on the fly
+        category = await Category.create({
+          name: part,
+          slug,
+          parent: parentId,
+          isActive: true
+        });
+      }
+      parentId = category._id.toString();
     }
 
-    return category._id.toString();
+    return parentId!;
   }
 
   /**
