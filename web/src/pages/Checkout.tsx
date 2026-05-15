@@ -17,6 +17,7 @@ import toast from 'react-hot-toast';
 import productService from '../services/product.service';
 import orderService from '../services/order.service';
 import { useAuth } from '../context/AuthContext';
+import { useCart } from '../context/CartContext';
 import { ProductPopulated, PaymentMethod, PAYMENT_METHODS } from '../types';
 import { LoadingSpinner } from '../components/ui';
 import { BulletinLayout, BulletinSection, BulletinCard } from '../components/layout/BulletinLayout';
@@ -74,7 +75,7 @@ const Checkout: React.FC = () => {
           setIsCartCheckout(true);
           setProducts(cartItems);
           // Default pickup location from first item
-          setForm((prev) => ({ ...prev, pickupLocation: cartItems[0].pickupLocation || '' }));
+          setForm((prev) => ({ ...prev, pickupLocation: (cartItems[0] as any).pickupLocation || '' }));
         }
       } catch (err: any) {
         toast.error('Failed to load checkout details');
