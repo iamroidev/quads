@@ -194,14 +194,42 @@ const CreateEditProduct: React.FC = () => {
   };
 
   const handleSaveDraft = async () => {
-    setValue('status', 'draft');
-    // For drafts, we relax some validations if needed, but here we just try to submit
-    const data = watch();
-    if (!data.title) {
+    // Manually trigger title validation as it's the bare minimum for a draft
+    const isTitleValid = await trigger('title');
+    if (!isTitleValid) {
       toast.error('Title is required even for drafts');
       return;
     }
-    handleSubmit(onSubmit)();
+
+    const values = watch();
+    setSubmitting(true);
+    try {
+      // Logic from onSubmit but relaxed for drafts
+      const tags = values.tags
+        ? values.tags.split(',').map((t) => t.trim()).filter(Boolean)
+        : [];
+
+      const payload = {
+        ...values,
+        tags,
+        status: 'draft' as const,
+        images: images.length > 0 ? images : undefined,
+      };
+
+      if (isEdit) {
+        await productService.updateProduct(id!, payload);
+        toast.success('Draft updated!');
+      } else {
+        await productService.createProduct(payload);
+        toast.success('Listing saved as draft!');
+      }
+      navigate('/my-listings');
+    } catch (err: any) {
+      const msg = err.response?.data?.message || 'Failed to save draft';
+      toast.error(msg);
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const handleRemoveExistingImage = (publicId: string) => {
@@ -251,258 +279,278 @@ const CreateEditProduct: React.FC = () => {
 
   return (
     <BulletinLayout
-      title={isEdit ? 'Edit listing' : 'New listing'}
-      subtitle={isEdit ? 'Update details' : 'pin to board'}
+      title={isEdit ? 'Update Notice' : 'Post Notice'}
+      subtitle={isEdit ? 'Re-pinning your item...' : 'Pin your item to the campus board'}
       section="14"
+      hideHero={true}
     >
-      <div className="border-b border-[var(--bulletin-border)] bg-[var(--bulletin-bg)] p-4 md:p-6">
-        <div className="mx-auto max-w-[1400px] flex justify-between items-center">
-          <button
-            onClick={() => navigate(-1)}
-            className="flex items-center gap-1 text-[12px] font-bold hover:underline"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Back
-          </button>
-          
-          <div className="flex items-center gap-4">
-            {[1, 2, 3].map(step => (
-              <div key={step} className="flex items-center gap-2">
-                <div className={`h-6 w-6 border-2 border-black flex items-center justify-center text-[10px] font-black ${currentStep === step ? 'bg-black text-white' : currentStep > step ? 'bg-[#ff6b6b] text-white' : 'bg-white text-black'}`}>
-                  {step}
-                </div>
-                {step < 3 && <div className="h-0.5 w-4 bg-black/10" />}
+      <div className="bg-[var(--bulletin-bg)] min-h-screen pb-20">
+        {/* Navigation / Progress Header */}
+        <div className="border-b-4 border-black bg-white px-6 py-6 sticky top-[42px] z-[50]">
+          <div className="mx-auto max-w-4xl flex justify-between items-center">
+            <button
+              onClick={() => navigate(-1)}
+              className="group flex items-center gap-2 text-[11px] font-black uppercase tracking-widest hover:text-[#ff6b6b]"
+            >
+              <div className="h-8 w-8 border-2 border-black flex items-center justify-center bg-white group-hover:bg-black group-hover:text-white transition-colors">
+                <ArrowLeft className="h-4 w-4" />
               </div>
-            ))}
+              <span className="hidden sm:inline">Abort Mission</span>
+            </button>
+            
+            <div className="flex items-center gap-2 sm:gap-6">
+              {[1, 2, 3].map(step => (
+                <div key={step} className="flex items-center gap-2">
+                  <div className={`h-10 w-10 border-4 border-black flex items-center justify-center text-sm font-black transition-all ${currentStep === step ? 'bg-[#ff6b6b] text-white -rotate-3 scale-110 shadow-[4px_4px_0_0_black]' : currentStep > step ? 'bg-black text-white' : 'bg-white text-black opacity-30'}`}>
+                    0{step}
+                  </div>
+                  {step < 3 && <div className="h-1 w-4 sm:w-8 bg-black/10" />}
+                </div>
+              ))}
+            </div>
           </div>
         </div>
-      </div>
 
-      <BulletinSection bgColor="bg-[var(--bulletin-bg)]">
-        <form onSubmit={handleSubmit(onSubmit)} className="max-w-2xl mx-auto">
-          
-          {/* STEP 1: IDENTITY & VISUALS */}
-          {currentStep === 1 && (
-            <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-               <div className="border-l-4 border-[#ff6b6b] pl-4 mb-8">
-                 <h2 className="text-3xl font-black uppercase tracking-tighter">Step 1: Visual Identity</h2>
-                 <p className="text-[12px] font-bold opacity-50 uppercase">Show them what you've got</p>
-               </div>
+        <BulletinSection bgColor="bg-[#1a1a1a] dark:bg-[#050505] py-12 md:py-24 relative overflow-hidden">
+          {/* Decorative background grid/elements */}
+          <div className="absolute inset-0 opacity-10 pointer-events-none" style={{ backgroundImage: 'radial-gradient(circle, #ffffff 1px, transparent 1px)', backgroundSize: '30px 30px' }} />
 
-              <BulletinCard rotation={-0.5} bgColor="bg-[var(--bulletin-card)]">
-                <div className={labelBase}>Item Gallery (Max 5)</div>
-                <div className="mt-3">
-                  <ImageUpload
-                    images={images}
-                    existingImages={existingImages}
-                    onChange={setImages}
-                    onRemoveExisting={handleRemoveExistingImage}
-                    maxImages={5}
-                  />
+          <form onSubmit={handleSubmit(onSubmit)} className="max-w-3xl mx-auto relative z-10">
+            
+            {/* STEP 1: IDENTITY & VISUALS */}
+            {currentStep === 1 && (
+              <div className="space-y-8 sm:space-y-12 animate-card-drop">
+                 <div className="bg-white border-2 sm:border-4 border-black p-3 sm:p-4 inline-block -rotate-2 shadow-[4px_4px_0_0_#ff6b6b] sm:shadow-[8px_8px_0_0_#ff6b6b]">
+                   <h2 className="text-2xl sm:text-4xl font-black uppercase tracking-tighter leading-none">PHASE 01: VISUAL PROOF</h2>
+                   <p className="text-[8px] sm:text-[10px] font-black uppercase tracking-widest opacity-40 mt-1">Institutional requirement: High quality photos only</p>
+                 </div>
+
+                <div className="relative pt-4 sm:pt-6">
+                  {/* Tape top */}
+                  <div className="absolute -top-3 sm:-top-4 left-1/2 -translate-x-1/2 h-6 sm:h-8 w-32 sm:w-48 bg-[#ffd700]/40 rotate-1 shadow-sm z-20 border border-black/5" />
+                  
+                  <BulletinCard rotation={-0.5} bgColor="bg-white" className="border-2 sm:border-4 border-black p-4 sm:p-8 shadow-[6px_6px_0_0_black] sm:shadow-[12px_12px_0_0_black]">
+                    <div className="text-[10px] sm:text-[12px] font-black uppercase tracking-[0.2em] mb-4 sm:mb-6 flex items-center gap-2 sm:gap-4">
+                      <div className="h-0.5 sm:h-1 flex-1 bg-black/10" />
+                      Gallery Input
+                      <div className="h-0.5 sm:h-1 flex-1 bg-black/10" />
+                    </div>
+                    <ImageUpload
+                      images={images}
+                      existingImages={existingImages}
+                      onChange={setImages}
+                      onRemoveExisting={handleRemoveExistingImage}
+                      maxImages={5}
+                    />
+                  </BulletinCard>
                 </div>
-              </BulletinCard>
 
-              <BulletinCard rotation={0.3} bgColor="bg-[var(--bulletin-card)]">
-                <label className={labelBase}>Listing Title</label>
-                <input
-                  type="text"
-                  placeholder="e.g., iPhone 15 Pro Max — MINT CONDITION"
-                  className={`${fieldBase} mt-2 text-lg py-4 ${errors.title ? fieldError : ''}`}
-                  {...register('title')}
-                />
-                {errors.title && <p className="mt-1 text-[11px] text-red-600 font-bold">{errors.title.message}</p>}
-              </BulletinCard>
-
-              <div className="flex justify-end pt-4">
-                <button
-                  type="button"
-                  onClick={nextStep}
-                  className="bg-black text-white px-10 py-4 text-[12px] font-black uppercase tracking-widest hover:bg-[#ff6b6b] transition-all shadow-[8px_8px_0_0_rgba(0,0,0,0.2)] active:shadow-none active:translate-x-1 active:translate-y-1"
-                >
-                  Next: The Details →
-                </button>
-              </div>
-            </div>
-          )}
-
-          {/* STEP 2: THE DETAILS */}
-          {currentStep === 2 && (
-            <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-500">
-               <div className="border-l-4 border-[#ff6b6b] pl-4 mb-8">
-                 <h2 className="text-3xl font-black uppercase tracking-tighter">Step 2: Specifications</h2>
-                 <p className="text-[12px] font-bold opacity-50 uppercase">The nitty-gritty details</p>
-               </div>
-
-              <BulletinCard rotation={-0.3} bgColor="bg-[var(--bulletin-card)]">
-                <label className={labelBase}>Detailed Description</label>
-                <textarea
-                  placeholder="Explain why this is a great deal..."
-                  rows={6}
-                  className={`${fieldBase} mt-2 resize-none ${errors.description ? fieldError : ''}`}
-                  {...register('description')}
-                />
-                {errors.description && <p className="mt-1 text-[11px] text-red-600 font-bold">{errors.description.message}</p>}
-              </BulletinCard>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <BulletinCard rotation={0.2} bgColor="bg-[var(--bulletin-card)]">
-                  <label className={labelBase}>Category</label>
+                <BulletinCard rotation={0.5} bgColor="bg-white" className="border-2 sm:border-4 border-black p-4 sm:p-8 shadow-[6px_6px_0_0_#ff6b6b] sm:shadow-[12px_12px_0_0_#ff6b6b]">
+                  <label className="block text-[9px] sm:text-[11px] font-black uppercase tracking-widest mb-2 sm:mb-4">ITEM DESIGNATION (TITLE)</label>
                   <input
                     type="text"
-                    placeholder="Search category..."
-                    className={`${fieldBase} mt-2 ${errors.category ? fieldError : ''}`}
-                    {...register('category')}
-                    autoComplete="off"
-                    list="category-suggestions"
+                    placeholder="E.G. ENGINEERING CALCULATOR"
+                    className="w-full border-2 sm:border-4 border-black bg-[var(--bulletin-bg)] p-3 sm:p-4 text-lg sm:text-xl font-black uppercase placeholder:opacity-20 focus:outline-none focus:bg-white transition-colors"
+                    {...register('title')}
                   />
-                  <datalist id="category-suggestions">
-                    {categories.map((cat) => (
-                      <option key={cat._id} value={cat.name} />
-                    ))}
-                  </datalist>
-                  {errors.category && <p className="mt-1 text-[11px] text-red-600 font-bold">{errors.category.message}</p>}
+                  {errors.title && <p className="mt-2 text-[11px] sm:text-[12px] text-[#ff6b6b] font-black italic">{errors.title.message}</p>}
                 </BulletinCard>
 
-                <BulletinCard rotation={-0.2} bgColor="bg-[var(--bulletin-card)]">
-                  <label className={labelBase}>Condition</label>
-                  <select className={`${fieldBase} mt-2 ${errors.condition ? fieldError : ''}`} {...register('condition')}>
-                    <option value="">Select condition</option>
-                    <option value="new">Brand New</option>
-                    <option value="like-new">Like New</option>
-                    <option value="good">Good</option>
-                    <option value="fair">Fair</option>
-                    <option value="poor">Poor</option>
-                  </select>
-                  {errors.condition && <p className="mt-1 text-[11px] text-red-600 font-bold">{errors.condition.message}</p>}
-                </BulletinCard>
-              </div>
-
-              <BulletinCard rotation={0.3} bgColor="bg-[var(--bulletin-card)]">
-                <label className={labelBase}>Search Tags (Optional)</label>
-                <input
-                  type="text"
-                  placeholder="samsung, phone, laptop..."
-                  className={`${fieldBase} mt-2`}
-                  {...register('tags')}
-                />
-              </BulletinCard>
-
-              <div className="flex justify-between pt-4">
-                <button
-                  type="button"
-                  onClick={prevStep}
-                  className="px-8 py-4 text-[12px] font-black uppercase tracking-widest border-2 border-black hover:bg-black/5"
-                >
-                  ← Back
-                </button>
-                <button
-                  type="button"
-                  onClick={nextStep}
-                  className="bg-black text-white px-10 py-4 text-[12px] font-black uppercase tracking-widest hover:bg-[#ff6b6b] transition-all shadow-[8px_8px_0_0_rgba(0,0,0,0.2)]"
-                >
-                  Next: Logistics →
-                </button>
-              </div>
-            </div>
-          )}
-
-          {/* STEP 3: LOGISTICS & PRICING */}
-          {currentStep === 3 && (
-            <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-500">
-               <div className="border-l-4 border-[#ff6b6b] pl-4 mb-8">
-                 <h2 className="text-3xl font-black uppercase tracking-tighter">Step 3: Final Logistics</h2>
-                 <p className="text-[12px] font-bold opacity-50 uppercase">Set your price and meetup</p>
-               </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <BulletinCard rotation={0.3} bgColor="bg-white dark:bg-black/40">
-                  <label className={labelBase}>Your Asking Price (GHS)</label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    className={`${fieldBase} mt-2 text-xl font-black ${errors.price ? fieldError : ''}`}
-                    {...register('price', { valueAsNumber: true })}
-                  />
-                  {errors.price && <p className="mt-1 text-[11px] text-red-600 font-bold">{errors.price.message}</p>}
-                </BulletinCard>
-
-                <BulletinCard rotation={-0.3} bgColor="bg-[var(--bulletin-card)]">
-                  <label className={labelBase}>Original/Market Price (GHS)</label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    className={`${fieldBase} mt-2 opacity-60`}
-                    {...register('originalPrice', { valueAsNumber: true })}
-                  />
-                </BulletinCard>
-              </div>
-
-              {pricingInsights && (
-                <div className="p-4 border-2 border-dashed border-black bg-[#fffacd] dark:bg-yellow-900/10 rotate-[-1deg]">
-                  <div className="text-[10px] font-black uppercase tracking-widest text-black/40">Smart Recommendation</div>
-                  <div className="text-[13px] font-bold mt-1 text-black">Students are paying GHS {pricingInsights.recommendedMin} - {pricingInsights.recommendedMax} for similar items.</div>
+                <div className="flex justify-end pt-6 sm:pt-10">
+                  <button
+                    type="button"
+                    onClick={nextStep}
+                    className="w-full sm:w-auto bg-black text-white px-8 sm:px-12 py-4 sm:py-6 text-[12px] sm:text-[14px] font-black uppercase tracking-[0.2em] sm:tracking-[0.3em] hover:bg-[#ff6b6b] transition-all shadow-[6px_6px_0_0_rgba(255,255,255,0.1)] sm:shadow-[12px_12px_0_0_rgba(255,255,255,0.1)] hover:shadow-[8px_8px_0_0_#ff6b6b] active:scale-95"
+                  >
+                    CONTINUE TO SPECS →
+                  </button>
                 </div>
-              )}
+              </div>
+            )}
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <BulletinCard rotation={-0.2} bgColor="bg-[var(--bulletin-card)]">
-                  <label className={labelBase}>Fulfillment</label>
-                  <select className={`${fieldBase} mt-2`} {...register('deliveryOption')}>
-                    <option value="pickup">Campus Pickup Only</option>
-                    <option value="delivery">Hostel Delivery Only</option>
-                    <option value="both">Both Available</option>
-                  </select>
+            {/* STEP 2: THE DETAILS */}
+            {currentStep === 2 && (
+              <div className="space-y-8 sm:space-y-12 animate-card-drop">
+                 <div className="bg-[#ff6b6b] border-2 sm:border-4 border-black p-3 sm:p-4 inline-block rotate-2 shadow-[4px_4px_0_0_white] sm:shadow-[8px_8px_0_0_white] text-white">
+                   <h2 className="text-2xl sm:text-4xl font-black uppercase tracking-tighter leading-none">PHASE 02: TECHNICAL DATA</h2>
+                   <p className="text-[8px] sm:text-[10px] font-black uppercase tracking-widest opacity-60 mt-1 text-white">Specify condition and classification</p>
+                 </div>
+
+                <BulletinCard rotation={-0.4} bgColor="bg-white" className="border-2 sm:border-4 border-black p-4 sm:p-8 shadow-[6px_6px_0_0_black] sm:shadow-[12px_12px_0_0_black]">
+                  <label className="block text-[9px] sm:text-[11px] font-black uppercase tracking-widest mb-2 sm:mb-4">DETAILED BRIEF (DESCRIPTION)</label>
+                  <textarea
+                    placeholder="DESCRIBE YOUR ITEM..."
+                    rows={6}
+                    className="w-full border-2 sm:border-4 border-black bg-[var(--bulletin-bg)] p-3 sm:p-4 text-[13px] sm:text-[14px] font-bold uppercase resize-none focus:outline-none focus:bg-white transition-colors"
+                    {...register('description')}
+                  />
+                  {errors.description && <p className="mt-2 text-[11px] sm:text-[12px] text-[#ff6b6b] font-black italic">{errors.description.message}</p>}
                 </BulletinCard>
 
-                {(deliveryOption === 'pickup' || deliveryOption === 'both') && (
-                  <BulletinCard rotation={0.2} bgColor="bg-[var(--bulletin-card)]">
-                    <label className={labelBase}>Meetup Location</label>
-                    <input
-                      type="text"
-                      placeholder="e.g. Unity Hall Gate"
-                      className={`${fieldBase} mt-2`}
-                      {...register('pickupLocation')}
-                      list="location-suggestions"
-                    />
-                    <datalist id="location-suggestions">
-                      {CAMPUS_LOCATIONS.map(l => <option key={l} value={l} />)}
-                    </datalist>
-                  </BulletinCard>
-                )}
-              </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
+                  <div className="relative">
+                     {/* corner tape */}
+                     <div className="absolute -top-2 -left-2 sm:-top-3 sm:-left-3 h-8 w-8 sm:h-10 sm:w-10 bg-black rotate-45 z-20" />
+                     <BulletinCard rotation={0.3} bgColor="bg-white" className="border-2 sm:border-4 border-black p-4 sm:p-6 shadow-[6px_6px_0_0_black] sm:shadow-[8px_8px_0_0_black]">
+                      <label className="block text-[9px] sm:text-[10px] font-black uppercase tracking-widest mb-2 sm:mb-3">CLASSIFICATION</label>
+                      <input
+                        type="text"
+                        placeholder="CATEGORY"
+                        className="w-full border-2 border-black p-2 sm:p-3 text-[11px] sm:text-[12px] font-black uppercase focus:outline-none"
+                        {...register('category')}
+                        autoComplete="off"
+                        list="category-suggestions"
+                      />
+                      <datalist id="category-suggestions">
+                        {categories.map((cat) => (
+                          <option key={cat._id} value={cat.name} />
+                        ))}
+                      </datalist>
+                    </BulletinCard>
+                  </div>
 
-              <div className="flex flex-col gap-4 pt-8">
-                <button
-                  type="submit"
-                  disabled={submitting}
-                  onClick={() => setValue('status', 'active')}
-                  className="w-full bg-black text-white px-10 py-5 text-[14px] font-black uppercase tracking-[0.3em] hover:bg-[#ff6b6b] transition-all shadow-[12px_12px_0_0_rgba(0,0,0,1)] active:translate-x-1 active:translate-y-1 active:shadow-none"
-                >
-                  {submitting ? 'PROCESSING...' : isEdit ? 'CONFIRM CHANGES' : 'PUBLISH TO BOARD'}
-                </button>
-                
-                <div className="flex gap-4">
-                   <button
+                  <BulletinCard rotation={-0.5} bgColor="bg-white" className="border-2 sm:border-4 border-black p-4 sm:p-6 shadow-[6px_6px_0_0_#ff6b6b] sm:shadow-[8px_8px_0_0_#ff6b6b]">
+                    <label className="block text-[9px] sm:text-[10px] font-black uppercase tracking-widest mb-2 sm:mb-3">STATE OF WEAR</label>
+                    <select className="w-full border-2 border-black p-2 sm:p-3 text-[11px] sm:text-[12px] font-black uppercase focus:outline-none bg-transparent" {...register('condition')}>
+                      <option value="">SELECT CONDITION</option>
+                      <option value="new">BRAND NEW</option>
+                      <option value="like-new">LIKE NEW</option>
+                      <option value="good">GOOD</option>
+                      <option value="fair">FAIR</option>
+                      <option value="poor">POOR</option>
+                    </select>
+                  </BulletinCard>
+                </div>
+
+                <BulletinCard rotation={0.4} bgColor="bg-[#fffacd] dark:bg-yellow-900/20" className="border-2 sm:border-4 border-black p-4 sm:p-6 shadow-[6px_6px_0_0_black] sm:shadow-[8px_8px_0_0_black]">
+                  <label className="block text-[9px] sm:text-[10px] font-black uppercase tracking-widest mb-2 sm:mb-3">DISCOVERY TAGS</label>
+                  <input
+                    type="text"
+                    placeholder="SAMSUNG, PHONE..."
+                    className="w-full border-2 border-black bg-transparent p-2 sm:p-3 text-[11px] sm:text-[12px] font-black uppercase placeholder:opacity-40 focus:outline-none"
+                    {...register('tags')}
+                  />
+                </BulletinCard>
+
+                <div className="flex flex-col sm:flex-row justify-between gap-4 pt-6 sm:pt-10">
+                  <button
                     type="button"
                     onClick={prevStep}
-                    className="flex-1 px-8 py-3 text-[11px] font-black uppercase tracking-widest border-2 border-black hover:bg-black/5"
+                    className="order-2 sm:order-1 px-8 py-4 text-[11px] sm:text-[12px] font-black uppercase tracking-widest border-2 sm:border-4 border-black bg-white hover:bg-black hover:text-white transition-all shadow-[4px_4px_0_0_black] sm:shadow-[6px_6px_0_0_black]"
                   >
-                    ← Back
+                    ← REVISE
                   </button>
                   <button
                     type="button"
-                    onClick={handleSaveDraft}
-                    disabled={submitting}
-                    className="flex-1 border-2 border-black bg-white dark:bg-black/20 px-8 py-3 text-[11px] font-black uppercase tracking-widest hover:bg-[#fffacd] dark:hover:bg-white/10 transition-colors"
+                    onClick={nextStep}
+                    className="order-1 sm:order-2 bg-black text-white px-10 sm:px-12 py-4 sm:py-5 text-[12px] sm:text-[14px] font-black uppercase tracking-[0.2em] sm:tracking-[0.3em] hover:bg-[#ff6b6b] transition-all shadow-[6px_6px_0_0_rgba(255,255,255,0.1)] sm:shadow-[12px_12px_0_0_rgba(255,255,255,0.1)]"
                   >
-                    Save as Draft
+                    FINAL LOGISTICS →
                   </button>
                 </div>
               </div>
-            </div>
-          )}
-        </form>
-      </BulletinSection>
+            )}
+
+            {/* STEP 3: LOGISTICS & PRICING */}
+            {currentStep === 3 && (
+              <div className="space-y-8 sm:space-y-12 animate-card-drop">
+                 <div className="bg-white border-2 sm:border-4 border-black p-3 sm:p-4 inline-block -rotate-1 shadow-[4px_4px_0_0_#ff6b6b] sm:shadow-[8px_8px_0_0_#ff6b6b]">
+                   <h2 className="text-2xl sm:text-4xl font-black uppercase tracking-tighter leading-none">PHASE 03: SETTLEMENT</h2>
+                   <p className="text-[8px] sm:text-[10px] font-black uppercase tracking-widest opacity-40 mt-1">Determine value and handover point</p>
+                 </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
+                  <BulletinCard rotation={0.4} bgColor="bg-white" className="border-2 sm:border-4 border-black p-4 sm:p-8 shadow-[6px_6px_0_0_black] sm:shadow-[12px_12px_0_0_black]">
+                    <label className="block text-[10px] sm:text-[11px] font-black uppercase tracking-widest mb-2 sm:mb-4">ASKING PRICE (GHS)</label>
+                    <div className="flex items-center gap-2 sm:gap-4">
+                       <span className="text-2xl sm:text-3xl font-black">¢</span>
+                       <input
+                        type="number"
+                        step="0.01"
+                        className="w-full border-b-2 sm:border-b-4 border-black text-2xl sm:text-4xl font-black bg-transparent focus:outline-none focus:border-[#ff6b6b] transition-colors"
+                        {...register('price', { valueAsNumber: true })}
+                      />
+                    </div>
+                  </BulletinCard>
+
+                  <BulletinCard rotation={-0.3} bgColor="bg-[var(--bulletin-bg)]" className="border-2 sm:border-4 border-black p-4 sm:p-8 opacity-60">
+                    <label className="block text-[10px] sm:text-[11px] font-black uppercase tracking-widest mb-2 sm:mb-4">MARKET VAL.</label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      className="w-full border-b-2 sm:border-b-4 border-black text-xl sm:text-2xl font-black bg-transparent focus:outline-none"
+                      {...register('originalPrice', { valueAsNumber: true })}
+                    />
+                  </BulletinCard>
+                </div>
+
+                {pricingInsights && (
+                  <div className="p-4 sm:p-8 border-2 sm:border-4 border-black bg-[#fffacd] dark:bg-yellow-900/10 rotate-[-0.3deg] shadow-[4px_4px_0_0_#ff6b6b] sm:shadow-[8px_8px_0_0_#ff6b6b]">
+                    <div className="text-[9px] sm:text-[11px] font-black uppercase tracking-[0.2em] text-black/40 mb-1 sm:mb-2 underline decoration-2">Market Intelligence</div>
+                    <div className="text-lg sm:text-xl font-black text-black leading-tight">GHS {pricingInsights.recommendedMin} — {pricingInsights.recommendedMax}</div>
+                  </div>
+                )}
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
+                  <BulletinCard rotation={-0.4} bgColor="bg-white" className="border-2 sm:border-4 border-black p-4 sm:p-6 shadow-[6px_6px_0_0_black] sm:shadow-[8px_8px_0_0_black]">
+                    <label className="block text-[9px] sm:text-[10px] font-black uppercase tracking-widest mb-2 sm:mb-3">HANDOVER METHOD</label>
+                    <select className="w-full border-2 border-black p-2 sm:p-3 text-[11px] sm:text-[12px] font-black uppercase focus:outline-none bg-transparent" {...register('deliveryOption')}>
+                      <option value="pickup">CAMPUS PICKUP</option>
+                      <option value="delivery">HOSTEL DELIVERY</option>
+                      <option value="both">BOTH</option>
+                    </select>
+                  </BulletinCard>
+
+                  {(deliveryOption === 'pickup' || deliveryOption === 'both') && (
+                    <BulletinCard rotation={0.4} bgColor="bg-white" className="border-2 sm:border-4 border-black p-4 sm:p-6 shadow-[6px_6px_0_0_#ff6b6b] sm:shadow-[8px_8px_0_0_#ff6b6b]">
+                      <label className="block text-[9px] sm:text-[10px] font-black uppercase tracking-widest mb-2 sm:mb-3">CAMPUS SECTOR</label>
+                      <input
+                        type="text"
+                        placeholder="LOCATION"
+                        className="w-full border-2 border-black p-2 sm:p-3 text-[11px] sm:text-[12px] font-black uppercase focus:outline-none"
+                        {...register('pickupLocation')}
+                        list="location-suggestions"
+                      />
+                    </BulletinCard>
+                  )}
+                </div>
+
+                <div className="flex flex-col gap-4 sm:gap-6 pt-6 sm:pt-12">
+                  <button
+                    type="submit"
+                    disabled={submitting}
+                    onClick={() => setValue('status', 'active')}
+                    className="w-full bg-black text-white px-8 sm:px-10 py-6 sm:py-8 text-[14px] sm:text-[18px] font-black uppercase tracking-[0.2em] sm:tracking-[0.4em] hover:bg-[#ff6b6b] transition-all shadow-[8px_8px_0_0_rgba(255,107,107,0.4)] sm:shadow-[16px_16px_0_0_rgba(255,107,107,0.4)] hover:shadow-none hover:translate-x-1 hover:translate-y-1 active:scale-[0.98] border-2 sm:border-4 border-white/10"
+                  >
+                    {submitting ? 'EXECUTING...' : isEdit ? 'RE-PIN LISTING' : 'PUBLISH TO THE BOARD'}
+                  </button>
+                  
+                  <div className="flex flex-col sm:flex-row gap-3 sm:gap-6">
+                    <button
+                      type="button"
+                      onClick={prevStep}
+                      className="order-2 sm:order-1 flex-1 px-8 py-4 sm:py-5 text-[11px] sm:text-[12px] font-black uppercase tracking-widest border-2 sm:border-4 border-black sm:border-white text-black sm:text-white bg-white sm:bg-transparent hover:bg-white hover:text-black transition-all"
+                    >
+                      ← PREV PHASE
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleSaveDraft}
+                      disabled={submitting}
+                      className="order-1 sm:order-2 flex-1 border-2 sm:border-4 border-[#ffd700] bg-[#ffd700]/10 text-[#ffd700] px-8 py-4 sm:py-5 text-[11px] sm:text-[12px] font-black uppercase tracking-widest hover:bg-[#ffd700] hover:text-black transition-colors"
+                    >
+                      HOLD AS DRAFT
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+          </form>
+        </BulletinSection>
+      </div>
+    </BulletinLayout>
+  );
+};
     </BulletinLayout>
   );
 };
