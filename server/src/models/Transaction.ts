@@ -1,7 +1,8 @@
 import mongoose, { Document, Schema } from 'mongoose';
 
 export interface ITransactionDocument extends Document {
-  order: mongoose.Types.ObjectId;
+  order?: mongoose.Types.ObjectId;
+  orders?: mongoose.Types.ObjectId[];
   reference: string;
   amount: number;
   currency: string;

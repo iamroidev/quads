@@ -12,13 +12,13 @@ self.addEventListener('push', function (event) {
       };
 
       event.waitUntil(
-        self.registration.showNotification(data.title || 'CampusMarketplace', options)
+        self.registration.showNotification(data.title || 'QUADS', options)
       );
     } catch (err) {
       console.error('Error parsing push data', err);
       // Fallback
       event.waitUntil(
-        self.registration.showNotification('CampusMarketplace', {
+        self.registration.showNotification('QUADS', {
           body: event.data.text(),
           icon: '/pwa-192x192.png',
         })

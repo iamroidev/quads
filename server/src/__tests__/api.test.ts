@@ -9,7 +9,7 @@ const createTestApp = () => {
   app.get('/api/health', (_req, res) => {
     res.status(200).json({
       success: true,
-      message: 'CampusMarketplace API is running',
+      message: 'QUADS API is running',
       timestamp: new Date().toISOString(),
     });
   });
@@ -26,7 +26,7 @@ describe('API Endpoints', () => {
 
       expect(res.status).toBe(200);
       expect(res.body.success).toBe(true);
-      expect(res.body.message).toBe('CampusMarketplace API is running');
+      expect(res.body.message).toBe('QUADS API is running');
       expect(res.body.timestamp).toBeDefined();
     });
   });

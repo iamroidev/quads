@@ -249,7 +249,7 @@ export const uploadAvatar = async (
 
     let avatarUrl = '';
     try {
-      const uploaded = await uploadToCloudinary(req.file.buffer, 'campusmarketplace/avatars');
+      const uploaded = await uploadToCloudinary(req.file.buffer, 'quads/avatars');
       avatarUrl = uploaded.url;
     } catch {
       const uploadsDir = path.resolve(process.cwd(), 'uploads', 'avatars');
@@ -266,7 +266,7 @@ export const uploadAvatar = async (
     }
 
     const oldAvatar = currentUser.avatar || '';
-    if (oldAvatar.includes('/campusmarketplace/avatars/')) {
+    if (oldAvatar.includes('/quads/avatars/')) {
       const marker = '/upload/';
       const markerIndex = oldAvatar.indexOf(marker);
       if (markerIndex >= 0) {

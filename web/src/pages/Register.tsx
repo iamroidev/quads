@@ -307,7 +307,7 @@ const RegisterPage: React.FC = () => {
         </ScatteredNote>
 
         <ScatteredNote bg="bg-[#e0f2f7] dark:bg-sky-900" rotation={2} bottom="12%" right="10%" w="145px" tapeColor="#4ecdc4">
-          <div className="text-[14px] font-black text-black dark:text-sky-200 uppercase tracking-tighter">🏠 Dorms</div>
+           <div className="text-[14px] font-black text-black dark:text-sky-200 uppercase tracking-tighter">🏠 Hostels</div>
           <div className="text-[11px] font-bold opacity-60 mt-1 text-black dark:text-sky-200">Furniture, decor</div>
         </ScatteredNote>
 

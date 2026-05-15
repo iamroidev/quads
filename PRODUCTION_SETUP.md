@@ -29,20 +29,25 @@ This guide walks you through everything needed to make QUADS work online for rea
 
 ## 2. Environment Variables — What MUST Change
 
-### 2.1 Server (`server/.env`) — CRITICAL CHANGES
+> **⚠️ IMPORTANT**: All env vars now live in a SINGLE root `.env` file.  
+> The old per-package `server/.env`, `web/.env` files have been removed.  
+> Only `mobile/.env` survives (Expo limitation — contains a subset of root vars).  
+> **Why?** Multiple `.env` files get out of sync — one gets updated, the other doesn't, causing bugs.
 
-| Variable | Current Value | What to Change To | Where to Get It |
-|----------|--------------|-------------------|-----------------|
-| `NODE_ENV` | `development` | `production` | Just type it |
-| `MONGODB_URI` | `mongodb://localhost:27017/campusmarketplace` | MongoDB Atlas connection string | [MongoDB Atlas](https://cloud.mongodb.com) |
-| `JWT_SECRET` | `campusmarket-umat-jwt-secret-2024-change-in-production` | Generate a 64-char random string | `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"` |
-| `CLIENT_URL` | `http://localhost:5173` | Your Vercel URL | Vercel dashboard |
-| `PAYSTACK_SECRET_KEY` | `sk_live_...` | ✅ Already live key — keep it | Paystack dashboard |
-| `PAYSTACK_PUBLIC_KEY` | `pk_live_...` | ✅ Already live key — keep it | Paystack dashboard |
-| `SMTP_FROM` | `noreply@campusmarketplace.com` | `noreply@yourdomain.com` | Your domain |
-| `PLATFORM_COMMISSION` | `10` | Your commission % | Your choice (e.g., 5, 10, 15) |
+### 2.1 Root `.env` — CRITICAL CHANGES
 
-**⚠️ NEW variables you need to add:**
+| Variable | Override File | Current Value | What to Change To | Where to Get It |
+|----------|--------------|--------------|-------------------|-----------------|
+| `NODE_ENV` | `server/.env.production` | `development` | `production` | Just type it |
+| `MONGODB_URI` | `server/.env.production` | `mongodb+srv://...` | MongoDB Atlas string | [MongoDB Atlas](https://cloud.mongodb.com) |
+| `JWT_SECRET` | `server/.env.production` | (current) | Random 64-char string | `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"` |
+| `CLIENT_URL` | `server/.env.production` | `http://localhost:5173` | Your Vercel URL | Vercel dashboard |
+| `PAYSTACK_SECRET_KEY` | shared (root `.env`) | `sk_live_...` | ✅ Already live — keep it | Paystack dashboard |
+| `PAYSTACK_PUBLIC_KEY` | shared (root `.env`) | `pk_live_...` | ✅ Already live — keep it | Paystack dashboard |
+| `SMTP_FROM` | `server/.env.production` | `noreply@campusmarketplace.com` | `noreply@yourdomain.com` | Your domain |
+| `PLATFORM_COMMISSION` | shared (root `.env`) | `10` | Your commission % | Your choice |
+
+**⚠️ NEW variables you may need to add (to `server/.env.production`):**
 
 ```bash
 # Paystack Webhook Security
@@ -52,7 +57,10 @@ PAYSTACK_WEBHOOK_SECRET=whsec_your_paystack_webhook_secret
 PAYSTACK_COMMISSION_PERCENT=10
 ```
 
-### 2.2 Web Frontend (`web/.env.production`) — CREATE THIS FILE
+### 2.2 Web Frontend (`web/.env.production`) — OVERRIDE FILE
+
+> Vite now reads from the root `.env` via `envDir: '..'` in vite.config.ts.  
+> But you can still override VITE_* vars in `web/.env.production` for production builds.
 
 ```bash
 VITE_API_URL=https://your-aws-ec2-ip.amazonaws.com/api
@@ -61,7 +69,10 @@ VITE_SOCKET_URL=https://your-aws-ec2-ip.amazonaws.com
 
 > **Important**: The web app currently falls back to `/api` which only works when API and web are on the same domain. Since web is on Vercel and API is on AWS, you MUST set the full API URL.
 
-### 2.3 Mobile App (`mobile/.env` or app.json)
+### 2.3 Mobile App (`mobile/.env` or `app.json`)
+
+> `mobile/.env` now contains ONLY EXPO_PUBLIC_* vars (subset of root `.env`).  
+> Update it separately for production:
 
 ```bash
 EXPO_PUBLIC_API_URL=https://your-aws-ec2-ip.amazonaws.com/api
@@ -170,7 +181,7 @@ You already have LIVE keys in `.env`:
 ### 3.5 Cloudinary (Image Storage)
 
 You already have credentials in `.env`:
-- `CLOUDINARY_CLOUD_NAME=umatmarketplace`
+- `CLOUDINARY_CLOUD_NAME=quads`
 - `CLOUDINARY_API_KEY=157298192926796`
 - `CLOUDINARY_API_SECRET=r2uhOj-Rp6hKhLCwHW9sDFB77Lw`
 
@@ -217,7 +228,7 @@ You already have AWS CLI configured (Account: `806889657718`).
 You have Resend configured:
 - `SMTP_HOST=smtp.resend.com`
 - `SMTP_PASS=re_SavrDqdV_FHskRzRZ794gXdyky8MhNZcq`
-- `SMTP_FROM=noreply@campusmarketplace.com`
+- `SMTP_FROM=noreply@quadsmarket.tech`
 
 **Do you need to change anything?**
 
@@ -226,7 +237,7 @@ You have Resend configured:
 SMTP_FROM=noreply@quads.app  # or your actual domain
 ```
 
-⚠️ The domain `campusmarketplace.com` must be verified in Resend dashboard for emails to send reliably.
+⚠️ The domain `quadsmarket.tech` must be verified in Resend dashboard for emails to send reliably.
 
 ---
 
@@ -240,7 +251,7 @@ npm run build
 ```
 
 ### Step 2: Create production `.env`
-Copy `.env` to `.env.production` and update ALL values from Section 2.1.
+Edit `server/.env.production` with production values. The root `.env` stays as your dev config.
 
 ### Step 3: Deploy to AWS
 ```bash
@@ -270,7 +281,7 @@ curl https://YOUR_EC2_IP:5000/api/health
 ```
 Should return:
 ```json
-{"success":true,"message":"CampusMarketplace API is running","timestamp":"..."}
+{"success":true,"message":"QUADS API is running","timestamp":"..."}
 ```
 
 ---

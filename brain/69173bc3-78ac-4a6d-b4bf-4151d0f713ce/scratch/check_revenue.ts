@@ -4,7 +4,7 @@ import path from 'path';
 
 dotenv.config({ path: path.resolve(process.cwd(), '../.env') });
 
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/campusmarketplace';
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/quads';
 
 async function checkRevenue() {
   try {

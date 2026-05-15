@@ -8,6 +8,7 @@ import { ProductPopulated } from '../types';
 import { BulletinLayout, BulletinSection } from '../components/layout/BulletinLayout';
 import { ProductCardSkeleton, CategorySkeleton } from '../components/ui/BulletinSkeleton';
 import { Package, Smartphone, Truck, Shield, TrendingUp } from 'lucide-react';
+import PulseFeed from '../components/feed/PulseFeed';
 
 const HomePage: React.FC = () => {
   const { isAuthenticated, user } = useAuth();
@@ -153,6 +154,15 @@ const HomePage: React.FC = () => {
         </div>
       </BulletinSection>
 
+      {/* ── Campus Pulse (Dynamic Discovery) ── */}
+      <BulletinSection 
+        title="Campus Pulse" 
+        subtitle="Discovery" 
+        bgColor="bg-[var(--bulletin-bg)] border-t-4 border-[var(--bulletin-border)]"
+      >
+        <PulseFeed />
+      </BulletinSection>
+
       {/* ── Spotlight Grid ── */}
       <BulletinSection bgColor="bg-[var(--bulletin-bg)]">
         <div className="grid lg:grid-cols-12 gap-8">
@@ -238,67 +248,6 @@ const HomePage: React.FC = () => {
         </div>
       </BulletinSection>
 
-      {/* ── Featured Products ── */}
-      <BulletinSection
-        title="Featured Listings"
-        subtitle="Curated"
-        bgColor="bg-[var(--bulletin-bg)] border-t-4 border-[var(--bulletin-border)]"
-        action={<Link to="/products" className="border-4 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] px-6 py-3 text-[12px] font-black uppercase tracking-widest text-[var(--bulletin-text)] shadow-[4px_4px_0_0_var(--bulletin-shadow)] hover:-translate-y-1 hover:shadow-[6px_6px_0_0_var(--bulletin-shadow)] transition-all">View full catalog →</Link>}
-      >
-        <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
-          {loading ? (
-            <>
-              <ProductCardSkeleton />
-              <ProductCardSkeleton />
-              <ProductCardSkeleton />
-              <ProductCardSkeleton />
-            </>
-          ) : featuredProducts.map((product, idx) => (
-            <Link key={product._id} to={`/products/${product._id}`} className="group relative">
-              <div className="border-4 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] p-5 shadow-[8px_8px_0_0_var(--bulletin-shadow),-4px_4px_0_0_#ff6b6b] transition-all hover:-translate-y-2 hover:shadow-[12px_12px_0_0_var(--bulletin-shadow),-8px_8px_0_0_#ff6b6b]"
-                style={{ transform: `rotate(${(idx % 3 - 1) * 1.2}deg)` }}>
-                <div className="relative aspect-square overflow-hidden border-4 border-[var(--bulletin-border)] bg-[var(--bulletin-bg)]">
-                  <img src={getImage(product)} alt={product.title} className="h-full w-full object-cover" />
-                  <div className="absolute -top-2 left-1/2 h-8 w-24 -translate-x-1/2 bg-[#ffd700]/50 rotate-[-2deg]" />
-                </div>
-                <div className="mt-6 space-y-3">
-                  <div className="truncate font-black uppercase text-[14px] tracking-tight text-[var(--bulletin-text)]">{product.title}</div>
-                  <div className="flex items-baseline justify-between">
-                    <span className="text-2xl font-black text-[var(--bulletin-text)]">GHS {product.price}</span>
-                    <span className="text-[10px] font-black uppercase tracking-widest opacity-60 text-[var(--bulletin-text)] truncate ml-2">{typeof product.category === 'string' ? '' : product.category.name}</span>
-                  </div>
-                </div>
-              </div>
-            </Link>
-          ))}
-        </div>
-      </BulletinSection>
-
-      {/* ── Just Listed ── */}
-      <BulletinSection title="Recently Posted" subtitle="Latest" bgColor="bg-[#e8f4f8] dark:bg-[var(--bulletin-bg)] border-t-4 border-[var(--bulletin-border)]">
-        <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
-          {loading ? (
-            <>
-              <ProductCardSkeleton />
-              <ProductCardSkeleton />
-              <ProductCardSkeleton />
-              <ProductCardSkeleton />
-            </>
-          ) : recentProducts.slice(0, 8).map((product, idx) => (
-            <Link key={product._id} to={`/products/${product._id}`} className="group relative">
-              <div className="border-4 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] p-5 shadow-[8px_8px_0_0_var(--bulletin-shadow),-4px_4px_0_0_#ff6b6b] transition-all hover:-translate-y-2 hover:shadow-[12px_12px_0_0_var(--bulletin-shadow),-8px_8px_0_0_#ff6b6b]"
-                style={{ transform: `rotate(${(idx % 2 === 0 ? 0.8 : -0.8)}deg)` }}>
-                <div className="aspect-square border-4 border-[var(--bulletin-border)] bg-[var(--bulletin-bg)] overflow-hidden mb-6 relative">
-                  <img src={getImage(product)} alt={product.title} className="w-full h-full object-cover" />
-                  <div className="absolute -top-2 left-1/2 h-8 w-24 -translate-x-1/2 bg-[#ffd700]/50 rotate-[2deg]" />
-                </div>
-                <div className="truncate text-[14px] font-black uppercase tracking-tight text-[var(--bulletin-text)] mb-2">{product.title}</div>
-                <div className="text-2xl font-black text-[var(--bulletin-text)]">GHS {product.price}</div>
-              </div>
-            </Link>
-          ))}
-        </div>
-      </BulletinSection>
 
       {/* ── How it works ── */}
       <BulletinSection title="How it works" subtitle="Process" bgColor="bg-[var(--bulletin-bg)]">

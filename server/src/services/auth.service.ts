@@ -2,6 +2,7 @@ import User, { IUserDocument } from '../models/User';
 import { generateToken } from '../utils/jwt';
 import ApiError from '../utils/ApiError';
 import { verifySupabaseToken } from '../utils/supabaseJwt';
+import { emailService } from './email.service';
 
 interface RegisterData {
   supabaseAccessToken: string;
@@ -52,6 +53,12 @@ class AuthService {
     return `${Math.random().toString(36).slice(-10)}${Math.random().toString(36).slice(-10)}`;
   }
 
+  private isInstitutionalEmail(email: string): boolean {
+    const institutionalDomains = ['umat.edu.gh', 'student.umat.edu.gh'];
+    const domain = email.split('@')[1];
+    return institutionalDomains.includes(domain);
+  }
+
   /**
    * Register a new user
    */
@@ -82,9 +89,10 @@ class AuthService {
       residenceHall: data.residenceHall || '',
       currentLevel: data.currentLevel || '',
       location: data.location || '',
-      isVerified: false, // Not verified yet until they verify email/phone
+      isVerified: false,
       emailVerified: false,
       phoneVerified: false,
+      isInstitutional: this.isInstitutionalEmail(email),
       avatar: metadataAvatar,
       password: this.randomPassword(),
     });
@@ -251,9 +259,9 @@ class AuthService {
       avatar: profileAvatar || fallbackAvatar,
       studentId: profileData?.studentId || '',
       department: profileData?.department || '',
-      residenceHall: profileData?.residenceHall || '',
       currentLevel: profileData?.currentLevel || '',
       location: profileData?.location || '',
+      isInstitutional: this.isInstitutionalEmail(email),
       password: this.randomPassword(),
     });
     isNewUser = true;

@@ -46,14 +46,19 @@ setupSocketHandlers(io);
 app.use(
   helmet({
     crossOriginResourcePolicy: { policy: 'cross-origin' },
+    crossOriginOpenerPolicy: { policy: 'same-origin-allow-popups' }, // Fixed Google Login popup
   })
 );
 
 // CORS
-const allowedOrigins = (env.NODE_ENV === 'production'
-  ? [env.CLIENT_URL, 'https://quadsmarket.tech', 'https://www.quadsmarket.tech']
-  : [env.CLIENT_URL, 'http://localhost:5173', 'http://localhost:19006']
-).filter(Boolean); // Remove empty/null values
+const allowedOrigins = [
+  env.CLIENT_URL,
+  'https://quadsmarket.tech',
+  'https://www.quadsmarket.tech',
+  'http://localhost:5173',
+  'http://localhost:19006',
+  'https://web-3q1q9bvna-roi-dev.vercel.app'
+].filter(Boolean); // Always allow these critical origins
 
 app.use(
   cors({

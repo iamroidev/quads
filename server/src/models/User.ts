@@ -17,10 +17,13 @@ export interface IUserDocument extends Document {
   isVerified: boolean;
   emailVerified: boolean;
   phoneVerified: boolean;
+  isInstitutional: boolean;
   isBanned: boolean;
   location: string;
   bio: string;
   savedItems: mongoose.Types.ObjectId[];
+  following: mongoose.Types.ObjectId[];
+  followersCount: number;
   notificationPrefs: {
     orderUpdates: boolean;
     messages: boolean;
@@ -59,6 +62,11 @@ export interface IUserDocument extends Document {
     identityDocumentUrl?: string;
     identitySubmittedAt?: Date;
     completedAt?: Date;
+  };
+  vacationMode: {
+    active: boolean;
+    message?: string;
+    returnDate?: Date;
   };
   createdAt: Date;
   updatedAt: Date;
@@ -139,6 +147,10 @@ const userSchema = new Schema<IUserDocument>(
       type: Boolean,
       default: false,
     },
+    isInstitutional: {
+      type: Boolean,
+      default: false,
+    },
     isBanned: {
       type: Boolean,
       default: false,
@@ -159,6 +171,16 @@ const userSchema = new Schema<IUserDocument>(
         ref: 'Product',
       },
     ],
+    following: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: 'User',
+      },
+    ],
+    followersCount: {
+      type: Number,
+      default: 0,
+    },
     notificationPrefs: {
       orderUpdates: { type: Boolean, default: true },
       messages: { type: Boolean, default: true },
@@ -221,6 +243,11 @@ const userSchema = new Schema<IUserDocument>(
       identityDocumentUrl: { type: String, default: '' },
       identitySubmittedAt: { type: Date },
       completedAt: { type: Date },
+    },
+    vacationMode: {
+      active: { type: Boolean, default: false },
+      message: { type: String, default: '' },
+      returnDate: { type: Date },
     },
   },
   {

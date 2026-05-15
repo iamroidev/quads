@@ -1,4 +1,4 @@
-const CACHE_NAME = 'campusmarket-v1';
+const CACHE_NAME = 'quads-v1';
 const APP_SHELL = ['/', '/index.html', '/offline.html', '/manifest.webmanifest'];
 
 self.addEventListener('install', (event) => {

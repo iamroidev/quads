@@ -13,6 +13,7 @@ import {
   createBundle,
   getSellerBundles,
   runAutomationSweep,
+  verifyHandoff,
 } from '../controllers/order.controller';
 import { authenticate, ensureProfileComplete } from '../middleware/auth';
 import { isSeller, isAdmin } from '../middleware/roleCheck';
@@ -54,5 +55,8 @@ router.patch('/:id/status', updateOrderStatus);
 
 // POST /api/orders/:id/cancel — cancel an order
 router.post('/:id/cancel', cancelOrder);
+
+// POST /api/orders/:id/verify-handoff — verify pickup handoff
+router.post('/:id/verify-handoff', verifyHandoff);
 
 export default router;

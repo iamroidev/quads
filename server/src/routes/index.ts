@@ -15,6 +15,8 @@ import verificationRoutes from './verification.routes';
 import payoutRoutes from './payout.routes';
 import autoPayoutRoutes from './autoPayout.routes';
 import supportRoutes from './support.routes';
+import feedRoutes from './feed.routes';
+import offerRoutes from './offer.routes';
 
 const router = Router();
 
@@ -44,5 +46,7 @@ router.use('/verification', verificationRoutes);
 router.use('/payouts', payoutRoutes);
 router.use('/auto-payouts', autoPayoutRoutes);
 router.use('/support', supportRoutes);
+router.use('/feed', feedRoutes);
+router.use('/offers', offerRoutes);
 
 export default router;
