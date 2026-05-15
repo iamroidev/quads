@@ -18,8 +18,12 @@ const transactionSchema = new Schema<ITransactionDocument>(
     order: {
       type: Schema.Types.ObjectId,
       ref: 'Order',
-      required: true,
+      required: false,
     },
+    orders: [{
+      type: Schema.Types.ObjectId,
+      ref: 'Order',
+    }],
     reference: {
       type: String,
       required: true,

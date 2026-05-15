@@ -13,11 +13,10 @@ export const createOrder = async (
   next: NextFunction
 ): Promise<void> => {
   try {
-    const order = await orderService.createOrder(
+    const orders = await orderService.createOrders(
       req.user!._id.toString(),
       {
-        productId: req.body.productId,
-        quantity: req.body.quantity,
+        items: req.body.items || [{ productId: req.body.productId, quantity: req.body.quantity || 1 }],
         deliveryMethod: req.body.deliveryMethod,
         couponCode: req.body.couponCode,
         pickupLocation: req.body.pickupLocation,
@@ -25,17 +24,21 @@ export const createOrder = async (
         note: req.body.note,
       }
     );
+    
+    const order = orders[0]; // For backward compatibility
 
     res.status(201).json({
       success: true,
-      message: 'Order created successfully',
-      data: { order },
+      message: orders.length > 1 ? `${orders.length} orders created successfully` : 'Order created successfully',
+      data: { orders, order },
     });
 
-    await growthService.captureEvent(req.user?._id?.toString(), 'order', {
-      orderId: order._id,
-      totalAmount: order.totalAmount,
-    });
+    for (const ord of orders) {
+      await growthService.captureEvent(req.user?._id?.toString(), 'order', {
+        orderId: ord._id,
+        totalAmount: ord.totalAmount,
+      });
+    }
   } catch (error) {
     next(error);
   }

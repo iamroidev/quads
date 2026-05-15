@@ -9,6 +9,7 @@ import {
   getTrustSummary,
   getAnalyticsOverview,
   getOpsOverview,
+  captureEvent,
 } from '../controllers/growth.controller';
 
 const router = Router();
@@ -21,6 +22,7 @@ router.post('/trust/signals', authenticate, isAdmin, addTrustSignal);
 router.get('/trust/:userId', authenticate, getTrustSummary);
 
 router.get('/analytics/overview', authenticate, isAdmin, getAnalyticsOverview);
+router.post('/analytics/capture', authenticate, captureEvent);
 router.get('/ops/overview', authenticate, isAdmin, getOpsOverview);
 
 export default router;

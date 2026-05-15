@@ -2,8 +2,8 @@ import api from './api';
 import { OrderPopulated, PaginationInfo, OrderStatus } from '../types';
 
 export interface CreateOrderData {
-  productId: string;
-  quantity?: number;
+  productId?: string; // For backward compatibility
+  items?: { productId: string; quantity: number }[];
   deliveryMethod: 'pickup' | 'delivery';
   couponCode?: string;
   pickupLocation?: string;

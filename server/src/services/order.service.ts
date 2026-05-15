@@ -6,9 +6,13 @@ import Bundle from '../models/Bundle';
 import ApiError from '../utils/ApiError';
 import notificationService from './notification.service';
 
-interface CreateOrderInput {
+interface OrderItemInput {
   productId: string;
-  quantity?: number;
+  quantity: number;
+}
+
+interface CreateOrderInput {
+  items: OrderItemInput[];
   deliveryMethod: 'pickup' | 'delivery';
   couponCode?: string;
   pickupLocation?: string;
@@ -28,132 +32,96 @@ interface PaginatedOrders {
 
 class OrderService {
   /**
-   * Create a new order
+   * Create new orders from cart items (splits by seller)
    */
-  async createOrder(buyerId: string, input: CreateOrderInput): Promise<IOrderDocument> {
-    const { productId, quantity = 1, deliveryMethod, couponCode, pickupLocation, deliveryAddress, note } = input;
+  async createOrders(buyerId: string, input: CreateOrderInput): Promise<IOrderDocument[]> {
+    const { items, deliveryMethod, couponCode, pickupLocation, deliveryAddress, note } = input;
 
-    // Fetch product
-    const product = await Product.findById(productId).populate('seller', '_id');
-    if (!product) {
-      throw ApiError.notFound('Product not found');
+    if (!items || items.length === 0) {
+      throw ApiError.badRequest('Cart is empty');
     }
 
-    if (product.status !== 'active') {
-      throw ApiError.badRequest('Product is no longer available');
+    // 1. Fetch all products and group by seller
+    const productIds = items.map(i => i.productId);
+    const products = await Product.find({ _id: { $in: productIds } }).populate('seller', '_id name');
+    
+    const sellerGroups: Record<string, { product: any, quantity: number }[]> = {};
+    
+    for (const item of items) {
+      const product = products.find(p => p._id.toString() === item.productId);
+      if (!product) throw ApiError.notFound(`Product ${item.productId} not found`);
+      if (product.status !== 'active') throw ApiError.badRequest(`Product ${product.title} is no longer available`);
+      
+      const sId = product.seller._id.toString();
+      if (sId === buyerId) throw ApiError.badRequest('You cannot buy your own products');
+      
+      if (!sellerGroups[sId]) sellerGroups[sId] = [];
+      sellerGroups[sId].push({ product, quantity: item.quantity });
     }
 
-    const sellerId = product.seller._id?.toString() || (product.seller as any).toString();
+    const createdOrders: IOrderDocument[] = [];
 
-    if (sellerId === buyerId) {
-      throw ApiError.badRequest('You cannot buy your own product');
-    }
+    // 2. Create an order for each seller group
+    for (const [sellerId, groupItems] of Object.entries(sellerGroups)) {
+      let orderSubtotal = 0;
+      const orderItems = [];
 
-    // Validate delivery method
-    if (deliveryMethod === 'pickup' && !pickupLocation) {
-      throw ApiError.badRequest('Pickup location is required for pickup orders');
-    }
-    if (deliveryMethod === 'delivery' && !deliveryAddress) {
-      throw ApiError.badRequest('Delivery address is required for delivery orders');
-    }
-
-    // Check product supports this delivery method
-    if (product.deliveryOption === 'pickup' && deliveryMethod === 'delivery') {
-      throw ApiError.badRequest('This product is pickup only');
-    }
-    if (product.deliveryOption === 'delivery' && deliveryMethod === 'pickup') {
-      throw ApiError.badRequest('This product is delivery only');
-    }
-
-    if (product.availableFrom && new Date(product.availableFrom) > new Date()) {
-      throw ApiError.badRequest('This listing is scheduled and not yet available');
-    }
-
-    if (product.availableUntil && new Date(product.availableUntil) < new Date()) {
-      throw ApiError.badRequest('This listing campaign has ended');
-    }
-
-    // Calculate totals
-    const effectivePrice = product.flashSalePrice && product.flashSaleEndsAt && new Date(product.flashSaleEndsAt) > new Date()
-      ? product.flashSalePrice
-      : product.price;
-    const itemTotal = effectivePrice * quantity;
-    const deliveryFee = deliveryMethod === 'delivery' ? 5.00 : 0; // Flat GHS 5 delivery fee
-    let discountAmount = 0;
-
-    if (couponCode) {
-      const now = new Date();
-      const coupon = await Coupon.findOne({
-        code: couponCode.toUpperCase(),
-        seller: sellerId,
-        isActive: true,
-        $and: [
-          { $or: [{ startsAt: { $exists: false } }, { startsAt: null }, { startsAt: { $lte: now } }] },
-          { $or: [{ expiresAt: { $exists: false } }, { expiresAt: null }, { expiresAt: { $gte: now } }] },
-        ],
-      });
-
-      if (coupon && itemTotal >= coupon.minOrderAmount && coupon.usedCount < coupon.usageLimit) {
-        discountAmount = coupon.type === 'percentage'
-          ? (itemTotal * coupon.value) / 100
-          : coupon.value;
-        discountAmount = Math.min(discountAmount, itemTotal);
-        coupon.usedCount += 1;
-        await coupon.save();
-      }
-    }
-
-    const totalAmount = Math.max(0, itemTotal + deliveryFee - discountAmount);
-
-    // Create the order
-    const order = await Order.create({
-      buyer: buyerId,
-      seller: sellerId,
-      items: [
-        {
+      for (const groupItem of groupItems) {
+        const { product, quantity } = groupItem;
+        const effectivePrice = product.flashSalePrice && product.flashSaleEndsAt && new Date(product.flashSaleEndsAt) > new Date()
+          ? product.flashSalePrice
+          : product.price;
+        
+        orderSubtotal += effectivePrice * quantity;
+        orderItems.push({
           product: product._id,
           title: product.title,
           price: effectivePrice,
-          image: product.images?.[0]?.url || undefined,
-          quantity,
-        },
-      ],
-      totalAmount,
-      discountAmount,
-      couponCode: couponCode ? couponCode.toUpperCase() : undefined,
-      deliveryMethod,
-      pickupLocation: deliveryMethod === 'pickup' ? pickupLocation : undefined,
-      deliveryAddress: deliveryMethod === 'delivery' ? deliveryAddress : undefined,
-      deliveryFee,
-      note,
-      status: 'pending',
-    });
+          image: product.images?.[0]?.url,
+          quantity
+        });
 
-    // Mark product as reserved
-    product.status = 'reserved';
-    await product.save();
-
-    if (product.stock > 0) {
-      product.stock = Math.max(0, product.stock - quantity);
-      await product.save();
-      if (product.stock <= 2) {
-        await notificationService.create(
-          sellerId,
-          'system',
-          'Inventory Low',
-          `${product.title} is low on stock (${product.stock} left).`,
-          '/my-listings',
-          { productId: product._id.toString(), stock: product.stock }
-        );
+        // Reserve stock
+        product.status = 'reserved';
+        if (product.stock > 0) {
+          product.stock = Math.max(0, product.stock - quantity);
+        }
+        await product.save();
       }
+
+      const deliveryFee = deliveryMethod === 'delivery' ? 5.00 : 0;
+      const totalAmount = orderSubtotal + deliveryFee;
+
+      const order = await Order.create({
+        buyer: buyerId,
+        seller: sellerId,
+        items: orderItems,
+        totalAmount,
+        deliveryMethod,
+        pickupLocation: deliveryMethod === 'pickup' ? pickupLocation : undefined,
+        deliveryAddress: deliveryMethod === 'delivery' ? deliveryAddress : undefined,
+        deliveryFee,
+        note,
+        status: 'pending',
+      });
+
+      createdOrders.push(await order.populate([
+        { path: 'buyer', select: 'name avatar phone email' },
+        { path: 'seller', select: 'name avatar phone isVerified' },
+        { path: 'items.product', select: 'title price images status seller' },
+      ]));
     }
 
-    // Populate and return
-    return order.populate([
-      { path: 'buyer', select: 'name avatar phone email' },
-      { path: 'seller', select: 'name avatar phone isVerified' },
-      { path: 'items.product', select: 'title price images status seller' },
-    ]);
+    return createdOrders;
+  }
+
+  // Keep old createOrder for backward compatibility or direct single buys
+  async createOrder(buyerId: string, input: any): Promise<IOrderDocument> {
+    const orders = await this.createOrders(buyerId, {
+      items: [{ productId: input.productId, quantity: input.quantity || 1 }],
+      ...input
+    });
+    return orders[0];
   }
 
   /**

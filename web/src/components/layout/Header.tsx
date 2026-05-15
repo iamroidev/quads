@@ -12,10 +12,12 @@ import {
   MessageSquare,
   Package,
   ShoppingBag,
+  ShoppingCart,
   User,
   X,
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import { useCart } from '../../context/CartContext';
 import { useSocket } from '../../context/SocketContext';
 import chatService from '../../services/chat.service';
 import notificationService from '../../services/notification.service';
@@ -25,6 +27,7 @@ import BrandMark from './BrandMark';
 
 const Header: React.FC = () => {
   const { user, isAuthenticated, logout } = useAuth();
+  const { totalItems } = useCart();
   const { unreadCount, setUnreadCount, onNewMessage } = useSocket();
   const navigate = useNavigate();
   const location = useLocation();
@@ -163,6 +166,19 @@ const Header: React.FC = () => {
                     + Sell
                   </Link>
                 )}
+                
+                <Link
+                  to="/cart"
+                  className="relative p-2 text-earth-500 transition-colors hover:text-earth-900"
+                  title="Cart"
+                >
+                  <ShoppingCart className="h-4 w-4" />
+                  {totalItems > 0 && (
+                    <span className="absolute right-1 top-1 flex h-[14px] min-w-[14px] items-center justify-center bg-red-600 px-0.5 text-[8px] font-black text-white">
+                      {totalItems > 99 ? '99+' : totalItems}
+                    </span>
+                  )}
+                </Link>
 
                 <Link
                   to="/messages"
@@ -294,6 +310,7 @@ const Header: React.FC = () => {
             {[
               { to: '/products', label: 'Browse listings' },
               { to: '/categories', label: 'Categories' },
+              { to: '/cart', label: `Cart (${totalItems})` },
               ...(isAuthenticated ? [
                 { to: '/profile', label: 'My profile' },
                 { to: '/messages', label: 'Messages' },

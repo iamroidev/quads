@@ -13,24 +13,30 @@ import payoutService from './payout.service';
 
 class PaymentService {
   /**
-   * Initiate a payment for an order
+   * Initiate a payment for one or more orders
    */
   async initiatePayment(
-    orderId: string,
+    orderIds: string | string[],
     userId: string,
     paymentMethod: string,
     callbackUrl: string
   ): Promise<{ authorizationUrl: string; reference: string }> {
-    // Fetch order
-    const order = await Order.findById(orderId);
-    if (!order) throw ApiError.notFound('Order not found');
+    const ids = Array.isArray(orderIds) ? orderIds : [orderIds];
+    
+    // Fetch orders
+    const orders = await Order.find({ _id: { $in: ids } });
+    if (orders.length === 0) throw ApiError.notFound('Orders not found');
 
-    if (order.buyer.toString() !== userId) {
-      throw ApiError.forbidden('Only the buyer can pay for this order');
-    }
-
-    if (order.status !== 'pending') {
-      throw ApiError.badRequest('This order has already been paid or is no longer payable');
+    // Verify all orders belong to user and are pending
+    let totalAmount = 0;
+    for (const order of orders) {
+      if (order.buyer.toString() !== userId) {
+        throw ApiError.forbidden(`You do not have access to order ${order._id}`);
+      }
+      if (order.status !== 'pending') {
+        throw ApiError.badRequest(`Order ${order.orderNumber} is no longer payable`);
+      }
+      totalAmount += order.totalAmount;
     }
 
     // Get buyer email
@@ -39,35 +45,36 @@ class PaymentService {
 
     // Generate reference
     const reference = generateReference();
-
-    // Get Paystack channels based on payment method
     const channels = getPaystackChannels(paymentMethod);
 
     // Create transaction record
     const transaction = await Transaction.create({
-      order: order._id,
+      order: orders[0]._id, // Keep for legacy
+      orders: orders.map(o => o._id),
       reference,
-      amount: order.totalAmount,
+      amount: totalAmount,
       currency: 'GHS',
       paymentMethod,
       status: 'pending',
     });
 
-    // Link transaction to order
-    order.payment = transaction._id;
-    await order.save();
+    // Link transaction to all orders
+    await Order.updateMany(
+      { _id: { $in: ids } },
+      { $set: { payment: transaction._id } }
+    );
 
     // Initialize with Paystack
     try {
       const paystackRes = await initializeTransaction(
         buyer.email,
-        order.totalAmount,
+        totalAmount,
         reference,
         callbackUrl,
         {
-          order_id: order._id.toString(),
-          order_number: order.orderNumber,
+          order_ids: ids.join(','),
           buyer_id: userId,
+          transaction_id: transaction._id.toString()
         },
         channels
       );
@@ -77,10 +84,8 @@ class PaymentService {
         reference: paystackRes.data.reference,
       };
     } catch (error: any) {
-      // Mark transaction as failed
       transaction.status = 'failed';
       await transaction.save();
-
       throw ApiError.internal(
         `Payment initialization failed: ${error.response?.data?.message || error.message}`
       );
@@ -128,34 +133,40 @@ class PaymentService {
         transaction.paidAt = new Date(paystackRes.data.paid_at);
         await transaction.save();
 
-        // Update order status to paid
-        const order = await Order.findById(transaction.order);
-        if (order && order.status === 'pending') {
-          order.status = 'paid';
-          await order.save();
-        }
+        // Update all orders
+        const orderIds = transaction.orders && transaction.orders.length > 0 
+          ? transaction.orders 
+          : [transaction.order];
 
-        const populatedOrder = await Order.findById(transaction.order)
+        await Order.updateMany(
+          { _id: { $in: orderIds }, status: 'pending' },
+          { $set: { status: 'paid' } }
+        );
+
+        // Notify and send receipts for all orders
+        const populatedOrders = await Order.find({ _id: { $in: orderIds } })
           .populate('buyer', 'name avatar phone email')
           .populate('seller', 'name avatar phone isVerified')
           .populate('items.product', 'title price images status seller')
           .populate('payment');
 
-        if (populatedOrder && populatedOrder.buyer && (populatedOrder.buyer as any).email) {
-          emailService.sendPaymentReceiptEmail(
-            (populatedOrder.buyer as any).email,
-            populatedOrder.orderNumber,
-            transaction.amount
-          ).catch(console.error);
+        for (const order of populatedOrders) {
+          if (order.buyer && (order.buyer as any).email) {
+            emailService.sendPaymentReceiptEmail(
+              (order.buyer as any).email,
+              order.orderNumber,
+              order.totalAmount
+            ).catch(console.error);
+          }
+
+          // Auto-create payout record for each seller
+          payoutService.createPayoutForOrder(
+            order._id.toString(),
+            transaction._id.toString()
+          ).catch((err) => console.error('Failed to create payout:', err));
         }
 
-        // Auto-create payout record for the seller
-        payoutService.createPayoutForOrder(
-          transaction.order.toString(),
-          transaction._id.toString()
-        ).catch((err) => console.error('Failed to create payout:', err));
-
-        return { verified: true, order: populatedOrder, transaction };
+        return { verified: true, order: populatedOrders[0], transaction };
       } else {
         transaction.status = 'failed';
         await transaction.save();
@@ -178,7 +189,6 @@ class PaymentService {
       const transaction = await Transaction.findOne({ reference });
       if (!transaction) return;
 
-      // Already processed
       if (transaction.status === 'success') return;
 
       transaction.status = 'success';
@@ -186,26 +196,32 @@ class PaymentService {
       transaction.paidAt = new Date(data.paid_at);
       await transaction.save();
 
-      // Update order
-      const order = await Order.findById(transaction.order).populate('buyer', 'email');
-      if (order && order.status === 'pending') {
-        order.status = 'paid';
-        await order.save();
-        
+      // Update all orders
+      const orderIds = transaction.orders && transaction.orders.length > 0 
+        ? transaction.orders 
+        : [transaction.order];
+
+      await Order.updateMany(
+        { _id: { $in: orderIds }, status: 'pending' },
+        { $set: { status: 'paid' } }
+      );
+
+      const populatedOrders = await Order.find({ _id: { $in: orderIds } }).populate('buyer', 'email');
+      
+      for (const order of populatedOrders) {
         if (order.buyer && (order.buyer as any).email) {
           emailService.sendPaymentReceiptEmail(
             (order.buyer as any).email,
             order.orderNumber,
-            transaction.amount
+            order.totalAmount
           ).catch(console.error);
         }
-      }
 
-      // Auto-create payout record
-      payoutService.createPayoutForOrder(
-        transaction.order.toString(),
-        transaction._id.toString()
-      ).catch((err: any) => console.error('Failed to create payout from webhook:', err));
+        payoutService.createPayoutForOrder(
+          order._id.toString(),
+          transaction._id.toString()
+        ).catch((err: any) => console.error('Failed to create payout from webhook:', err));
+      }
     }
 
     if (event === 'charge.failed') {

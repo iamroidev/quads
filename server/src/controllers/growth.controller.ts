@@ -63,3 +63,13 @@ export const getOpsOverview = async (_req: Request, res: Response, next: NextFun
     next(error);
   }
 };
+
+export const captureEvent = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const { event, context } = req.body;
+    await growthService.captureEvent(req.user?._id.toString(), event, context);
+    res.status(201).json({ success: true, message: 'Event captured' });
+  } catch (error) {
+    next(error);
+  }
+};
