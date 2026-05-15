@@ -551,8 +551,5 @@ const CreateEditProduct: React.FC = () => {
     </BulletinLayout>
   );
 };
-    </BulletinLayout>
-  );
-};
 
 export default CreateEditProduct;
