@@ -146,7 +146,7 @@ export const BulletinLayout: React.FC<BulletinLayoutProps> = ({
 
               {!isSeller && (
                 <Link 
-                  to="/sell" 
+                  to={isAuthenticated ? "/seller/onboarding" : "/register"} 
                   className="hidden md:flex items-center gap-2 border-2 border-black bg-black text-white px-4 py-2 text-[10px] font-black uppercase tracking-widest shadow-[3px_3px_0_0_#ff6b6b] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all"
                 >
                   Sell on Quads
