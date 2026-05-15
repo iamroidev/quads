@@ -39,13 +39,19 @@ api.interceptors.response.use(
     if (error.response?.status === 401) {
       localStorage.removeItem('token');
       localStorage.removeItem('user');
-      // Only redirect if not already on login page
-      if (
-        !window.location.pathname.includes('/login') &&
-        !window.location.pathname.includes('/register')
-      ) {
+      
+      // Define public paths that should NOT force redirect on 401
+      const publicPaths = ['/', '/login', '/register', '/products', '/categories', '/support', '/contact', '/terms'];
+      const isPublicPath = publicPaths.includes(window.location.pathname) || 
+                          window.location.pathname.startsWith('/products/') ||
+                          window.location.pathname.startsWith('/collections/');
+
+      if (!isPublicPath) {
         window.location.href = '/login';
         toast.error('Session expired. Please login again.');
+      } else {
+        // Just reload to clear auth state in UI if needed, or stay quiet
+        // window.location.reload(); 
       }
     }
 

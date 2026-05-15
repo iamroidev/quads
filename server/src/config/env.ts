@@ -30,6 +30,8 @@ interface EnvConfig {
   SMTP_PASS: string;
   SMTP_FROM: string;
   PLATFORM_COMMISSION: number;
+  PLATFORM_NAME: string;
+  INSTITUTIONAL_DOMAINS: string;
   FIREBASE_PROJECT_ID: string;
   FIREBASE_CLIENT_EMAIL: string;
   FIREBASE_PRIVATE_KEY: string;
@@ -60,6 +62,8 @@ const env: EnvConfig = {
   SMTP_PASS: process.env.SMTP_PASS || '',
   SMTP_FROM: `"QUADS" <${process.env.SMTP_FROM || 'noreply@quadsmarket.tech'}>`,
   PLATFORM_COMMISSION: parseInt(process.env.PLATFORM_COMMISSION || '10', 10),
+  PLATFORM_NAME: process.env.PLATFORM_NAME || 'QUADS',
+  INSTITUTIONAL_DOMAINS: process.env.INSTITUTIONAL_DOMAINS || 'umat.edu.gh,student.umat.edu.gh',
   FIREBASE_PROJECT_ID: process.env.FIREBASE_PROJECT_ID || '',
   FIREBASE_CLIENT_EMAIL: process.env.FIREBASE_CLIENT_EMAIL || '',
   FIREBASE_PRIVATE_KEY: (process.env.FIREBASE_PRIVATE_KEY || '').replace(/\\n/g, '\n'),
