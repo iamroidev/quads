@@ -390,3 +390,21 @@ export const NOTIFICATION_TYPE_LABELS: Record<NotificationType, string> = {
   product_sold: 'Product Sold',
   system: 'System',
 };
+
+// Pulse / Activity types
+export type ActivityType = 'listing_created' | 'order_fulfilled' | 'user_verified' | 'coupon_created';
+
+export interface Activity {
+  _id: string;
+  type: ActivityType;
+  user: string | { _id: string; name: string; avatar?: string };
+  product?: string;
+  order?: string;
+  metadata: {
+    userName: string;
+    productTitle?: string;
+    location?: string;
+    amount?: number;
+  };
+  createdAt: string;
+}
