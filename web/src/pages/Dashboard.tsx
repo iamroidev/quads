@@ -16,6 +16,7 @@ import {
   BadgePercent,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import toast from 'react-hot-toast';
 import productService from '../services/product.service';
 import authService, { UserStats } from '../services/auth.service';
 import categoryService, { CategoryWithCount } from '../services/category.service';
