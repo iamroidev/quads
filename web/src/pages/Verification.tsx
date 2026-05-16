@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import verificationService from '../services/verification.service';
-import { setupRecaptcha, sendOtp } from '../services/firebase';
+import { setupRecaptcha, sendOtp, resetRecaptcha } from '../services/firebase';
 import { ConfirmationResult } from 'firebase/auth';
 import toast from 'react-hot-toast';
 import { BulletinLayout, BulletinSection, BulletinCard } from '../components/layout/BulletinLayout';
@@ -81,9 +81,19 @@ const VerificationPage: React.FC = () => {
       toast.success(`Code sent to your ${activeMethod === 'email' ? 'email' : 'phone'}!`);
     } catch (err: any) {
       console.error('Send error:', err);
-      toast.error(err.response?.data?.message || err.message || 'Failed to send code');
-      if (activeMethod === 'phone' && (window as any).grecaptcha) {
-        (window as any).grecaptcha.reset();
+      
+      let errorMessage = err.response?.data?.message || err.message || 'Failed to send code';
+      
+      // Friendly check for common Firebase setup errors
+      if (errorMessage.includes('billing-not-enabled')) {
+        errorMessage = 'Phone verification is currently in maintenance. Please use Email verification for now.';
+        console.warn('CRITICAL: Firebase Phone Auth requires Blaze Plan to be enabled in Firebase Console.');
+      }
+
+      toast.error(errorMessage);
+      
+      if (activeMethod === 'phone') {
+        resetRecaptcha('recaptcha-container');
       }
     } finally {
       setSending(false);
