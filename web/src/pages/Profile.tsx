@@ -122,8 +122,8 @@ const ProfilePage: React.FC = () => {
   const [stats, setStats] = useState<UserStats | null>(null);
   const [loadingStats, setLoadingStats] = useState(false);
 
-  const isAdmin = user?.role === 'admin';
-  const isSeller = user?.role === 'seller';
+  const isAdmin = user?.roles?.includes('admin');
+  const isSeller = user?.viewMode === 'seller';
   const otherRole = isSeller ? 'buyer' : 'seller';
 
   const {
@@ -290,7 +290,7 @@ const ProfilePage: React.FC = () => {
               <div className="text-center md:text-left">
                 <div className="inline-flex items-center gap-2 mb-4">
                   <span className={`px-3 py-1 border-2 border-[var(--bulletin-border)] text-[10px] font-black uppercase tracking-widest ${isSeller ? 'bg-[#ff6b6b] text-white' : 'bg-sky-500 text-white'}`}>
-                    {user?.role} View
+                    {user?.viewMode?.toUpperCase()} View
                   </span>
                   {user?.isVerified && (
                     <span className="flex items-center gap-1 border-2 border-[var(--bulletin-border)] bg-emerald-50 dark:bg-emerald-900/20 px-3 py-1 text-[10px] font-black uppercase tracking-widest text-emerald-700 dark:text-emerald-400">
@@ -488,7 +488,7 @@ const ProfilePage: React.FC = () => {
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    {isSeller && (
+                    {user?.roles?.includes('seller') && (
                       <>
                         <div>
                           <label className={labelBase}>Shop Name</label>

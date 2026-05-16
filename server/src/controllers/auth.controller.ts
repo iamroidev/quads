@@ -1,4 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
+import mongoose from 'mongoose';
 import authService from '../services/auth.service';
 import env from '../config/env';
 import { emailService } from '../services/email.service';
@@ -20,13 +21,13 @@ export const register = async (
   next: NextFunction
 ): Promise<void> => {
   try {
-    const { name, phone, role, studentId, department, residenceHall, currentLevel, location, supabaseAccessToken } = req.body;
+    const { name, phone, roles, studentId, department, residenceHall, currentLevel, location, supabaseAccessToken } = req.body;
 
     const { user, token } = await authService.register({
       supabaseAccessToken,
       name,
       phone,
-      role: role || 'buyer',
+      roles: roles || ['buyer'],
       studentId,
       department,
       residenceHall,
@@ -35,7 +36,7 @@ export const register = async (
     });
 
     // Send welcome email
-    emailService.sendWelcomeEmail(user.email, user.name, user.role).catch((err) => {
+    emailService.sendWelcomeEmail(user.email, user.name, user.roles[0]).catch((err) => {
       console.error('Welcome email failed:', err);
     });
 
@@ -162,13 +163,13 @@ export const switchRole = async (
   next: NextFunction
 ): Promise<void> => {
   try {
-    const { role } = req.body;
-    if (!role || !['buyer', 'seller'].includes(role)) {
-      res.status(400).json({ success: false, message: 'Role must be "buyer" or "seller".' });
+    const { targetMode } = req.body;
+    if (!targetMode || !['buyer', 'seller'].includes(targetMode)) {
+      res.status(400).json({ success: false, message: 'targetMode must be "buyer" or "seller".' });
       return;
     }
 
-    const { user, token } = await authService.switchRole(req.user!._id.toString(), role);
+    const { user, token } = await authService.switchRole(req.user!._id.toString(), targetMode);
 
     // Set cookie
     res.cookie('token', token, {
@@ -180,7 +181,7 @@ export const switchRole = async (
 
     res.status(200).json({
       success: true,
-      message: `Role switched to ${role}.`,
+      message: `Role switched to ${targetMode}.`,
       data: { user, token },
     });
   } catch (error) {
@@ -483,7 +484,7 @@ export const googleLogin = async (
 
     // Send welcome email if new user
     if (isNewUser) {
-      emailService.sendWelcomeEmail(user.email, user.name, user.role).catch((err) => {
+      emailService.sendWelcomeEmail(user.email, user.name, user.roles[0]).catch((err) => {
         console.error('[GoogleLogin] Welcome email failed:', err);
       });
     }
@@ -504,7 +505,7 @@ export const updateSellerOnboarding = async (
   next: NextFunction
 ): Promise<void> => {
   try {
-    if (!req.user || !['buyer', 'seller', 'admin'].includes(req.user.role)) {
+    if (!req.user || (!req.user.roles.includes('seller') && !req.user.roles.includes('admin') && !req.user.roles.includes('buyer'))) {
       res.status(403).json({ success: false, message: 'Access denied.' });
       return;
     }
@@ -545,8 +546,24 @@ export const updateSellerOnboarding = async (
       brandName,
       sellerOnboarding: onboardingPatch,
       ...(responseTimeMinutes !== undefined ? { responseTimeMinutes } : {}),
-      ...(completed ? { role: 'seller' } : {}),
     } as any);
+
+    // Sync Store if exists
+    if (user.activeStore) {
+      const Store = mongoose.model('Store');
+      await Store.findByIdAndUpdate(user.activeStore, {
+        name: storeName || user.name,
+        payoutSetupComplete: onboardingPatch.payoutSetupComplete,
+        payoutMethod: onboardingPatch.payoutMethod,
+        payoutProvider: onboardingPatch.payoutProvider,
+        payoutAccountName: onboardingPatch.payoutAccountName,
+        payoutAccountNumber: onboardingPatch.payoutAccountNumber,
+      });
+    }
+
+    if (completed && !user.roles.includes('seller')) {
+      await authService.switchRole(user._id.toString(), 'seller');
+    }
 
     res.status(200).json({ success: true, message: 'Seller onboarding updated.', data: { user } });
   } catch (error) {

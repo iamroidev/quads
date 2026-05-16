@@ -17,7 +17,7 @@ export interface IProductDocument extends Document {
     price: number;
     originalPrice?: number;
     category: mongoose.Types.ObjectId;
-    seller: mongoose.Types.ObjectId;
+    seller: mongoose.Types.ObjectId; // References Store
     images: IProductImage[];
     video?: IProductVideo;
     condition: 'new' | 'like-new' | 'good' | 'fair' | 'poor';
@@ -80,8 +80,8 @@ const productSchema = new Schema<IProductDocument>(
     },
     seller: {
       type: Schema.Types.ObjectId,
-      ref: 'User',
-      required: [true, 'Seller is required'],
+      ref: 'Store',
+      required: [true, 'Seller Store is required'],
     },
     images: {
       type: [productImageSchema],

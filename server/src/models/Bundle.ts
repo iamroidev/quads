@@ -14,7 +14,7 @@ const bundleSchema = new Schema<IBundleDocument>(
   {
     seller: {
       type: Schema.Types.ObjectId,
-      ref: 'User',
+      ref: 'Store',
       required: true,
     },
     name: {

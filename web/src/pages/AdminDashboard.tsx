@@ -545,7 +545,7 @@ const AdminDashboard: React.FC = () => {
                     </div>
                     <div>
                       <p className="text-[15px] font-black uppercase text-[var(--bulletin-text)]">{user.name}</p>
-                      <p className="text-[11px] font-bold opacity-40 text-[var(--bulletin-text)]">{user.email} · {user.role}</p>
+                      <p className="text-[11px] font-bold opacity-40 text-[var(--bulletin-text)]">{user.email} · {user.roles?.join(', ')}</p>
                       <div className="flex gap-2 mt-2">
                         {user.isVerified && (
                           <span className="text-[8px] border-2 border-black px-2 py-0.5 bg-[#fffacd] dark:bg-yellow-900/40 text-black dark:text-yellow-200 font-black uppercase tracking-widest">Verified</span>
@@ -557,7 +557,7 @@ const AdminDashboard: React.FC = () => {
                     </div>
                   </div>
                   <div className="flex gap-3">
-                    {user.role === 'seller' && (
+                    {user.roles?.includes('seller') && (
                       <button 
                         onClick={() => handleToggleVerifySeller(user)} 
                         disabled={busyId === user._id} 

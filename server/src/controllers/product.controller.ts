@@ -36,7 +36,7 @@ export const createProduct = async (
     }
 
     const product = await productService.createProduct(
-      req.user!._id.toString(),
+      req.user!.activeStore!._id.toString(),
       {
         title: req.body.title,
         description: req.body.description,
@@ -183,7 +183,7 @@ export const getMyListings = async (
 ): Promise<void> => {
   try {
     const result = await productService.getSellerProducts(
-      req.user!._id.toString(),
+      req.user!.activeStore!._id.toString(),
       {
         status: req.query.status as string,
         sort: req.query.sort as string,
@@ -277,7 +277,7 @@ export const updateProduct = async (
     const product = await productService.updateProduct(
       req.params.id,
       req.user!._id.toString(),
-      req.user!.role,
+      req.user!.roles.includes('admin') ? 'admin' : req.user!.viewMode,
       {
         title: req.body.title,
         description: req.body.description,
@@ -328,7 +328,7 @@ export const deleteProductImages = async (
     const product = await productService.deleteProductImages(
       req.params.id,
       req.user!._id.toString(),
-      req.user!.role,
+      req.user!.roles.includes('admin') ? 'admin' : req.user!.viewMode,
       publicIds
     );
 
@@ -356,7 +356,7 @@ export const deleteProduct = async (
     await productService.deleteProduct(
       req.params.id,
       req.user!._id.toString(),
-      req.user!.role
+      req.user!.roles.includes('admin') ? 'admin' : req.user!.viewMode
     );
 
     res.status(200).json({
@@ -650,7 +650,7 @@ export const importProductsCSV = async (
             }
           }
 
-          await productService.createProduct(req.user!._id.toString(), {
+          await productService.createProduct(req.user!.activeStore!._id.toString(), {
             title,
             description,
             price,
@@ -715,7 +715,7 @@ export const importProductsCSV = async (
             }
           }
 
-          await productService.createProduct(req.user!._id.toString(), {
+          await productService.createProduct(req.user!.activeStore!._id.toString(), {
             title,
             description,
             price: priceValue,

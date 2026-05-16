@@ -5,7 +5,7 @@ import { LoadingSpinner } from '../ui';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
-  roles?: string[];
+  roles?: ('buyer' | 'seller' | 'admin')[];
 }
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, roles }) => {
@@ -20,13 +20,13 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, roles }) => {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  if (roles && user && !roles.includes(user.role)) {
+  if (roles && user && !roles.some(r => user.roles?.includes(r))) {
     return <Navigate to="/" replace />;
   }
 
   if (
     user &&
-    user.role === 'seller' &&
+    user.roles?.includes('seller') &&
     location.pathname !== '/seller/onboarding' &&
     !user?.sellerOnboarding?.completed
   ) {

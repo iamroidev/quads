@@ -77,8 +77,8 @@ const SettingsPage: React.FC = () => {
     }
   }, [user]);
 
-  const isAdmin = user?.role === 'admin';
-  const isSeller = user?.role === 'seller';
+  const isAdmin = user?.roles?.includes('admin');
+  const isSeller = user?.roles?.includes('seller');
 
   const notificationItems = isAdmin
     ? [

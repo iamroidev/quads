@@ -37,7 +37,7 @@ export const BulletinLayout: React.FC<BulletinLayoutProps> = ({
   hideHero = false,
 }) => {
   const { user, isAuthenticated, logout, switchRole } = useAuth();
-  const isSeller = user?.role === 'seller' || user?.role === 'admin';
+  const isSeller = user?.roles?.includes('seller') || user?.roles?.includes('admin');
   const location = useLocation();
   const navigate = useNavigate();
   const [isProfileOpen, setIsProfileOpen] = React.useState(false);
@@ -76,8 +76,8 @@ export const BulletinLayout: React.FC<BulletinLayoutProps> = ({
   const handleRoleSwitch = async () => {
     setIsSwitching(true);
     try {
-      const targetRole = user?.role === 'seller' ? 'buyer' : 'seller';
-      await switchRole(targetRole);
+      const targetMode = user?.viewMode === 'seller' ? 'buyer' : 'seller';
+      await switchRole(targetMode);
       setIsProfileOpen(false);
     } catch (err) {
       console.error('Failed to switch role', err);
@@ -117,7 +117,7 @@ export const BulletinLayout: React.FC<BulletinLayoutProps> = ({
 
             <div className="flex items-center gap-8">
               <div className="hidden lg:flex items-center gap-6 text-[10px] font-black uppercase tracking-widest">
-                {user?.role === 'seller' ? (
+                {user?.viewMode === 'seller' ? (
                   <>
                     <Link to="/dashboard" className="hover:text-[#ff6b6b]">My Shop</Link>
                     <Link to="/seller/analytics" className="hover:text-[#ff6b6b]">My Stats</Link>
@@ -143,7 +143,7 @@ export const BulletinLayout: React.FC<BulletinLayoutProps> = ({
                 )}
               </div>
 
-              {(!isAuthenticated || user?.role === 'buyer') && (
+               {(!isAuthenticated || user?.viewMode === 'buyer') && (
                 <Link 
                   to={isAuthenticated ? "/seller/onboarding" : "/register"} 
                   className="hidden md:flex items-center gap-2 border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-text)] text-[var(--bulletin-bg)] px-4 py-2 text-[10px] font-black uppercase tracking-widest shadow-[3px_3px_0_0_var(--bulletin-accent)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all"
@@ -152,7 +152,7 @@ export const BulletinLayout: React.FC<BulletinLayoutProps> = ({
                   Sell on Quads
                 </Link>
               )}
-              {user?.role === 'seller' && (
+               {user?.viewMode === 'seller' && (
                 <Link 
                   to="/sell" 
                   className="hidden md:flex items-center gap-2 border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-accent)] text-white px-4 py-2 text-[10px] font-black uppercase tracking-widest shadow-[3px_3px_0_0_var(--bulletin-text)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all"
@@ -191,8 +191,8 @@ export const BulletinLayout: React.FC<BulletinLayoutProps> = ({
                         <div className="px-4 py-3 border-b-2 border-[var(--bulletin-border)] bg-[#fffacd] dark:bg-yellow-900/20">
                            <div className="text-[8px] font-black uppercase tracking-widest opacity-40 dark:opacity-70 text-black dark:text-white">Currently viewing as</div>
                            <div className="text-[10px] font-black uppercase tracking-widest flex items-center gap-2 text-black dark:text-white">
-                             <div className={`h-2 w-2 rounded-full ${user?.role === 'seller' ? 'bg-[#ff6b6b]' : 'bg-sky-500'} animate-pulse`} />
-                             {user?.role?.toUpperCase()}
+                             <div className={`h-2 w-2 rounded-full ${user?.viewMode === 'seller' ? 'bg-[#ff6b6b]' : 'bg-sky-500'} animate-pulse`} />
+                             {user?.viewMode?.toUpperCase()}
                            </div>
                         </div>
                         
@@ -200,13 +200,13 @@ export const BulletinLayout: React.FC<BulletinLayoutProps> = ({
                            <User className="h-3 w-3" /> My Profile
                         </Link>
                         
-                        {user?.role !== 'admin' && (
+                        {!user?.roles?.includes('admin') && (
                           <button 
                             disabled={isSwitching}
                             onClick={handleRoleSwitch}
                             className="px-4 py-3 text-[10px] font-black uppercase tracking-widest border-b border-[var(--bulletin-border)]/10 hover:bg-sky-50 dark:hover:bg-sky-900/10 hover:text-[#ff6b6b] transition-colors flex items-center gap-2 text-sky-700 dark:text-sky-400">
                              <Repeat className={`h-3 w-3 ${isSwitching ? 'animate-spin' : ''}`} />
-                             {isSwitching ? 'Switching...' : `Switch to ${user?.role === 'seller' ? 'Buyer' : 'Seller'} View`}
+                             {isSwitching ? 'Switching...' : `Switch to ${user?.viewMode === 'seller' ? 'Buyer' : 'Seller'} View`}
                           </button>
                         )}
 
@@ -301,7 +301,7 @@ export const BulletinLayout: React.FC<BulletinLayoutProps> = ({
               
               {/* Organized Navigation Column */}
               <div className="flex flex-col gap-4">
-                {user?.role === 'seller' ? (
+                {user?.viewMode === 'seller' ? (
                   <>
                     <Link to="/dashboard" className="text-[14px] font-black uppercase tracking-widest hover:text-[#ff6b6b] transition-colors">My Shop</Link>
                     <Link to="/seller/analytics" className="text-[14px] font-black uppercase tracking-widest hover:text-[#ff6b6b] transition-colors">My Stats</Link>
@@ -321,7 +321,7 @@ export const BulletinLayout: React.FC<BulletinLayoutProps> = ({
               {/* Safety & Rules Column */}
               <div className="flex flex-col gap-4">
                 <div className="text-[10px] font-black uppercase tracking-[0.3em] text-[#ff6b6b] mb-2">Safety & Rules</div>
-                {user?.role === 'seller' ? (
+                {user?.viewMode === 'seller' ? (
                   <>
                     <Link to="/seller/payouts" className="text-[14px] font-black uppercase tracking-widest hover:text-[#ff6b6b] transition-colors">Payments</Link>
                     <Link to="/support" className="text-[14px] font-black uppercase tracking-widest hover:text-[#ff6b6b] transition-colors">Help Desk</Link>
@@ -341,7 +341,7 @@ export const BulletinLayout: React.FC<BulletinLayoutProps> = ({
                 <div className="text-[10px] font-black uppercase tracking-[0.3em] text-[#ff6b6b] mb-2">Account</div>
                 {isAuthenticated ? (
                   <>
-                    <Link to={user?.role === 'seller' ? "/seller/orders" : "/orders"} className="text-[14px] font-black uppercase tracking-widest hover:text-[#ff6b6b] transition-colors">{user?.role === 'seller' ? 'Incoming Orders' : 'My Orders'}</Link>
+                    <Link to={user?.viewMode === 'seller' ? "/seller/orders" : "/orders"} className="text-[14px] font-black uppercase tracking-widest hover:text-[#ff6b6b] transition-colors">{user?.viewMode === 'seller' ? 'Incoming Orders' : 'My Orders'}</Link>
                     <Link to="/messages" className="text-[14px] font-black uppercase tracking-widest hover:text-[#ff6b6b] transition-colors">Messages</Link>
                     <Link to="/settings" className="text-[14px] font-black uppercase tracking-widest hover:text-[#ff6b6b] transition-colors">Settings</Link>
                   </>
@@ -380,11 +380,14 @@ export const BulletinLayout: React.FC<BulletinLayoutProps> = ({
               </div>
             </div>
 
-            {/* Legal / Metadata */}
-            <div className="mt-16 flex flex-col md:flex-row items-center justify-between border-t-2 border-[var(--bulletin-border)] opacity-20 pt-8 gap-6">
-              <div className="flex items-center gap-3">
-                <div className="h-1.5 w-1.5 rounded-full bg-[#ff6b6b] animate-pulse" />
-                <span className="text-[9px] font-black uppercase tracking-[0.3em] opacity-30 text-[var(--bulletin-text)]">System Online · {new Date().getFullYear()} Operations</span>
+            {/* Legal & Privacy */}
+            <div className="mt-16 flex flex-col md:flex-row items-center justify-between border-t-2 border-[var(--bulletin-border)] pt-8 gap-6">
+              <div className="flex flex-wrap items-center justify-center md:justify-start gap-3">
+                <Link to="/terms#privacy" className="text-[9px] font-black uppercase tracking-[0.3em] text-[var(--bulletin-text)] opacity-40 hover:opacity-100 hover:text-[#ff6b6b] transition-all">Privacy Policy</Link>
+                <span className="text-[var(--bulletin-border)]">|</span>
+                <Link to="/terms#tos" className="text-[9px] font-black uppercase tracking-[0.3em] text-[var(--bulletin-text)] opacity-40 hover:opacity-100 hover:text-[#ff6b6b] transition-all">Terms of Service</Link>
+                <span className="text-[var(--bulletin-border)]">|</span>
+                <span className="text-[9px] font-black uppercase tracking-[0.3em] opacity-30 text-[var(--bulletin-text)]">© {new Date().getFullYear()} QUADS</span>
               </div>
               <div className="text-[9px] font-black uppercase tracking-[0.5em] opacity-30 text-[var(--bulletin-text)]">
                 /// QUADS DEPLOYMENT V2.4.0 ///

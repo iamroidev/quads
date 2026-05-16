@@ -53,7 +53,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onSavedChange }) => 
   const { isAuthenticated, user } = useAuth();
   const navigate = useNavigate();
 
-  const sellerName = typeof product.seller === 'string' ? 'Seller' : (product.seller.storeName || product.seller.brandName || product.seller.name);
+  const sellerName = typeof product.seller === 'string' ? 'Seller' : product.seller.name;
   const sellerVerified = typeof product.seller === 'string' ? false : product.seller.isVerified;
 
   /** Optimize Cloudinary URLs with f_auto,q_auto */

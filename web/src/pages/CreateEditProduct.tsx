@@ -37,7 +37,7 @@ const CreateEditProduct = () => {
 
   const isUnverifiedSeller =
     !isEdit &&
-    user?.role === 'seller' &&
+    user?.roles?.includes('seller') &&
     !user?.isVerified &&
     !user?.emailVerified &&
     !user?.phoneVerified;

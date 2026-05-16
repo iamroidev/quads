@@ -1,4 +1,5 @@
 import User, { IUserDocument } from '../models/User';
+import Store from '../models/Store';
 import { generateToken } from '../utils/jwt';
 import ApiError from '../utils/ApiError';
 import { verifySupabaseToken } from '../utils/supabaseJwt';
@@ -11,7 +12,7 @@ interface RegisterData {
   supabaseAccessToken: string;
   name: string;
   phone: string;
-  role: 'buyer' | 'seller';
+  roles: ('buyer' | 'seller')[];
   studentId?: string;
   department?: string;
   residenceHall?: string;
@@ -48,8 +49,18 @@ class AuthService {
   private buildToken(user: IUserDocument): string {
     return generateToken({
       userId: user._id.toString(),
-      role: user.role,
+      roles: user.roles,
+      viewMode: user.viewMode,
     });
+  }
+
+  private slugify(text: string): string {
+    return text.toString().toLowerCase()
+      .replace(/\s+/g, '-')
+      .replace(/[^\w\-]+/g, '')
+      .replace(/\-\-+/g, '-')
+      .replace(/^-+/, '')
+      .replace(/-+$/, '');
   }
 
   private randomPassword(): string {
@@ -85,7 +96,7 @@ class AuthService {
       name: (data.name || metadataName || 'User').trim(),
       email,
       phone: data.phone || '',
-      role: data.role || 'buyer',
+      roles: data.roles || ['buyer'],
       studentId: data.studentId || '',
       department: data.department || '',
       residenceHall: data.residenceHall || '',
@@ -136,7 +147,7 @@ class AuthService {
    * Get user profile by ID
    */
   async getProfile(userId: string): Promise<IUserDocument> {
-    const user = await User.findById(userId);
+    const user = await User.findById(userId).populate('activeStore');
     if (!user) {
       throw ApiError.notFound('User not found.');
     }
@@ -146,17 +157,54 @@ class AuthService {
   /**
    * Update user profile
    */
-  async switchRole(userId: string, newRole: 'buyer' | 'seller'): Promise<AuthResult> {
+  async switchRole(userId: string, targetMode: 'buyer' | 'seller'): Promise<AuthResult> {
     const user = await User.findById(userId);
     if (!user) {
       throw ApiError.notFound('User not found.');
     }
 
-    user.role = newRole;
+    // 1. Ensure permissions (Cumulative Role)
+    if (targetMode === 'seller' && !user.roles.includes('seller')) {
+      user.roles.push('seller');
+    }
+
+    // 2. Ensure Store exists if switching to seller mode
+    if (targetMode === 'seller' && !user.activeStore) {
+      const storeName = user.storeName || `${user.name}'s Shop`;
+      const baseSlug = this.slugify(storeName);
+      let slug = baseSlug;
+      let counter = 1;
+      
+      // Handle slug collisions
+      while (await Store.findOne({ slug })) {
+        slug = `${baseSlug}-${counter++}`;
+      }
+
+      const store = await Store.create({
+        ownerId: user._id,
+        name: storeName,
+        slug,
+        avatar: user.avatar,
+        location: user.location,
+        payoutSetupComplete: user.sellerOnboarding?.payoutSetupComplete || false,
+        payoutMethod: user.sellerOnboarding?.payoutMethod,
+        payoutProvider: user.sellerOnboarding?.payoutProvider,
+        payoutAccountName: user.sellerOnboarding?.payoutAccountName,
+        payoutAccountNumber: user.sellerOnboarding?.payoutAccountNumber,
+      });
+
+      user.activeStore = store._id;
+    }
+
+    // 3. Toggle ViewMode
+    user.viewMode = targetMode;
     await user.save();
 
-    const token = this.buildToken(user);
-    return { user, token };
+    const populatedUser = await User.findById(user._id).populate('activeStore');
+    if (!populatedUser) throw ApiError.notFound('User not found');
+
+    const token = this.buildToken(populatedUser);
+    return { user: populatedUser, token };
   }
 
   async updateProfile(
@@ -254,7 +302,7 @@ class AuthService {
       name: profileName || 'User',
       email,
       phone: profileData?.phone || '',
-      role: normalizedRole,
+      roles: normalizedRole ? [normalizedRole as any] : ['buyer'],
       isVerified: true,
       emailVerified: true, // Google OAuth verifies the email
       phoneVerified: false,
@@ -287,9 +335,14 @@ class AuthService {
         user.isVerified = true;
         shouldSave = true;
       }
-      if (normalizedRole && user.role !== normalizedRole) {
-        user.role = normalizedRole;
+      if (normalizedRole && !user.roles.includes(normalizedRole as any)) {
+        user.roles.push(normalizedRole as any);
         shouldSave = true;
+      }
+      // If logging in as seller but no active store, switchRole handles it usually, 
+      // but let's ensure consistency here if role was forced
+      if (user.roles.includes('seller') && !user.activeStore) {
+        // This will be handled on next switchRole call for cleaner logic
       }
       
       if (profileData) {

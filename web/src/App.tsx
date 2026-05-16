@@ -71,7 +71,7 @@ const RootRoute: React.FC = () => {
   const { isAuthenticated, isLoading, user } = useAuth();
   if (isLoading) return null;
   if (!isAuthenticated) return <HomePage />;
-  return user?.role === 'admin' ? <Navigate to="/admin" replace /> : <Navigate to="/dashboard" replace />;
+  return user?.roles?.includes('admin') ? <Navigate to="/admin" replace /> : <Navigate to="/dashboard" replace />;
 };
 
 const App: React.FC = () => {

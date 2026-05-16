@@ -3,7 +3,8 @@ import env from '../config/env';
 
 interface TokenPayload {
   userId: string;
-  role: string;
+  roles: string[];
+  viewMode: string;
 }
 
 export const generateToken = (payload: TokenPayload): string => {

@@ -26,8 +26,8 @@ class AdminService {
       revenueAgg,
     ] = await Promise.all([
       User.countDocuments(),
-      User.countDocuments({ role: 'seller' }),
-      User.countDocuments({ role: 'seller', isVerified: true }),
+      User.countDocuments({ roles: 'seller' }),
+      User.countDocuments({ roles: 'seller', isVerified: true }),
       User.countDocuments({ isBanned: true }),
       Product.countDocuments(),
       Product.countDocuments({ status: 'active' }),
@@ -74,7 +74,7 @@ class AdminService {
     const skip = (page - 1) * limit;
 
     const query: Record<string, any> = {};
-    if (filters.role) query.role = filters.role;
+    if (filters.role) query.roles = filters.role;
     if (filters.isBanned !== undefined) query.isBanned = filters.isBanned === 'true';
     if (filters.search) {
       query.$or = [
@@ -125,7 +125,7 @@ class AdminService {
 
     const user = await User.findById(userId);
     if (!user) throw ApiError.notFound('User not found');
-    if (user.role !== 'seller') throw ApiError.badRequest('Only seller accounts can be verified');
+    if (!user.roles.includes('seller')) throw ApiError.badRequest('Only seller accounts can be verified');
 
     user.isVerified = isVerified;
     await user.save();

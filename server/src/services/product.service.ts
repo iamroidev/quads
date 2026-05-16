@@ -171,7 +171,7 @@ class ProductService {
     // Populate and return
     return product.populate([
       { path: 'category', select: 'name slug icon' },
-      { path: 'seller', select: 'name storeName brandName avatar isVerified location' },
+      { path: 'seller', select: 'name slug avatar isVerified location rating reviewCount' },
     ]);
   }
 
@@ -198,19 +198,19 @@ class ProductService {
       query.status = 'active';
     }
 
-    // Exclude sellers on vacation
-    const vacationingSellers = await User.find({ 'vacationMode.active': true }).distinct('_id');
-    if (vacationingSellers.length > 0) {
+    // Exclude sellers (stores) on vacation
+    const Store = mongoose.model('Store');
+    const vacationingStores = await Store.find({ 'vacationMode.active': true }).distinct('_id');
+    if (vacationingStores.length > 0) {
       if (query.seller) {
-        // If filtering by specific seller, and they're on vacation, no products
-        if (vacationingSellers.some(id => id.toString() === filters.seller)) {
+        if (vacationingStores.some(id => id.toString() === filters.seller)) {
           return {
             products: [],
             pagination: { page, limit, total: 0, pages: 0 }
           };
         }
       } else {
-        query.seller = { $nin: vacationingSellers };
+        query.seller = { $nin: vacationingStores };
       }
     }
 
@@ -303,7 +303,7 @@ class ProductService {
         .skip(skip)
         .limit(limit)
         .populate('category', 'name slug icon')
-        .populate('seller', 'name storeName brandName avatar isVerified location')
+        .populate('seller', 'name slug avatar isVerified location rating reviewCount')
         .lean(),
       Product.countDocuments(query),
     ]);
@@ -332,7 +332,7 @@ class ProductService {
 
     const product = await Product.findById(productId)
       .populate('category', 'name slug icon description')
-      .populate('seller', 'name storeName brandName avatar isVerified location bio createdAt');
+      .populate('seller', 'name slug avatar banner bio description isVerified location rating reviewCount totalSales createdAt');
 
     if (!product) {
       throw ApiError.notFound('Product not found');
@@ -381,8 +381,11 @@ class ProductService {
 
     const previousPrice = product.price;
 
-    // Check ownership (sellers can edit own products, admins can edit any)
-    if (product.seller.toString() !== userId && userRole !== 'admin') {
+    // Check ownership (sellers can edit own products via their store, admins can edit any)
+    const user = await User.findById(userId).select('activeStore roles');
+    const isOwner = user?.activeStore && product.seller.toString() === user.activeStore.toString();
+    
+    if (!isOwner && userRole !== 'admin') {
       throw ApiError.forbidden('You can only edit your own products');
     }
 
@@ -463,7 +466,7 @@ class ProductService {
 
     return product.populate([
       { path: 'category', select: 'name slug icon' },
-      { path: 'seller', select: 'name storeName brandName avatar isVerified location' },
+      { path: 'seller', select: 'name slug avatar isVerified location rating reviewCount' },
     ]);
   }
 
@@ -482,7 +485,10 @@ class ProductService {
       throw ApiError.notFound('Product not found');
     }
 
-    if (product.seller.toString() !== userId && userRole !== 'admin') {
+    const user = await User.findById(userId).select('activeStore roles');
+    const isOwner = user?.activeStore && product.seller.toString() === user.activeStore.toString();
+
+    if (!isOwner && userRole !== 'admin') {
       throw ApiError.forbidden('You can only edit your own products');
     }
 
@@ -507,7 +513,7 @@ class ProductService {
 
     return product.populate([
       { path: 'category', select: 'name slug icon' },
-      { path: 'seller', select: 'name storeName brandName avatar isVerified location' },
+      { path: 'seller', select: 'name slug avatar isVerified location rating reviewCount' },
     ]);
   }
 
@@ -525,7 +531,10 @@ class ProductService {
       throw ApiError.notFound('Product not found');
     }
 
-    if (product.seller.toString() !== userId && userRole !== 'admin') {
+    const user = await User.findById(userId).select('activeStore roles');
+    const isOwner = user?.activeStore && product.seller.toString() === user.activeStore.toString();
+
+    if (!isOwner && userRole !== 'admin') {
       throw ApiError.forbidden('You can only delete your own products');
     }
 
@@ -588,7 +597,7 @@ class ProductService {
 
     return product.populate([
       { path: 'category', select: 'name slug icon' },
-      { path: 'seller', select: 'name storeName brandName avatar isVerified location' },
+      { path: 'seller', select: 'name slug avatar isVerified location rating reviewCount' },
     ]);
   }
 
@@ -626,7 +635,7 @@ class ProductService {
       .sort({ isFeatured: -1, createdAt: -1 })
       .limit(limit)
       .populate('category', 'name slug icon')
-      .populate('seller', 'name storeName brandName avatar isVerified location');
+      .populate('seller', 'name slug avatar isVerified location rating reviewCount');
   }
 
   /**
@@ -637,7 +646,7 @@ class ProductService {
       .sort({ createdAt: -1 })
       .limit(limit)
       .populate('category', 'name slug icon')
-      .populate('seller', 'name storeName brandName avatar isVerified location');
+      .populate('seller', 'name slug avatar isVerified location rating reviewCount');
   }
 
   /**
@@ -697,7 +706,7 @@ class ProductService {
       .sort({ views: -1, createdAt: -1 })
       .limit(limit)
       .populate('category', 'name slug icon')
-      .populate('seller', 'name storeName brandName avatar isVerified location');
+      .populate('seller', 'name slug avatar isVerified location rating reviewCount');
   }
 
   /**
@@ -719,7 +728,7 @@ class ProductService {
       .sort({ createdAt: -1 })
       .limit(limit)
       .populate('category', 'name slug icon')
-      .populate('seller', 'name storeName brandName avatar isVerified location');
+      .populate('seller', 'name slug avatar isVerified location rating reviewCount');
   }
 
   async getRecommendations(
@@ -743,7 +752,7 @@ class ProductService {
           .sort({ views: -1, createdAt: -1 })
           .limit(safeLimit)
           .populate('category', 'name slug icon')
-          .populate('seller', 'name storeName brandName avatar isVerified location');
+          .populate('seller', 'name slug avatar isVerified location rating reviewCount');
         if (scoped.length >= safeLimit) return scoped;
       }
     }
@@ -764,7 +773,7 @@ class ProductService {
             .sort({ views: -1, createdAt: -1 })
             .limit(safeLimit)
             .populate('category', 'name slug icon')
-            .populate('seller', 'name storeName brandName avatar isVerified location');
+            .populate('seller', 'name slug avatar isVerified location rating reviewCount');
           if (personalized.length > 0) return personalized;
         }
       }
@@ -775,7 +784,7 @@ class ProductService {
       .sort({ views: -1, createdAt: -1 })
       .limit(safeLimit)
       .populate('category', 'name slug icon')
-      .populate('seller', 'name storeName brandName avatar isVerified location');
+      .populate('seller', 'name slug avatar isVerified location rating reviewCount');
   }
 
   async getPriceInsights(productId: string): Promise<{
