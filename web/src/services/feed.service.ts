@@ -1,10 +1,11 @@
 import api from './api';
-import { ProductPopulated } from '../types';
+import { ProductPopulated, Activity } from '../types';
 
 export interface PulseFeedResponse {
   success: boolean;
   data: {
     pulse: ProductPopulated[];
+    activities: Activity[];
     sections: {
       nearYou: ProductPopulated[];
       trending: ProductPopulated[];
