@@ -205,7 +205,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onSavedChange }) => 
 
       {/* ── Info ── */}
       <div className="pt-3">
-        <h3 className="line-clamp-1 text-sm font-medium text-earth-700 transition-colors group-hover:text-earth-900">
+        <h3 className="line-clamp-1 text-sm font-medium text-earth-700 transition-colors group-hover:text-[#ff6b6b]">
           {product.title}
         </h3>
 

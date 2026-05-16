@@ -59,12 +59,12 @@ const HomePage: React.FC = () => {
         <div className="border-b-4 border-[var(--bulletin-border)] bg-[#f0e8f4] dark:bg-purple-900/40 px-6 py-4">
           <div className="mx-auto max-w-[1400px] flex justify-between items-center">
             <span className="text-[12px] font-black uppercase tracking-widest text-[var(--bulletin-text)]">You are in marketplace view</span>
-            <Link to="/dashboard" className="text-[12px] font-black uppercase underline decoration-2 underline-offset-4 text-[var(--bulletin-text)] hover:opacity-70 transition-opacity">Return to Seller Hub →</Link>
+            <Link to="/dashboard" className="text-[12px] font-black uppercase underline decoration-2 underline-offset-4 text-[var(--bulletin-text)] hover:opacity-70 transition-opacity">Return to My Shop →</Link>
           </div>
         </div>
       )}
 
-      {/* ── The Bulletin Board Hero ── */}
+      {/* ── Marketplace Hero ── */}
       <BulletinSection bgColor="bg-[var(--bulletin-bg)]" className="pt-4 md:pt-12 overflow-hidden">
         <div className="min-h-auto lg:min-h-[700px] w-full relative">
           <div className="absolute inset-0 border-4 border-[var(--bulletin-border)] bg-[#1a1a1a] dark:bg-[#0a0a0a] shadow-[16px_16px_0_0_var(--bulletin-shadow)]" />
@@ -79,14 +79,14 @@ const HomePage: React.FC = () => {
                 Verified Network
               </div>
               <p className="text-3xl md:text-4xl lg:text-5xl font-black uppercase tracking-tighter leading-none mb-4 md:mb-10 text-[var(--bulletin-text)]">
-                BROWSE VERIFIED <br/>CAMPUS LISTINGS
+                BROWSE VERIFIED <br/>CAMPUS ITEMS
               </p>
               <p className="text-sm md:text-lg lg:text-xl font-bold leading-relaxed opacity-70 text-[var(--bulletin-text)] mb-4 md:mb-10 max-w-xl">
                 Buy, sell, and trade with verified UMaT students. From textbooks to electronics, we've built the most trusted network for your hostel life.
               </p>
               <div className="flex flex-wrap gap-3 md:gap-4">
                 <Link to="/products" className="border-4 border-black bg-black text-white px-6 md:px-8 py-3 md:py-4 text-[11px] md:text-[14px] font-black uppercase tracking-widest hover:-translate-y-1 shadow-[6px_6px_0_0_#ff6b6b] transition-all">
-                  Browse Board →
+                  Browse Items →
                 </Link>
               </div>
             </div>
@@ -101,7 +101,7 @@ const HomePage: React.FC = () => {
                 </div>
                 <h3 className="text-xl md:text-2xl font-black uppercase tracking-tight text-black mb-3">New here?</h3>
                 <p className="text-[11px] md:text-[13px] font-bold opacity-80 text-black mb-4 md:mb-6 leading-tight">
-                  Connect with the board. <br/>Use your student ID email <br/>to unlock campus trading.
+                  Connect with the market. <br/>Use your student email <br/>to start trading.
                 </p>
                 <Link to="/register" className="inline-block w-full border-4 border-black bg-black text-white px-4 py-3 text-[10px] md:text-[11px] font-black uppercase text-center hover:bg-[#ff6b6b] transition-all">
                   Initialize Access →
@@ -117,8 +117,8 @@ const HomePage: React.FC = () => {
               <div className="text-[10px] md:text-[12px] font-bold text-black dark:text-white mt-1">Free for every student.</div>
             </div>
             <div className="border-4 border-black bg-[#e0f2f7] dark:bg-[#cde9f0] p-4 md:p-6 shadow-[4px_4px_0_0_var(--bulletin-shadow)] md:shadow-[8px_8px_0_0_var(--bulletin-shadow)] w-full sm:w-1/3 lg:w-full" style={{ transform: 'rotate(-2.5deg)' }}>
-              <div className="text-2xl md:text-4xl font-black text-black mb-1">{totalProducts || '...'}</div>
-              <div className="text-[8px] md:text-[10px] font-black uppercase tracking-widest opacity-40 dark:opacity-80 text-black dark:text-white/70">Listings</div>
+              <div className="text-[2xl] md:text-4xl font-black text-black mb-1">{totalProducts || '...'}</div>
+              <div className="text-[8px] md:text-[10px] font-black uppercase tracking-widest opacity-40 dark:opacity-80 text-black dark:text-white/70">Items</div>
               <div className="text-[10px] md:text-[12px] font-bold text-black dark:text-white mt-1">Live campus inventory.</div>
             </div>
             <div className="border-4 border-black bg-[#fce4ec] dark:bg-[#f8d0de] p-4 md:p-6 shadow-[4px_4px_0_0_var(--bulletin-shadow)] md:shadow-[8px_8px_0_0_var(--bulletin-shadow)] w-full sm:w-1/3 lg:w-full" style={{ transform: 'rotate(0.5deg)' }}>
@@ -130,8 +130,8 @@ const HomePage: React.FC = () => {
         </div>
       </BulletinSection>
 
-      {/* ── Just Listed (Restored with Skeletons) ── */}
-      <BulletinSection title="Just Pinned" subtitle="New" bgColor="bg-[#f0e8f4] dark:bg-purple-900/10">
+      {/* ── New Items (Restored with Skeletons) ── */}
+      <BulletinSection title="Just Posted" subtitle="New" bgColor="bg-[#f0e8f4] dark:bg-purple-900/10">
         {loading ? (
           <div className="grid gap-6 grid-cols-2 md:grid-cols-4 lg:grid-cols-6">
             {[1, 2, 3, 4, 5, 6].map(i => <ProductCardSkeleton key={i} />)}
@@ -141,18 +141,18 @@ const HomePage: React.FC = () => {
             {recentProducts.map(p => <ProductCard key={p._id} product={p} />)}
           </div>
         ) : (
-          <div className="text-center py-10 opacity-30 dark:opacity-60 uppercase font-black tracking-widest">No listings found</div>
+          <div className="text-center py-10 opacity-30 dark:opacity-60 uppercase font-black tracking-widest">No items found</div>
         )}
         {!loading && recentProducts.length > 0 && (
            <div className="mt-12 text-center">
-             <Link to="/products" className="bg-black text-white px-8 py-3 text-[11px] font-black uppercase tracking-widest shadow-[6px_6px_0_0_#ff6b6b]">See Full Board</Link>
+             <Link to="/products" className="bg-black text-white px-8 py-3 text-[11px] font-black uppercase tracking-widest shadow-[6px_6px_0_0_#ff6b6b]">See All Items</Link>
           </div>
         )}
       </BulletinSection>
 
       {/* ── Campus Pulse ── */}
       <BulletinSection 
-        title="Campus Pulse" 
+        title="Recent Activity" 
         subtitle="Discovery" 
         bgColor="bg-[var(--bulletin-bg)] border-t-4 border-[var(--bulletin-border)]"
       >
@@ -180,7 +180,7 @@ const HomePage: React.FC = () => {
       )}
 
       {/* ── Category strip ── */}
-      <BulletinSection title="Explore Departments" subtitle="Browse" bgColor="bg-[var(--bulletin-bg)] border-t-4 border-[var(--bulletin-border)]">
+      <BulletinSection title="Explore Categories" subtitle="Browse" bgColor="bg-[var(--bulletin-bg)] border-t-4 border-[var(--bulletin-border)]">
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6">
           {loading ? (
             <>
@@ -227,7 +227,7 @@ const HomePage: React.FC = () => {
                   </div>
                 </div>
               )) : (
-                <div className="text-[11px] font-black opacity-30 uppercase tracking-widest mt-10">Discovering top sellers...</div>
+                <div className="text-[11px] font-black opacity-30 uppercase tracking-widest mt-10">Finding top sellers...</div>
               )}
             </div>
             <Link to="/sellers" className="mt-8 inline-block text-[10px] font-black uppercase tracking-[0.2em] text-[#ff6b6b] hover:underline">Full directory →</Link>
@@ -236,19 +236,19 @@ const HomePage: React.FC = () => {
           <div className="lg:col-span-8 border-4 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] dark:bg-[#111] p-10 shadow-[8px_8px_0_0_var(--bulletin-shadow)] relative flex flex-col md:flex-row items-center gap-10" style={{ transform: 'rotate(0.3deg)' }}>
             <div className="flex-1">
               <div className="text-[10px] font-black uppercase tracking-[0.3em] text-[#ff6b6b] mb-6">Partner Opportunity</div>
-              <h2 className="text-4xl md:text-5xl font-black uppercase tracking-tighter text-[var(--bulletin-text)] leading-none mb-6">Your Store.<br />Your Rules.</h2>
-              <p className="text-[15px] font-bold opacity-60 dark:opacity-80 text-[var(--bulletin-text)] max-w-sm mb-8">Ready to turn your extra items into cash? Post a listing in under 2 minutes and reach the entire campus community.</p>
+              <h2 className="text-4xl md:text-5xl font-black uppercase tracking-tighter text-[var(--bulletin-text)] leading-none mb-6">Your Shop.<br />Your Rules.</h2>
+              <p className="text-[15px] font-bold opacity-60 dark:opacity-80 text-[var(--bulletin-text)] max-w-sm mb-8">Ready to turn your extra items into cash? Sell something in under 2 minutes and reach the entire campus.</p>
               {!isAuthenticated ? (
                 <Link to="/register" className="inline-block border-4 border-[#ff6b6b] bg-transparent px-8 py-4 text-[13px] font-black uppercase tracking-widest text-[#ff6b6b] shadow-[6px_6px_0_0_#ff6b6b] hover:-translate-y-1 transition-all">
                   Start Selling Now →
                 </Link>
               ) : !isSeller ? (
                 <Link to="/seller/onboarding" className="inline-block border-4 border-[#ff6b6b] bg-transparent px-8 py-4 text-[13px] font-black uppercase tracking-widest text-[#ff6b6b] shadow-[6px_6px_0_0_#ff6b6b] hover:-translate-y-1 transition-all">
-                  Initialize Store →
+                  Start Selling Now →
                 </Link>
               ) : (
                 <Link to="/sell" className="inline-block border-4 border-[#ff6b6b] bg-transparent px-8 py-4 text-[13px] font-black uppercase tracking-widest text-[#ff6b6b] shadow-[6px_6px_0_0_#ff6b6b] hover:-translate-y-1 transition-all">
-                  + Create New Listing
+                  + Sell Item
                 </Link>
               )}
             </div>
@@ -272,7 +272,7 @@ const HomePage: React.FC = () => {
             </div>
             <div className="text-3xl font-black uppercase tracking-tighter mb-4 text-[var(--bulletin-text)]">Discover</div>
             <p className="text-[14px] font-bold opacity-70 dark:opacity-90 dark:text-white leading-relaxed text-[var(--bulletin-text)]">
-              Browse through listings from fellow students. Filter by category, condition, or campus location.
+              Browse through items from other students. Filter by category, condition, or campus location.
             </p>
           </div>
 
@@ -281,7 +281,7 @@ const HomePage: React.FC = () => {
             <div className="h-20 w-20 border-4 border-[var(--bulletin-border)] bg-[#fffacd] dark:bg-yellow-900/40 flex items-center justify-center mb-8 shadow-[6px_6px_0_0_var(--bulletin-shadow)] text-black dark:text-yellow-200 relative">
               <Shield className="h-10 w-10" />
             </div>
-            <div className="text-3xl font-black uppercase tracking-tighter mb-4 text-[var(--bulletin-text)]">Secure Pay</div>
+            <div className="text-3xl font-black uppercase tracking-tighter mb-4 text-[var(--bulletin-text)]">Secure Payment</div>
             <p className="text-[14px] font-bold opacity-70 dark:opacity-90 dark:text-white leading-relaxed text-[var(--bulletin-text)]">
               Pay securely through the platform. Funds are held in escrow until you confirm you've received the item exactly as described.
             </p>
@@ -292,7 +292,7 @@ const HomePage: React.FC = () => {
             <div className="h-20 w-20 border-4 border-[var(--bulletin-border)] bg-[#e0f2f7] dark:bg-sky-900/40 flex items-center justify-center mb-8 shadow-[6px_6px_0_0_var(--bulletin-shadow)] text-black dark:text-sky-200 relative">
               <Truck className="h-10 w-10" />
             </div>
-            <div className="text-3xl font-black uppercase tracking-tighter mb-4 text-[var(--bulletin-text)]">Fulfillment</div>
+            <div className="text-3xl font-black uppercase tracking-tighter mb-4 text-[var(--bulletin-text)]">Get Item</div>
             <p className="text-[14px] font-bold opacity-70 dark:opacity-90 dark:text-white leading-relaxed text-[var(--bulletin-text)]">
               Meet up at a designated campus safety zone or opt for delivery straight to your hostel.
             </p>

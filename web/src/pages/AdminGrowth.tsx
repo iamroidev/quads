@@ -44,7 +44,7 @@ const AdminGrowthPage: React.FC = () => {
   const fieldBase = 'w-full border border-black bg-[#fefdfb] p-2 text-[12px] font-bold focus:outline-none focus:ring-2 focus:ring-black placeholder:text-black/30';
 
   return (
-    <BulletinLayout title="Growth Ledger" subtitle="Administrative Ops" section="19">
+    <BulletinLayout title="Platform Stats" subtitle="Control Panel" section="19">
       {/* Funnel stats */}
       <BulletinSection bgColor="bg-[var(--bulletin-bg)]">
         <div className="grid gap-6 sm:grid-cols-5">
@@ -74,7 +74,7 @@ const AdminGrowthPage: React.FC = () => {
           <div className="relative">
             <div className="absolute -top-3 left-10 h-6 w-32 bg-[#ffd700]/60 rotate-[-1deg] z-10" />
             <BulletinCard rotation={-0.3} className="!p-8 border-4 border-black">
-              <div className="text-[10px] font-black uppercase tracking-widest opacity-40 text-[var(--bulletin-text)] mb-6">User Retention Matrix</div>
+              <div className="text-[10px] font-black uppercase tracking-widest opacity-40 text-[var(--bulletin-text)] mb-6">User Activity</div>
               <div className="space-y-3">
                 {Object.entries(cohorts).map(([month, val]: any) => (
                   <div key={month} className="flex justify-between border-2 border-black/10 bg-black/5 dark:bg-white/5 px-4 py-3 text-[12px] font-black uppercase">
@@ -93,7 +93,7 @@ const AdminGrowthPage: React.FC = () => {
           <div className="relative">
             <div className="absolute -top-3 right-10 h-6 w-6 rounded-full bg-red-600 border-2 border-black z-10" />
             <BulletinCard rotation={0.3} className="!p-8 border-4 border-black bg-[#fffacd] dark:bg-yellow-900/20">
-              <div className="text-[10px] font-black uppercase tracking-widest opacity-40 text-black dark:text-yellow-200 mb-6">Trust Injection System</div>
+              <div className="text-[10px] font-black uppercase tracking-widest opacity-40 text-black dark:text-yellow-200 mb-6">Trust Control</div>
               <div className="space-y-4">
                 <div>
                   <label className="block text-[9px] font-black uppercase tracking-widest opacity-40 mb-2 text-black dark:text-yellow-200">Target User ID</label>
@@ -106,7 +106,7 @@ const AdminGrowthPage: React.FC = () => {
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-[9px] font-black uppercase tracking-widest opacity-40 mb-2 text-black dark:text-yellow-200">Signal Type</label>
+                    <label className="block text-[9px] font-black uppercase tracking-widest opacity-40 mb-2 text-black dark:text-yellow-200">Trust Reason</label>
                     <select 
                       value={trustType} 
                       onChange={(e) => setTrustType(e.target.value as any)} 
@@ -118,7 +118,7 @@ const AdminGrowthPage: React.FC = () => {
                     </select>
                   </div>
                   <div>
-                    <label className="block text-[9px] font-black uppercase tracking-widest opacity-40 mb-2 text-black dark:text-yellow-200">Delta Score</label>
+                    <label className="block text-[9px] font-black uppercase tracking-widest opacity-40 mb-2 text-black dark:text-yellow-200">Score Change</label>
                     <input 
                       value={scoreDelta} 
                       onChange={(e) => setScoreDelta(e.target.value)} 
@@ -131,7 +131,7 @@ const AdminGrowthPage: React.FC = () => {
                   onClick={addSignal} 
                   className="w-full border-4 border-black bg-black text-white py-4 text-[11px] font-black uppercase hover:bg-[#ff6b6b] transition-all shadow-[6px_6px_0_0_rgba(0,0,0,0.2)]"
                 >
-                  Authorize Signal
+                  Save Trust Change
                 </button>
               </div>
             </BulletinCard>
@@ -142,7 +142,7 @@ const AdminGrowthPage: React.FC = () => {
       {/* Ops overview */}
       <BulletinSection bgColor="bg-[var(--bulletin-bg)] border-t-4 border-black">
         <BulletinCard rotation={0} className="!p-8 border-4 border-black bg-[var(--bulletin-card)]">
-          <div className="text-[10px] font-black uppercase tracking-widest opacity-40 text-[var(--bulletin-text)] mb-8">Operational Snapshot</div>
+          <div className="text-[10px] font-black uppercase tracking-widest opacity-40 text-[var(--bulletin-text)] mb-8">System Summary</div>
           <div className="grid gap-4 sm:grid-cols-5">
             {[
               ['Moderation Queue', opsData.moderationQueue || 0],
@@ -161,7 +161,7 @@ const AdminGrowthPage: React.FC = () => {
           <div className="grid gap-8 md:grid-cols-2 mt-12">
             {Array.isArray(opsData.retryJobs) && opsData.retryJobs.length > 0 && (
               <div className="border-4 border-black bg-[#faf8f5] dark:bg-black/20 p-6">
-                <p className="text-[10px] font-black uppercase tracking-widest opacity-40 text-[var(--bulletin-text)] mb-4">Critical Dispatch Retries</p>
+                <p className="text-[10px] font-black uppercase tracking-widest opacity-40 text-[var(--bulletin-text)] mb-4">Background Fixes</p>
                 <div className="space-y-2">
                   {opsData.retryJobs.slice(0, 5).map((job: any) => (
                     <p key={job._id} className="text-[12px] font-bold text-[var(--bulletin-text)] flex justify-between border-b-2 border-black/5 pb-2">
@@ -175,7 +175,7 @@ const AdminGrowthPage: React.FC = () => {
 
             {Array.isArray(opsData.importAuditLogs) && opsData.importAuditLogs.length > 0 && (
               <div className="border-4 border-black bg-[#e0f2f7] dark:bg-sky-900/20 p-6">
-                <p className="text-[10px] font-black uppercase tracking-widest opacity-40 text-sky-900 dark:text-sky-200 mb-4">Ingestion Audit Logs</p>
+                <p className="text-[10px] font-black uppercase tracking-widest opacity-40 text-sky-900 dark:text-sky-200 mb-4">System Logs</p>
                 <div className="space-y-2">
                   {opsData.importAuditLogs.slice(0, 5).map((log: any) => (
                     <p key={log._id} className="text-[12px] font-bold text-sky-900 dark:text-sky-200 flex justify-between border-b-2 border-black/10 pb-2">
@@ -185,7 +185,7 @@ const AdminGrowthPage: React.FC = () => {
                   ))}
                 </div>
                 <Link to="/admin" className="mt-6 inline-flex items-center gap-2 text-[10px] font-black uppercase underline decoration-2 underline-offset-4 text-sky-900 dark:text-sky-200 hover:opacity-70 transition-all">
-                  Open Console Hub →
+                  Open System Control →
                 </Link>
               </div>
             )}

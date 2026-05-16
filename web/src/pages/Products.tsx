@@ -33,7 +33,7 @@ const deliveryOptions = [
 ];
 
 const proximityOptions = [
-  { value: '', label: 'Entire Campus' },
+  { value: '', label: 'All Halls & Hostels' },
   { value: 'Chamber of Mines Hall', label: 'Chamber of Mines' },
   { value: 'Gold Refinery Hall', label: 'Gold Refinery' },
   { value: 'KT Hall', label: 'K.T. Hall' },
@@ -131,15 +131,15 @@ const Products: React.FC = () => {
 
   return (
     <BulletinLayout 
-      title={search ? `Results: "${search}"` : 'Product Catalog'}
-      subtitle={pagination ? `${pagination.total} Items Available` : 'Syncing...'}
+      title={search ? `Results: "${search}"` : 'All Items'}
+      subtitle={pagination ? `${pagination.total} Items Available` : 'Loading...'}
       section="02"
     >
       <BulletinSection bgColor="bg-[var(--bulletin-bg)]">
         <div className="mb-12 flex flex-col md:flex-row md:items-center justify-between gap-6 border-b-4 border-black pb-8">
           <div>
-            <h2 className="text-[10px] font-black uppercase tracking-[0.3em] opacity-40 text-[var(--bulletin-text)] mb-2">Campus Inventory</h2>
-            <p className="text-[14px] font-bold text-[var(--bulletin-text)] opacity-60">Browse active listings for books, electronics, and essentials.</p>
+            <h2 className="text-[10px] font-black uppercase tracking-[0.3em] opacity-40 text-[var(--bulletin-text)] mb-2">Stuff on Campus</h2>
+            <p className="text-[14px] font-bold text-[var(--bulletin-text)] opacity-60">See what's for sale - from books to electronics.</p>
           </div>
           <button
             onClick={() => setShowFilters(!showFilters)}
@@ -159,7 +159,7 @@ const Products: React.FC = () => {
           {/* Sidebar filters - Desktop */}
           <div className={`${showFilters ? 'fixed inset-0 z-[2000] bg-[var(--bulletin-bg)] p-8 overflow-auto' : 'hidden'} md:block md:static md:w-80 md:flex-shrink-0`}>
             <div className="flex items-center justify-between mb-10 border-b-4 border-black pb-6 md:hidden">
-              <div className="text-2xl font-black uppercase tracking-tight text-[var(--bulletin-text)]">Preferences</div>
+              <div className="text-2xl font-black uppercase tracking-tight text-[var(--bulletin-text)]">Filters</div>
               <button onClick={() => setShowFilters(false)} className="h-10 w-10 border-4 border-black bg-white flex items-center justify-center text-xl font-black">✕</button>
             </div>
 
@@ -178,7 +178,7 @@ const Products: React.FC = () => {
                           : 'bg-transparent text-[var(--bulletin-text)] border-transparent hover:border-black/20'
                       }`}
                     >
-                      Full Catalog
+                      Everything
                     </button>
                     {categories.map((cat) => (
                       <button
@@ -199,7 +199,7 @@ const Products: React.FC = () => {
 
               {/* Condition filter */}
               <div className="border-4 border-black bg-[var(--bulletin-card)] p-6 shadow-[8px_8px_0_0_var(--bulletin-shadow)]">
-                <div className="mb-6 text-[10px] font-black uppercase tracking-widest opacity-40 text-[var(--bulletin-text)]">Item Condition</div>
+                <div className="mb-6 text-[10px] font-black uppercase tracking-widest opacity-40 text-[var(--bulletin-text)]">Condition</div>
                 <select
                   value={condition}
                   onChange={(e) => updateFilter('condition', e.target.value)}
@@ -217,7 +217,7 @@ const Products: React.FC = () => {
                 <div className="grid grid-cols-2 gap-4">
                   <input
                     type="number"
-                    placeholder="Floor"
+                    placeholder="Min"
                     value={minPrice}
                     onChange={(e) => updateFilter('minPrice', e.target.value)}
                     className="w-full border-4 border-black bg-[var(--bulletin-bg)] p-4 text-[16px] font-black focus:outline-none placeholder:opacity-20 text-[var(--bulletin-text)]"
@@ -225,7 +225,7 @@ const Products: React.FC = () => {
                   />
                   <input
                     type="number"
-                    placeholder="Ceiling"
+                    placeholder="Max"
                     value={maxPrice}
                     onChange={(e) => updateFilter('maxPrice', e.target.value)}
                     className="w-full border-4 border-black bg-[var(--bulletin-bg)] p-4 text-[16px] font-black focus:outline-none placeholder:opacity-20 text-[var(--bulletin-text)]"
@@ -236,7 +236,7 @@ const Products: React.FC = () => {
 
               {/* Delivery option */}
               <div className="border-4 border-black bg-[var(--bulletin-card)] p-6 shadow-[8px_8px_0_0_var(--bulletin-shadow)]">
-                <div className="mb-6 text-[10px] font-black uppercase tracking-widest opacity-40 text-[var(--bulletin-text)]">Delivery & Pickup</div>
+                <div className="mb-6 text-[10px] font-black uppercase tracking-widest opacity-40 text-[var(--bulletin-text)]">Delivery</div>
                 <select
                   value={deliveryOption}
                   onChange={(e) => updateFilter('delivery', e.target.value)}
@@ -253,7 +253,7 @@ const Products: React.FC = () => {
                 <div className="absolute top-2 right-2 opacity-10 group-hover:opacity-100 transition-opacity">
                   <Filter className="h-4 w-4" />
                 </div>
-                <div className="mb-6 text-[10px] font-black uppercase tracking-widest opacity-40 text-[var(--bulletin-text)]">Pickup Locations</div>
+                <div className="mb-6 text-[10px] font-black uppercase tracking-widest opacity-40 text-[var(--bulletin-text)]">Where you are</div>
                 <select
                   value={pickupLocation}
                   onChange={(e) => updateFilter('pickupLocation', e.target.value)}
@@ -264,7 +264,7 @@ const Products: React.FC = () => {
                   ))}
                 </select>
                 <div className="mt-4 text-[9px] font-bold opacity-40 uppercase leading-tight">
-                  Discover resources within specific residence zones for zero-latency retrieval.
+                  Filter by your hostel or hall to find items nearby.
                 </div>
               </div>
 
@@ -316,13 +316,13 @@ const Products: React.FC = () => {
               </div>
             ) : products.length === 0 ? (
               <div className="border-8 border-black bg-[#fffacd] dark:bg-yellow-900/10 p-20 text-center shadow-[16px_16px_0_0_var(--bulletin-shadow)]" style={{ transform: 'rotate(-0.5deg)' }}>
-                <div className="text-[10px] font-black uppercase tracking-[0.5em] opacity-40 mb-6 text-black dark:text-yellow-200">System Empty</div>
+                <div className="text-[10px] font-black uppercase tracking-[0.5em] opacity-40 mb-6 text-black dark:text-yellow-200">Nothing here</div>
                 <h3 className="text-4xl font-black uppercase tracking-tighter text-black dark:text-yellow-200 leading-none">
                   {search
-                    ? `No matches for "${search}"`
+                    ? `Couldn't find anything for "${search}"`
                     : 'No items found.'}
                 </h3>
-                <p className="mt-6 text-[14px] font-bold opacity-60 text-black dark:text-yellow-200">Adjust your criteria or post a new listing.</p>
+                <p className="mt-6 text-[14px] font-bold opacity-60 text-black dark:text-yellow-200">Try different filters or be the first to sell something here.</p>
               </div>
             ) : (
               <>
@@ -413,7 +413,7 @@ const Products: React.FC = () => {
                         onClick={() => updateFilter('page', String(page + 1))}
                         className="border-4 border-black bg-black text-white px-8 py-3 text-[12px] font-black uppercase tracking-widest transition-all hover:bg-[#ff6b6b] shadow-[6px_6px_0_0_rgba(0,0,0,0.2)]"
                       >
-                        Proceed →
+                        Next →
                       </button>
                     )}
                   </div>

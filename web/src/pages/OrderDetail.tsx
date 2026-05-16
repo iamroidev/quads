@@ -210,7 +210,7 @@ const OrderDetail: React.FC = () => {
   return (
     <BulletinLayout
       title={`Order #${order.orderNumber}`}
-      subtitle="Transaction Detail"
+      subtitle="Order Details"
       section="06"
     >
       {/* Back button */}
@@ -230,7 +230,7 @@ const OrderDetail: React.FC = () => {
         {/* Header */}
         <div className="flex items-start justify-between mb-8 border-b-2 border-[var(--bulletin-border)] pb-6">
           <div>
-            <div className="text-[10px] font-black uppercase tracking-widest opacity-40 mb-1 text-[var(--bulletin-text)]">Transaction Reference</div>
+            <div className="text-[10px] font-black uppercase tracking-widest opacity-40 mb-1 text-[var(--bulletin-text)]">Order Number</div>
             <div className="text-2xl font-black text-[var(--bulletin-text)]">#{order.orderNumber}</div>
             <div className="text-[10px] font-black uppercase tracking-widest opacity-40 mt-1 text-[var(--bulletin-text)]">
               Placed on {new Date(order.createdAt).toLocaleDateString('en-GH', {
@@ -247,7 +247,7 @@ const OrderDetail: React.FC = () => {
         {order.status !== 'cancelled' && order.status !== 'disputed' && (
           <div className="border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] p-8 shadow-[8px_8px_0_0_var(--bulletin-shadow)] mb-8">
             <div className="text-[10px] font-black uppercase tracking-widest opacity-40 mb-8 text-[var(--bulletin-text)]">
-              Fulfillment Pipeline
+              Order Status
             </div>
             <div className="relative">
               {/* Vertical connector line */}
@@ -306,7 +306,7 @@ const OrderDetail: React.FC = () => {
           <div className="border-4 border-[var(--bulletin-border)] bg-red-50 dark:bg-red-900/10 p-6 mb-8 flex items-start gap-4 shadow-[8px_8px_0_0_var(--bulletin-shadow)]">
             <XCircle className="h-6 w-6 flex-shrink-0 mt-0.5 text-red-600" />
             <div>
-              <div className="text-lg font-black uppercase tracking-tight text-red-600">Transaction Terminated</div>
+              <div className="text-lg font-black uppercase tracking-tight text-red-600">Order Cancelled</div>
               {order.cancelReason && (
                 <div className="text-sm mt-2 font-medium italic text-red-600/80">Reason: "{order.cancelReason}"</div>
               )}
@@ -344,7 +344,7 @@ const OrderDetail: React.FC = () => {
           {/* Delivery */}
           <div className="border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] p-6 shadow-[4px_4px_0_0_var(--bulletin-shadow)]" style={{ transform: 'rotate(0.3deg)' }}>
             <div className="text-[10px] font-black uppercase tracking-widest opacity-40 mb-4 flex items-center gap-2 text-[var(--bulletin-text)]">
-              <Truck className="h-4 w-4" /> Logistics Info
+              <Truck className="h-4 w-4" /> Delivery Info
             </div>
             <div className="space-y-4">
               <div className="flex justify-between items-center border-b border-[var(--bulletin-border)]/10 pb-2">
@@ -363,7 +363,7 @@ const OrderDetail: React.FC = () => {
           {/* Payment */}
           <div className="border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] p-6 shadow-[4px_4px_0_0_var(--bulletin-shadow)]" style={{ transform: 'rotate(-0.3deg)' }}>
             <div className="text-[10px] font-black uppercase tracking-widest opacity-40 mb-4 flex items-center gap-2 text-[var(--bulletin-text)]">
-              <CreditCard className="h-4 w-4" /> Financial Summary
+              <CreditCard className="h-4 w-4" /> Payment Summary
             </div>
             <div className="space-y-3">
               <div className="flex justify-between text-sm">
@@ -373,9 +373,9 @@ const OrderDetail: React.FC = () => {
                 </span>
               </div>
               <div className="flex justify-between text-sm">
-                <span className="opacity-40 font-bold uppercase tracking-widest text-[9px] text-[var(--bulletin-text)]">Logistics Fee</span>
+                <span className="opacity-40 font-bold uppercase tracking-widest text-[9px] text-[var(--bulletin-text)]">Delivery Fee</span>
                 <span className="font-black text-[var(--bulletin-text)]">
-                  {order.deliveryFee > 0 ? `GHS ${order.deliveryFee.toFixed(2)}` : 'COMPLIMENTARY'}
+                  {order.deliveryFee > 0 ? `GHS ${order.deliveryFee.toFixed(2)}` : 'FREE'}
                 </span>
               </div>
               <div className="border-t-2 border-[var(--bulletin-border)] pt-3" />
@@ -387,7 +387,7 @@ const OrderDetail: React.FC = () => {
               </div>
               {order.payment && (
                 <div className="flex justify-between pt-2">
-                  <span className="opacity-40 font-bold uppercase tracking-widest text-[9px] text-[var(--bulletin-text)]">Escrow Status</span>
+                  <span className="opacity-40 font-bold uppercase tracking-widest text-[9px] text-[var(--bulletin-text)]">Payment Status</span>
                   <span className={`text-[10px] font-black uppercase tracking-widest px-2 py-0.5 border border-current ${
                     order.payment.status === 'success' ? 'text-emerald-600 bg-emerald-50 dark:bg-emerald-900/10' :
                     order.payment.status === 'failed' ? 'text-red-600 bg-red-50 dark:bg-red-900/10' : 'text-yellow-600 bg-yellow-50 dark:bg-yellow-900/10'
@@ -403,7 +403,7 @@ const OrderDetail: React.FC = () => {
           {/* Seller / Buyer */}
           <div className="border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] p-6 shadow-[4px_4px_0_0_var(--bulletin-shadow)]" style={{ transform: 'rotate(0.3deg)' }}>
             <div className="text-[10px] font-black uppercase tracking-widest opacity-40 mb-4 flex items-center gap-2 text-[var(--bulletin-text)]">
-              <UserIcon className="h-4 w-4" /> {isBuyer ? 'Counterparty' : 'Client Profile'}
+              <UserIcon className="h-4 w-4" /> {isBuyer ? 'Seller Info' : 'Buyer Info'}
             </div>
             {isBuyer ? (
               <div className="space-y-3">
@@ -443,7 +443,7 @@ const OrderDetail: React.FC = () => {
         {/* Note */}
         {order.note && (
           <div className="border-2 border-[var(--bulletin-border)] bg-[#fffacd] dark:bg-yellow-900/10 p-6 shadow-[4px_4px_0_0_var(--bulletin-shadow)] mb-6">
-            <div className="text-[10px] font-black uppercase tracking-widest opacity-40 mb-2 text-black dark:text-yellow-200">Transaction Memo</div>
+            <div className="text-[10px] font-black uppercase tracking-widest opacity-40 mb-2 text-black dark:text-yellow-200">Note</div>
             <div className="text-sm font-medium italic text-black dark:text-yellow-200">"{order.note}"</div>
           </div>
         )}
@@ -456,7 +456,7 @@ const OrderDetail: React.FC = () => {
             className="flex-1 sm:flex-none border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] px-8 py-3 text-[10px] font-black uppercase tracking-widest shadow-[4px_4px_0_0_var(--bulletin-shadow)] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-none transition-all disabled:opacity-40 text-[var(--bulletin-text)]"
           >
             <MessageCircle className="inline-block h-4 w-4 mr-2" />
-            {isBuyer ? 'Direct Message' : 'Contact Client'}
+            {isBuyer ? 'Message Seller' : 'Message Buyer'}
           </button>
           {canCancel && (
             <button
@@ -464,7 +464,7 @@ const OrderDetail: React.FC = () => {
               className="flex-1 sm:flex-none border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] px-8 py-3 text-[10px] font-black uppercase tracking-widest shadow-[4px_4px_0_0_var(--bulletin-shadow)] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-none transition-all text-red-600"
             >
               <XCircle className="inline-block h-4 w-4 mr-2" />
-              Terminate Order
+              Cancel Order
             </button>
           )}
           {canLeaveReview && (
@@ -506,8 +506,8 @@ const OrderDetail: React.FC = () => {
             <div className="border-4 border-black dark:border-[var(--bulletin-border)] bg-[var(--bulletin-card)] shadow-[16px_16px_0_0_var(--bulletin-shadow)] max-w-lg w-full p-10 animate-in zoom-in-95 duration-200">
               <div className="flex items-center justify-between mb-8 border-b-2 border-black dark:border-[var(--bulletin-border)] pb-4">
                 <div>
-                  <div className="text-[10px] font-black uppercase tracking-widest opacity-40 text-[var(--bulletin-text)]">Security Confirmation</div>
-                  <div className="text-2xl font-black uppercase tracking-tight mt-1 text-[var(--bulletin-text)]">Terminate Order</div>
+                  <div className="text-[10px] font-black uppercase tracking-widest opacity-40 text-[var(--bulletin-text)]">Confirm</div>
+                  <div className="text-2xl font-black uppercase tracking-tight mt-1 text-[var(--bulletin-text)]">Cancel Order</div>
                 </div>
                 <button
                   onClick={() => { setShowCancelModal(false); setCancelReason(''); }}
@@ -548,8 +548,8 @@ const OrderDetail: React.FC = () => {
             <div className="border-4 border-black dark:border-[var(--bulletin-border)] bg-[var(--bulletin-card)] shadow-[16px_16px_0_0_var(--bulletin-shadow)] max-w-lg w-full p-10 animate-in zoom-in-95 duration-200">
               <div className="flex items-center justify-between mb-8 border-b-2 border-black dark:border-[var(--bulletin-border)] pb-4">
                 <div>
-                  <div className="text-[10px] font-black uppercase tracking-widest opacity-40 text-[var(--bulletin-text)]">Quality Assurance</div>
-                  <div className="text-2xl font-black uppercase tracking-tight mt-1 text-[var(--bulletin-text)]">Rate Transaction</div>
+                  <div className="text-[10px] font-black uppercase tracking-widest opacity-40 text-[var(--bulletin-text)]">Review</div>
+                  <div className="text-2xl font-black uppercase tracking-tight mt-1 text-[var(--bulletin-text)]">Rate Order</div>
                 </div>
                 <button
                   onClick={() => { setShowReviewModal(false); setReviewComment(''); setReviewRating(5); }}
@@ -559,7 +559,7 @@ const OrderDetail: React.FC = () => {
                 </button>
               </div>
               <div className="mb-6">
-                <div className="text-[9px] font-black uppercase tracking-widest opacity-40 mb-3 text-[var(--bulletin-text)]">Rating Scale</div>
+                <div className="text-[9px] font-black uppercase tracking-widest opacity-40 mb-3 text-[var(--bulletin-text)]">Your Rating</div>
                 <div className="flex items-center gap-2">
                   {[1, 2, 3, 4, 5].map((star) => (
                     <button key={star} type="button" onClick={() => setReviewRating(star)} className="p-2 border-2 border-[var(--bulletin-border)]/10 hover:border-[#ff6b6b] transition-all">

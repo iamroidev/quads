@@ -138,7 +138,7 @@ const VerificationPage: React.FC = () => {
   const isVerified = user?.emailVerified && user?.phoneVerified;
 
   return (
-    <BulletinLayout title="Verification" subtitle="Security Center" section="05">
+    <BulletinLayout title="Verify Me" subtitle="Security" section="05">
       {/* Dark Banner with Status */}
       <div className="border-b-4 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] relative overflow-hidden">
         {/* Subtle background pattern/tape */}
@@ -151,13 +151,13 @@ const VerificationPage: React.FC = () => {
                 <div className={`p-4 border-2 border-[var(--bulletin-text)] ${isVerified ? 'bg-emerald-500 shadow-[4px_4px_0_0_var(--bulletin-text)]' : 'bg-red-500 animate-pulse shadow-[4px_4px_0_0_var(--bulletin-text)]'}`}>
                   {isVerified ? <ShieldCheck className="h-8 w-8 text-[var(--bulletin-bg)]" /> : <ShieldOff className="h-8 w-8 text-[var(--bulletin-bg)]" />}
                 </div>
-                <div className="text-[12px] font-black uppercase tracking-[0.4em] text-[var(--bulletin-text)] opacity-60">Account Integrity</div>
+                <div className="text-[12px] font-black uppercase tracking-[0.4em] text-[var(--bulletin-text)] opacity-60">Verification</div>
               </div>
               <h1 className="text-4xl md:text-6xl font-black text-[var(--bulletin-text)] uppercase tracking-tighter leading-none mb-6">
-                {isVerified ? 'Fully Verified' : 'Action Required'}
+                {isVerified ? "You're all set" : 'Action Required'}
               </h1>
               <p className="max-w-md text-lg text-[var(--bulletin-text)] opacity-70 font-bold leading-relaxed">
-                Verify your identity to unlock higher transaction limits, faster payouts, and the trusted "Verified Seller" badge.
+                Verify your account to unlock higher transaction limits, faster payouts, and the trusted "Verified Seller" badge.
               </p>
             </div>
 
@@ -260,7 +260,7 @@ const VerificationPage: React.FC = () => {
                         <Smartphone className="mb-6 h-10 w-10 text-[var(--bulletin-text)]" />
                         <div className="text-[11px] font-black uppercase tracking-widest opacity-40 mb-2 text-[var(--bulletin-text)]">Method 02</div>
                         <div className="text-2xl font-black uppercase text-[var(--bulletin-text)]">SMS Code</div>
-                        <div className="mt-2 text-[12px] font-bold opacity-60 text-[var(--bulletin-text)]">Send code to registered phone</div>
+                        <div className="mt-2 text-[12px] font-bold opacity-60 text-[var(--bulletin-text)]">Send code to your phone</div>
                         {user?.phoneVerified && (
                           <div className="absolute top-4 right-4 bg-[var(--bulletin-text)] text-[var(--bulletin-bg)] px-3 py-1 text-[9px] font-black uppercase tracking-widest">Verified</div>
                         )}
@@ -298,7 +298,7 @@ const VerificationPage: React.FC = () => {
                         onClick={handleVerifyCode}
                         className="w-full border-4 border-[var(--bulletin-border)] bg-[var(--bulletin-text)] py-4 text-[14px] font-black uppercase tracking-widest text-[var(--bulletin-bg)] shadow-[6px_6px_0_0_var(--bulletin-shadow)] transition-all hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[4px_4px_0_0_var(--bulletin-shadow)] active:translate-x-[6px] active:translate-y-[6px] active:shadow-none disabled:opacity-40"
                       >
-                        {verifying ? <Loader2 className="mx-auto h-6 w-6 animate-spin" /> : 'Confirm Verification'}
+                        {verifying ? <Loader2 className="mx-auto h-6 w-6 animate-spin" /> : 'Verify Me'}
                       </button>
 
                       <div className="mt-8 flex items-center justify-between border-t-2 border-[var(--bulletin-border)] pt-6">
@@ -320,15 +320,15 @@ const VerificationPage: React.FC = () => {
                 <div className="mx-auto mb-8 flex h-24 w-24 items-center justify-center border-4 border-[var(--bulletin-border)] bg-emerald-500 shadow-[6px_6px_0_0_var(--bulletin-shadow)]">
                   <ShieldCheck className="h-12 w-12 text-white" />
                 </div>
-                <h2 className="text-5xl font-black uppercase tracking-tighter mb-6 text-[var(--bulletin-text)]">System Secured</h2>
+                <h2 className="text-5xl font-black uppercase tracking-tighter mb-6 text-[var(--bulletin-text)]">Account Verified</h2>
                 <p className="max-w-md mx-auto text-[14px] font-bold opacity-70 leading-relaxed mb-10 text-[var(--bulletin-text)]">
-                  Your identity has been successfully cross-verified. You now have full access to all marketplace features.
+                  Your account has been successfully verified. You now have full access to all marketplace features.
                 </p>
                 <Link
                   to="/dashboard"
                   className="inline-flex items-center gap-3 border-4 border-[var(--bulletin-border)] bg-[var(--bulletin-text)] px-8 py-4 text-[12px] font-black uppercase tracking-widest text-[var(--bulletin-bg)] hover:-translate-y-1 hover:shadow-[6px_6px_0_0_var(--bulletin-shadow)] transition-all"
                 >
-                  Return to Hub <ArrowRight className="h-4 w-4" />
+                  Return to Dashboard <ArrowRight className="h-4 w-4" />
                 </Link>
               </div>
             )}

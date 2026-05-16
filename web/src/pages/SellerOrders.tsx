@@ -39,9 +39,9 @@ const STATUS_TABS: { value: OrderStatus | ''; label: string }[] = [
 ];
 
 const NEXT_STATUS: Record<string, { status: string; label: string }> = {
-  paid: { status: 'confirmed', label: 'Confirm Order' },
-  confirmed: { status: 'ready', label: 'Mark Ready' },
-  ready: { status: 'completed', label: 'Mark Complete' },
+  paid: { status: 'confirmed', label: 'Accept Order' },
+  confirmed: { status: 'ready', label: 'Ready for Pickup' },
+  ready: { status: 'completed', label: 'Finish Order' },
 };
 
 const STATUS_STYLES: Record<string, string> = {
@@ -139,19 +139,19 @@ const SellerOrders: React.FC = () => {
   };
 
   return (
-    <BulletinLayout title="Seller Orders" subtitle="Hub" section="15">
+    <BulletinLayout title="Incoming Orders" subtitle="Selling" section="15">
       <BulletinSection bgColor="bg-[var(--bulletin-bg)]">
         {/* Header */}
         <div className="flex items-end justify-between mb-8">
           <div className="text-[10px] font-black uppercase tracking-widest opacity-40 text-[var(--bulletin-text)]">
-            {pagination ? `${pagination.total} incoming transaction${pagination.total !== 1 ? 's' : ''}` : 'Sales Activity'}
+            {pagination ? `${pagination.total} new order${pagination.total !== 1 ? 's' : ''}` : 'Sales Activity'}
           </div>
           <Link
             to="/seller/analytics"
             className="border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] px-6 py-2 text-[10px] font-black uppercase tracking-widest shadow-[4px_4px_0_0_var(--bulletin-shadow)] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-none transition-all text-[var(--bulletin-text)]"
           >
             <BarChart2 className="inline-block h-4 w-4 mr-2" />
-            Insights
+            My Stats
           </Link>
         </div>
 
@@ -160,7 +160,7 @@ const SellerOrders: React.FC = () => {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
             <div className="border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] p-6 shadow-[4px_4px_0_0_var(--bulletin-shadow)]">
               <div className="text-[10px] font-black uppercase tracking-widest opacity-40 mb-3 flex items-center gap-2 text-[var(--bulletin-text)]">
-                <Package className="h-4 w-4" /> Total Sales
+                <Package className="h-4 w-4" /> All Sales
               </div>
               <div className="text-3xl font-black text-[var(--bulletin-text)]">{stats.totalOrders}</div>
             </div>
@@ -172,7 +172,7 @@ const SellerOrders: React.FC = () => {
             </div>
             <div className="border-2 border-[var(--bulletin-border)] bg-[#f0e8f4] dark:bg-purple-900/10 p-6 shadow-[4px_4px_0_0_var(--bulletin-shadow)]">
               <div className="text-[10px] font-black uppercase tracking-widest opacity-40 mb-3 flex items-center gap-2 text-purple-900 dark:text-purple-200">
-                <CheckCircle className="h-4 w-4" /> Fulfilled
+                <CheckCircle className="h-4 w-4" /> Finished
               </div>
               <div className="text-3xl font-black text-purple-900 dark:text-purple-200">{stats.completedOrders}</div>
             </div>
@@ -207,14 +207,14 @@ const SellerOrders: React.FC = () => {
         {/* Orders */}
         {loading ? (
           <div className="flex justify-center py-20">
-            <LoadingSpinner text="Fetching store orders..." />
+            <LoadingSpinner text="Loading your orders..." />
           </div>
         ) : orders.length === 0 ? (
           <div className="border-4 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] p-12 text-center shadow-[8px_8px_0_0_var(--bulletin-shadow)]">
             <Package className="h-12 w-12 mx-auto opacity-20 mb-4 text-[var(--bulletin-text)]" />
             <div className="text-[10px] font-black uppercase tracking-widest opacity-40 mb-2 text-[var(--bulletin-text)]">Empty Queue</div>
             <div className="text-2xl font-black uppercase tracking-tight text-[var(--bulletin-text)]">
-              {statusFilter ? `No ${statusFilter} orders found` : 'No incoming orders yet'}
+              {statusFilter ? `No ${statusFilter} orders found` : "You haven't received any orders yet"}
             </div>
           </div>
         ) : (
@@ -283,7 +283,7 @@ const SellerOrders: React.FC = () => {
                           to={`/orders/${order._id}`}
                           className="ml-auto border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] px-4 py-2 text-[9px] font-black uppercase tracking-widest text-[var(--bulletin-text)] shadow-[2px_2px_0_0_var(--bulletin-shadow)] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-none transition-all"
                         >
-                          Details
+                          View Info
                           <ArrowUpRight className="inline-block h-3 w-3 ml-2" />
                         </Link>
                       </div>
@@ -330,7 +330,7 @@ const SellerOrders: React.FC = () => {
                   )}
 
                   <div className="text-[9px] font-black uppercase tracking-widest opacity-30 mt-4 text-[var(--bulletin-text)] text-right">
-                    Ordered {new Date(order.createdAt).toLocaleDateString('en-GH', {
+                    Placed on {new Date(order.createdAt).toLocaleDateString('en-GH', {
                       year: 'numeric', month: 'short', day: 'numeric',
                       hour: '2-digit', minute: '2-digit',
                     })}

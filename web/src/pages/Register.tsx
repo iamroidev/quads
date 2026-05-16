@@ -375,7 +375,7 @@ const RegisterPage: React.FC = () => {
                 <div className="mb-8 text-center">
                   <div className="inline-flex items-center gap-2 border-2 border-[var(--bulletin-border)] px-3 py-1 mb-6 bg-[var(--bulletin-bg)] text-[var(--bulletin-text)] shadow-[2px_2px_0_0_var(--bulletin-shadow)]">
                     <Scissors className="h-4 w-4" />
-                    <span className="text-[10px] font-black uppercase tracking-[0.2em]">Cut here to choose</span>
+                    <span className="text-[10px] font-black uppercase tracking-[0.2em]">Choose your side</span>
                   </div>
                   <h1 className="text-4xl font-black uppercase tracking-tighter text-[var(--bulletin-text)]">I want to...</h1>
                 </div>
@@ -398,7 +398,7 @@ const RegisterPage: React.FC = () => {
 
                 <div className="mb-8 p-5 border-2 border-dashed border-[var(--bulletin-border)] bg-[var(--bulletin-bg)] relative">
                   <div className="absolute -top-3 left-4 bg-red-500 text-white text-[9px] font-black px-2 py-0.5 shadow-[2px_2px_0_0_rgba(0,0,0,1)]">
-                    SESSION PROTOCOL
+                    SESSION RULES
                   </div>
                   <div className="flex items-start gap-4">
                     <label className="relative flex h-8 w-8 cursor-pointer items-center justify-center border-2 border-black bg-white shadow-[3px_3px_0_0_var(--bulletin-shadow)] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-none transition-all">
@@ -413,7 +413,7 @@ const RegisterPage: React.FC = () => {
                     </label>
                     <div className="flex-1">
                       <p className="text-[10px] font-black uppercase tracking-tight text-[var(--bulletin-text)] leading-tight">
-                        I acknowledge the <Link to="/terms" className="underline decoration-2 underline-offset-2">Honor Code</Link> & <Link to="/terms#privacy" className="underline decoration-2 underline-offset-2">Safety Protocols</Link> for this session.
+                        I acknowledge the <Link to="/terms" className="underline decoration-2 underline-offset-2">Community Rules</Link> & <Link to="/terms#privacy" className="underline decoration-2 underline-offset-2">Safety Rules</Link> for this session.
                       </p>
                     </div>
                   </div>
@@ -454,7 +454,7 @@ const RegisterPage: React.FC = () => {
             {/* STEP 2: Account Details */}
             {step === 2 && (
               <div className="animate-in fade-in slide-in-from-right-4 duration-300">
-                <h1 className="text-3xl font-black uppercase tracking-tighter mb-2 text-[var(--bulletin-text)]">Identify Yourself</h1>
+                <h1 className="text-3xl font-black uppercase tracking-tighter mb-2 text-[var(--bulletin-text)]">Your Details</h1>
                 <p className="text-[12px] font-bold opacity-60 mb-8 text-[var(--bulletin-text)]">Fill in your student details.</p>
                 <div className="space-y-6">
                   <div>
@@ -485,7 +485,7 @@ const RegisterPage: React.FC = () => {
             {/* STEP 3: Campus Info */}
             {step === 3 && (
               <div className="animate-in fade-in slide-in-from-right-4 duration-300">
-                <h1 className="text-3xl font-black uppercase tracking-tighter mb-2 text-[var(--bulletin-text)]">Campus Coordinates</h1>
+                <h1 className="text-3xl font-black uppercase tracking-tighter mb-2 text-[var(--bulletin-text)]">Campus Details</h1>
                 <p className="text-[12px] font-bold opacity-60 mb-8 text-[var(--bulletin-text)]">Help others know where you're from.</p>
                 <div className="space-y-6">
                   <div>
@@ -532,12 +532,12 @@ const RegisterPage: React.FC = () => {
                 {isGoogleFlow ? (
                   <>
                     <div className="mb-8 p-6 border-4 border-[var(--bulletin-border)] bg-[#e0f2f7] dark:bg-sky-900/40 shadow-[8px_8px_0_0_var(--bulletin-shadow)]" style={{ transform: 'rotate(-1deg)' }}>
-                      <h1 className="text-3xl font-black uppercase tracking-tighter mb-2 text-[var(--bulletin-text)]">Final Verification</h1>
+                      <h1 className="text-3xl font-black uppercase tracking-tighter mb-2 text-[var(--bulletin-text)]">Last Step</h1>
                       <p className="text-[14px] font-bold opacity-80 text-[var(--bulletin-text)] mb-8">Your account will use Google authentication.</p>
                       
                       <div className="mt-8 p-6 border-2 border-dashed border-[var(--bulletin-border)] bg-[var(--bulletin-bg)] relative">
                         <div className="absolute -top-3 left-4 bg-red-500 text-white text-[9px] font-black px-2 py-0.5 shadow-[2px_2px_0_0_rgba(0,0,0,1)]">
-                          LEGAL PROTOCOL
+                          LEGAL RULES
                         </div>
                         <div className="flex items-start gap-4">
                           <label className="relative flex h-8 w-8 cursor-pointer items-center justify-center border-2 border-black bg-white shadow-[3px_3px_0_0_var(--bulletin-shadow)] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-none transition-all">
@@ -550,7 +550,7 @@ const RegisterPage: React.FC = () => {
                           </label>
                           <div className="flex-1">
                             <p className="text-[11px] font-black uppercase tracking-tight text-[var(--bulletin-text)] leading-tight">
-                              I verify that I have read and agree to the <Link to="/terms" target="_blank" className="underline decoration-2 underline-offset-2 hover:text-[#ff6b6b]">Institutional Terms</Link> & <Link to="/terms#privacy" target="_blank" className="underline decoration-2 underline-offset-2 hover:text-[#ff6b6b]">Privacy Charter</Link>.
+                              I verify that I have read and agree to the <Link to="/terms" target="_blank" className="underline decoration-2 underline-offset-2 hover:text-[#ff6b6b]">Campus Rules</Link> & <Link to="/terms#privacy" target="_blank" className="underline decoration-2 underline-offset-2 hover:text-[#ff6b6b]">Privacy Policy</Link>.
                             </p>
                           </div>
                         </div>
@@ -568,13 +568,13 @@ const RegisterPage: React.FC = () => {
                         disabled={isSubmitting} 
                         className="flex-[2] border-4 border-[var(--bulletin-border)] bg-[var(--bulletin-text)] px-4 py-4 text-[14px] font-black uppercase text-[var(--bulletin-bg)] shadow-[6px_6px_0_0_var(--bulletin-shadow)] hover:-translate-y-1 hover:shadow-[4px_4px_0_0_var(--bulletin-shadow)] disabled:opacity-40 transition-all tracking-widest"
                       >
-                        {isSubmitting ? 'Authenticating...' : 'Complete with Google'}
+                        {isSubmitting ? 'Connecting...' : 'Complete with Google'}
                       </button>
                     </div>
                   </>
                 ) : (
                   <>
-                    <h1 className="text-3xl font-black uppercase tracking-tighter mb-2 text-[var(--bulletin-text)]">Secure Access</h1>
+                    <h1 className="text-3xl font-black uppercase tracking-tighter mb-2 text-[var(--bulletin-text)]">Account Security</h1>
                     <p className="text-[12px] font-bold opacity-60 mb-8 text-[var(--bulletin-text)]">Choose a strong password.</p>
                     <div className="space-y-6">
                       <div>
@@ -597,7 +597,7 @@ const RegisterPage: React.FC = () => {
 
                     <div className="mt-10 p-6 border-2 border-dashed border-[var(--bulletin-border)] bg-[var(--bulletin-bg)] relative">
                       <div className="absolute -top-3 left-4 bg-red-500 text-white text-[9px] font-black px-2 py-0.5 shadow-[2px_2px_0_0_rgba(0,0,0,1)]">
-                        LEGAL PROTOCOL
+                        LEGAL RULES
                       </div>
                       <div className="flex items-start gap-4">
                         <label className="relative flex h-8 w-8 cursor-pointer items-center justify-center border-2 border-black bg-white shadow-[3px_3px_0_0_var(--bulletin-shadow)] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-none transition-all">
@@ -620,7 +620,7 @@ const RegisterPage: React.FC = () => {
                     <div className="flex gap-4 mt-10">
                       <button type="button" onClick={() => setStep(3)} className="flex-1 border-4 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] px-4 py-4 text-[12px] font-black uppercase shadow-[6px_6px_0_0_var(--bulletin-shadow)] hover:-translate-y-1 hover:shadow-[4px_4px_0_0_var(--bulletin-shadow)] transition-all text-[var(--bulletin-text)]">← Back</button>
                       <button type="submit" disabled={isSubmitting} className="flex-[2] border-4 border-[var(--bulletin-border)] bg-[var(--bulletin-text)] px-4 py-4 text-[14px] font-black uppercase text-[var(--bulletin-bg)] shadow-[6px_6px_0_0_var(--bulletin-shadow)] hover:-translate-y-1 hover:shadow-[4px_4px_0_0_var(--bulletin-shadow)] disabled:opacity-40 transition-all tracking-widest">
-                        {isSubmitting ? 'Creating...' : 'Initialize Account'}
+                        {isSubmitting ? 'Creating...' : 'Create Account'}
                       </button>
                     </div>
                   </>

@@ -96,7 +96,7 @@ export const BulletinLayout: React.FC<BulletinLayoutProps> = ({
         <BulletinMarquee 
           messages={[
             "System Audit Complete: QUADS Platform is now Production Ready",
-            "Marketplace Safety: Always trade in designated 'Safe Zones'",
+            "Safe Trading: Always meet in safe places on campus",
             "Listing Alert: Electronics category is trending this week",
             "Security Notice: Never share your login credentials with anyone"
           ]} 
@@ -119,26 +119,26 @@ export const BulletinLayout: React.FC<BulletinLayoutProps> = ({
               <div className="hidden lg:flex items-center gap-6 text-[10px] font-black uppercase tracking-widest">
                 {user?.role === 'seller' ? (
                   <>
-                    <Link to="/dashboard" className="hover:text-[#ff6b6b]">Hub</Link>
-                    <Link to="/seller/analytics" className="hover:text-[#ff6b6b]">Analytics</Link>
-                    <Link to="/my-listings" className="hover:text-[#ff6b6b]">Listings</Link>
-                    <Link to="/seller/orders" className="hover:text-[#ff6b6b]">Shop Orders</Link>
-                    <Link to="/seller/payouts" className="hover:text-[#ff6b6b]">Payouts</Link>
+                    <Link to="/dashboard" className="hover:text-[#ff6b6b]">My Shop</Link>
+                    <Link to="/seller/analytics" className="hover:text-[#ff6b6b]">My Stats</Link>
+                    <Link to="/my-listings" className="hover:text-[#ff6b6b]">My Items</Link>
+                    <Link to="/seller/orders" className="hover:text-[#ff6b6b]">Orders</Link>
+                    <Link to="/seller/payouts" className="hover:text-[#ff6b6b]">Payments</Link>
                   </>
                 ) : isAuthenticated ? (
                   <>
-                    <Link to="/products" className="hover:text-[#ff6b6b]">Marketplace</Link>
-                    <Link to="/pulse" className="hover:text-[#ff6b6b]">Pulse</Link>
+                    <Link to="/products" className="hover:text-[#ff6b6b]">All Items</Link>
+                    <Link to="/pulse" className="hover:text-[#ff6b6b]">Activity</Link>
                     <Link to="/saved" className="hover:text-[#ff6b6b]">Saved</Link>
                     <Link to="/orders" className="hover:text-[#ff6b6b]">Orders</Link>
                     <Link to="/messages" className="hover:text-[#ff6b6b]">Messages</Link>
                   </>
                 ) : (
                   <>
-                    <Link to="/products" className="hover:text-[#ff6b6b]">The Board</Link>
-                    <Link to="/sellers" className="hover:text-[#ff6b6b]">Merchants</Link>
-                    <Link to="/pulse" className="hover:text-[#ff6b6b]">Pulse</Link>
-                    <Link to="/support" className="hover:text-[#ff6b6b]">Protocol</Link>
+                    <Link to="/products" className="hover:text-[#ff6b6b]">All Items</Link>
+                    <Link to="/sellers" className="hover:text-[#ff6b6b]">Sellers</Link>
+                    <Link to="/pulse" className="hover:text-[#ff6b6b]">Activity</Link>
+                    <Link to="/support" className="hover:text-[#ff6b6b]">Safety & Rules</Link>
                   </>
                 )}
               </div>
@@ -157,7 +157,7 @@ export const BulletinLayout: React.FC<BulletinLayoutProps> = ({
                   to="/sell" 
                   className="hidden md:flex items-center gap-2 border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-accent)] text-white px-4 py-2 text-[10px] font-black uppercase tracking-widest shadow-[3px_3px_0_0_var(--bulletin-text)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all"
                 >
-                  + Post Notice
+                  + Sell Something
                 </Link>
               )}
 
@@ -189,14 +189,14 @@ export const BulletinLayout: React.FC<BulletinLayoutProps> = ({
                       <div className="fixed inset-0 z-[-1]" onClick={() => setIsProfileOpen(false)} />
                       <div className="absolute right-0 mt-3 w-64 border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] shadow-[8px_8px_0_0_var(--bulletin-shadow)] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-100">
                         <div className="px-4 py-3 border-b-2 border-[var(--bulletin-border)] bg-[#fffacd] dark:bg-yellow-900/20">
-                           <div className="text-[8px] font-black uppercase tracking-widest opacity-40 dark:opacity-70 text-black dark:text-white">Active Perspective</div>
+                           <div className="text-[8px] font-black uppercase tracking-widest opacity-40 dark:opacity-70 text-black dark:text-white">Currently viewing as</div>
                            <div className="text-[10px] font-black uppercase tracking-widest flex items-center gap-2 text-black dark:text-white">
                              <div className={`h-2 w-2 rounded-full ${user?.role === 'seller' ? 'bg-[#ff6b6b]' : 'bg-sky-500'} animate-pulse`} />
-                             {user?.role?.toUpperCase()} VIEW
+                             {user?.role?.toUpperCase()}
                            </div>
                         </div>
                         
-                        <Link to="/profile" className="px-4 py-3 text-[10px] font-black uppercase tracking-widest border-b border-[var(--bulletin-border)]/10 hover:bg-[var(--bulletin-bg)] transition-colors flex items-center gap-2 text-[var(--bulletin-text)]">
+                        <Link to="/profile" className="px-4 py-3 text-[10px] font-black uppercase tracking-widest border-b border-[var(--bulletin-border)]/10 hover:bg-[var(--bulletin-bg)] hover:text-[#ff6b6b] transition-colors flex items-center gap-2 text-[var(--bulletin-text)]">
                            <User className="h-3 w-3" /> My Profile
                         </Link>
                         
@@ -204,17 +204,17 @@ export const BulletinLayout: React.FC<BulletinLayoutProps> = ({
                           <button 
                             disabled={isSwitching}
                             onClick={handleRoleSwitch}
-                            className="px-4 py-3 text-[10px] font-black uppercase tracking-widest border-b border-[var(--bulletin-border)]/10 hover:bg-sky-50 dark:hover:bg-sky-900/10 transition-colors flex items-center gap-2 text-sky-700 dark:text-sky-400">
+                            className="px-4 py-3 text-[10px] font-black uppercase tracking-widest border-b border-[var(--bulletin-border)]/10 hover:bg-sky-50 dark:hover:bg-sky-900/10 hover:text-[#ff6b6b] transition-colors flex items-center gap-2 text-sky-700 dark:text-sky-400">
                              <Repeat className={`h-3 w-3 ${isSwitching ? 'animate-spin' : ''}`} />
                              {isSwitching ? 'Switching...' : `Switch to ${user?.role === 'seller' ? 'Buyer' : 'Seller'} View`}
                           </button>
                         )}
 
-                        <Link to="/settings" className="px-4 py-3 text-[10px] font-black uppercase tracking-widest border-b border-[var(--bulletin-border)]/10 hover:bg-[var(--bulletin-bg)] transition-colors flex items-center gap-2 text-[var(--bulletin-text)]">
+                        <Link to="/settings" className="px-4 py-3 text-[10px] font-black uppercase tracking-widest border-b border-[var(--bulletin-border)]/10 hover:bg-[var(--bulletin-bg)] hover:text-[#ff6b6b] transition-colors flex items-center gap-2 text-[var(--bulletin-text)]">
                            <Settings className="h-3 w-3" /> Account Settings
                         </Link>
 
-                        <Link to="/notifications" className="px-4 py-3 text-[10px] font-black uppercase tracking-widest border-b border-[var(--bulletin-border)]/10 hover:bg-[var(--bulletin-bg)] transition-colors flex items-center gap-2 text-[var(--bulletin-text)]">
+                        <Link to="/notifications" className="px-4 py-3 text-[10px] font-black uppercase tracking-widest border-b border-[var(--bulletin-border)]/10 hover:bg-[var(--bulletin-bg)] hover:text-[#ff6b6b] transition-colors flex items-center gap-2 text-[var(--bulletin-text)]">
                            <Bell className="h-3 w-3" /> Notifications
                         </Link>
 
@@ -229,7 +229,7 @@ export const BulletinLayout: React.FC<BulletinLayoutProps> = ({
                   )}
                 </div>
               ) : (
-                <Link to="/login" className="border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-text)] text-[var(--bulletin-bg)] px-4 py-1.5 text-[10px] font-black uppercase tracking-widest hover:bg-[#fffacd] hover:text-black transition-colors">
+                <Link to="/login" className="border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-text)] text-[var(--bulletin-bg)] px-4 py-1.5 text-[10px] font-black uppercase tracking-widest hover:bg-[#ff6b6b] hover:text-white transition-colors">
                   Join Market
                 </Link>
               )}
@@ -241,7 +241,7 @@ export const BulletinLayout: React.FC<BulletinLayoutProps> = ({
         {!hideBreadcrumbs && (
           <div className="border-b border-[var(--bulletin-border)] bg-[var(--bulletin-card)] px-6 py-3">
             <div className="mx-auto flex max-w-[1400px] items-center gap-2 text-[10px] font-black uppercase tracking-widest opacity-40 text-[var(--bulletin-text)]">
-              <Link to="/" className="hover:opacity-100 text-[var(--bulletin-text)]"><Home className="h-3 w-3" /></Link>
+              <Link to="/" className="hover:text-[#ff6b6b] text-[var(--bulletin-text)]"><Home className="h-3 w-3" /></Link>
               <ChevronRight className="h-3 w-3" />
               <span>{section}</span>
               {title && (
@@ -291,7 +291,7 @@ export const BulletinLayout: React.FC<BulletinLayoutProps> = ({
                   </div>
                   <div>
                     <h2 className="text-xl font-black uppercase tracking-tighter text-[var(--bulletin-text)]">QUADS</h2>
-                    <p className="text-[8px] font-black uppercase tracking-[0.2em] opacity-40 text-[var(--bulletin-text)]">Institutional Exchange</p>
+                    <p className="text-[8px] font-black uppercase tracking-[0.2em] opacity-40 text-[var(--bulletin-text)]">Student Marketplace</p>
                   </div>
                 </div>
                 <p className="text-[11px] font-bold opacity-60 leading-relaxed max-w-[200px]">
@@ -301,38 +301,35 @@ export const BulletinLayout: React.FC<BulletinLayoutProps> = ({
               
               {/* Organized Navigation Column */}
               <div className="flex flex-col gap-4">
-                <div className="text-[10px] font-black uppercase tracking-[0.3em] text-[#ff6b6b] mb-2">
-                  {user?.role === 'seller' ? 'Shop Management' : isAuthenticated ? 'Marketplace' : 'Discovery'}
-                </div>
                 {user?.role === 'seller' ? (
                   <>
-                    <Link to="/dashboard" className="text-[14px] font-black uppercase tracking-widest hover:text-[#ff6b6b] transition-colors">Seller Hub</Link>
-                    <Link to="/seller/analytics" className="text-[14px] font-black uppercase tracking-widest hover:text-[#ff6b6b] transition-colors">Insights</Link>
-                    <Link to="/my-listings" className="text-[14px] font-black uppercase tracking-widest hover:text-[#ff6b6b] transition-colors">Inventory</Link>
-                    <Link to="/sell" className="text-[14px] font-black uppercase tracking-widest hover:text-[#ff6b6b] transition-colors">New Listing</Link>
+                    <Link to="/dashboard" className="text-[14px] font-black uppercase tracking-widest hover:text-[#ff6b6b] transition-colors">My Shop</Link>
+                    <Link to="/seller/analytics" className="text-[14px] font-black uppercase tracking-widest hover:text-[#ff6b6b] transition-colors">My Stats</Link>
+                    <Link to="/my-listings" className="text-[14px] font-black uppercase tracking-widest hover:text-[#ff6b6b] transition-colors">My Items</Link>
+                    <Link to="/sell" className="text-[14px] font-black uppercase tracking-widest hover:text-[#ff6b6b] transition-colors">Sell Something</Link>
                   </>
                 ) : (
                   <>
-                    <Link to="/products" className="text-[14px] font-black uppercase tracking-widest hover:text-[#ff6b6b] transition-colors">All Listings</Link>
+                    <Link to="/products" className="text-[14px] font-black uppercase tracking-widest hover:text-[#ff6b6b] transition-colors">All Items</Link>
                     <Link to="/categories" className="text-[14px] font-black uppercase tracking-widest hover:text-[#ff6b6b] transition-colors">Categories</Link>
-                    <Link to="/sellers" className="text-[14px] font-black uppercase tracking-widest hover:text-[#ff6b6b] transition-colors">Merchants</Link>
-                    <Link to="/pulse" className="text-[14px] font-black uppercase tracking-widest hover:text-[#ff6b6b] transition-colors">Market Pulse</Link>
+                    <Link to="/sellers" className="text-[14px] font-black uppercase tracking-widest hover:text-[#ff6b6b] transition-colors">Sellers</Link>
+                    <Link to="/pulse" className="text-[14px] font-black uppercase tracking-widest hover:text-[#ff6b6b] transition-colors">Activity</Link>
                   </>
                 )}
               </div>
 
-              {/* Protocols Column */}
+              {/* Safety & Rules Column */}
               <div className="flex flex-col gap-4">
-                <div className="text-[10px] font-black uppercase tracking-[0.3em] text-[#ff6b6b] mb-2">Protocols</div>
+                <div className="text-[10px] font-black uppercase tracking-[0.3em] text-[#ff6b6b] mb-2">Safety & Rules</div>
                 {user?.role === 'seller' ? (
                   <>
-                    <Link to="/seller/payouts" className="text-[14px] font-black uppercase tracking-widest hover:text-[#ff6b6b] transition-colors">Disbursements</Link>
+                    <Link to="/seller/payouts" className="text-[14px] font-black uppercase tracking-widest hover:text-[#ff6b6b] transition-colors">Payments</Link>
                     <Link to="/support" className="text-[14px] font-black uppercase tracking-widest hover:text-[#ff6b6b] transition-colors">Help Desk</Link>
-                    <Link to="/terms" className="text-[14px] font-black uppercase tracking-widest hover:text-[#ff6b6b] transition-colors">Guidelines</Link>
+                    <Link to="/terms" className="text-[14px] font-black uppercase tracking-widest hover:text-[#ff6b6b] transition-colors">Rules</Link>
                   </>
                 ) : (
                   <>
-                    <Link to="/support" className="text-[14px] font-black uppercase tracking-widest hover:text-[#ff6b6b] transition-colors">Support Hub</Link>
+                    <Link to="/support" className="text-[14px] font-black uppercase tracking-widest hover:text-[#ff6b6b] transition-colors">Help Center</Link>
                     <Link to="/contact" className="text-[14px] font-black uppercase tracking-widest hover:text-[#ff6b6b] transition-colors">Contact Us</Link>
                     <Link to="/terms" className="text-[14px] font-black uppercase tracking-widest hover:text-[#ff6b6b] transition-colors">User Policy</Link>
                   </>
@@ -344,9 +341,9 @@ export const BulletinLayout: React.FC<BulletinLayoutProps> = ({
                 <div className="text-[10px] font-black uppercase tracking-[0.3em] text-[#ff6b6b] mb-2">Account</div>
                 {isAuthenticated ? (
                   <>
-                    <Link to="/orders" className="text-[14px] font-black uppercase tracking-widest hover:text-[#ff6b6b] transition-colors">{user?.role === 'seller' ? 'Shop Orders' : 'My Orders'}</Link>
+                    <Link to={user?.role === 'seller' ? "/seller/orders" : "/orders"} className="text-[14px] font-black uppercase tracking-widest hover:text-[#ff6b6b] transition-colors">{user?.role === 'seller' ? 'Incoming Orders' : 'My Orders'}</Link>
                     <Link to="/messages" className="text-[14px] font-black uppercase tracking-widest hover:text-[#ff6b6b] transition-colors">Messages</Link>
-                    <Link to="/settings" className="text-[14px] font-black uppercase tracking-widest hover:text-[#ff6b6b] transition-colors">Preferences</Link>
+                    <Link to="/settings" className="text-[14px] font-black uppercase tracking-widest hover:text-[#ff6b6b] transition-colors">Settings</Link>
                   </>
                 ) : (
                   <>

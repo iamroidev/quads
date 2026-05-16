@@ -284,16 +284,16 @@ const ProductDetail: React.FC = () => {
 
   if (!product) {
     return (
-      <BulletinLayout title="Product Not Found" subtitle="Error" section="XX">
+      <BulletinLayout title="Item Not Found" subtitle="Error" section="XX">
         <BulletinSection bgColor="bg-[var(--bulletin-bg)]">
           <div className="border-4 border-[var(--bulletin-border)] bg-[#fffacd] dark:bg-yellow-900/10 p-12 text-center shadow-[8px_8px_0_0_var(--bulletin-shadow)]">
-            <div className="text-[10px] font-black uppercase tracking-widest opacity-40 mb-2 text-black dark:text-yellow-200">Missing Inventory</div>
-            <div className="text-xl font-black uppercase tracking-tight mb-8 text-black dark:text-yellow-200">This product may have been removed or doesn't exist.</div>
+            <div className="text-[10px] font-black uppercase tracking-widest opacity-40 mb-2 text-black dark:text-yellow-200">Item Not Found</div>
+            <div className="text-xl font-black uppercase tracking-tight mb-8 text-black dark:text-yellow-200">This item might have been removed or it doesn't exist anymore.</div>
             <Link
               to="/products"
               className="inline-block border-2 border-black dark:border-yellow-200 bg-black dark:bg-yellow-200 px-8 py-3 text-[10px] font-black uppercase text-white dark:text-black transition-all hover:bg-white hover:text-black"
             >
-              Browse Catalog
+              Browse All Items
             </Link>
           </div>
         </BulletinSection>
@@ -311,9 +311,9 @@ const ProductDetail: React.FC = () => {
   const getRelatedImage = (p: ProductPopulated) => p.images[0]?.url || 'https://placehold.co/400x500/ddd/666?text=Item';
 
   return (
-    <BulletinLayout
+      <BulletinLayout
       title={product.title}
-      subtitle="Detailed Product View"
+      subtitle="Item Details"
       section="03"
     >
       <Helmet>
@@ -416,7 +416,7 @@ const ProductDetail: React.FC = () => {
             {/* Product reviews - Moved beneath image */}
             <div className="mt-12 pt-12 border-t-2 border-[var(--bulletin-border)]/10">
               <div className="flex items-center justify-between mb-8">
-                <div className="text-[10px] font-black uppercase tracking-[0.3em] opacity-40 text-[var(--bulletin-text)]">Customer Feedback</div>
+                <div className="text-[10px] font-black uppercase tracking-[0.3em] opacity-40 text-[var(--bulletin-text)]">Reviews</div>
                 {reviews.length > 0 && (
                    <div className="flex items-center gap-2">
                      <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
@@ -468,9 +468,9 @@ const ProductDetail: React.FC = () => {
                     <div className="h-16 w-16 bg-[var(--bulletin-card)] border-2 border-[var(--bulletin-border)] flex items-center justify-center mx-auto mb-6 shadow-[4px_4px_0_0_var(--bulletin-shadow)] rotate-[-3deg]">
                        <Star className="h-8 w-8 text-[var(--bulletin-border)] opacity-20" />
                     </div>
-                    <div className="text-[10px] font-black uppercase tracking-widest opacity-40 text-[var(--bulletin-text)] mb-2">Pristine Record</div>
-                    <div className="text-sm font-black uppercase tracking-tight text-[var(--bulletin-text)]">No feedback recorded yet.</div>
-                    <p className="mt-2 text-[11px] font-bold opacity-40 max-w-[200px] mx-auto text-[var(--bulletin-text)]">Be the first to verify this entity after a successful transaction.</p>
+                    <div className="text-[10px] font-black uppercase tracking-widest opacity-40 text-[var(--bulletin-text)] mb-2">No Reviews Yet</div>
+                    <div className="text-sm font-black uppercase tracking-tight text-[var(--bulletin-text)]">No feedback yet.</div>
+                    <p className="mt-2 text-[11px] font-bold opacity-40 max-w-[200px] mx-auto text-[var(--bulletin-text)]">Be the first to review this seller after you buy from them.</p>
                   </div>
                 </div>
               )}
@@ -484,7 +484,7 @@ const ProductDetail: React.FC = () => {
               to={`/products?category=${category.slug}`}
               className="text-[10px] font-black uppercase tracking-widest opacity-40 hover:opacity-100 hover:underline transition-opacity text-[var(--bulletin-text)]"
             >
-              {category.name} Listings
+              {category.name} Items
             </Link>
 
             {/* Title */}
@@ -498,7 +498,7 @@ const ProductDetail: React.FC = () => {
             {/* Price intelligence */}
             {priceInsights && (
               <div className="border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] p-6 shadow-[4px_4px_0_0_var(--bulletin-shadow)] mb-8" style={{ transform: 'rotate(0.5deg)' }}>
-                <div className="text-[10px] font-black uppercase tracking-widest opacity-40 mb-4 text-[var(--bulletin-text)]">Market Intelligence</div>
+                <div className="text-[10px] font-black uppercase tracking-widest opacity-40 mb-4 text-[var(--bulletin-text)]">Price Guide</div>
                 <div className="grid gap-6 sm:grid-cols-3">
                   <div>
                     <div className="text-[9px] font-black uppercase tracking-widest opacity-40 text-[var(--bulletin-text)]">Range</div>
@@ -507,13 +507,13 @@ const ProductDetail: React.FC = () => {
                     </div>
                   </div>
                   <div>
-                    <div className="text-[9px] font-black uppercase tracking-widest opacity-40 text-[var(--bulletin-text)]">Mean</div>
+                    <div className="text-[9px] font-black uppercase tracking-widest opacity-40 text-[var(--bulletin-text)]">Average</div>
                     <div className="text-[13px] font-black text-[var(--bulletin-text)] mt-1">{priceInsights.average.toLocaleString('en-GH')}</div>
                   </div>
                   <div>
-                    <div className="text-[9px] font-black uppercase tracking-widest opacity-40 text-[var(--bulletin-text)]">Rating</div>
+                    <div className="text-[9px] font-black uppercase tracking-widest opacity-40 text-[var(--bulletin-text)]">Deal</div>
                     <div className="text-[13px] font-black text-[var(--bulletin-text)] mt-1">
-                      {priceInsights.dealLabel === 'great_deal' ? 'Valued Deal' : priceInsights.dealLabel === 'premium' ? 'Premium Tier' : 'Fair Market'}
+                      {priceInsights.dealLabel === 'great_deal' ? 'Good Deal' : priceInsights.dealLabel === 'premium' ? 'High Price' : 'Market Price'}
                     </div>
                   </div>
                 </div>
@@ -554,7 +554,7 @@ const ProductDetail: React.FC = () => {
 
             {/* Description */}
             <div className="mb-8">
-              <h3 className="text-[10px] font-black uppercase tracking-widest mb-3 opacity-40 text-[var(--bulletin-text)]">Product Description</h3>
+              <h3 className="text-[10px] font-black uppercase tracking-widest mb-3 opacity-40 text-[var(--bulletin-text)]">Item Description</h3>
               <p className="text-[14px] leading-relaxed font-medium text-[var(--bulletin-text)] opacity-80 whitespace-pre-wrap">
                 {product.description}
               </p>
@@ -563,7 +563,7 @@ const ProductDetail: React.FC = () => {
             {/* Tags */}
             {product.tags.length > 0 && (
               <div className="mb-8">
-                <h3 className="text-[10px] font-black uppercase tracking-widest mb-3 opacity-40 text-[var(--bulletin-text)]">Meta Tags</h3>
+                <h3 className="text-[10px] font-black uppercase tracking-widest mb-3 opacity-40 text-[var(--bulletin-text)]">Search Tags</h3>
                 <div className="flex flex-wrap gap-2">
                   {product.tags.map((tag) => (
                     <Link
@@ -584,7 +584,7 @@ const ProductDetail: React.FC = () => {
               <div className="mb-10 p-6 border-4 border-black bg-[#fffacd] dark:bg-yellow-900/20 shadow-[8px_8px_0_0_#000] rotate-[-0.5deg]">
                 <div className="flex items-center gap-2 mb-4">
                   <BadgePercent className="h-5 w-5 text-[#ff6b6b]" />
-                  <h3 className="text-[12px] font-black uppercase tracking-[0.2em]">Seller Promotions</h3>
+                  <h3 className="text-[12px] font-black uppercase tracking-[0.2em]">Shop Promos</h3>
                 </div>
                 <div className="grid gap-3">
                   {sellerCoupons.map((coupon) => (
@@ -609,7 +609,7 @@ const ProductDetail: React.FC = () => {
                   to={`/products/${product._id}/edit`}
                   className="flex-1 border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-text)] px-8 py-4 text-[11px] font-black uppercase tracking-widest text-[var(--bulletin-bg)] text-center shadow-[6px_6px_0_0_var(--bulletin-shadow)] hover:translate-y-1 hover:shadow-none transition-all"
                 >
-                  Modify Listing
+                  Edit Item
                 </Link>
               ) : (
                 <>
@@ -676,7 +676,7 @@ const ProductDetail: React.FC = () => {
       {/* Seller info */}
       <BulletinSection bgColor="bg-[var(--bulletin-bg)]">
         <div className="border-4 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] p-8 shadow-[12px_12px_0_0_var(--bulletin-shadow)]" style={{ transform: 'rotate(-0.5deg)' }}>
-          <div className="text-[10px] font-black uppercase tracking-widest opacity-40 mb-6 text-[var(--bulletin-text)]">Seller Profile</div>
+          <div className="text-[10px] font-black uppercase tracking-widest opacity-40 mb-6 text-[var(--bulletin-text)]">About the Seller</div>
           <div className="flex flex-col md:flex-row items-center gap-8">
             <div className="h-24 w-24 border-4 border-[var(--bulletin-border)] bg-[var(--bulletin-bg)] flex items-center justify-center font-black text-3xl overflow-hidden shadow-[6px_6px_0_0_var(--bulletin-shadow)] text-[var(--bulletin-text)]">
               {seller.avatar ? (
@@ -707,7 +707,7 @@ const ProductDetail: React.FC = () => {
                     </span>
                   </div>
                   <span className="text-[11px] font-black uppercase tracking-widest opacity-40 text-[var(--bulletin-text)]">
-                    {sellerRating.totalReviews} Customer Reviews
+                    {sellerRating.totalReviews} Reviews
                   </span>
                 </div>
               )}
@@ -716,29 +716,29 @@ const ProductDetail: React.FC = () => {
               to={`/products?seller=${seller._id}`}
               className="border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] px-8 py-3 text-[10px] font-black uppercase tracking-widest shadow-[4px_4px_0_0_var(--bulletin-shadow)] transition-all hover:translate-y-1 hover:shadow-none text-[var(--bulletin-text)]"
             >
-              View All Listings
+              See All Items
             </Link>
           </div>
 
           <div className="mt-10 grid gap-6 border-t-2 border-[var(--bulletin-border)] pt-8 md:grid-cols-2">
             <div className="border-2 border-[var(--bulletin-border)] bg-[#fffacd] dark:bg-yellow-900/10 p-6 shadow-[6px_6px_0_0_var(--bulletin-shadow)]">
-              <div className="text-[10px] font-black uppercase tracking-widest opacity-40 text-black dark:text-yellow-200">Security Layer</div>
+              <div className="text-[10px] font-black uppercase tracking-widest opacity-40 text-black dark:text-yellow-200">Safety</div>
               <div className="mt-3 text-sm font-black uppercase tracking-tight flex items-center gap-3 text-black dark:text-yellow-200">
                 <Shield className="h-5 w-5" />
-                UMaT Escrow Active
+                Secure Payment Active
               </div>
               <p className="mt-2 text-[12px] font-medium text-black/70 dark:text-yellow-200/70 leading-relaxed">
                 Payments are held securely until transaction fulfillment is confirmed by both parties.
               </p>
             </div>
             <div className="border-2 border-[var(--bulletin-border)] bg-[#e0f2f7] dark:bg-sky-900/10 p-6 shadow-[6px_6px_0_0_var(--bulletin-shadow)]">
-              <div className="text-[10px] font-black uppercase tracking-widest opacity-40 text-black dark:text-sky-200">Response Metrics</div>
+              <div className="text-[10px] font-black uppercase tracking-widest opacity-40 text-black dark:text-sky-200">Reply Time</div>
               <div className="mt-3 text-sm font-black uppercase tracking-tight flex items-center gap-3 text-black dark:text-sky-200">
                 <MessageCircle className="h-5 w-5" />
-                Replies in ~{sellerResponseTime} mins
+                Usually replies in ~{sellerResponseTime} mins
               </div>
               <p className="mt-2 text-[12px] font-medium text-black/70 dark:text-sky-200/70 leading-relaxed">
-                Counterparty is highly active. Coordinate pickup in designated campus safety zones.
+                The seller is highly active. Coordinate pickup in safe places on campus.
               </p>
             </div>
           </div>
@@ -793,7 +793,7 @@ const ProductDetail: React.FC = () => {
 
       {/* Recommendations */}
       {recommendations.length > 0 && (
-        <BulletinSection title="Curated for you" subtitle="Discovery" bgColor="bg-[var(--bulletin-bg)]">
+        <BulletinSection title="Recommended for you" subtitle="For You" bgColor="bg-[var(--bulletin-bg)]">
           <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
             {recommendations.map((rec, idx) => (
               <Link

@@ -120,7 +120,7 @@ const Messages: React.FC = () => {
   }
 
   return (
-    <BulletinLayout title="Messages" subtitle="Inbox" section="07">
+    <BulletinLayout title="Messages" subtitle="My Chats" section="07">
       <BulletinSection bgColor="bg-[var(--bulletin-bg)]">
         {/* Search */}
         {conversations.length > 0 && (
@@ -128,7 +128,7 @@ const Messages: React.FC = () => {
             <Search className="absolute left-0 top-1/2 -translate-y-1/2 h-4 w-4 opacity-40" />
             <input
               type="text"
-              placeholder="Search conversations..."
+              placeholder="Search messages..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full pl-6 pr-4 py-2 bg-transparent text-[12px] font-bold focus:outline-none placeholder:text-[var(--bulletin-muted)]"
@@ -149,14 +149,14 @@ const Messages: React.FC = () => {
             <div className="text-[12px] opacity-60 mb-6">
               {searchQuery
                 ? 'Try a different search term'
-                : 'Contact a seller on a product listing to start a conversation'}
+                : 'Message a seller on an item to start a chat'}
             </div>
             {!searchQuery && (
               <button
                 onClick={() => navigate('/products')}
                 className="inline-block border border-[var(--bulletin-border)] bg-[var(--bulletin-text)] px-4 py-2 text-[10px] font-bold uppercase text-[var(--bulletin-bg)] transition-colors hover:bg-[var(--bulletin-card)] hover:text-[var(--bulletin-text)] shadow-[2px_2px_0_0_var(--bulletin-shadow)]"
               >
-                Browse Products
+                Browse Items
               </button>
             )}
           </div>

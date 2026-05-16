@@ -272,8 +272,8 @@ const CreateEditProduct = () => {
             <div className="inline-flex items-center justify-center h-16 w-16 border-2 border-[var(--bulletin-border)] bg-[#fce4ec] dark:bg-red-900/20 mb-6">
               <ShieldOff className="h-8 w-8 opacity-60" />
             </div>
-            <div className="text-[10px] font-bold uppercase tracking-[3px] opacity-50 mb-3">Action Required</div>
-            <h2 className="text-2xl font-bold mb-3">Verify before listing</h2>
+            <div className="text-[10px] font-bold uppercase tracking-[3px] opacity-50 mb-3">Check this</div>
+            <h2 className="text-2xl font-bold mb-3">Verify your account to sell</h2>
             <p className="text-[13px] opacity-60 mb-2">
               Sellers must verify their <strong>email</strong> or <strong>phone</strong> before creating listings.
             </p>
@@ -293,8 +293,8 @@ const CreateEditProduct = () => {
 
   return (
     <BulletinLayout
-      title={isEdit ? 'Update Notice' : 'Post Notice'}
-      subtitle={isEdit ? 'Re-pinning your item...' : 'Pin your item to the campus board'}
+      title={isEdit ? 'Edit Item' : 'Sell Something'}
+      subtitle={isEdit ? 'Fixing up your item info...' : 'Post your item for others to buy'}
       section="14"
       hideHero={true}
     >
@@ -308,7 +308,7 @@ const CreateEditProduct = () => {
               <div className="h-8 w-8 border-2 border-[var(--bulletin-border)] flex items-center justify-center bg-[var(--bulletin-card)] group-hover:bg-[var(--bulletin-text)] group-hover:text-[var(--bulletin-bg)] transition-colors">
                 <ArrowLeft className="h-4 w-4" />
               </div>
-              <span className="hidden sm:inline">Abort Mission</span>
+              <span className="hidden sm:inline">Cancel</span>
             </button>
             
             <div className="flex items-center gap-2 sm:gap-6">
@@ -331,8 +331,8 @@ const CreateEditProduct = () => {
             {currentStep === 1 && (
               <div className="space-y-8 sm:space-y-12 animate-card-drop">
                  <div className="bg-[var(--bulletin-card)] border-2 sm:border-4 border-[var(--bulletin-border)] p-3 sm:p-4 inline-block -rotate-2 shadow-[4px_4px_0_0_var(--bulletin-accent)] sm:shadow-[8px_8px_0_0_var(--bulletin-accent)]">
-                   <h2 className="text-2xl sm:text-4xl font-black uppercase tracking-tighter leading-none">PHASE 01: VISUAL PROOF</h2>
-                   <p className="text-[8px] sm:text-[10px] font-black uppercase tracking-widest opacity-40 mt-1">Institutional requirement: High quality photos only</p>
+                   <h2 className="text-2xl sm:text-4xl font-black uppercase tracking-tighter leading-none">STEP 1: PHOTOS</h2>
+                   <p className="text-[8px] sm:text-[10px] font-black uppercase tracking-widest opacity-40 mt-1">Make sure photos are clear and show the item well</p>
                  </div>
 
                 <div className="relative pt-4 sm:pt-6">
@@ -341,7 +341,7 @@ const CreateEditProduct = () => {
                   <BulletinCard rotation={-0.5} bgColor="bg-[var(--bulletin-card)]" className="border-2 sm:border-4 border-[var(--bulletin-border)] p-4 sm:p-8 shadow-[6px_6px_0_0_var(--bulletin-text)] sm:shadow-[12px_12px_0_0_var(--bulletin-text)]">
                     <div className="text-[10px] sm:text-[12px] font-black uppercase tracking-[0.2em] mb-4 sm:mb-6 flex items-center gap-2 sm:gap-4">
                       <div className="h-0.5 sm:h-1 flex-1 bg-[var(--bulletin-text)] opacity-10" />
-                      Gallery Input
+                      Add Photos
                       <div className="h-0.5 sm:h-1 flex-1 bg-[var(--bulletin-text)] opacity-10" />
                     </div>
                     <ImageUpload
@@ -355,8 +355,8 @@ const CreateEditProduct = () => {
                     {/* Video Upload Section */}
                     <div className="mt-10 border-t-2 border-[var(--bulletin-border)] pt-10">
                        <div className="text-[10px] sm:text-[12px] font-black uppercase tracking-[0.2em] mb-6 flex items-center gap-4">
-                        <div className="h-0.5 sm:h-1 flex-1 bg-[var(--bulletin-text)] opacity-10" />
-                        Motion Proof (Video)
+                         <div className="h-0.5 sm:h-1 flex-1 bg-[var(--bulletin-text)] opacity-10" />
+                        Item Video
                         <div className="h-0.5 sm:h-1 flex-1 bg-[var(--bulletin-text)] opacity-10" />
                       </div>
 
@@ -410,7 +410,7 @@ const CreateEditProduct = () => {
                 </div>
 
                 <BulletinCard rotation={0.5} bgColor="bg-[var(--bulletin-card)]" className="border-2 sm:border-4 border-[var(--bulletin-border)] p-4 sm:p-8 shadow-[6px_6px_0_0_var(--bulletin-accent)] sm:shadow-[8px_8px_0_0_var(--bulletin-accent)]">
-                  <label className="block text-[9px] sm:text-[11px] font-black uppercase tracking-widest mb-2 sm:mb-4">ITEM DESIGNATION (TITLE)</label>
+                  <label className="block text-[9px] sm:text-[11px] font-black uppercase tracking-widest mb-2 sm:mb-4">ITEM NAME</label>
                   <input
                     type="text"
                     placeholder="E.G. ENGINEERING CALCULATOR"
@@ -426,7 +426,7 @@ const CreateEditProduct = () => {
                     onClick={nextStep}
                     className="w-full sm:w-auto bg-[var(--bulletin-text)] text-[var(--bulletin-bg)] px-8 sm:px-12 py-4 sm:py-6 text-[12px] sm:text-[14px] font-black uppercase tracking-[0.2em] sm:tracking-[0.3em] hover:bg-[var(--bulletin-accent)] hover:text-white transition-all shadow-[6px_6px_0_0_var(--bulletin-shadow)] sm:shadow-[12px_12px_0_0_var(--bulletin-shadow)] hover:shadow-[8px_8px_0_0_var(--bulletin-accent)] active:scale-95"
                   >
-                    CONTINUE TO SPECS →
+                    CONTINUE TO DETAILS →
                   </button>
                 </div>
               </div>
@@ -435,12 +435,12 @@ const CreateEditProduct = () => {
             {currentStep === 2 && (
               <div className="space-y-8 sm:space-y-12 animate-card-drop">
                  <div className="bg-[var(--bulletin-accent)] border-2 sm:border-4 border-[var(--bulletin-border)] p-3 sm:p-4 inline-block rotate-2 shadow-[4px_4px_0_0_var(--bulletin-card)] sm:shadow-[8px_8px_0_0_var(--bulletin-card)] text-white">
-                   <h2 className="text-2xl sm:text-4xl font-black uppercase tracking-tighter leading-none">PHASE 02: TECHNICAL DATA</h2>
-                   <p className="text-[8px] sm:text-[10px] font-black uppercase tracking-widest opacity-60 mt-1 text-white">Specify condition and classification</p>
+                   <h2 className="text-2xl sm:text-4xl font-black uppercase tracking-tighter leading-none">STEP 2: DETAILS</h2>
+                   <p className="text-[8px] sm:text-[10px] font-black uppercase tracking-widest opacity-60 mt-1 text-white">Specify condition and details</p>
                  </div>
 
                 <BulletinCard rotation={-0.4} bgColor="bg-[var(--bulletin-card)]" className="border-2 sm:border-4 border-[var(--bulletin-border)] p-4 sm:p-8 shadow-[6px_6px_0_0_var(--bulletin-text)] sm:shadow-[12px_12px_0_0_var(--bulletin-text)]">
-                  <label className="block text-[9px] sm:text-[11px] font-black uppercase tracking-widest mb-2 sm:mb-4">DETAILED BRIEF (DESCRIPTION)</label>
+                  <label className="block text-[9px] sm:text-[11px] font-black uppercase tracking-widest mb-2 sm:mb-4">ABOUT THIS ITEM (DESCRIPTION)</label>
                   <textarea
                     placeholder="DESCRIBE YOUR ITEM..."
                     rows={6}
@@ -454,7 +454,7 @@ const CreateEditProduct = () => {
                   <div className="relative">
                      <div className="absolute -top-2 -left-2 sm:-top-3 sm:-left-3 h-8 w-8 sm:h-10 sm:w-10 bg-[var(--bulletin-text)] rotate-45 z-20" />
                      <BulletinCard rotation={0.3} bgColor="bg-[var(--bulletin-card)]" className="border-2 sm:border-4 border-[var(--bulletin-border)] p-4 sm:p-6 shadow-[6px_6px_0_0_var(--bulletin-text)] sm:shadow-[8px_8px_0_0_var(--bulletin-text)]">
-                      <label className="block text-[9px] sm:text-[10px] font-black uppercase tracking-widest mb-2 sm:mb-3">CLASSIFICATION</label>
+                      <label className="block text-[9px] sm:text-[10px] font-black uppercase tracking-widest mb-2 sm:mb-3">CATEGORY</label>
                       <input
                         type="text"
                         placeholder="CATEGORY"
@@ -472,7 +472,7 @@ const CreateEditProduct = () => {
                   </div>
 
                   <BulletinCard rotation={-0.5} bgColor="bg-[var(--bulletin-card)]" className="border-2 sm:border-4 border-[var(--bulletin-border)] p-4 sm:p-6 shadow-[6px_6px_0_0_var(--bulletin-accent)] sm:shadow-[8px_8px_0_0_var(--bulletin-accent)]">
-                    <label className="block text-[9px] sm:text-[10px] font-black uppercase tracking-widest mb-2 sm:mb-3">STATE OF WEAR</label>
+                    <label className="block text-[9px] sm:text-[10px] font-black uppercase tracking-widest mb-2 sm:mb-3">CONDITION</label>
                     <select className="w-full border-2 border-[var(--bulletin-border)] p-2 sm:p-3 text-[11px] sm:text-[12px] font-black uppercase focus:outline-none bg-transparent" {...register('condition')}>
                       <option value="">SELECT CONDITION</option>
                       <option value="new">BRAND NEW</option>
@@ -485,7 +485,7 @@ const CreateEditProduct = () => {
                 </div>
 
                 <BulletinCard rotation={0.4} bgColor="bg-[var(--bulletin-card)]" className="border-2 sm:border-4 border-[var(--bulletin-border)] p-4 sm:p-6 shadow-[6px_6px_0_0_var(--bulletin-text)] sm:shadow-[8px_8px_0_0_var(--bulletin-text)]">
-                  <label className="block text-[9px] sm:text-[10px] font-black uppercase tracking-widest mb-2 sm:mb-3">DISCOVERY TAGS</label>
+                  <label className="block text-[9px] sm:text-[10px] font-black uppercase tracking-widest mb-2 sm:mb-3">SEARCH TAGS</label>
                   <input
                     type="text"
                     placeholder="SAMSUNG, PHONE..."
@@ -500,14 +500,14 @@ const CreateEditProduct = () => {
                     onClick={prevStep}
                     className="order-2 sm:order-1 px-8 py-4 text-[11px] sm:text-[12px] font-black uppercase tracking-widest border-2 sm:border-4 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] text-[var(--bulletin-text)] hover:bg-[var(--bulletin-text)] hover:text-[var(--bulletin-bg)] transition-all shadow-[4px_4px_0_0_var(--bulletin-text)] sm:shadow-[6px_6px_0_0_var(--bulletin-text)]"
                   >
-                    ← REVISE
+                    ← BACK
                   </button>
                   <button
                     type="button"
                     onClick={nextStep}
                     className="order-1 sm:order-2 bg-[var(--bulletin-text)] text-[var(--bulletin-bg)] px-10 sm:px-12 py-4 sm:py-5 text-[12px] sm:text-[14px] font-black uppercase tracking-[0.2em] sm:tracking-[0.3em] hover:bg-[var(--bulletin-accent)] hover:text-white transition-all shadow-[6px_6px_0_0_var(--bulletin-accent)]"
                   >
-                    FINAL LOGISTICS →
+                    PRICE & DELIVERY →
                   </button>
                 </div>
               </div>
@@ -516,13 +516,13 @@ const CreateEditProduct = () => {
             {currentStep === 3 && (
               <div className="space-y-8 sm:space-y-12 animate-card-drop">
                  <div className="bg-[var(--bulletin-card)] border-2 sm:border-4 border-[var(--bulletin-border)] p-3 sm:p-4 inline-block -rotate-1 shadow-[4px_4px_0_0_var(--bulletin-accent)] sm:shadow-[8px_8px_0_0_var(--bulletin-accent)]">
-                   <h2 className="text-2xl sm:text-4xl font-black uppercase tracking-tighter leading-none">PHASE 03: SETTLEMENT</h2>
-                   <p className="text-[8px] sm:text-[10px] font-black uppercase tracking-widest opacity-40 mt-1">Determine value and handover point</p>
+                   <h2 className="text-2xl sm:text-4xl font-black uppercase tracking-tighter leading-none">STEP 3: PRICE & LOCATION</h2>
+                   <p className="text-[8px] sm:text-[10px] font-black uppercase tracking-widest opacity-40 mt-1">Determine value and where to meet</p>
                  </div>
 
                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
                   <BulletinCard rotation={0.4} bgColor="bg-[var(--bulletin-card)]" className="border-2 sm:border-4 border-[var(--bulletin-border)] p-4 sm:p-8 shadow-[6px_6px_0_0_var(--bulletin-text)] sm:shadow-[12px_12px_0_0_var(--bulletin-text)]">
-                    <label className="block text-[10px] sm:text-[11px] font-black uppercase tracking-widest mb-2 sm:mb-4">ASKING PRICE (GHS)</label>
+                    <label className="block text-[10px] sm:text-[11px] font-black uppercase tracking-widest mb-2 sm:mb-4">PRICE (GHS)</label>
                     <div className="flex items-center gap-2 sm:gap-4">
                        <span className="text-2xl sm:text-3xl font-black">¢</span>
                        <input
@@ -535,7 +535,7 @@ const CreateEditProduct = () => {
                   </BulletinCard>
 
                   <BulletinCard rotation={-0.3} bgColor="bg-[var(--bulletin-card)]" className="border-2 sm:border-4 border-[var(--bulletin-border)] p-4 sm:p-8 opacity-60">
-                    <label className="block text-[10px] sm:text-[11px] font-black uppercase tracking-widest mb-2 sm:mb-4">MARKET VAL.</label>
+                    <label className="block text-[10px] sm:text-[11px] font-black uppercase tracking-widest mb-2 sm:mb-4">ORIGINAL PRICE</label>
                     <input
                       type="number"
                       step="0.01"
@@ -547,24 +547,24 @@ const CreateEditProduct = () => {
 
                 {pricingInsights && (
                   <div className="p-4 sm:p-8 border-2 sm:border-4 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] rotate-[-0.3deg] shadow-[4px_4px_0_0_var(--bulletin-accent)] sm:shadow-[8px_8px_0_0_var(--bulletin-accent)]">
-                    <div className="text-[9px] sm:text-[11px] font-black uppercase tracking-[0.2em] opacity-40 mb-1 sm:mb-2 underline decoration-2">Market Intelligence</div>
+                    <div className="text-[9px] sm:text-[11px] font-black uppercase tracking-[0.2em] opacity-40 mb-1 sm:mb-2 underline decoration-2">Price Guide</div>
                     <div className="text-lg sm:text-xl font-black leading-tight">GHS {pricingInsights.recommendedMin} — {pricingInsights.recommendedMax}</div>
                   </div>
                 )}
 
                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
                   <BulletinCard rotation={-0.4} bgColor="bg-[var(--bulletin-card)]" className="border-2 sm:border-4 border-[var(--bulletin-border)] p-4 sm:p-6 shadow-[6px_6px_0_0_var(--bulletin-text)] sm:shadow-[12px_12px_0_0_var(--bulletin-text)]">
-                    <label className="block text-[9px] sm:text-[10px] font-black uppercase tracking-widest mb-2 sm:mb-3">HANDOVER METHOD</label>
+                    <label className="block text-[9px] sm:text-[10px] font-black uppercase tracking-widest mb-2 sm:mb-3">DELIVERY</label>
                     <select className="w-full border-2 border-[var(--bulletin-border)] p-2 sm:p-3 text-[11px] sm:text-[12px] font-black uppercase focus:outline-none bg-transparent" {...register('deliveryOption')}>
-                      <option value="pickup">CAMPUS PICKUP</option>
-                      <option value="delivery">HOSTEL DELIVERY</option>
+                      <option value="pickup">PICKUP</option>
+                      <option value="delivery">DELIVERY</option>
                       <option value="both">BOTH</option>
                     </select>
                   </BulletinCard>
 
                   {(deliveryOption === 'pickup' || deliveryOption === 'both') && (
                     <BulletinCard rotation={0.4} bgColor="bg-[var(--bulletin-card)]" className="border-2 sm:border-4 border-[var(--bulletin-border)] p-4 sm:p-6 shadow-[6px_6px_0_0_var(--bulletin-accent)] sm:shadow-[8px_8px_0_0_var(--bulletin-accent)]">
-                      <label className="block text-[9px] sm:text-[10px] font-black uppercase tracking-widest mb-2 sm:mb-3">CAMPUS SECTOR</label>
+                      <label className="block text-[9px] sm:text-[10px] font-black uppercase tracking-widest mb-2 sm:mb-3">CAMPUS LOCATION</label>
                       <input
                         type="text"
                         placeholder="LOCATION"
@@ -582,7 +582,7 @@ const CreateEditProduct = () => {
                     onClick={() => setValue('status', 'active')}
                     className="w-full bg-[var(--bulletin-text)] text-[var(--bulletin-bg)] px-8 sm:px-10 py-6 sm:py-8 text-[14px] sm:text-[18px] font-black uppercase tracking-[0.2em] sm:tracking-[0.4em] hover:bg-[var(--bulletin-accent)] hover:text-white transition-all shadow-[8px_8px_0_0_var(--bulletin-accent)] sm:shadow-[16px_16px_0_0_var(--bulletin-accent)] hover:shadow-none hover:translate-x-1 hover:translate-y-1 active:scale-[0.98] border-2 sm:border-4 border-white/10"
                   >
-                    {submitting ? 'EXECUTING...' : isEdit ? 'RE-PIN LISTING' : 'PUBLISH TO THE BOARD'}
+                    {submitting ? 'SAVING...' : isEdit ? 'UPDATE ITEM' : 'POST ITEM'}
                   </button>
                   
                   <div className="flex flex-col sm:flex-row gap-3 sm:gap-6">
@@ -591,7 +591,7 @@ const CreateEditProduct = () => {
                       onClick={prevStep}
                       className="order-2 sm:order-1 flex-1 px-8 py-4 sm:py-5 text-[11px] sm:text-[12px] font-black uppercase tracking-widest border-2 sm:border-4 border-[var(--bulletin-border)] text-[var(--bulletin-text)] bg-[var(--bulletin-card)] hover:bg-[var(--bulletin-text)] hover:text-[var(--bulletin-bg)] transition-all"
                     >
-                      ← PREV PHASE
+                      ← BACK
                     </button>
                     <button
                       type="button"
@@ -599,7 +599,7 @@ const CreateEditProduct = () => {
                       disabled={submitting}
                       className="order-1 sm:order-2 flex-1 border-2 sm:border-4 border-[#ffd700] bg-[#ffd700]/10 text-[#ffd700] px-8 py-4 sm:py-5 text-[11px] sm:text-[12px] font-black uppercase tracking-widest hover:bg-[#ffd700] hover:text-black transition-colors"
                     >
-                      HOLD AS DRAFT
+                      SAVE AS DRAFT
                     </button>
                   </div>
                 </div>

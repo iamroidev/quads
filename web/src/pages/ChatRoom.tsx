@@ -316,7 +316,7 @@ const ChatRoom: React.FC = () => {
         <div className="flex-1 bg-[#f0e8f4] dark:bg-purple-900/10 px-3 py-2">
           <div className="flex items-center justify-between">
             <span className="text-[10px] uppercase tracking-wider opacity-40 text-purple-900 dark:text-purple-200">
-              {typingUser ? 'typing...' : isOtherOnline ? 'Online' : 'Offline'}
+              {typingUser ? 'is typing...' : isOtherOnline ? 'Online' : 'Offline'}
             </span>
             <div className="relative" ref={menuRef}>
               <button onClick={() => setShowMenu(!showMenu)} className="p-1 hover:opacity-60 text-purple-900 dark:text-purple-200">
@@ -330,7 +330,7 @@ const ChatRoom: React.FC = () => {
                       className="flex items-center gap-2 px-3 py-1.5 text-[10px] font-bold uppercase hover:bg-sky-50 dark:hover:bg-sky-900/20 text-[var(--bulletin-text)]"
                       onClick={() => setShowMenu(false)}
                     >
-                      <Package className="h-3 w-3" /> View Product
+                      <Package className="h-3 w-3" /> View Item
                     </Link>
                   )}
                   <button
@@ -376,7 +376,7 @@ const ChatRoom: React.FC = () => {
               disabled={loadingMore}
               className="border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] px-3 py-1.5 text-[9px] font-bold uppercase shadow-[2px_2px_0_0_var(--bulletin-shadow)] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-none disabled:opacity-40 transition-all text-[var(--bulletin-text)]"
             >
-              {loadingMore ? 'Loading...' : 'Load older'}
+              {loadingMore ? 'Loading...' : 'See older messages'}
             </button>
           </div>
         )}
@@ -461,7 +461,7 @@ const ChatRoom: React.FC = () => {
                                   type="number"
                                   min="0"
                                   step="0.01"
-                                  placeholder="Counter (GHS)"
+                                  placeholder="New Price (GHS)"
                                   value={counterAmounts[msg._id] || ''}
                                   onChange={(e) =>
                                     setCounterAmounts((prev) => ({ ...prev, [msg._id]: e.target.value }))
@@ -526,7 +526,7 @@ const ChatRoom: React.FC = () => {
       <div className="border-t-2 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] p-3">
         {/* Quick replies */}
         <div className="mb-3 flex flex-wrap items-center gap-2">
-          {['Available now', 'Can negotiate', 'Meet at main gate'].map((q) => (
+          {['Is this available?', 'Can you reduce the price?', 'Where can we meet?'].map((q) => (
             <button key={q} onClick={() => sendQuickReply(q)} className="border border-[var(--bulletin-border)] bg-[var(--bulletin-card)] text-[var(--bulletin-text)] px-2 py-1 text-[8px] font-black uppercase shadow-[1px_1px_0_0_var(--bulletin-shadow)] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-none transition-all">
               {q}
             </button>
@@ -568,7 +568,7 @@ const ChatRoom: React.FC = () => {
           <input
             ref={inputRef}
             type="text"
-            placeholder="Type a message..."
+            placeholder="Write something..."
             value={inputValue}
             onChange={handleInputChange}
             onKeyDown={handleKeyDown}
