@@ -304,9 +304,19 @@ export const BulletinLayout: React.FC<BulletinLayoutProps> = ({
               {/* Protocols Column */}
               <div className="flex flex-col gap-4">
                 <div className="text-[10px] font-black uppercase tracking-[0.3em] opacity-30 mb-2">Protocols</div>
-                <Link to="/support" className="text-[14px] font-black uppercase tracking-widest hover:text-[#ff6b6b] transition-colors">Help Hub</Link>
-                <Link to="/terms" className="text-[14px] font-black uppercase tracking-widest hover:text-[#ff6b6b] transition-colors">Terms of Service</Link>
-                <Link to="/contact" className="text-[14px] font-black uppercase tracking-widest hover:text-[#ff6b6b] transition-colors">Direct Assistance</Link>
+                {user?.role === 'seller' ? (
+                  <>
+                    <Link to="/seller/support" className="text-[14px] font-black uppercase tracking-widest hover:text-[#ff6b6b] transition-colors">Merchant Help</Link>
+                    <Link to="/terms/seller" className="text-[14px] font-black uppercase tracking-widest hover:text-[#ff6b6b] transition-colors">Seller Policy</Link>
+                    <Link to="/seller/payouts" className="text-[14px] font-black uppercase tracking-widest hover:text-[#ff6b6b] transition-colors">Disbursements</Link>
+                  </>
+                ) : (
+                  <>
+                    <Link to="/support" className="text-[14px] font-black uppercase tracking-widest hover:text-[#ff6b6b] transition-colors">Buyer Help</Link>
+                    <Link to="/terms" className="text-[14px] font-black uppercase tracking-widest hover:text-[#ff6b6b] transition-colors">Terms of Service</Link>
+                    <Link to="/safety" className="text-[14px] font-black uppercase tracking-widest hover:text-[#ff6b6b] transition-colors">Campus Safety</Link>
+                  </>
+                )}
               </div>
 
               {/* My Hub Column */}
