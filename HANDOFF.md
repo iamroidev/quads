@@ -32,7 +32,14 @@ The project has successfully transitioned from "Readiness" to **Active Productio
 *   **Reasoning**: Replaced Nodemailer/SMTP to bypass EC2 memory limits and ensure all attempts are logged in the Resend Dashboard.
 *   **Branding**: Fully branded institutional templates with role-specific welcome logic (Buyer vs. Seller).
 
-### 2. Payout Scheduler
+### 2. Growth & Marketing Engine 🚀
+*   **Production-Ready Growth Toolkit**: Finalized the backend logic for Coupons, Bundles, and Campaigns.
+    *   **Live Coupons**: Implemented full lifecycle (Creation -> Validation -> Application). Coupons now respect usage limits, dates, and min-spend.
+    *   **Dynamic Bundles**: Checkout engine automatically detects bundle matches and applies seller-defined discounts.
+    *   **Discovery UI**: Implemented automatic promotion discovery on Product Detail pages (Amazon-style "available coupons" cards).
+    *   **Featured Boosts**: Campaign logic now actively injects products into the "Campus Spotlight" section of the home feed.
+
+### 3. Payout Scheduler
 *   **Logic**: Cron job running every 15 minutes.
 *   **Security**: Uses escrow-to-seller disbursement only after order completion.
 *   **Monitoring**: View logs via `pm2 logs quads-api` to see the `[PayoutScheduler]` activity.
