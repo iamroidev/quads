@@ -66,7 +66,7 @@ const SellersPage: React.FC = () => {
             {filteredSellers.map((entry, idx) => (
               <Link 
                 key={entry.seller?._id} 
-                to={`/sellers/${entry.seller?._id}`}
+                to={`/products?seller=${entry.seller?._id}`}
                 className="group relative"
               >
                 <div className="border-4 border-black bg-white dark:bg-black p-6 shadow-[10px_10px_0_0_#000] group-hover:translate-x-1 group-hover:translate-y-1 group-hover:shadow-none transition-all h-full">

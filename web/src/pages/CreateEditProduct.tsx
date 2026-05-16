@@ -71,6 +71,8 @@ const CreateEditProduct = () => {
   });
 
   const deliveryOption = watch('deliveryOption');
+  const selectedCategory = watch('category');
+  const isServiceOrAccommodation = selectedCategory === 'Services' || selectedCategory === 'Accommodation';
 
   useEffect(() => {
     categoryService.getCategories().then((res) => {
@@ -160,7 +162,7 @@ const CreateEditProduct = () => {
         toast.error('Category is required to publish');
         return;
       }
-      if (!data.condition) {
+      if (!isServiceOrAccommodation && !data.condition) {
         toast.error('Condition is required to publish');
         return;
       }
@@ -471,17 +473,19 @@ const CreateEditProduct = () => {
                     </BulletinCard>
                   </div>
 
-                  <BulletinCard rotation={-0.5} bgColor="bg-[var(--bulletin-card)]" className="border-2 sm:border-4 border-[var(--bulletin-border)] p-4 sm:p-6 shadow-[6px_6px_0_0_var(--bulletin-accent)] sm:shadow-[8px_8px_0_0_var(--bulletin-accent)]">
-                    <label className="block text-[9px] sm:text-[10px] font-black uppercase tracking-widest mb-2 sm:mb-3">CONDITION</label>
-                    <select className="w-full border-2 border-[var(--bulletin-border)] p-2 sm:p-3 text-[11px] sm:text-[12px] font-black uppercase focus:outline-none bg-transparent" {...register('condition')}>
-                      <option value="">SELECT CONDITION</option>
-                      <option value="new">BRAND NEW</option>
-                      <option value="like-new">LIKE NEW</option>
-                      <option value="good">GOOD</option>
-                      <option value="fair">FAIR</option>
-                      <option value="poor">POOR</option>
-                    </select>
-                  </BulletinCard>
+                  {!isServiceOrAccommodation && (
+                    <BulletinCard rotation={-0.5} bgColor="bg-[var(--bulletin-card)]" className="border-2 sm:border-4 border-[var(--bulletin-border)] p-4 sm:p-6 shadow-[6px_6px_0_0_var(--bulletin-accent)] sm:shadow-[8px_8px_0_0_var(--bulletin-accent)]">
+                      <label className="block text-[9px] sm:text-[10px] font-black uppercase tracking-widest mb-2 sm:mb-3">CONDITION</label>
+                      <select className="w-full border-2 border-[var(--bulletin-border)] p-2 sm:p-3 text-[11px] sm:text-[12px] font-black uppercase focus:outline-none bg-transparent" {...register('condition')}>
+                        <option value="">SELECT CONDITION</option>
+                        <option value="new">BRAND NEW</option>
+                        <option value="like-new">LIKE NEW</option>
+                        <option value="good">GOOD</option>
+                        <option value="fair">FAIR</option>
+                        <option value="poor">POOR</option>
+                      </select>
+                    </BulletinCard>
+                  )}
                 </div>
 
                 <BulletinCard rotation={0.4} bgColor="bg-[var(--bulletin-card)]" className="border-2 sm:border-4 border-[var(--bulletin-border)] p-4 sm:p-6 shadow-[6px_6px_0_0_var(--bulletin-text)] sm:shadow-[8px_8px_0_0_var(--bulletin-text)]">
@@ -554,17 +558,17 @@ const CreateEditProduct = () => {
 
                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
                   <BulletinCard rotation={-0.4} bgColor="bg-[var(--bulletin-card)]" className="border-2 sm:border-4 border-[var(--bulletin-border)] p-4 sm:p-6 shadow-[6px_6px_0_0_var(--bulletin-text)] sm:shadow-[12px_12px_0_0_var(--bulletin-text)]">
-                    <label className="block text-[9px] sm:text-[10px] font-black uppercase tracking-widest mb-2 sm:mb-3">DELIVERY</label>
+                    <label className="block text-[9px] sm:text-[10px] font-black uppercase tracking-widest mb-2 sm:mb-3">{isServiceOrAccommodation ? 'OFFERING METHOD' : 'DELIVERY'}</label>
                     <select className="w-full border-2 border-[var(--bulletin-border)] p-2 sm:p-3 text-[11px] sm:text-[12px] font-black uppercase focus:outline-none bg-transparent" {...register('deliveryOption')}>
-                      <option value="pickup">PICKUP</option>
-                      <option value="delivery">DELIVERY</option>
-                      <option value="both">BOTH</option>
+                      <option value="pickup">{isServiceOrAccommodation ? 'AT SELLER LOCATION' : 'PICKUP'}</option>
+                      <option value="delivery">{isServiceOrAccommodation ? 'AT BUYER LOCATION / REMOTE' : 'DELIVERY'}</option>
+                      <option value="both">BOTH / FLEXIBLE</option>
                     </select>
                   </BulletinCard>
 
                   {(deliveryOption === 'pickup' || deliveryOption === 'both') && (
                     <BulletinCard rotation={0.4} bgColor="bg-[var(--bulletin-card)]" className="border-2 sm:border-4 border-[var(--bulletin-border)] p-4 sm:p-6 shadow-[6px_6px_0_0_var(--bulletin-accent)] sm:shadow-[8px_8px_0_0_var(--bulletin-accent)]">
-                      <label className="block text-[9px] sm:text-[10px] font-black uppercase tracking-widest mb-2 sm:mb-3">CAMPUS LOCATION</label>
+                      <label className="block text-[9px] sm:text-[10px] font-black uppercase tracking-widest mb-2 sm:mb-3">{isServiceOrAccommodation ? 'MEETING POINT' : 'CAMPUS LOCATION'}</label>
                       <input
                         type="text"
                         placeholder="LOCATION"

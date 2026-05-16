@@ -522,9 +522,11 @@ const ProductDetail: React.FC = () => {
 
             {/* Badges */}
             <div className="flex flex-wrap gap-3 mb-6">
-              <span className={`border-2 border-[var(--bulletin-border)] px-4 py-1.5 text-[10px] font-black uppercase tracking-widest ${conditionStyles[product.condition]}`}>
-                {conditionLabels[product.condition]}
-              </span>
+              {!(product.category.name === 'Services' || product.category.name === 'Accommodation') && (
+                <span className={`border-2 border-[var(--bulletin-border)] px-4 py-1.5 text-[10px] font-black uppercase tracking-widest ${conditionStyles[product.condition]}`}>
+                  {conditionLabels[product.condition]}
+                </span>
+              )}
               {product.status === 'reserved' && (
                 <span className="border-2 border-[var(--bulletin-border)] px-4 py-1.5 text-[10px] font-black uppercase tracking-widest bg-[#fff5e1] dark:bg-orange-900/40 text-black dark:text-orange-200">
                   Awaiting Transaction

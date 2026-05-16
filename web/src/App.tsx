@@ -44,6 +44,7 @@ import MaintenancePage from './pages/Maintenance';
 import SellersPage from './pages/Sellers';
 import GrowthToolsPage from './pages/GrowthTools';
 import PulsePage from './pages/Pulse';
+import DisputeCenterPage from './pages/DisputeCenter';
 
 import { LoadingSpinner } from './components/ui';
 
@@ -58,6 +59,11 @@ const SearchRedirect: React.FC = () => {
 const CategoryRedirect: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
   return <Navigate to={`/products?category=${slug || ''}`} replace />;
+};
+
+const SellerRedirect: React.FC = () => {
+  const { id } = useParams<{ id: string }>();
+  return <Navigate to={`/products?seller=${id || ''}`} replace />;
 };
 
 // Root: guests → landing, logged-in → dashboard
@@ -231,9 +237,11 @@ const App: React.FC = () => {
         {/* Redirect routes for backward compat */}
         <Route path="/search" element={<SearchRedirect />} />
         <Route path="/category/:slug" element={<CategoryRedirect />} />
+        <Route path="/sellers/:id" element={<SellerRedirect />} />
         <Route path="/pulse" element={<PulsePage />} />
         <Route path="/categories" element={<CategoriesPage />} />
         <Route path="/collections/:slug" element={<CollectionDetailPage />} />
+        <Route path="/dispute-center" element={<ProtectedRoute><DisputeCenterPage /></ProtectedRoute>} />
 
         <Route
           path="/saved"
