@@ -164,12 +164,10 @@ const LoginPage: React.FC = () => {
               <span className="text-4xl opacity-50">👤</span>
             </div>
           </div>
-          <div className="text-center">
-            <div className="bg-[var(--bulletin-text)] text-[var(--bulletin-bg)] px-3 py-1.5 text-2xl font-black uppercase tracking-tighter">
-              Q
+            <div className="flex flex-col items-center">
+              <BrandMark className="h-16 w-16 mb-2" />
+              <div className="text-lg font-black uppercase tracking-tight text-[var(--bulletin-text)] mt-1">QUADS</div>
             </div>
-            <div className="text-lg font-black uppercase tracking-tight text-[var(--bulletin-text)] mt-1">QUADS</div>
-          </div>
           {/* Tape effect */}
           <div className="absolute -top-4 left-1/2 -translate-x-1/2 h-8 w-24 bg-[#ffd700]/50 rotate-[-2deg]" />
         </div>
