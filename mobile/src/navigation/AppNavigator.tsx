@@ -8,28 +8,43 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAuth } from '../context/AuthContext';
 
 import {
-  LoginScreen,
-  RegisterScreen,
-  HomeScreen,
-  ProductsScreen,
-  ProductDetailScreen,
-  SavedScreen,
-  ProfileScreen,
-  OrdersScreen,
-  ConversationListScreen,
-  NotificationsScreen,
-  ChatScreen,
-  OrderDetailScreen,
-  CreateListingScreen,
-  ProfileEditScreen,
-  SellerAnalyticsScreen,
-  MyListingsScreen,
-  SettingsScreen,
-  SellerOnboardingScreen,
-  VerificationScreen,
-  ForgotPasswordScreen,
-  CheckoutScreen,
-} from '../screens';
+   LoginScreen,
+   RegisterScreen,
+   HomeScreen,
+   ProductsScreen,
+   ProductDetailScreen,
+   SavedScreen,
+   ProfileScreen,
+   OrdersScreen,
+   ConversationListScreen,
+   NotificationsScreen,
+   ChatScreen,
+   OrderDetailScreen,
+   CreateListingScreen,
+   ProfileEditScreen,
+   SellerAnalyticsScreen,
+   MyListingsScreen,
+   SettingsScreen,
+   SellerOnboardingScreen,
+   VerificationScreen,
+   ForgotPasswordScreen,
+   CheckoutScreen,
+   SellerPayoutsScreen,
+   DisputeCenterScreen,
+   GrowthToolsScreen,
+   PulseScreen,
+   CategoriesScreen,
+   SellersScreen,
+   SellerOrdersScreen,
+   CartScreen,
+   PaymentVerificationScreen,
+   SupportScreen,
+   ContactScreen,
+   TermsScreen,
+   MaintenanceScreen,
+   CollectionDetailScreen,
+   ResetPasswordScreen,
+ } from '../screens';
 import { navigationRef } from './navigationRef';
 import { colors } from '../theme';
 
@@ -159,23 +174,73 @@ const ProfileStackScreen = () => (
       component={ConversationListScreen}
       options={{ ...defaultStackHeader, title: 'Messages' }}
     />
-    <ProfileStack.Screen
-      name="Chat"
-      component={ChatScreen}
-      options={{ ...defaultStackHeader }}
-    />
-    <ProfileStack.Screen
-      name="Verification"
-      component={VerificationScreen}
-      options={{ ...defaultStackHeader, title: 'Verify Account' }}
-    />
-    <ProfileStack.Screen
-      name="Checkout"
-      component={CheckoutScreen}
-      options={{ ...defaultStackHeader, title: 'Checkout' }}
-    />
-  </ProfileStack.Navigator>
-);
+<ProfileStack.Screen
+              name="Chat"
+              component={ChatScreen}
+              options={{ ...defaultStackHeader }}
+            />
+            <ProfileStack.Screen
+              name="Verification"
+              component={VerificationScreen}
+              options={{ ...defaultStackHeader, title: 'Verify Account' }}
+            />
+<ProfileStack.Screen
+              name="Checkout"
+              component={CheckoutScreen}
+              options={{ ...defaultStackHeader, title: 'Checkout' }}
+            />
+            <ProfileStack.Screen
+              name="Categories"
+              component={CategoriesScreen}
+              options={{ ...defaultStackHeader, title: 'Categories' }}
+            />
+            <ProfileStack.Screen
+              name="Sellers"
+              component={SellersScreen}
+              options={{ ...defaultStackHeader, title: 'Sellers' }}
+            />
+            <ProfileStack.Screen
+              name="SellerOrders"
+              component={SellerOrdersScreen}
+              options={{ ...defaultStackHeader, title: 'Sales Orders' }}
+            />
+            <ProfileStack.Screen
+              name="Cart"
+              component={CartScreen}
+              options={{ ...defaultStackHeader, title: 'Shopping Cart' }}
+            />
+            <ProfileStack.Screen
+              name="PaymentVerification"
+              component={PaymentVerificationScreen}
+              options={{ ...defaultStackHeader, title: 'Payment Status' }}
+            />
+             <ProfileStack.Screen
+               name="MessagesList"
+               component={ConversationListScreen}
+               options={{ ...defaultStackHeader, title: 'Messages' }}
+             />
+            <ProfileStack.Screen
+              name="Support"
+              component={SupportScreen}
+              options={{ ...defaultStackHeader, title: 'Support' }}
+            />
+            <ProfileStack.Screen
+              name="Contact"
+              component={ContactScreen}
+              options={{ ...defaultStackHeader, title: 'Contact' }}
+            />
+            <ProfileStack.Screen
+              name="Terms"
+              component={TermsScreen}
+              options={{ ...defaultStackHeader, title: 'Terms' }}
+            />
+            <ProfileStack.Screen
+              name="CollectionDetail"
+              component={CollectionDetailScreen}
+              options={{ ...defaultStackHeader, title: 'Collection' }}
+            />
+          </ProfileStack.Navigator>
+        );
 
 // ── Bottom tabs ───────────────────────────────────────────────────────────────
 const tabIcon = (name: any) => ({ color }: { color: string }) => (
@@ -239,27 +304,34 @@ const MainTabs = () => {
           options={{ title: 'Home', tabBarIcon: tabIcon('home-outline') }}
         />
       )}
-      {!isSellerMode && (
-        <Tab.Screen
-          name="ProductsTab"
-          component={ProductsStackScreen}
-          options={{ 
-            title: 'Browse', 
-            tabBarIcon: tabIcon('grid-outline')
-          }}
-          listeners={({ navigation }) => ({
-            tabPress: (e) => {
-              e.preventDefault();
-              navigation.navigate('ProductsTab', { screen: 'ProductsHome' });
-            },
-          })}
-        />
-      )}
-      <Tab.Screen
-        name="MessagesTab"
-        component={MessagesStackScreen}
-        options={{ title: 'Chat', tabBarIcon: tabIcon('chatbubble-ellipses-outline') }}
-      />
+{!isSellerMode && (
+         <Tab.Screen
+           name="ProductsTab"
+           component={ProductsStackScreen}
+           options={{ 
+             title: 'Browse', 
+             tabBarIcon: tabIcon('grid-outline')
+           }}
+           listeners={({ navigation }) => ({
+             tabPress: (e) => {
+               e.preventDefault();
+               navigation.navigate('ProductsTab', { screen: 'ProductsHome' });
+             },
+           })}
+         />
+       )}
+       {!isSellerMode && (
+         <Tab.Screen
+           name="PulseTab"
+           component={PulseScreen}
+           options={{ title: 'Pulse', tabBarIcon: tabIcon('pulse-outline') }}
+         />
+       )}
+       <Tab.Screen
+         name="MessagesTab"
+         component={MessagesStackScreen}
+         options={{ title: 'Chat', tabBarIcon: tabIcon('chatbubble-ellipses-outline') }}
+       />
       <Tab.Screen
         name="ProfileTab"
         component={ProfileStackScreen}

@@ -342,18 +342,18 @@ export const BulletinLayout: React.FC<BulletinLayoutProps> = ({
             <div className="flex flex-col md:flex-row items-center justify-between border-t-4 border-black pt-12 gap-8">
               <div className="flex flex-col items-center md:items-start gap-4">
                  <div className="text-[10px] font-black uppercase tracking-[0.3em] text-[#ff6b6b]">Official Channels</div>
-                 <div className="flex items-center gap-10">
-                  <a href="mailto:support@quadsmarket.tech" title="Email Support" className="text-[var(--bulletin-text)] hover:text-[#ff6b6b] transition-all hover:scale-110">
-                    <Mail className="h-6 w-6" />
-                  </a>
-                  <a href="https://wa.me/233551500736" target="_blank" rel="noopener noreferrer" title="WhatsApp Support" className="text-[var(--bulletin-text)] hover:text-[#25D366] transition-all hover:scale-110">
-                    <MessageCircle className="h-6 w-6" />
-                  </a>
-                  <a href="https://twitter.com/quadsmarket" target="_blank" rel="noopener noreferrer" title="Follow on X" className="text-[var(--bulletin-text)] hover:text-[#1DA1F2] transition-all hover:scale-110">
-                    <Twitter className="h-6 w-6" />
-                  </a>
+                  <div className="flex items-center gap-10">
+                    <a href="mailto:support@quadsmarket.tech" title="Email Support" className="text-[var(--bulletin-text)] hover:text-[#ff6b6b] transition-all hover:scale-110">
+                      <Mail className="h-6 w-6" />
+                    </a>
+                    <a href="https://wa.me/233551500736" target="_blank" rel="noopener noreferrer" title="WhatsApp Support" className="text-[var(--bulletin-text)] hover:text-[#25D366] transition-all hover:scale-110">
+                      <MessageCircle className="h-6 w-6" />
+                    </a>
+                    <a href="https://twitter.com/quadsmarket" target="_blank" rel="noopener noreferrer" title="Follow on X" className="text-[var(--bulletin-text)] hover:text-[#1DA1F2] transition-all hover:scale-110">
+                      <Twitter className="h-6 w-6" />
+                    </a>
+                  </div>
                 </div>
-              </div>
 
               <div className="border-4 border-black bg-[#fffacd] dark:bg-yellow-900/20 px-6 py-2 shadow-[4px_4px_0_0_#000]">
                  <div className="text-[10px] font-black uppercase tracking-tighter flex items-center gap-2">
