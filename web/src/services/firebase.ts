@@ -16,37 +16,37 @@ export const auth = getAuth(app);
 
 // Helper to setup reCAPTCHA
 export const setupRecaptcha = (containerId: string) => {
-  const container = document.getElementById(containerId);
-  if (!container) {
-    console.error(`Recaptcha container with id "${containerId}" not found in DOM`);
-  }
-
-  // If we already have a verifier, check if it's still valid
-  // In some cases (HMR or navigation), we might need to recreate it
+  // If we already have a verifier on the window, reuse it
   if ((window as any).recaptchaVerifier) {
     try {
-      // Clear the old one if it exists to be safe
-      (window as any).recaptchaVerifier.clear();
+      // If the container element has been wiped (e.g. navigation), we might need to reset
+      const container = document.getElementById(containerId);
+      if (container && container.innerHTML === '') {
+         // It's empty, we can likely reuse or it's first time
+         return (window as any).recaptchaVerifier;
+      }
+      
+      // If we get "already rendered" errors, we should try to reset instead of recreate
+      return (window as any).recaptchaVerifier;
     } catch (e) {
-      // Ignore errors during clear
+      console.warn('Error checking existing verifier:', e);
     }
-    (window as any).recaptchaVerifier = null;
   }
 
-  (window as any).recaptchaVerifier = new RecaptchaVerifier(auth, containerId, {
+  const verifier = new RecaptchaVerifier(auth, containerId, {
     'size': 'invisible',
     'callback': () => {
       // reCAPTCHA solved
     },
     'expired-callback': () => {
-      // Response expired. Ask user to solve reCAPTCHA again.
       if ((window as any).recaptchaVerifier) {
         (window as any).recaptchaVerifier.reset();
       }
     }
   });
 
-  return (window as any).recaptchaVerifier;
+  (window as any).recaptchaVerifier = verifier;
+  return verifier;
 };
 
 // Helper to send OTP
@@ -56,5 +56,20 @@ export const sendOtp = async (phoneNumber: string, appVerifier: any): Promise<Co
   } catch (error) {
     console.error('Error sending OTP:', error);
     throw error;
+  }
+};
+
+export const resetRecaptcha = (containerId: string) => {
+  if ((window as any).recaptchaVerifier) {
+    try {
+      (window as any).recaptchaVerifier.clear();
+      (window as any).recaptchaVerifier = null;
+    } catch (e) {
+      console.warn('Error clearing recaptcha:', e);
+    }
+  }
+  const container = document.getElementById(containerId);
+  if (container) {
+    container.innerHTML = '';
   }
 };
