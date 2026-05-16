@@ -179,7 +179,7 @@ export type OrderStatus =
   | 'cancelled'
   | 'disputed';
 
-export type PaymentMethod = 'momo_mtn' | 'momo_vodafone' | 'momo_airteltigo' | 'card' | 'bank_transfer';
+export type PaymentMethod = 'momo_mtn' | 'momo_vodafone' | 'momo_airteltigo' | 'card' | 'bank_transfer' | 'cash_on_delivery';
 export type PaymentStatus = 'pending' | 'success' | 'failed' | 'refunded';
 export type DeliveryMethod = 'pickup' | 'delivery';
 
@@ -272,6 +272,7 @@ export const PAYMENT_METHODS: { value: PaymentMethod; label: string; icon: strin
   { value: 'momo_airteltigo', label: 'AirtelTigo Money', icon: '📱' },
   { value: 'card', label: 'Debit/Credit Card', icon: '💳' },
   { value: 'bank_transfer', label: 'Bank Transfer', icon: '🏦' },
+  { value: 'cash_on_delivery', label: 'Cash on Meetup', icon: '🤝' },
 ];
 
 // Message / Chat types
