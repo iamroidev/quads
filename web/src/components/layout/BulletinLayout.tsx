@@ -13,9 +13,11 @@ import {
   Moon,
   Mail,
   MessageCircle,
-  Twitter
+  Twitter,
+  ShoppingCart
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import { useCart } from '../../context/CartContext';
 import { BulletinMarquee } from '../ui/BulletinMarquee';
 import BrandMark from './BrandMark';
 
@@ -37,6 +39,7 @@ export const BulletinLayout: React.FC<BulletinLayoutProps> = ({
   hideHero = false,
 }) => {
   const { user, isAuthenticated, logout, switchRole } = useAuth();
+  const { totalItems } = useCart();
   const isSeller = user?.roles?.includes('seller') || user?.roles?.includes('admin');
   const location = useLocation();
   const navigate = useNavigate();
@@ -168,6 +171,19 @@ export const BulletinLayout: React.FC<BulletinLayoutProps> = ({
               >
                 {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
               </button>
+
+              <Link 
+                to="/cart"
+                className="p-2 border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] hover:bg-[#ffd700] dark:hover:bg-white/10 transition-colors shadow-[2px_2px_0_0_var(--bulletin-shadow)] relative active:translate-x-[1px] active:translate-y-[1px] active:shadow-none"
+                title="Your Shopping Cart"
+              >
+                <ShoppingCart className="h-4 w-4" />
+                {totalItems > 0 && (
+                  <span className="absolute -top-2 -right-2 bg-[#ff6b6b] text-white text-[8px] font-black h-4 w-4 rounded-full flex items-center justify-center border-2 border-black animate-pulse">
+                    {totalItems}
+                  </span>
+                )}
+              </Link>
 
               {isAuthenticated ? (
                 <div className="relative">
