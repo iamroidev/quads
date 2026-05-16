@@ -129,12 +129,12 @@ const Checkout: React.FC = () => {
         );
 
         if (payRes.success && payRes.data.authorizationUrl) {
-          toast.success('Redirecting to secure payment...', { id: 'payment-init' });
+          toast.success('Opening payment page...', { id: 'payment-init' });
           if (isCartCheckout) clearCart();
           // Redirect to Paystack
           window.location.href = payRes.data.authorizationUrl;
         } else {
-          toast.error('Failed to initialize payment gateway', { id: 'payment-init' });
+          toast.error('Failed to connect to payment system', { id: 'payment-init' });
           navigate(`/orders/${orderIds[0]}`);
         }
       }
@@ -152,7 +152,7 @@ const Checkout: React.FC = () => {
   const subtotal = products.reduce((sum, p) => sum + (p.price * p.quantity), 0);
 
   return (
-    <BulletinLayout title="Checkout" subtitle="Purchase" section="11">
+    <BulletinLayout title="Checkout" subtitle="Finalize Purchase" section="11">
       <div className="border-b border-[var(--bulletin-border)] bg-[var(--bulletin-bg)] p-4 md:p-6">
         <div className="mx-auto max-w-[1400px]">
           <button
@@ -172,7 +172,7 @@ const Checkout: React.FC = () => {
             {/* Product Summary */}
             <div className="relative mb-8">
               <div className="absolute -top-3 left-4 bg-[var(--bulletin-text)] text-[var(--bulletin-bg)] text-[9px] font-black px-2 py-0.5 z-10 rotate-[-1deg]">
-                {products.length > 1 ? 'PINNED ITEMS' : 'SELECTED ITEM'}
+                {products.length > 1 ? 'YOUR ITEMS' : 'YOUR ITEM'}
               </div>
               <div className="border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] p-5 shadow-[4px_4px_0_0_var(--bulletin-shadow)] space-y-4">
                 {products.map((p, idx) => (
@@ -287,7 +287,7 @@ const Checkout: React.FC = () => {
               <div className="flex items-start gap-3">
                 <Shield className="h-5 w-5 flex-shrink-0 mt-0.5" />
                 <div>
-                  <div className="text-[12px] font-bold mb-1">Protected by buyer guarantee</div>
+                  <div className="text-[12px] font-bold mb-1">Buyer Protection Active</div>
                   <div className="text-[11px] opacity-70">
                     Payment is held securely until you confirm receipt. Learn more about buyer protection.
                   </div>
@@ -300,11 +300,11 @@ const Checkout: React.FC = () => {
           <div className="lg:sticky lg:top-24 h-fit">
             <div className="relative">
               <div className="absolute -top-3 -right-2 bg-[#ff6b6b] text-white text-[9px] font-black px-2 py-0.5 z-10 rotate-[2deg] shadow-[2px_2px_0_0_var(--bulletin-shadow)]">
-                PAYMENT DUE
+                ORDER TOTAL
               </div>
               <div className="border-2 border-[var(--bulletin-border)] bg-[#fffacd] dark:bg-yellow-900/20 p-6 shadow-[8px_8px_0_0_var(--bulletin-shadow)]">
                 <div className="text-[10px] uppercase font-black tracking-widest opacity-40 mb-6 border-b border-black/10 dark:border-white/10 pb-2">
-                  Bill of Sale
+                  Total Cost
                 </div>
 
                 <div className="space-y-4 text-[12px] font-mono">
@@ -370,11 +370,11 @@ const Checkout: React.FC = () => {
                     <span className="font-black italic">Free</span>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="opacity-60 uppercase">Logistics</span>
+                    <span className="opacity-60 uppercase">Delivery</span>
                     <span className="font-black">{form.deliveryMethod === 'delivery' ? 'TBD' : 'GHS 0.00'}</span>
                   </div>
                   <div className="border-t-2 border-dashed border-black/20 dark:border-white/20 pt-4 flex justify-between items-baseline">
-                    <span className="font-black uppercase text-sm">Amount Due</span>
+                    <span className="font-black uppercase text-sm">Total to Pay</span>
                     <span className="font-black text-2xl tracking-tighter">
                       GHS {(subtotal - (couponData?.discount || 0)).toLocaleString('en-GH', { minimumFractionDigits: 2 })}
                     </span>
@@ -392,7 +392,7 @@ const Checkout: React.FC = () => {
                     <Pin className={`h-4 w-4 transition-all ${form.termsAccepted ? 'text-red-600 rotate-45' : 'text-gray-300'}`} />
                   </label>
                   <label htmlFor="termsAccepted" className="text-[10px] font-black uppercase tracking-tight text-[var(--bulletin-text)] leading-tight cursor-pointer opacity-80">
-                    I verify this purchase & agree to the <Link to="/terms" target="_blank" className="underline decoration-1 underline-offset-2">Institutional Terms</Link>
+                    I verify this purchase & agree to the <Link to="/terms" target="_blank" className="underline decoration-1 underline-offset-2">Campus Rules</Link>
                   </label>
                 </div>
 
@@ -401,13 +401,13 @@ const Checkout: React.FC = () => {
                   disabled={submitting || (form.deliveryMethod === 'delivery' && !form.deliveryAddress.trim())}
                   className="w-full border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-text)] mt-8 px-4 py-4 text-[13px] font-black uppercase text-[var(--bulletin-bg)] shadow-[4px_4px_0_0_var(--bulletin-shadow)] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[3px_3px_0_0_var(--bulletin-shadow)] active:translate-x-[4px] active:translate-y-[4px] active:shadow-none transition-all disabled:opacity-40"
                 >
-                  {submitting ? 'Authenticating...' : 'Authorize Transaction →'}
+                  {submitting ? 'Connecting...' : 'Pay Now →'}
                 </button>
 
                 <div className="mt-6 flex items-center justify-center gap-2 opacity-30">
                   <Shield className="h-3 w-3" />
                   <span className="text-[9px] font-black uppercase tracking-widest">
-                    Encrypted Protocol v2.4
+                    Secure Payment
                   </span>
                 </div>
               </div>

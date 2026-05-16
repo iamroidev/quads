@@ -312,7 +312,7 @@ const ProfilePage: React.FC = () => {
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-2 gap-4 w-full lg:w-72">
               {(isSeller 
                 ? [
-                    { label: 'Active Listings', value: loadingStats ? '...' : (stats?.activeListings || '0'), color: 'bg-[var(--bulletin-card)]' },
+                    { label: 'Available Items', value: loadingStats ? '...' : (stats?.activeListings || '0'), color: 'bg-[var(--bulletin-card)]' },
                     { label: 'Rating', value: loadingStats ? '...' : (stats?.rating ? `${stats.rating}/5` : 'N/A'), color: 'bg-[#fffacd] dark:bg-yellow-900/20' },
                     { label: 'Sales', value: loadingStats ? '...' : (stats?.totalSales || '0'), color: 'bg-[var(--bulletin-card)]' },
                     { label: 'Response', value: loadingStats ? '...' : `${stats?.responseRate || 100}%`, color: 'bg-[var(--bulletin-card)]' },
@@ -344,7 +344,7 @@ const ProfilePage: React.FC = () => {
                       : 'bg-[var(--bulletin-card)] text-[var(--bulletin-text)] hover:bg-[var(--bulletin-bg)] hover:-translate-y-0.5'
                   }`}
                 >
-                  {t === 'profile' ? 'Profile Details' : 'Password & Security'}
+                  {t === 'profile' ? 'My Profile' : 'Security'}
                 </button>
               ))}
             </div>
@@ -356,7 +356,7 @@ const ProfilePage: React.FC = () => {
                 className="flex items-center gap-2 px-8 py-3 text-xs font-black uppercase tracking-widest border-2 border-[var(--bulletin-border)] bg-[#fffacd] dark:bg-yellow-900/20 text-[var(--bulletin-text)] shadow-[4px_4px_0_0_var(--bulletin-shadow)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all disabled:opacity-40 group"
               >
                 <Repeat className={`h-4 w-4 group-hover:rotate-180 transition-transform duration-500 ${switchingRole ? 'animate-spin' : ''}`} />
-                {switchingRole ? 'Switching...' : `Switch to ${isSeller ? 'Buyer' : 'Seller'} View`}
+                {switchingRole ? 'Switching...' : `Switch to ${isSeller ? 'Buying' : 'Selling'}`}
               </button>
             )}
           </div>
@@ -380,7 +380,7 @@ const ProfilePage: React.FC = () => {
                     </div>
                   )}
                   <div>
-                    <div className="text-[10px] font-black uppercase tracking-widest opacity-30 text-[var(--bulletin-text)]">Profile ID</div>
+                    <div className="text-[10px] font-black uppercase tracking-widest opacity-30 text-[var(--bulletin-text)]">Student ID</div>
                     <div className="text-sm font-black uppercase tracking-tight truncate text-[var(--bulletin-text)]">{user?.studentId || 'UNK-001'}</div>
                   </div>
                 </div>
@@ -448,7 +448,7 @@ const ProfilePage: React.FC = () => {
                 <div className="border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] p-8 shadow-[6px_6px_0_0_var(--bulletin-shadow)]">
                   <div className="mb-8">
                     <div className="inline-block bg-[#e0f2f7] dark:bg-sky-900/20 border border-[var(--bulletin-border)] px-2 py-0.5 text-[8px] font-black uppercase tracking-widest mb-2 text-black dark:text-white">Section 02</div>
-                    <h3 className="text-2xl font-black uppercase tracking-tighter text-[var(--bulletin-text)]">Campus Credentials</h3>
+                    <h3 className="text-2xl font-black uppercase tracking-tighter text-[var(--bulletin-text)]">Student Info</h3>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -483,7 +483,7 @@ const ProfilePage: React.FC = () => {
                       Section 03
                     </div>
                     <h3 className="text-2xl font-black uppercase tracking-tighter text-[var(--bulletin-text)]">
-                      {isSeller ? 'Store Profile' : 'Contact Details'}
+                      {isSeller ? 'Shop Info' : 'Contact Details'}
                     </h3>
                   </div>
 
@@ -491,7 +491,7 @@ const ProfilePage: React.FC = () => {
                     {isSeller && (
                       <>
                         <div>
-                          <label className={labelBase}>Store Brand Name</label>
+                          <label className={labelBase}>Shop Name</label>
                           <input type="text" className={fieldBase} {...rp('storeName')} />
                         </div>
                         <div>
@@ -522,7 +522,7 @@ const ProfilePage: React.FC = () => {
                     disabled={isUpdating}
                     className="w-full md:w-auto border-4 border-[var(--bulletin-border)] bg-[var(--bulletin-text)] text-[var(--bulletin-bg)] px-10 py-4 text-sm font-black uppercase tracking-widest hover:bg-[#ff6b6b] hover:text-white transition-all shadow-[4px_4px_0_0_rgba(255,107,107,1)] active:translate-y-1 active:shadow-none"
                   >
-                    {isUpdating ? 'Saving...' : 'Update Profile'}
+                    {isUpdating ? 'Saving...' : 'Save Changes'}
                   </button>
                 </div>
               </form>
@@ -586,12 +586,12 @@ const ProfilePage: React.FC = () => {
             <div className="mb-4">
                <Repeat className="h-8 w-8 mb-3" />
                <h2 className="text-xl font-black uppercase tracking-tight">
-                 {isSeller ? 'Switch to Buyer View?' : 'Switch to Seller View?'}
+                 {isSeller ? 'Switch to Buying?' : 'Switch to Selling?'}
                </h2>
                <p className="text-sm opacity-70 mt-2 leading-relaxed">
                  {isSeller 
-                   ? "You'll switch to the buyer dashboard. Your store and active listings remain visible to the community, and you can switch back at any time."
-                   : "You'll switch to the seller dashboard to manage your products, track store analytics, and process orders. You can switch back anytime."}
+                   ? "You'll switch to the buyer dashboard. Your shop and items for sale remain visible to others, and you can switch back at any time."
+                   : "You'll switch to the seller dashboard to manage your products, track sales stats, and process orders. You can switch back anytime."}
                </p>
             </div>
 

@@ -175,13 +175,13 @@ const SellerAnalyticsPage: React.FC = () => {
 
   const STAT_CARDS = [
     {
-      label: 'Total Revenue',
+      label: 'Money Made',
       value: `GHS ${totalRevenue.toFixed(2)}`,
       icon: <DollarSign className="h-5 w-5" />,
       sub: 'Lifetime earnings',
     },
     {
-      label: 'Total Orders',
+      label: 'Total Sales',
       value: totalOrders,
       icon: <ShoppingBag className="h-5 w-5" />,
       sub: 'All time',
@@ -196,19 +196,19 @@ const SellerAnalyticsPage: React.FC = () => {
       label: 'Completed',
       value: completedOrders,
       icon: <CheckCircle className="h-5 w-5" />,
-      sub: `${completionRate}% completion rate`,
+      sub: `${completionRate}% success rate`,
     },
   ];
 
   return (
-    <BulletinLayout title="Analytics" subtitle="Seller" section="16">
+    <BulletinLayout title="My Stats" subtitle="Selling" section="16">
       {/* Stat banner */}
       <div className="border-b border-[var(--bulletin-border)] bg-[#111] dark:bg-[#1a1a1a]">
         <div className="mx-auto max-w-[1400px] px-6 py-8">
           <div className="flex items-end justify-between mb-6">
             <div>
               <p className="text-[9px] font-bold uppercase tracking-[0.35em] text-[#ff6b6b] mb-2">
-                Seller Performance
+                How you're doing
               </p>
               <h2 className="text-2xl font-bold text-white">Overview</h2>
             </div>
@@ -223,7 +223,7 @@ const SellerAnalyticsPage: React.FC = () => {
                 to="/sell"
                 className="bg-white px-4 py-2 text-[10px] font-bold uppercase tracking-[0.14em] text-black transition-colors hover:bg-[#f0f0f0]"
               >
-                + New listing
+                + Add Item
               </Link>
             </div>
           </div>
@@ -260,7 +260,7 @@ const SellerAnalyticsPage: React.FC = () => {
           <div>
             <div className="flex items-end justify-between mb-6">
               <div>
-                <p className={labelBase}>Activity</p>
+                <p className={labelBase}>Recent Sales</p>
                 <div className="mt-1 text-lg font-bold">Recent orders</div>
               </div>
               <Link
@@ -286,9 +286,9 @@ const SellerAnalyticsPage: React.FC = () => {
             ) : orders.length === 0 ? (
               <div className="border border-[var(--bulletin-border)] px-8 py-16 text-center bg-[var(--bulletin-card)]">
                 <BarChart2 className="h-10 w-10 opacity-20 mx-auto mb-4" />
-                <p className="text-sm font-bold uppercase opacity-60">No orders yet</p>
+                <p className="text-sm font-bold uppercase opacity-60">No sales yet</p>
                 <p className="text-xs mt-1 opacity-40">
-                  Orders will appear here once buyers purchase your listings.
+                  Orders will show up here once someone buys your item.
                 </p>
               </div>
             ) : (
@@ -327,19 +327,19 @@ const SellerAnalyticsPage: React.FC = () => {
           {/* Right — listings sidebar */}
           <div>
             <div className="mb-6">
-              <p className={labelBase}>Your listings</p>
-              <div className="mt-1 text-lg font-bold">Active products</div>
+              <p className={labelBase}>Your items</p>
+              <div className="mt-1 text-lg font-bold">Items for sale</div>
             </div>
 
             {listings.length === 0 ? (
               <BulletinCard rotation={0.5} bgColor="bg-[#fffacd] dark:bg-yellow-900/20">
-                <p className="text-[12px]">No listings yet.</p>
+                <p className="text-[12px]">Nothing for sale yet.</p>
                 <Link
                   to="/sell"
                   className="mt-3 inline-flex items-center gap-1.5 border border-[var(--bulletin-border)] bg-[var(--bulletin-text)] px-3 py-1.5 text-[9px] font-bold uppercase text-[var(--bulletin-bg)] transition-colors hover:bg-[var(--bulletin-card)] hover:text-[var(--bulletin-text)]"
                 >
                   <Package className="h-3 w-3" />
-                  Create first
+                  Add first item
                 </Link>
               </BulletinCard>
             ) : (
@@ -373,7 +373,7 @@ const SellerAnalyticsPage: React.FC = () => {
                   to="/my-listings"
                   className="flex items-center justify-center gap-2 border border-[var(--bulletin-border)] py-3 text-[10px] font-bold uppercase hover:bg-[var(--bulletin-card)] transition-colors"
                 >
-                  View all listings →
+                  See all items →
                 </Link>
               </div>
             )}
@@ -382,11 +382,11 @@ const SellerAnalyticsPage: React.FC = () => {
             <BulletinCard rotation={-0.3} bgColor="bg-[var(--bulletin-card)]" className="mt-6">
               <div className="flex items-center gap-2 mb-3">
                 <TrendingUp className="h-4 w-4 opacity-40" />
-                <p className={labelBase}>Completion rate</p>
+                <p className={labelBase}>Success rate</p>
               </div>
               <div className="flex items-end gap-2 mb-3">
                 <span className="text-3xl font-bold">{completionRate}%</span>
-                <span className="text-[11px] opacity-50 mb-1">of orders fulfilled</span>
+                <span className="text-[11px] opacity-50 mb-1">of sales finished</span>
               </div>
               <div className="h-2 bg-[#f0e8f4] dark:bg-purple-900/30 border border-[var(--bulletin-border)]">
                 <div

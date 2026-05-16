@@ -106,13 +106,13 @@ const Dashboard: React.FC = () => {
   /* ── Seller View ── */
   if (isSeller && viewMode === 'seller') {
     return (
-      <BulletinLayout title={`Store Hub: ${user?.name}`} subtitle="Seller Dashboard" section="01">
+      <BulletinLayout title={`My Shop: ${user?.name}`} subtitle="Seller Dashboard" section="01">
         {/* Seller Navigation */}
         <div className="border-b border-black dark:border-white/20 bg-black px-6 py-3 flex justify-between items-center">
           <div className="flex gap-4">
-            <Link to="/sell" className="text-[10px] font-black uppercase text-white hover:text-[#fffacd]">+ New Listing</Link>
-            <Link to="/seller/orders" className="text-[10px] font-black uppercase text-white/60 hover:text-white">Orders</Link>
-            <Link to="/seller/analytics" className="text-[10px] font-black uppercase text-white/60 hover:text-white">Analytics</Link>
+            <Link to="/sell" className="text-[10px] font-black uppercase text-[#ff6b6b] hover:text-[#fffacd]">+ Sell Something</Link>
+            <Link to="/seller/orders" className="text-[10px] font-black uppercase text-[#ff6b6b] hover:text-white">Orders</Link>
+            <Link to="/seller/stats" className="text-[10px] font-black uppercase text-[#ff6b6b] hover:text-white">My Stats</Link>
           </div>
         </div>
 
@@ -131,15 +131,15 @@ const Dashboard: React.FC = () => {
               <div className="text-[10px] uppercase font-bold opacity-40 dark:opacity-70 mb-1">Open Orders</div>
               <div className="text-3xl font-black">{loadingStats ? '...' : (stats?.totalOrders ?? 0)}</div>
             </div>
-            <Link to="/seller/analytics" className="border border-black dark:border-white/20 bg-[#fce4ec] dark:bg-pink-900/20 p-6 shadow-[4px_4px_0_0_var(--bulletin-shadow)] hover:-translate-y-1 transition-transform">
+            <Link to="/seller/stats" className="border border-black dark:border-white/20 bg-[#fce4ec] dark:bg-pink-900/20 p-6 shadow-[4px_4px_0_0_var(--bulletin-shadow)] hover:-translate-y-1 transition-transform">
               <div className="text-[10px] uppercase font-bold opacity-40 dark:opacity-70 mb-1">Total Sales</div>
               <div className="text-3xl font-black">{loadingStats ? '...' : (stats?.totalSales ?? 0)}</div>
             </Link>
           </div>
         </BulletinSection>
 
-        {/* My Listings */}
-        <BulletinSection bgColor="bg-white dark:bg-black/40" title="My Listings" subtitle="Management" action={<Link to="/my-listings" className="text-[11px] underline">Manage all →</Link>}>
+        {/* My Items */}
+        <BulletinSection bgColor="bg-white dark:bg-black/40" title="My Items" subtitle="Management" action={<Link to="/my-listings" className="text-[11px] underline">Manage all →</Link>}>
           {loadingMyListings ? (
             <div className="flex gap-4 overflow-hidden">
               <ProductCardSkeleton />
@@ -149,8 +149,8 @@ const Dashboard: React.FC = () => {
             </div>
           ) : myListings.length === 0 ? (
             <div className="border-2 border-dashed border-black dark:border-white/10 p-12 text-center">
-              <div className="text-[10px] uppercase font-bold opacity-40 dark:opacity-70 mb-2">No active listings</div>
-              <Link to="/sell" className="inline-block border border-black dark:border-white bg-black dark:bg-white text-white dark:text-black px-6 py-3 text-[11px] font-bold uppercase">Create your first listing</Link>
+              <div className="text-[10px] uppercase font-bold opacity-40 dark:opacity-70 mb-2">No items for sale yet</div>
+              <Link to="/sell" className="inline-block border border-black dark:border-white bg-black dark:bg-white text-white dark:text-black px-6 py-3 text-[11px] font-bold uppercase">Sell your first item</Link>
             </div>
           ) : (
             <div className="flex gap-4 overflow-x-auto pb-6 scrollbar-hide">
@@ -169,7 +169,7 @@ const Dashboard: React.FC = () => {
                     <div className="text-base font-black mt-1">GHS {product.price}</div>
                     <div className="mt-2 flex justify-between items-center">
                       <span className={`text-[8px] font-bold uppercase px-1.5 py-0.5 border border-black ${product.status === 'active' ? 'bg-[#fffacd] dark:bg-yellow-900/40 text-black dark:text-yellow-100' : 'bg-[#fce4ec] dark:bg-pink-900/40 text-black dark:text-pink-100'}`}>
-                        {product.status === 'active' ? 'Live' : product.status}
+                        {product.status === 'active' ? 'Available' : product.status}
                       </span>
                       <PenSquare className="h-3 w-3 opacity-30" />
                     </div>
@@ -180,7 +180,7 @@ const Dashboard: React.FC = () => {
           )}
         </BulletinSection>
 
-        {/* Accelerator / Growth Toolkit */}
+        {/* Seller Tools */}
         <BulletinSection bgColor="bg-[#f0e8f4] dark:bg-purple-900/10">
           <div className="grid lg:grid-cols-2 gap-8">
             <BulletinCard rotation={0.3} bgColor="bg-[#e0f2f7] dark:bg-sky-900/20" className="border-4 border-black shadow-[12px_12px_0_0_#000] p-10 h-full flex flex-col">
@@ -188,12 +188,12 @@ const Dashboard: React.FC = () => {
                  <div className="h-12 w-12 border-4 border-black bg-white flex items-center justify-center shadow-[6px_6px_0_0_#000]">
                     <TrendingUp className="h-6 w-6 text-black" />
                  </div>
-                 <div className="text-[12px] font-black uppercase tracking-[0.4em] opacity-40">Accelerator</div>
+                 <div className="text-[12px] font-black uppercase tracking-[0.4em] opacity-40">Sell More</div>
               </div>
-              <h3 className="text-4xl font-black uppercase mb-6 leading-none">Scale Your <br />Storefront.</h3>
-              <p className="text-sm font-bold opacity-60 mb-10 leading-relaxed max-w-md">Access pro-grade marketing tools: Campaigns, Coupons, and Dynamic Bundles designed to maximize your campus reach and conversion.</p>
+              <h3 className="text-4xl font-black uppercase mb-6 leading-none">Grow Your <br />Shop.</h3>
+              <p className="text-sm font-bold opacity-60 mb-10 leading-relaxed max-w-md">Use campus-wide marketing tools: Coupons and Bundles designed to help you sell items faster to other students.</p>
               <div className="mt-auto">
-                <Link to="/seller/growth" className="inline-block border-4 border-black bg-black text-white px-10 py-5 text-[12px] font-black uppercase text-center tracking-[0.2em] hover:bg-[#ff6b6b] transition-all shadow-[8px_8px_0_0_#ff6b6b] hover:translate-y-1 hover:shadow-none">Open Growth Toolkit →</Link>
+                <Link to="/seller/growth" className="inline-block border-4 border-black bg-black text-white px-10 py-5 text-[12px] font-black uppercase text-center tracking-[0.2em] hover:bg-[#ff6b6b] transition-all shadow-[8px_8px_0_0_#ff6b6b] hover:translate-y-1 hover:shadow-none">Open Seller Tools →</Link>
               </div>
             </BulletinCard>
 
@@ -211,7 +211,7 @@ const Dashboard: React.FC = () => {
                     <span className="text-[10px] font-black uppercase tracking-widest opacity-40">Strategy 02</span>
                     <BadgePercent className="h-4 w-4 opacity-20" />
                   </div>
-                  <div className="text-xl font-black uppercase">Loyalty Coupons</div>
+                  <div className="text-xl font-black uppercase">Discount Coupons</div>
                   <p className="text-xs opacity-60 mt-2">Distribute unique codes to drive repeat purchases from buyers.</p>
                </div>
                <div className="border-4 border-black bg-[var(--bulletin-card)] p-6 shadow-[8px_8px_0_0_rgba(0,0,0,0.1)] hover:translate-x-1 transition-transform cursor-pointer">
@@ -219,7 +219,7 @@ const Dashboard: React.FC = () => {
                     <span className="text-[10px] font-black uppercase tracking-widest opacity-40">Strategy 03</span>
                     <Package className="h-4 w-4 opacity-20" />
                   </div>
-                  <div className="text-xl font-black uppercase">Multi-Buy Bundles</div>
+                  <div className="text-xl font-black uppercase">Item Bundles</div>
                   <p className="text-xs opacity-60 mt-2">Create starter packs or clearing-out deals with automatic discounts.</p>
                </div>
             </div>
@@ -239,18 +239,18 @@ const Dashboard: React.FC = () => {
       {/* Switch back to seller if applicable */}
       {isSeller && (
         <div className="bg-[#fffacd] dark:bg-yellow-900/20 border-b border-black dark:border-white/20 px-6 py-2 flex justify-between items-center">
-          <p className="text-[10px] font-bold uppercase tracking-wider">You are in Buyer Mode</p>
+          <p className="text-[10px] font-bold uppercase tracking-wider">You are in Buyer View</p>
           <button
             onClick={() => setViewMode('seller')}
             className="text-[10px] font-black uppercase underline decoration-2 underline-offset-4"
           >
-            Back to Seller Hub →
+            Back to My Shop →
           </button>
         </div>
       )}
 
       {/* Quick Actions */}
-      <BulletinSection bgColor="bg-[#faf8f5] dark:bg-black/20" title="Discovery" subtitle="Quick Links">
+      <BulletinSection bgColor="bg-[#faf8f5] dark:bg-black/20" title="Marketplace" subtitle="Quick Links">
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <Link to="/products" className="group" style={{ transform: 'rotate(-1deg)' }}>
             <div className="border border-black dark:border-white/20 bg-[#fffacd] dark:bg-yellow-900/20 p-6 shadow-[4px_4px_0_0_var(--bulletin-shadow)] hover:shadow-[6px_6px_0_0_var(--bulletin-shadow)] hover:-translate-y-1 transition-all">
@@ -273,7 +273,7 @@ const Dashboard: React.FC = () => {
           <Link to="/messages" className="group" style={{ transform: 'rotate(0.5deg)' }}>
             <div className="border border-black dark:border-white/20 bg-[#f0e8f4] dark:bg-purple-900/20 p-6 shadow-[4px_4px_0_0_var(--bulletin-shadow)] hover:shadow-[6px_6px_0_0_var(--bulletin-shadow)] hover:-translate-y-1 transition-all">
               <Bell className="mb-3 h-5 w-5" />
-              <div className="font-black uppercase tracking-tight">Chat Center</div>
+              <div className="font-black uppercase tracking-tight">Messages</div>
             </div>
           </Link>
         </div>
@@ -367,7 +367,7 @@ const Dashboard: React.FC = () => {
 
       {/* AI Collections */}
       {loadingCollections ? (
-        <BulletinSection title="Curating for you..." subtitle="Section 05">
+        <BulletinSection title="Finding items for you..." subtitle="Section 05">
            <CollectionSkeleton />
            <CollectionSkeleton />
         </BulletinSection>
@@ -389,7 +389,7 @@ const Dashboard: React.FC = () => {
                       </p>
                       <div className="mt-auto pt-4 border-t border-black/5 flex items-center gap-2">
                           <div className="w-8 h-8 rounded-full bg-emerald-500 flex items-center justify-center text-[10px] text-white font-black">AI</div>
-                          <span className="text-[9px] font-black uppercase tracking-widest opacity-40">AI-Powered Curation</span>
+                          <span className="text-[9px] font-black uppercase tracking-widest opacity-40">Smart Suggestions</span>
                       </div>
                     </div>
                 </div>
@@ -473,8 +473,8 @@ const Dashboard: React.FC = () => {
         <BulletinSection bgColor="bg-[#111] dark:bg-[#111]">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-6 py-4 border-l-4 border-[#ff6b6b] pl-8">
             <div>
-              <div className="text-[10px] uppercase tracking-wider text-[#ff6b6b] mb-2 font-black">Passive income?</div>
-              <div className="text-2xl font-black text-white uppercase tracking-tighter">Upgrade to Seller Hub</div>
+              <div className="text-[10px] uppercase tracking-wider text-[#ff6b6b] mb-2 font-black">Want to sell?</div>
+              <div className="text-2xl font-black text-white uppercase tracking-tighter">Become a Seller</div>
               <div className="text-[12px] text-white/50 mt-1 font-mono">List items and reach the whole UMaT community.</div>
             </div>
             <button
@@ -508,24 +508,24 @@ const Dashboard: React.FC = () => {
               <div className="flex gap-6">
                 <div className="flex-shrink-0 w-10 h-10 border-4 border-black dark:border-white/40 bg-[#fffacd] dark:bg-yellow-900/40 flex items-center justify-center font-black text-xl">1</div>
                 <div>
-                  <h4 className="font-black uppercase tracking-tight text-lg">Perspective Switch</h4>
-                  <p className="text-sm opacity-60">We toggle your account to Seller Mode, giving you access to the Store Hub and Analytics.</p>
+                  <h4 className="font-black uppercase tracking-tight text-lg">Become a Seller</h4>
+                  <p className="text-sm opacity-60">We switch your account to Seller View, giving you access to My Shop and Sales Stats.</p>
                 </div>
               </div>
 
               <div className="flex gap-6">
                 <div className="flex-shrink-0 w-10 h-10 border-4 border-black dark:border-white/40 bg-[#e0f2f7] dark:bg-sky-900/40 flex items-center justify-center font-black text-xl">2</div>
                 <div>
-                  <h4 className="font-black uppercase tracking-tight text-lg">Identity Setup</h4>
-                  <p className="text-sm opacity-60">Add your Store Name, Brand, and contact details. This builds trust with UMaT buyers.</p>
+                  <h4 className="font-black uppercase tracking-tight text-lg">Set Up Shop</h4>
+                  <p className="text-sm opacity-60">Add your Shop Name and campus location. This builds trust with other students.</p>
                 </div>
               </div>
 
               <div className="flex gap-6">
                 <div className="flex-shrink-0 w-10 h-10 border-4 border-black dark:border-white/40 bg-black dark:bg-white text-white dark:text-black flex items-center justify-center font-black text-xl">3</div>
                 <div>
-                  <h4 className="font-black uppercase tracking-tight text-lg">Instant Listing</h4>
-                  <p className="text-sm opacity-60">Snap photos, set your price, and list. Your items go live to thousands of students immediately.</p>
+                  <h4 className="font-black uppercase tracking-tight text-lg">Start Selling</h4>
+                  <p className="text-sm opacity-60">Snap photos, set your price, and post. Your items go live for everyone to see.</p>
                 </div>
               </div>
             </div>

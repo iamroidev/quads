@@ -181,7 +181,7 @@ const SettingsPage: React.FC = () => {
                 <span className="opacity-40">/</span>
                 <span className="opacity-100 text-white">Settings</span>
               </nav>
-              <p className="text-[10px] font-black uppercase tracking-[0.35em] text-[#ff6b6b] mb-3">Account Management</p>
+              <p className="text-[10px] font-black uppercase tracking-[0.35em] text-[#ff6b6b] mb-3">Manage Account</p>
               <h1 className="text-4xl font-black uppercase tracking-tight text-white">Preferences</h1>
             </div>
           </div>
@@ -211,7 +211,7 @@ const SettingsPage: React.FC = () => {
           <div>
             <div className="mb-8 border-b-2 border-[var(--bulletin-border)] pb-4">
               <div className={labelBase}>Preferences</div>
-              <h2 className="mt-2 text-2xl font-black uppercase tracking-tight text-[var(--bulletin-text)]">Notification Engine</h2>
+              <h2 className="mt-2 text-2xl font-black uppercase tracking-tight text-[var(--bulletin-text)]">Notification Settings</h2>
             </div>
 
             <p className="text-[12px] font-bold opacity-70 mb-8 max-w-xl text-[var(--bulletin-text)]">
@@ -260,8 +260,8 @@ const SettingsPage: React.FC = () => {
             {/* Push Notifications */}
             <div>
               <div className="mb-8 border-b-2 border-[var(--bulletin-border)] pb-4">
-                <div className={labelBase}>Local Machine</div>
-                <h3 className="mt-2 text-2xl font-black uppercase tracking-tight text-[var(--bulletin-text)]">Push Delivery</h3>
+                <div className={labelBase}>This Device</div>
+                <h3 className="mt-2 text-2xl font-black uppercase tracking-tight text-[var(--bulletin-text)]">Alerts</h3>
               </div>
 
               <BulletinCard rotation={-0.5} bgColor="bg-[#e0f2f7] dark:bg-sky-900/20" className="mb-6 border-2 border-[var(--bulletin-border)] shadow-[8px_8px_0_0_var(--bulletin-shadow)] p-6">
@@ -274,10 +274,10 @@ const SettingsPage: React.FC = () => {
                       <div className="text-[14px] font-black uppercase tracking-tight text-[var(--bulletin-text)]">Browser Push Active</div>
                       <div className={descBase}>
                         {isAdmin
-                          ? 'Maintain real-time situational awareness for platform critical events.'
+                          ? 'Be notified immediately about platform health.'
                           : isSeller
-                          ? 'Maintain real-time situational awareness for incoming sales.'
-                          : 'Receive instant ping on order dispatch and tracking updates.'}
+                          ? 'Be notified immediately when you make a sale.'
+                          : 'Get alerts when your order is sent or updated.'}
                       </div>
                     </div>
                   </div>
@@ -307,7 +307,7 @@ const SettingsPage: React.FC = () => {
           <div>
             <div className="mb-8 border-b-2 border-[var(--bulletin-border)] pb-4">
               <div className={labelBase}>Privacy</div>
-              <h2 className="mt-2 text-2xl font-black uppercase tracking-tight text-[var(--bulletin-text)]">Security Audit</h2>
+              <h2 className="mt-2 text-2xl font-black uppercase tracking-tight text-[var(--bulletin-text)]">Security Settings</h2>
             </div>
 
             <div className="max-w-2xl space-y-8">
@@ -317,9 +317,9 @@ const SettingsPage: React.FC = () => {
                     <Lock className="h-5 w-5 text-[var(--bulletin-text)]" />
                   </div>
                   <div>
-                    <div className="text-[14px] font-black uppercase tracking-tight text-[var(--bulletin-text)]">Access Credentials</div>
+                    <div className="text-[14px] font-black uppercase tracking-tight text-[var(--bulletin-text)]">Login Info</div>
                     <div className={descBase}>
-                      Modify your cryptographic authentication keys from the profile module.
+                      Change your password from your profile.
                     </div>
                     <Link to="/profile" className="mt-4 inline-block border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-text)] px-4 py-2 text-[10px] font-black uppercase tracking-widest text-[var(--bulletin-bg)] transition-all hover:-translate-y-1 shadow-[4px_4px_0_0_var(--bulletin-shadow)]">
                       Change Password →
@@ -334,9 +334,9 @@ const SettingsPage: React.FC = () => {
                     <Shield className="h-5 w-5 text-[var(--bulletin-text)]" />
                   </div>
                   <div>
-                    <div className="text-[14px] font-black uppercase tracking-tight text-[var(--bulletin-text)]">Integrity Protocol</div>
+                    <div className="text-[14px] font-black uppercase tracking-tight text-[var(--bulletin-text)]">Safety Rules</div>
                     <div className={descBase}>
-                      Your ledger is secured via email authentication. Zero third-party telemetry is injected into your operational flow.
+                      Your account is secured. We don't share your data with anyone else.
                     </div>
                   </div>
                 </div>
@@ -348,9 +348,9 @@ const SettingsPage: React.FC = () => {
                     <Smartphone className="h-5 w-5 text-[var(--bulletin-text)]" />
                   </div>
                   <div>
-                    <div className="text-[14px] font-black uppercase tracking-tight text-[var(--bulletin-text)]">Active Session</div>
+                    <div className="text-[14px] font-black uppercase tracking-tight text-[var(--bulletin-text)]">Active Login</div>
                     <div className={descBase}>
-                      You are authenticated on this terminal. Terminate session globally via account settings to force re-authentication.
+                      You are logged in on this device.
                     </div>
                   </div>
                 </div>
@@ -364,7 +364,7 @@ const SettingsPage: React.FC = () => {
           <div>
             <div className="mb-8 border-b-2 border-[var(--bulletin-border)] pb-4">
               <div className={labelBase}>Danger Zone</div>
-              <h2 className="mt-2 text-2xl font-black uppercase tracking-tight text-red-600 dark:text-red-400">Account Termination</h2>
+              <h2 className="mt-2 text-2xl font-black uppercase tracking-tight text-red-600 dark:text-red-400">Delete Account</h2>
             </div>
 
             <BulletinCard rotation={0.5} bgColor="bg-[#fce4ec] dark:bg-red-900/20" className="max-w-xl border-4 border-red-600 dark:border-red-400 shadow-[12px_12px_0_0_rgba(220,38,38,0.5)] p-8">
@@ -373,9 +373,9 @@ const SettingsPage: React.FC = () => {
                   <AlertTriangle className="h-6 w-6" />
                 </div>
                 <div>
-                  <div className="text-[16px] font-black uppercase tracking-tight text-red-600 dark:text-red-400">Permanent Erasure</div>
+                  <div className="text-[16px] font-black uppercase tracking-tight text-red-600 dark:text-red-400">Delete Account</div>
                   <div className="text-[12px] font-bold opacity-80 mt-2 text-red-600/80 dark:text-red-400/80 leading-relaxed">
-                    Executing this command will irreversibly wipe all operational data, listings, and transaction history. Recovery is impossible.
+                    Doing this will remove all your account data, items, and history. You cannot get it back.
                   </div>
                 </div>
               </div>
@@ -386,11 +386,11 @@ const SettingsPage: React.FC = () => {
                   className="w-full border-4 border-red-600 dark:border-red-400 bg-transparent px-6 py-4 text-[12px] font-black uppercase tracking-widest text-red-600 dark:text-red-400 hover:bg-red-600 hover:text-white dark:hover:bg-red-400 dark:hover:text-black transition-all"
                 >
                   <Trash2 className="inline-block h-4 w-4 mr-2" />
-                  Initiate Deletion
+                  Start Deletion
                 </button>
               ) : (
                 <div className="space-y-4 border-t-2 border-red-600/20 dark:border-red-400/20 pt-6 mt-6">
-                  <p className="text-[11px] font-black uppercase tracking-widest text-red-600 dark:text-red-400">Type DELETE to confirm authorization</p>
+                  <p className="text-[11px] font-black uppercase tracking-widest text-red-600 dark:text-red-400">Type DELETE to confirm</p>
                   <input
                     type="text"
                     value={deleteConfirmation}
@@ -410,7 +410,7 @@ const SettingsPage: React.FC = () => {
                       disabled={deleteConfirmation !== 'DELETE' || deleting}
                       className="flex-1 border-4 border-red-600 dark:border-red-400 bg-red-600 dark:bg-red-400 px-4 py-4 text-[11px] font-black uppercase tracking-widest text-white dark:text-black transition-colors hover:bg-red-700 dark:hover:bg-red-300 disabled:opacity-40"
                     >
-                      {deleting ? 'Executing...' : 'Confirm Purge'}
+                      {deleting ? 'Deleting...' : 'Delete Now'}
                     </button>
                   </div>
                 </div>

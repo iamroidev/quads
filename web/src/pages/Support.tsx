@@ -15,11 +15,11 @@ const ARTICLES = {
   help: [
     {
       title: 'Getting Started with QUADS',
-      content: 'Welcome to the official QUADS platform for UMaT. Use your institutional email (@st.umat.edu.gh) to register. After login, visit the Security Center to verify your identity. You can browse listings on the Board or switch to Seller Mode to manage your own store.'
+      content: 'Welcome to the official QUADS platform for UMaT. Use your institutional email (@st.umat.edu.gh) to register. After login, visit the Security Center to verify your account. You can browse listings on the Board or switch to Seller mode to manage your own store.'
     },
     {
       title: 'Safe Buying Guide',
-      content: 'Message sellers directly via Chat. All meetups must happen on campus (e.g., Library foyer or Student Center). Use our protected payment system; funds are held in escrow until you confirm receipt of the item.'
+      content: 'Message sellers directly via Chat. All meetups must happen on campus (e.g., Library foyer or Student Center). Use our secure payment system; funds are held until you confirm receipt of the item.'
     },
     {
       title: 'Selling and Store Management',
@@ -28,8 +28,8 @@ const ARTICLES = {
   ],
   safety: [
     {
-      title: 'Escrow and Payment Security',
-      content: 'Our Escrow system holds buyer funds until the transaction is complete. NEVER pay via direct MoMo transfer outside the platform or pay "commitment fees" in advance. Report any user asking for external payments.'
+      title: 'Payment Safety',
+      content: 'Our secure payment system holds buyer funds until the transaction is complete. NEVER pay via direct MoMo transfer outside the platform or pay "advance money" in advance. Report any user asking for external payments.'
     },
     {
       title: 'Inspection Checklist',
@@ -64,7 +64,7 @@ const Support: React.FC = () => {
   const hasNoResults = filteredHelp.length === 0 && filteredSafety.length === 0;
 
   return (
-    <BulletinLayout title="Support" subtitle="Documentation" section="00" hideBreadcrumbs={true}>
+    <BulletinLayout title="Support" subtitle="Help Guides" section="00" hideBreadcrumbs={true}>
       
       {/* Hero / Search */}
       <BulletinSection bgColor="bg-[var(--bulletin-bg)]">
@@ -83,9 +83,9 @@ const Support: React.FC = () => {
               </div>
               <div className="mt-8 flex flex-wrap gap-6 text-[12px] font-black uppercase tracking-widest opacity-60 text-[var(--bulletin-text)]">
                 <span>Quick Links:</span>
-                <a href="#help" className="underline decoration-2 underline-offset-4 hover:opacity-100 transition-all">Help Center</a>
-                <a href="#safety" className="underline decoration-2 underline-offset-4 hover:opacity-100 transition-all">Safety Center</a>
-                <Link to="/contact" className="underline decoration-2 underline-offset-4 hover:opacity-100 transition-all flex items-center gap-2">
+                <a href="#help" className="underline decoration-2 underline-offset-4 hover:text-[#ff6b6b] transition-all">Help Center</a>
+                <a href="#safety" className="underline decoration-2 underline-offset-4 hover:text-[#ff6b6b] transition-all">Safety Center</a>
+                <Link to="/contact" className="underline decoration-2 underline-offset-4 hover:text-[#ff6b6b] transition-all flex items-center gap-2">
                   Contact Support <ArrowRight className="h-4 w-4" />
                 </Link>
               </div>
@@ -97,7 +97,7 @@ const Support: React.FC = () => {
                 <h3 className="text-xl font-black uppercase tracking-tight mb-4 text-sky-900 dark:text-sky-200">Official Protocols</h3>
                 <p className="text-[13px] font-bold opacity-60 mb-6 leading-tight text-sky-900 dark:text-sky-200">Read our community guidelines and safety documentation to ensure secure transactions.</p>
                 <Link to="/terms" className="w-full inline-block border-2 border-black bg-black text-white py-3 text-center text-[11px] font-black uppercase tracking-widest hover:bg-white hover:text-black transition-all">
-                  Read Protocols →
+                  Read Rules →
                 </Link>
               </div>
             </div>
@@ -145,7 +145,7 @@ const Support: React.FC = () => {
         </div>
       </BulletinSection>
 
-      <BulletinSection title="Safety Center" subtitle="Secure Transactions" id="safety" bgColor="bg-[var(--bulletin-card)] border-t-4 border-[var(--bulletin-border)]">
+      <BulletinSection title="Safety Center" subtitle="Safe Trading" id="safety" bgColor="bg-[var(--bulletin-card)] border-t-4 border-[var(--bulletin-border)]">
         <div className="space-y-6">
           {filteredSafety.map((art, i) => (
             <div key={i} className="border-4 border-[var(--bulletin-border)] bg-[#e0f2f7] dark:bg-sky-900/40 shadow-[8px_8px_0_0_var(--bulletin-shadow)] transition-all hover:translate-x-1 hover:translate-y-1 hover:shadow-[4px_4px_0_0_var(--bulletin-shadow)]">
@@ -171,20 +171,20 @@ const Support: React.FC = () => {
         </div>
       </BulletinSection>
 
-      <BulletinSection title="Legal Statement" subtitle="Terms of Use" id="legal" bgColor="bg-[#fffacd] dark:bg-yellow-900/20 border-t-4 border-[var(--bulletin-border)]">
+      <BulletinSection title="Policies" subtitle="Terms of Use" id="legal" bgColor="bg-[#fffacd] dark:bg-yellow-900/20 border-t-4 border-[var(--bulletin-border)]">
         <div className="border-4 border-[var(--bulletin-border)] bg-[var(--bulletin-bg)] p-8 md:p-12 shadow-[12px_12px_0_0_var(--bulletin-shadow)]" style={{ transform: 'rotate(-0.5deg)' }}>
           <div className="max-w-3xl">
-            <h4 className="text-3xl font-black uppercase tracking-tighter mb-6 text-[var(--bulletin-text)]">Platform Policy</h4>
+            <h4 className="text-3xl font-black uppercase tracking-tighter mb-6 text-[var(--bulletin-text)]">Market Rules</h4>
             <div className="space-y-6 text-[14px] font-bold leading-relaxed text-[var(--bulletin-text)] opacity-80">
-              <p>QUADS is a community-driven platform for UMaT students. We provide the infrastructure for campus commerce but do not take ownership of listed items.</p>
+              <p>QUADS is a community-driven platform for UMaT students. We provide the tools for campus commerce but do not take ownership of listed items.</p>
               <p>Users are responsible for their own safety during meetups. Always meet in public, well-lit campus areas.</p>
-              <p>Prohibited items include: Alcohol, Tobacco, Weapons, Academic Dishonesty services, and anything illegal under Ghanaian law.</p>
+              <p>Things you can't sell: Alcohol, Tobacco, Weapons, Academic Dishonesty services, and anything illegal under Ghanaian law.</p>
             </div>
             <div className="mt-12 flex gap-8 border-t-4 border-[var(--bulletin-border)] pt-8">
-              <Link to="/terms" className="text-[12px] font-black uppercase tracking-widest underline decoration-2 underline-offset-4 flex items-center gap-2 text-[var(--bulletin-text)] hover:opacity-70 transition-opacity">
+              <Link to="/terms" className="text-[12px] font-black uppercase tracking-widest underline decoration-2 underline-offset-4 flex items-center gap-2 text-[var(--bulletin-text)] hover:text-[#ff6b6b] transition-opacity">
                 Terms of Service <ExternalLink className="h-4 w-4" />
               </Link>
-              <Link to="/terms#privacy" className="text-[12px] font-black uppercase tracking-widest underline decoration-2 underline-offset-4 flex items-center gap-2 text-[var(--bulletin-text)] hover:opacity-70 transition-opacity">
+              <Link to="/terms#privacy" className="text-[12px] font-black uppercase tracking-widest underline decoration-2 underline-offset-4 flex items-center gap-2 text-[var(--bulletin-text)] hover:text-[#ff6b6b] transition-opacity">
                 Privacy Policy <ExternalLink className="h-4 w-4" />
               </Link>
             </div>

@@ -74,7 +74,7 @@ const Orders: React.FC = () => {
   };
 
   return (
-    <BulletinLayout title="My Orders" subtitle="Purchases" section="05">
+    <BulletinLayout title="My Orders" subtitle="Orders" section="05">
       <BulletinSection bgColor="bg-[var(--bulletin-bg)]">
         {/* Status tabs */}
         <div className="flex gap-0 overflow-x-auto mb-6 border-b border-[var(--bulletin-border)] scrollbar-hide">
@@ -96,14 +96,14 @@ const Orders: React.FC = () => {
         {/* Orders list */}
         {loading ? (
           <div className="flex justify-center py-20">
-            <LoadingSpinner text="Fetching your purchases..." />
+            <LoadingSpinner text="Loading your orders..." />
           </div>
         ) : orders.length === 0 ? (
           <BulletinEmptyState
-            title={statusFilter ? `No ${statusFilter} orders` : "Order Inventory Empty"}
+            title={statusFilter ? `No ${statusFilter} orders` : "No Orders Yet"}
             message={statusFilter 
               ? `You don't have any purchases currently in ${statusFilter} status.` 
-              : "The manifest shows no past acquisitions. Browse the marketplace to acquire resources."
+              : "You haven't bought anything yet. Browse the marketplace to find items you need."
             }
             icon={<ShoppingBag className="h-12 w-12 opacity-20" />}
             action={
@@ -146,7 +146,7 @@ const Orders: React.FC = () => {
                             {item?.title || 'Unknown Product'}
                           </div>
                           <div className="text-[10px] font-bold opacity-40 mt-1 text-[var(--bulletin-text)]">
-                            ID: {order.orderNumber} &middot; STORE: {(order.seller as any).storeName || (order.seller as any).brandName || order.seller.name}
+                            ID: {order.orderNumber} &middot; SHOP: {(order.seller as any).storeName || (order.seller as any).brandName || order.seller.name}
                           </div>
                         </div>
                         <ChevronRight className="h-5 w-5 opacity-20 flex-shrink-0 mt-0.5 text-[var(--bulletin-text)]" />

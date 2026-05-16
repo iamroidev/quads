@@ -280,7 +280,7 @@ const MyListings: React.FC = () => {
   };
 
   return (
-    <BulletinLayout title="My Listings" subtitle="Seller" section="04">
+    <BulletinLayout title="My Items" subtitle="Selling" section="04">
       {/* Action bar */}
       <div className="border-b border-[var(--bulletin-border)] bg-[var(--bulletin-bg)] p-4 md:p-6">
         <div className="mx-auto max-w-[1400px]">
@@ -323,14 +323,14 @@ const MyListings: React.FC = () => {
                 className="border border-[var(--bulletin-border)] bg-[var(--bulletin-card)] px-3 py-1.5 text-[10px] font-bold uppercase shadow-[2px_2px_0_0_var(--bulletin-shadow)] transition-all hover:shadow-[3px_3px_0_0_var(--bulletin-shadow)]"
               >
                 <BarChart3 className="inline-block h-3 w-3 mr-1" />
-                Analytics
+                My Stats
               </Link>
               <Link
                 to="/sell"
                 className="border border-[var(--bulletin-border)] bg-[var(--bulletin-text)] px-4 py-1.5 text-[10px] font-bold uppercase text-[var(--bulletin-bg)] shadow-[2px_2px_0_0_var(--bulletin-shadow)] transition-all hover:bg-[var(--bulletin-card)] hover:text-[var(--bulletin-text)]"
               >
                 <Plus className="inline-block h-3 w-3 mr-1" />
-                New Listing
+                Sell Something
               </Link>
             </div>
           </div>
@@ -343,9 +343,9 @@ const MyListings: React.FC = () => {
           <div className="mb-6 flex flex-col sm:flex-row items-start sm:items-center gap-3 border-2 border-[var(--bulletin-border)] bg-[#fce4ec] dark:bg-red-900/20 p-4 shadow-[4px_4px_0_0_var(--bulletin-shadow)]">
             <ShieldOff className="h-5 w-5 flex-shrink-0 opacity-60" />
             <div className="flex-1">
-              <div className="text-[11px] font-bold uppercase tracking-wider">Verification required to list items</div>
+              <div className="text-[11px] font-bold uppercase tracking-wider">Verify your account to sell</div>
               <div className="text-[11px] opacity-70 mt-0.5">
-                Verify your <strong>email</strong> or <strong>phone</strong> before creating active listings. Existing drafts are safe.
+                Verify your <strong>email</strong> or <strong>phone</strong> before you can sell. Your drafts are still here.
               </div>
             </div>
             <button
@@ -452,7 +452,7 @@ const MyListings: React.FC = () => {
               <div className="flex items-center justify-between mb-4 border-b border-[var(--bulletin-border)] pb-3">
                 <div>
                   <div className="text-[10px] uppercase tracking-wider opacity-60">CSV Preview</div>
-                  <div className="text-lg font-bold mt-1">Import summary</div>
+                  <div className="text-lg font-bold mt-1">Check items</div>
                 </div>
                 <button
                   onClick={() => { setPreviewingCSV(false); setCsvPreview(null); setPendingCSVFile(null); }}
@@ -468,14 +468,14 @@ const MyListings: React.FC = () => {
                 </div>
                 <div className="border border-[var(--bulletin-border)] bg-[var(--bulletin-card)] p-3 shadow-[2px_2px_0_0_var(--bulletin-shadow)]">
                   <div className="text-[10px] opacity-60 uppercase tracking-wider">Rows</div>
-                  <div className="text-[12px] font-bold mt-1">{csvPreview.totalRows}</div>
+                  <div className="text-[12px] font-bold mt-1">{csvPreview.totalRows} items</div>
                 </div>
                 <div className="border border-[var(--bulletin-border)] bg-[#fffacd] dark:bg-yellow-900/30 p-3 shadow-[2px_2px_0_0_var(--bulletin-shadow)]">
-                  <div className="text-[10px] opacity-60 uppercase tracking-wider">Valid</div>
+                  <div className="text-[10px] opacity-60 uppercase tracking-wider">Ready to import</div>
                   <div className="text-[12px] font-bold mt-1">{csvPreview.estimatedValid}</div>
                 </div>
                 <div className="border border-[var(--bulletin-border)] bg-[#fce4ec] dark:bg-red-900/30 p-3 shadow-[2px_2px_0_0_var(--bulletin-shadow)]">
-                  <div className="text-[10px] opacity-60 uppercase tracking-wider">Invalid</div>
+                  <div className="text-[10px] opacity-60 uppercase tracking-wider">Has errors</div>
                   <div className="text-[12px] font-bold mt-1">{csvPreview.estimatedInvalid}</div>
                 </div>
               </div>
@@ -533,8 +533,8 @@ const MyListings: React.FC = () => {
               </div>
               <div className="text-[12px] mb-6">
                 {confirmDelete.mode === 'single'
-                  ? 'Delete this listing permanently?'
-                  : `Delete ${confirmDelete.count || selectedIds.length} selected listings permanently?`}
+                  ? 'Delete this item forever?'
+                  : `Delete these ${confirmDelete.count || selectedIds.length} items forever?`}
               </div>
               <div className="flex items-center justify-end gap-2">
                 <button
@@ -566,10 +566,10 @@ const MyListings: React.FC = () => {
           <LoadingSpinner text="Loading your listings..." />
         ) : products.length === 0 ? (
           <BulletinEmptyState
-            title={statusFilter ? `No ${statusFilter} listings` : "No Listings Yet"}
+            title={statusFilter ? `No ${statusFilter} items` : "Nothing for Sale Yet"}
             message={statusFilter 
               ? `You don't have any items currently marked as ${statusFilter}.` 
-              : "Your shop is looking a bit quiet. Start selling by creating your first listing."
+              : "You haven't listed anything yet. Start selling by adding your first item."
             }
             icon={<Package className="h-12 w-12 opacity-20" />}
             action={
@@ -578,7 +578,7 @@ const MyListings: React.FC = () => {
                 className="inline-block border border-[var(--bulletin-border)] bg-[var(--bulletin-text)] px-8 py-3 text-[10px] font-bold uppercase text-[var(--bulletin-bg)] transition-all hover:-translate-y-1 shadow-[4px_4px_0_0_var(--bulletin-shadow)]"
               >
                 <Plus className="inline-block h-3 w-3 mr-2" />
-                Create Listing
+                Add Item
               </Link>
             }
           />
@@ -649,7 +649,7 @@ const MyListings: React.FC = () => {
                           className="border border-[var(--bulletin-border)] bg-[#fffacd] dark:bg-yellow-900/30 px-2 py-1 text-[8px] font-bold uppercase shadow-[1px_1px_0_0_var(--bulletin-shadow)] disabled:opacity-40 transition-all hover:shadow-[2px_2px_0_0_var(--bulletin-shadow)]"
                         >
                           <Zap className="inline-block h-2.5 w-2.5 mr-0.5" />
-                          {boostingId === product._id ? '...' : 'Boost'}
+                          {boostingId === product._id ? '...' : 'Promote'}
                         </button>
                       )}
                       <Link
@@ -701,7 +701,7 @@ const MyListings: React.FC = () => {
                                   className="w-full text-left px-3 py-1.5 text-[10px] font-bold uppercase hover:bg-[#fffacd] dark:hover:bg-yellow-900/30 disabled:opacity-40"
                                 >
                                   <Zap className="inline-block h-3 w-3 mr-1" />
-                                  {boostingId === product._id ? 'Requesting...' : 'Request Boost'}
+                                  {boostingId === product._id ? 'Requesting...' : 'Promote Item'}
                                 </button>
                               )}
                               <button
@@ -709,7 +709,7 @@ const MyListings: React.FC = () => {
                                 className="w-full text-left px-3 py-1.5 text-[10px] font-bold uppercase hover:bg-[#e0f2f7] dark:hover:bg-sky-900/30 flex items-center gap-1"
                               >
                                 <Copy className="h-3 w-3" />
-                                Duplicate
+                                Copy
                               </button>
                               <div className="border-t border-[var(--bulletin-border)] my-1" />
                               <button

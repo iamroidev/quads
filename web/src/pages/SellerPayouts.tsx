@@ -38,7 +38,7 @@ const SellerPayouts: React.FC = () => {
   };
 
   return (
-    <BulletinLayout title="Earnings" subtitle="Payout Registry" section="19">
+    <BulletinLayout title="Earnings" subtitle="Payment History" section="19">
       {/* Overview stats */}
       <div className="border-b border-black dark:border-white/20 bg-black py-10 px-6">
         <div className="max-w-[1400px] mx-auto">
@@ -46,21 +46,21 @@ const SellerPayouts: React.FC = () => {
             <div className="bg-[#fffdf8] p-6 border-4 border-[#ff6b6b] shadow-[8px_8px_0_0_#ff6b6b]">
               <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest opacity-40 mb-2">
                 <TrendingUp className="h-3 w-3" />
-                Lifetime Revenue
+                Total Earned
               </div>
               <div className="text-4xl font-black text-black">GHS {stats.totalPaid.toFixed(2)}</div>
             </div>
             <div className="bg-[#fffdf8] p-6 border-4 border-black shadow-[8px_8px_0_0_rgba(0,0,0,0.2)]">
               <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest opacity-40 mb-2">
                 <Clock className="h-3 w-3" />
-                Awaiting Clearing
+                Pending
               </div>
               <div className="text-4xl font-black text-black">GHS {stats.pending.toFixed(2)}</div>
             </div>
             <div className="bg-[#fffdf8] p-6 border-4 border-black shadow-[8px_8px_0_0_rgba(0,0,0,0.2)]">
               <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest opacity-40 mb-2">
                 <CreditCard className="h-3 w-3" />
-                Settlements
+                Payments
               </div>
               <div className="text-4xl font-black text-black">{stats.count}</div>
             </div>
@@ -72,8 +72,8 @@ const SellerPayouts: React.FC = () => {
         <div className="max-w-[1400px] mx-auto">
           <div className="mb-8 flex items-end justify-between">
             <div>
-              <h3 className="text-2xl font-black uppercase tracking-tighter">Transaction Ledger</h3>
-              <p className="text-[11px] font-bold opacity-40 uppercase tracking-widest mt-1">Automatic disbursement history</p>
+              <h3 className="text-2xl font-black uppercase tracking-tighter">Payment History</h3>
+              <p className="text-[11px] font-bold opacity-40 uppercase tracking-widest mt-1">History of money sent to you</p>
             </div>
             <div className="bg-[#fffacd] px-3 py-1 border-2 border-black text-[9px] font-black uppercase">
               Schedule: Every 15 mins
@@ -140,9 +140,9 @@ const SellerPayouts: React.FC = () => {
                  <ArrowUpRight className="h-5 w-5 text-white" />
                </div>
                <div>
-                 <h4 className="text-sm font-black uppercase">About Settlements</h4>
+                 <h4 className="text-sm font-black uppercase">About Payments</h4>
                  <p className="text-xs opacity-60 mt-2 leading-relaxed max-w-2xl">
-                   QUADS uses an automated settlement engine. Funds are typically held for a short clearing period to ensure buyer satisfaction. Once cleared, they are automatically disbursed to your chosen <strong>{user?.sellerOnboarding?.payoutProvider || 'account'}</strong>.
+                   QUADS uses an automated system. Funds are typically held for a short waiting period to ensure buyer satisfaction. Once ready, they are automatically sent to your chosen <strong>{user?.sellerOnboarding?.payoutProvider || 'account'}</strong>.
                  </p>
                </div>
              </div>

@@ -27,12 +27,12 @@ import { BulletinLayout, BulletinSection, BulletinCard } from '../components/lay
 type AdminTab = 'overview' | 'users' | 'products' | 'orders' | 'disputes' | 'ops' | 'payouts';
 
 const TABS: { value: AdminTab; label: string }[] = [
-  { value: 'overview', label: 'Overview' },
+  { value: 'overview', label: 'Summary' },
   { value: 'users', label: 'Users' },
   { value: 'products', label: 'Products' },
   { value: 'orders', label: 'Orders' },
   { value: 'disputes', label: 'Disputes' },
-  { value: 'ops', label: 'Ops' },
+  { value: 'ops', label: 'System Logs' },
   { value: 'payouts', label: 'Payouts' },
 ];
 
@@ -145,7 +145,7 @@ const AdminDashboard: React.FC = () => {
     try {
       const res = await orderService.runAutomationSweep();
       if (res.success) {
-        toast.success(`Sweep done: ${res.data.abandonedCheckoutCount} abandoned + ${res.data.inventoryLowAlertCount} low-stock alerts`);
+        toast.success(`Clean up done: ${res.data.abandonedCheckoutCount} abandoned + ${res.data.inventoryLowAlertCount} low-stock alerts`);
       }
     } catch {
       toast.error('Failed to run automation sweep');
@@ -378,11 +378,11 @@ const AdminDashboard: React.FC = () => {
 
   if (loading) {
     return (
-      <BulletinLayout title="Central Command" subtitle="System Administration" section="18">
+      <BulletinLayout title="System Control" subtitle="Settings" section="18">
         <BulletinSection bgColor="bg-[var(--bulletin-bg)]">
           <div className="flex flex-col items-center justify-center py-32">
             <div className="h-12 w-12 border-4 border-black border-t-[#ff6b6b] animate-spin mb-4" />
-            <div className="text-[10px] font-black uppercase tracking-[0.3em] opacity-40">Accessing Data...</div>
+            <div className="text-[10px] font-black uppercase tracking-[0.3em] opacity-40">Loading...</div>
           </div>
         </BulletinSection>
       </BulletinLayout>
@@ -390,7 +390,7 @@ const AdminDashboard: React.FC = () => {
   }
 
   return (
-    <BulletinLayout title="Central Command" subtitle="Administration" section="18">
+    <BulletinLayout title="System Control" subtitle="Settings" section="18">
       {/* Tab bar */}
       <div className="border-b-4 border-black bg-[var(--bulletin-card)] sticky top-[72px] z-50">
         <div className="mx-auto max-w-[1400px] px-6 md:px-12">
@@ -439,11 +439,11 @@ const AdminDashboard: React.FC = () => {
                   <div className="flex items-center justify-between border-b-2 border-black/10 px-6 py-5 bg-[#faf8f5] dark:bg-black/20">
                     <div>
                       <p className="text-[10px] font-black uppercase tracking-widest opacity-40 text-black dark:text-white">Moderation Queue</p>
-                      <div className="mt-1 text-sm font-black uppercase text-black dark:text-white">Flagged Listings</div>
+                      <div className="mt-1 text-sm font-black uppercase text-black dark:text-white">Flagged Items</div>
                     </div>
                     <div className="flex gap-3">
                       <button onClick={runAutomationSweep} disabled={runningAutomation} className="border-2 border-black bg-black text-white px-3 py-1.5 text-[9px] font-black uppercase hover:bg-[#ff6b6b] transition-all disabled:opacity-20">
-                        {runningAutomation ? '...' : 'Sweep'}
+                        {runningAutomation ? '...' : 'Clean'}
                       </button>
                       <button onClick={fetchModerationQueue} className="border-2 border-black bg-white text-black px-3 py-1.5 text-[9px] font-black uppercase hover:bg-[#fffacd] transition-all">
                         Refresh
@@ -452,7 +452,7 @@ const AdminDashboard: React.FC = () => {
                   </div>
                   <div className="divide-y-2 divide-black/5 max-h-[400px] overflow-auto">
                     {moderationQueue.products.length === 0 ? (
-                      <p className="p-8 text-[12px] font-bold opacity-30 text-center uppercase tracking-widest">Board is Clean</p>
+                      <p className="p-8 text-[12px] font-bold opacity-30 text-center uppercase tracking-widest">Everything is fine</p>
                     ) : moderationQueue.products.map((product) => (
                       <div key={product._id} className="p-6 hover:bg-black/5 transition-colors">
                         <div className="flex items-start justify-between gap-4">
@@ -482,7 +482,7 @@ const AdminDashboard: React.FC = () => {
                 <BulletinCard rotation={0.3} className="!p-0 border-2">
                   <div className="border-b-2 border-black/10 px-6 py-5 bg-[#e0f2f7] dark:bg-sky-900/20">
                     <p className="text-[10px] font-black uppercase tracking-widest opacity-40 text-sky-900 dark:text-sky-200">Open Disputes</p>
-                    <div className="mt-1 text-sm font-black uppercase text-sky-900 dark:text-sky-200">System Conflicts</div>
+                    <div className="mt-1 text-sm font-black uppercase text-sky-900 dark:text-sky-200">Student Problems</div>
                   </div>
                   <div className="divide-y-2 divide-black/5 max-h-[400px] overflow-auto">
                     {moderationQueue.disputes.length === 0 ? (
@@ -517,8 +517,8 @@ const AdminDashboard: React.FC = () => {
           <div className="space-y-8">
             <div className="flex flex-col md:flex-row gap-6 md:items-center md:justify-between">
               <div>
-                <h3 className="text-2xl font-black uppercase tracking-tighter text-[var(--bulletin-text)]">Identity Registry</h3>
-                <p className="text-[12px] font-bold opacity-40 text-[var(--bulletin-text)] uppercase tracking-widest">Manage Community Access</p>
+                <h3 className="text-2xl font-black uppercase tracking-tighter text-[var(--bulletin-text)]">User List</h3>
+                <p className="text-[12px] font-bold opacity-40 text-[var(--bulletin-text)] uppercase tracking-widest">Manage community access</p>
               </div>
               <div className="flex gap-4 w-full md:w-auto">
                 <div className="relative flex-1 md:w-80">
@@ -531,7 +531,7 @@ const AdminDashboard: React.FC = () => {
                   />
                 </div>
                 <button onClick={fetchUsers} className="border-4 border-black bg-black text-white px-6 py-3 text-[12px] font-black uppercase hover:bg-[#ff6b6b] transition-all">
-                  Query
+                  Search
                 </button>
               </div>
             </div>
@@ -563,7 +563,7 @@ const AdminDashboard: React.FC = () => {
                         disabled={busyId === user._id} 
                         className={`border-4 border-black px-4 py-2 text-[10px] font-black uppercase transition-all disabled:opacity-20 ${user.isVerified ? 'bg-white text-black' : 'bg-[#fffacd] text-black'}`}
                       >
-                        {busyId === user._id ? '...' : user.isVerified ? 'Revoke Trust' : 'Verify Shop'}
+                        {busyId === user._id ? '...' : user.isVerified ? 'Remove Verify' : 'Verify Shop'}
                       </button>
                     )}
                     <button 
@@ -585,8 +585,8 @@ const AdminDashboard: React.FC = () => {
           <div className="space-y-8">
             <div className="flex flex-col md:flex-row gap-6 md:items-center md:justify-between">
               <div>
-                <h3 className="text-2xl font-black uppercase tracking-tighter text-[var(--bulletin-text)]">Manifest Review</h3>
-                <p className="text-[12px] font-bold opacity-40 text-[var(--bulletin-text)] uppercase tracking-widest">Audit Active Board Listings</p>
+                <h3 className="text-2xl font-black uppercase tracking-tighter text-[var(--bulletin-text)]">Check Items</h3>
+                <p className="text-[12px] font-bold opacity-40 text-[var(--bulletin-text)] uppercase tracking-widest">Look at active items</p>
               </div>
               <div className="flex gap-4 w-full md:w-auto">
                 <input 
@@ -596,7 +596,7 @@ const AdminDashboard: React.FC = () => {
                   className="w-full md:w-80 border-4 border-black bg-[var(--bulletin-card)] p-3 text-[13px] font-black focus:outline-none text-[var(--bulletin-text)]" 
                 />
                 <button onClick={fetchProducts} className="border-4 border-black bg-black text-white px-6 py-3 text-[12px] font-black uppercase hover:bg-[#ff6b6b] transition-all">
-                  Query
+                  Search
                 </button>
               </div>
             </div>
@@ -657,11 +657,11 @@ const AdminDashboard: React.FC = () => {
           <div className="space-y-8">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="text-2xl font-black uppercase tracking-tighter text-[var(--bulletin-text)]">Tribunal Console</h3>
-                <p className="text-[12px] font-bold opacity-40 text-[var(--bulletin-text)] uppercase tracking-widest">Adjudicate Member Conflicts</p>
+                <h3 className="text-2xl font-black uppercase tracking-tighter text-[var(--bulletin-text)]">Conflict Resolver</h3>
+                <p className="text-[12px] font-bold opacity-40 text-[var(--bulletin-text)] uppercase tracking-widest">Fix student problems</p>
               </div>
               <button onClick={fetchDisputes} className="border-4 border-black bg-[var(--bulletin-card)] text-[var(--bulletin-text)] px-6 py-3 text-[11px] font-black uppercase hover:bg-[#fffacd] transition-all shadow-[6px_6px_0_0_var(--bulletin-shadow)]">
-                Sync Data
+                Sync
               </button>
             </div>
 
@@ -703,7 +703,7 @@ const AdminDashboard: React.FC = () => {
 
                       {dispute.adminNote && (
                         <div className="mb-8 p-4 bg-[#fffacd] dark:bg-yellow-900/20 border-2 border-black">
-                          <p className="text-[9px] font-black uppercase tracking-[0.2em] text-black dark:text-yellow-200 mb-2">Internal Admin Ledger</p>
+                          <p className="text-[9px] font-black uppercase tracking-[0.2em] text-black dark:text-yellow-200 mb-2">Secret Note</p>
                           <p className="text-[12px] font-bold text-black dark:text-white">{dispute.adminNote}</p>
                         </div>
                       )}
@@ -723,7 +723,7 @@ const AdminDashboard: React.FC = () => {
                       onClick={() => { setSelectedDispute(dispute); setDisputeStatus(dispute.status); setAdminNote(dispute.adminNote || ''); }}
                       className="w-full md:w-40 border-4 border-black bg-black text-white px-6 py-4 text-[12px] font-black uppercase hover:bg-[#ff6b6b] transition-all shadow-[6px_6px_0_0_rgba(0,0,0,0.2)]"
                     >
-                      Intervene
+                      Step In
                     </button>
                   </div>
                 </div>
@@ -737,8 +737,8 @@ const AdminDashboard: React.FC = () => {
           <div className="space-y-8">
             <div className="flex flex-col md:flex-row gap-6 md:items-center md:justify-between">
               <div>
-                <h3 className="text-2xl font-black uppercase tracking-tighter text-[var(--bulletin-text)]">Settlement Console</h3>
-                <p className="text-[12px] font-bold opacity-40 text-[var(--bulletin-text)] uppercase tracking-widest">Disburse Funds to Sellers</p>
+                <h3 className="text-2xl font-black uppercase tracking-tighter text-[var(--bulletin-text)]">Payments Control</h3>
+                <p className="text-[12px] font-bold opacity-40 text-[var(--bulletin-text)] uppercase tracking-widest">Pay Sellers</p>
               </div>
               <div className="flex gap-4 items-center">
                 <select

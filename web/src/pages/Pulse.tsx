@@ -5,7 +5,7 @@ import { Activity } from 'lucide-react';
 
 const PulsePage: React.FC = () => {
   return (
-    <BulletinLayout title="Campus Pulse" subtitle="Real-time Activity" section="04">
+    <BulletinLayout title="Activity" subtitle="What's happening" section="04">
       <BulletinSection bgColor="bg-[#faf8f5] dark:bg-black/20">
         <div className="max-w-4xl mb-12">
           <div className="flex items-center gap-3 mb-4">
@@ -16,7 +16,7 @@ const PulsePage: React.FC = () => {
             The Board <br />Is Moving.
           </h1>
           <p className="text-lg font-medium opacity-70 max-w-xl leading-relaxed">
-            Real-time insights into trending items, hyper-local hostel drops, and the most active student merchants on campus.
+            Real-time insights into trending items, hostel deals, and the most active sellers on campus.
           </p>
         </div>
 
@@ -29,7 +29,7 @@ const PulsePage: React.FC = () => {
                     <Activity className="h-8 w-8 text-black" />
                  </div>
                  <div>
-                    <div className="text-xl font-black uppercase">Adaptive Feed</div>
+                    <div className="text-xl font-black uppercase">Smart Feed</div>
                     <p className="text-sm font-bold opacity-60">Pulse learns from campus trends to show you relevant gear first.</p>
                  </div>
               </div>

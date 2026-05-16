@@ -27,8 +27,8 @@ const SellersPage: React.FC = () => {
 
   return (
     <BulletinLayout 
-      title="Elite Merchants" 
-      subtitle="The most trusted and active sellers in the QUADS ecosystem."
+      title="Top Sellers" 
+      subtitle="The most trusted and active sellers in the QUADS community."
       section="08"
     >
       <BulletinSection>
@@ -38,7 +38,7 @@ const SellersPage: React.FC = () => {
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 opacity-30" />
             <input 
               type="text"
-              placeholder="Search merchants..."
+              placeholder="Search sellers..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full border-4 border-black bg-white dark:bg-black p-4 pl-12 text-[11px] font-black uppercase tracking-widest focus:outline-none focus:ring-0 shadow-[4px_4px_0_0_#000]"
@@ -94,7 +94,7 @@ const SellersPage: React.FC = () => {
                         {entry.seller?.isVerified && <Verified className="h-4 w-4 text-emerald-500 flex-shrink-0" />}
                       </div>
                       <div className="text-[10px] font-bold opacity-40 truncate uppercase tracking-widest">
-                        {entry.seller?.brandName || 'Independent Merchant'}
+                        {entry.seller?.brandName || 'Verified Seller'}
                       </div>
                     </div>
                   </div>
@@ -126,14 +126,14 @@ const SellersPage: React.FC = () => {
         ) : (
           <div className="text-center py-20 border-4 border-dashed border-black/10">
              <ShoppingBag className="h-12 w-12 mx-auto opacity-20 mb-4" />
-             <p className="font-black uppercase tracking-widest opacity-40">No merchants found matching your search</p>
+             <p className="font-black uppercase tracking-widest opacity-40">No sellers found matching your search</p>
           </div>
         )}
       </BulletinSection>
 
-      {/* Merchant Call to Action - Only show if not a seller */}
+      {/* Seller Call to Action - Only show if not a seller */}
       {(!user || user.role === 'buyer') && (
-        <BulletinSection bgColor="bg-black text-white" title="Join the Elite" subtitle="Apply for Merchant Status">
+        <BulletinSection bgColor="bg-black text-white" title="Sell on Quads" subtitle="Apply to be a verified seller">
            <div className="flex flex-col md:flex-row items-center justify-between gap-8">
               <div className="max-w-xl text-center md:text-left">
                  <p className="text-xl font-medium leading-tight opacity-70">

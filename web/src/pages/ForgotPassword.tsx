@@ -58,7 +58,7 @@ const ForgotPasswordPage: React.FC = () => {
         className="fixed top-8 left-8 flex items-center gap-3 border-4 border-black bg-white px-6 py-4 text-[12px] font-black uppercase tracking-[0.2em] shadow-[8px_8px_0_0_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all z-50 group"
       >
         <ArrowLeft className="h-5 w-5 group-hover:-translate-x-2 transition-transform" />
-        Return to Login
+        Back to Login
       </Link>
 
       <div className="max-w-md w-full relative">
@@ -79,25 +79,25 @@ const ForgotPasswordPage: React.FC = () => {
               </div>
             </div>
 
-            <div className="text-[11px] font-black uppercase tracking-[0.4em] opacity-40 mb-4 text-black dark:text-yellow-200">Transmission Success</div>
+            <div className="text-[11px] font-black uppercase tracking-[0.4em] opacity-40 mb-4 text-black dark:text-yellow-200">Done</div>
             <h1 className="text-4xl font-black uppercase tracking-tighter text-black dark:text-yellow-200 mb-6 leading-none">Check<br/>Your Inbox.</h1>
             
             <p className="text-[14px] font-bold opacity-70 text-black dark:text-yellow-200 mb-8 leading-relaxed">
-              We've dispatched a recovery key to:<br/>
+              We've sent a reset link to:<br/>
               <span className="inline-block mt-3 border-2 border-black bg-white/50 px-3 py-1 font-black text-black">
                 {getValues('email')}
               </span>
             </p>
 
             <div className="bg-black/5 border-2 border-dashed border-black/20 p-4 mb-10 text-[11px] font-bold text-black/60 italic">
-              "The link will remain active for exactly 60 minutes. Verify your spam folder if the transmission is delayed."
+              "The link will remain active for exactly 60 minutes. Check your spam folder if the link hasn't arrived."
             </div>
 
             <Link
               to="/login"
               className="inline-block w-full border-4 border-black bg-black px-8 py-5 text-[12px] font-black uppercase tracking-widest text-white shadow-[8px_8px_0_0_rgba(0,0,0,0.2)] hover:bg-white hover:text-black transition-all"
             >
-              Back to Entrance
+              Back to Login
             </Link>
           </div>
         ) : (
@@ -114,19 +114,19 @@ const ForgotPasswordPage: React.FC = () => {
             <div className="mb-12">
               <div className="flex items-center gap-3 mb-8">
                 <BrandMark className="h-8 w-8" />
-                <span className="text-[12px] font-black uppercase tracking-[0.3em] opacity-40">QUADS NETWORK</span>
+                <span className="text-[12px] font-black uppercase tracking-[0.3em] opacity-40">QUADS</span>
               </div>
               
-              <h1 className="text-5xl font-black uppercase tracking-tighter text-[var(--bulletin-text)] leading-none mb-6">Lost Access?</h1>
+              <h1 className="text-5xl font-black uppercase tracking-tighter text-[var(--bulletin-text)] leading-none mb-6">Forgot Password?</h1>
               <p className="text-[14px] font-bold opacity-60 text-[var(--bulletin-text)] leading-tight">
-                Provide your institutional coordinates to receive a one-time security reset bypass.
+                Enter your student email to receive a password reset link.
               </p>
             </div>
 
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-10">
               <div className="group">
                 <label className="block text-[11px] font-black uppercase tracking-[0.2em] opacity-40 mb-4 text-[var(--bulletin-text)]">
-                  Registered Email Address
+                  Your Email Address
                 </label>
                 <div className="relative flex items-center">
                   <Mail className="absolute left-5 h-6 w-6 opacity-20 group-focus-within:opacity-100 transition-opacity text-[var(--bulletin-text)]" />
@@ -157,7 +157,7 @@ const ForgotPasswordPage: React.FC = () => {
                 disabled={submitting}
                 className="w-full border-4 border-black bg-black px-10 py-6 text-[14px] font-black uppercase tracking-[0.2em] text-white shadow-[10px_10px_0_0_rgba(255,107,107,0.5)] hover:bg-[#ff6b6b] hover:shadow-none hover:translate-x-2 hover:translate-y-2 transition-all disabled:opacity-20 disabled:grayscale"
               >
-                {submitting ? 'Requesting Bypass...' : 'Dispatch Reset Link'}
+                {submitting ? 'Sending...' : 'Send Reset Link'}
                 {!submitting && <Send className="inline-block h-5 w-5 ml-3" />}
               </button>
             </form>
@@ -176,7 +176,7 @@ const ForgotPasswordPage: React.FC = () => {
 
       {/* ── Fixed Footer ── */}
       <div className="fixed bottom-10 left-10 text-[10px] font-black uppercase tracking-[0.5em] opacity-10 pointer-events-none hidden md:block">
-        QUADS SECURITY RECOVERY PROTOCOL
+        QUADS SECURITY
       </div>
     </div>
   );

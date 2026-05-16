@@ -57,12 +57,12 @@ const SellerOnboardingPage: React.FC = () => {
   };
 
   return (
-    <BulletinLayout title="Seller Initialization" subtitle="Store Setup" section="17">
+    <BulletinLayout title="Seller Setup" subtitle="Store Setup" section="17">
       <div className="border-b-4 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] px-6 py-12 relative overflow-hidden">
         <div className="absolute top-0 right-20 h-full w-40 bg-[var(--bulletin-bg)] opacity-5 rotate-[15deg]" />
         <div className="max-w-[1400px] mx-auto relative z-10">
-          <p className="text-[10px] font-black uppercase tracking-[0.35em] text-[var(--bulletin-text)] opacity-40 mb-3">Workspace Activation</p>
-          <h1 className="text-4xl font-black uppercase tracking-tight text-[var(--bulletin-text)]">Configure Operations</h1>
+          <p className="text-[10px] font-black uppercase tracking-[0.35em] text-[var(--bulletin-text)] opacity-40 mb-3">Account Activation</p>
+          <h1 className="text-4xl font-black uppercase tracking-tight text-[var(--bulletin-text)]">Seller Details</h1>
         </div>
       </div>
 
@@ -70,7 +70,7 @@ const SellerOnboardingPage: React.FC = () => {
         <div className="max-w-3xl mx-auto">
           {/* Progress steps */}
           <div className="flex flex-wrap items-center gap-0 mb-12 border-4 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] p-6 shadow-[8px_8px_0_0_var(--bulletin-shadow)]" style={{ transform: 'rotate(-0.5deg)' }}>
-            {['Store Branding', 'Payout Infrastructure', 'Identity Verification'].map((label, idx) => (
+            {['Shop Info', 'Payment Details', 'Verification'].map((label, idx) => (
               <React.Fragment key={label}>
                 <div className="flex items-center gap-3 py-2">
                   {steps[idx] ? (
@@ -99,7 +99,7 @@ const SellerOnboardingPage: React.FC = () => {
             </BulletinCard>
             
             <BulletinCard rotation={-0.3} bgColor="bg-[var(--bulletin-card)]" className="border-4 border-[var(--bulletin-border)] shadow-[8px_8px_0_0_var(--bulletin-shadow)]">
-              <label className={labelBase}>Target Response Time</label>
+              <label className={labelBase}>Quick reply (min)</label>
               <div className="relative">
                 <input value={responseTimeMinutes} onChange={(e) => setResponseTimeMinutes(Number(e.target.value || 15))} type="number" className={`${fieldBase} mt-2 pr-16`} />
                 <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-black uppercase tracking-widest opacity-40 text-[var(--bulletin-text)]">MIN</span>
@@ -107,7 +107,7 @@ const SellerOnboardingPage: React.FC = () => {
             </BulletinCard>
             
             <BulletinCard rotation={0.3} bgColor="bg-[var(--bulletin-card)]" className="border-4 border-[var(--bulletin-border)] shadow-[8px_8px_0_0_var(--bulletin-shadow)]">
-              <label className={labelBase}>Payout Protocol</label>
+              <label className={labelBase}>Payment Method</label>
               <select value={payoutMethod} onChange={(e) => setPayoutMethod(e.target.value as any)} className={`${fieldBase} mt-2`}>
                 <option value="momo">Mobile Money Network</option>
                 <option value="bank">Direct Bank Transfer</option>
@@ -115,17 +115,17 @@ const SellerOnboardingPage: React.FC = () => {
             </BulletinCard>
             
             <BulletinCard rotation={-0.3} bgColor="bg-[var(--bulletin-card)]" className="border-4 border-[var(--bulletin-border)] shadow-[8px_8px_0_0_var(--bulletin-shadow)]">
-              <label className={labelBase}>Institution / Network</label>
+              <label className={labelBase}>Network / Bank</label>
               <input value={payoutProvider} onChange={(e) => setPayoutProvider(e.target.value)} placeholder="e.g. MTN, Telecel, GCB" className={`${fieldBase} mt-2`} />
             </BulletinCard>
             
             <BulletinCard rotation={0.3} bgColor="bg-[var(--bulletin-card)]" className="border-4 border-[var(--bulletin-border)] shadow-[8px_8px_0_0_var(--bulletin-shadow)]">
-              <label className={labelBase}>Account Bearer</label>
-              <input value={payoutAccountName} onChange={(e) => setPayoutAccountName(e.target.value)} placeholder="Legal entity name" className={`${fieldBase} mt-2`} />
+              <label className={labelBase}>Account Name</label>
+              <input value={payoutAccountName} onChange={(e) => setPayoutAccountName(e.target.value)} placeholder="Full name on account" className={`${fieldBase} mt-2`} />
             </BulletinCard>
             
             <BulletinCard rotation={-0.3} bgColor="bg-[#fffacd] dark:bg-yellow-900/20" className="sm:col-span-2 border-4 border-[var(--bulletin-border)] shadow-[8px_8px_0_0_var(--bulletin-shadow)]">
-              <label className="block text-[10px] font-black uppercase tracking-[0.2em] opacity-40 mb-2 text-black dark:text-yellow-200">Account identifier</label>
+              <label className="block text-[10px] font-black uppercase tracking-[0.2em] opacity-40 mb-2 text-black dark:text-yellow-200">Account Number</label>
               <input value={payoutAccountNumber} onChange={(e) => setPayoutAccountNumber(e.target.value)} placeholder="Routing or phone number" className={`w-full border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-bg)] p-4 text-2xl font-mono focus:outline-none focus:ring-2 focus:ring-[#ff6b6b] text-[var(--bulletin-text)] placeholder:text-[var(--bulletin-text)] placeholder:opacity-30 mt-2 tracking-widest`} />
             </BulletinCard>
           </div>
@@ -136,7 +136,7 @@ const SellerOnboardingPage: React.FC = () => {
               disabled={submitting}
               className="inline-flex items-center gap-3 border-4 border-[var(--bulletin-border)] bg-[var(--bulletin-text)] px-8 py-4 text-[12px] font-black uppercase tracking-widest text-[var(--bulletin-bg)] shadow-[8px_8px_0_0_var(--bulletin-shadow)] hover:translate-y-1 hover:shadow-[4px_4px_0_0_var(--bulletin-shadow)] disabled:opacity-40 transition-all"
             >
-              {submitting ? 'Authenticating...' : allDone ? 'Initialize Workspace' : 'Commit Progress'}
+              {submitting ? 'Saving...' : allDone ? 'Start Selling' : 'Save Progress'}
               <ArrowRight className="h-4 w-4" />
             </button>
           </div>
