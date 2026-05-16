@@ -430,9 +430,9 @@ const Checkout: React.FC = () => {
 
               {/* Decorative stamp effect */}
               <div className="mt-6 border-2 border-[var(--bulletin-border)]/10 p-3 flex items-center gap-3 grayscale opacity-30 select-none pointer-events-none rotate-[-1deg]">
-                <Package className="h-5 w-5" />
+                <Shield className="h-5 w-5" />
                 <div className="text-[9px] leading-tight font-black uppercase">
-                  Shipment handled by<br/>UMaT Logistics Center
+                  Verified Campus<br/>Transaction
                 </div>
               </div>
             </div>
