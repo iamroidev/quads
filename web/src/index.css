@@ -13,9 +13,9 @@
   --bulletin-text: #f0efec;
   --bulletin-accent: #ff6b6b;
   --bulletin-card: #111111;
-  --bulletin-border: #3a3a3a;
-  --bulletin-shadow: rgba(255, 255, 255, 0.15);
-  --bulletin-muted: rgba(255, 255, 255, 0.5);
+  --bulletin-border: #4a4a4a;
+  --bulletin-shadow: rgba(255, 255, 255, 0.1);
+  --bulletin-muted: rgba(255, 255, 255, 0.4);
   color-scheme: dark;
 }
 

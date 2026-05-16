@@ -246,8 +246,8 @@ const LoginPage: React.FC = () => {
                   <div className="absolute -top-3 left-4 bg-red-500 text-white text-[9px] font-black px-2 py-0.5 shadow-[2px_2px_0_0_rgba(0,0,0,1)]">
                     SESSION PROTOCOL
                   </div>
-              <div className="flex items-start gap-2 md:gap-4">
-                <label className="relative flex h-6 w-6 md:h-8 md:w-8 flex-shrink-0 cursor-pointer items-center justify-center border-2 border-black bg-white shadow-[2px_2px_0_0_var(--bulletin-shadow)] md:shadow-[3px_3px_0_0_var(--bulletin-shadow)] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-none transition-all">
+                  <div className="flex items-start gap-2 md:gap-4">
+                <label className="relative flex h-6 w-6 md:h-8 md:w-8 flex-shrink-0 cursor-pointer items-center justify-center border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] shadow-[2px_2px_0_0_var(--bulletin-shadow)] md:shadow-[3px_3px_0_0_var(--bulletin-shadow)] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-none transition-all">
                       <input
                         type="checkbox"
                         className="peer sr-only"
@@ -255,7 +255,7 @@ const LoginPage: React.FC = () => {
                         onChange={(e) => setProtocolAccepted(e.target.checked)}
                         required
                       />
-                      <Pin className="h-4 w-4 text-gray-300 peer-checked:text-red-600 peer-checked:rotate-45 transition-all" />
+                      <Pin className="h-4 w-4 opacity-20 peer-checked:text-[var(--bulletin-accent)] peer-checked:rotate-45 transition-all text-[var(--bulletin-text)]" />
                     </label>
                     <div className="flex-1">
                       <p className="text-[10px] font-black uppercase tracking-tight text-[var(--bulletin-text)] leading-tight">

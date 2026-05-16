@@ -79,18 +79,18 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
 
   return (
     <div>
-      <label className="label">
+      <label className="text-[11px] font-black uppercase tracking-widest mb-4 block opacity-50">
         Product Images ({totalImages}/{maxImages})
       </label>
 
       {/* Existing + New image previews */}
       {(existingImages.length > 0 || images.length > 0) && (
-        <div className="grid grid-cols-3 sm:grid-cols-5 gap-3 mb-3">
+        <div className="grid grid-cols-3 sm:grid-cols-5 gap-3 mb-6">
           {/* Existing images */}
           {existingImages.map((img) => (
             <div
               key={img.publicId}
-              className="relative aspect-square rounded-lg overflow-hidden border border-gray-200 group"
+              className="relative aspect-square border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-bg)] overflow-hidden group"
             >
               <img
                 src={img.url}
@@ -101,7 +101,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
                 <button
                   type="button"
                   onClick={() => onRemoveExisting(img.publicId)}
-                  className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                  className="absolute top-1 right-1 bg-[var(--bulletin-accent)] text-white border border-[var(--bulletin-border)] p-1 opacity-0 group-hover:opacity-100 transition-opacity z-10"
                 >
                   <X className="h-3 w-3" />
                 </button>
@@ -113,7 +113,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
           {images.map((file, index) => (
             <div
               key={`new-${index}`}
-              className="relative aspect-square rounded-lg overflow-hidden border border-earth-200 group"
+              className="relative aspect-square border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-bg)] overflow-hidden group"
             >
               <img
                 src={URL.createObjectURL(file)}
@@ -123,12 +123,12 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
               <button
                 type="button"
                 onClick={() => removeNewImage(index)}
-                className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                className="absolute top-1 right-1 bg-[var(--bulletin-accent)] text-white border border-[var(--bulletin-border)] p-1 opacity-0 group-hover:opacity-100 transition-opacity z-10"
               >
                 <X className="h-3 w-3" />
               </button>
-              <div className="absolute bottom-0 left-0 right-0 bg-earth-900 text-white text-[10px] text-center py-0.5">
-                New
+              <div className="absolute bottom-0 left-0 right-0 bg-[var(--bulletin-text)] text-[var(--bulletin-bg)] text-[8px] font-black uppercase text-center py-0.5 tracking-tighter">
+                NEW ENTRY
               </div>
             </div>
           ))}
@@ -138,11 +138,11 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
       {/* Upload area */}
       {canAdd && (
         <div
-          className={`border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors ${
+          className={`border-4 border-dashed p-8 text-center cursor-pointer transition-all ${
             dragActive
-              ? 'border-earth-900 bg-earth-50'
-              : 'border-earth-300 hover:border-earth-600 hover:bg-earth-50'
-          } ${error ? 'border-red-400' : ''}`}
+              ? 'border-[var(--bulletin-accent)] bg-[var(--bulletin-accent)]/5'
+              : 'border-[var(--bulletin-border)] opacity-30 hover:opacity-100 hover:bg-[var(--bulletin-text)]/5'
+          } ${error ? 'border-red-500' : ''}`}
           onDragEnter={handleDrag}
           onDragLeave={handleDrag}
           onDragOver={handleDrag}
@@ -157,27 +157,27 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
             onChange={handleFileInput}
             className="hidden"
           />
-          <div className="flex flex-col items-center gap-2">
+          <div className="flex flex-col items-center gap-3">
             {totalImages === 0 ? (
-              <ImageIcon className="h-10 w-10 text-earth-400" />
+              <ImageIcon className="h-10 w-10 opacity-30" />
             ) : (
-              <Upload className="h-8 w-8 text-earth-400" />
+              <Upload className="h-8 w-8 opacity-30" />
             )}
             <div>
-              <p className="text-sm font-medium text-earth-600">
+              <p className="text-[11px] font-black uppercase tracking-widest">
                 {totalImages === 0
-                  ? 'Click or drag images to upload'
-                  : `Add more images (${maxImages - totalImages} remaining)`}
+                  ? 'UPLOAD VISUAL PROOF'
+                  : `ADD MORE IMAGES (${maxImages - totalImages} REMAINING)`}
               </p>
-              <p className="text-xs text-earth-400 mt-1">
-                JPEG, PNG, GIF, or WebP up to 5MB each
+              <p className="text-[9px] font-bold uppercase opacity-30 mt-2">
+                JPEG, PNG, or WebP up to 5MB each
               </p>
             </div>
           </div>
         </div>
       )}
 
-      {error && <p className="mt-1 text-sm text-red-500">{error}</p>}
+      {error && <p className="mt-2 text-[11px] font-black italic text-red-500">{error}</p>}
     </div>
   );
 };
