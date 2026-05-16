@@ -307,8 +307,6 @@ export const BulletinLayout: React.FC<BulletinLayoutProps> = ({
                 <div className="text-[10px] font-black uppercase tracking-[0.3em] text-[#ff6b6b] mb-2">Protocols</div>
                 {user?.role === 'seller' ? (
                   <>
-                    <Link to="/seller/support" className="text-[14px] font-black uppercase tracking-widest hover:text-[#ff6b6b] transition-colors">Merchant Help</Link>
-                    <Link to="/terms/seller" className="text-[14px] font-black uppercase tracking-widest hover:text-[#ff6b6b] transition-colors">Seller Policy</Link>
                     <Link to="/seller/payouts" className="text-[14px] font-black uppercase tracking-widest hover:text-[#ff6b6b] transition-colors">Disbursements</Link>
                   </>
                 ) : (

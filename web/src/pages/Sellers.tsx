@@ -2,10 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { BulletinLayout, BulletinSection } from '../components/layout/BulletinLayout';
 import productService from '../services/product.service';
+import { useAuth } from '../context/AuthContext';
 import { LoadingSpinner } from '../components/ui';
 import { Star, Verified, ShoppingBag, ArrowRight, Search, Trophy } from 'lucide-react';
 
 const SellersPage: React.FC = () => {
+  const { user } = useAuth();
   const [sellers, setSellers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -129,19 +131,21 @@ const SellersPage: React.FC = () => {
         )}
       </BulletinSection>
 
-      {/* Merchant Call to Action */}
-      <BulletinSection bgColor="bg-black text-white" title="Join the Elite" subtitle="Apply for Merchant Status">
-         <div className="flex flex-col md:flex-row items-center justify-between gap-8">
-            <div className="max-w-xl text-center md:text-left">
-               <p className="text-xl font-medium leading-tight opacity-70">
-                 Ready to turn your side-hustle into a verified campus business? Join the growing network of students already earning on QUADS.
-               </p>
-            </div>
-            <Link to="/seller/onboarding" className="bg-white text-black px-10 py-5 font-black uppercase tracking-widest shadow-[8px_8px_0_0_#ff6b6b] hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all flex items-center gap-3">
-               Start Selling <ArrowRight className="h-4 w-4" />
-            </Link>
-         </div>
-      </BulletinSection>
+      {/* Merchant Call to Action - Only show if not a seller */}
+      {(!user || user.role === 'buyer') && (
+        <BulletinSection bgColor="bg-black text-white" title="Join the Elite" subtitle="Apply for Merchant Status">
+           <div className="flex flex-col md:flex-row items-center justify-between gap-8">
+              <div className="max-w-xl text-center md:text-left">
+                 <p className="text-xl font-medium leading-tight opacity-70">
+                   Ready to turn your side-hustle into a verified campus business? Join the growing network of students already earning on QUADS.
+                 </p>
+              </div>
+              <Link to="/seller/onboarding" className="bg-white text-black px-10 py-5 font-black uppercase tracking-widest shadow-[8px_8px_0_0_#ff6b6b] hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all flex items-center gap-3">
+                 Start Selling <ArrowRight className="h-4 w-4" />
+              </Link>
+           </div>
+        </BulletinSection>
+      )}
     </BulletinLayout>
   );
 };
