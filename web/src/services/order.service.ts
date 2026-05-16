@@ -176,6 +176,11 @@ const orderService = {
     const response = await api.get('/orders/seller/bundles');
     return response.data;
   },
+  
+  validateCoupon: async (code: string, sellerId: string, subtotal: number): Promise<{ success: boolean; data: { code: string; type: string; value: number; discount: number } }> => {
+    const response = await api.get(`/orders/validate-coupon?code=${code}&sellerId=${sellerId}&subtotal=${subtotal}`);
+    return response.data;
+  },
 };
 
 export default orderService;

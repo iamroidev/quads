@@ -49,7 +49,10 @@ const Checkout: React.FC = () => {
     note: '',
     paymentMethod: 'momo_mtn',
     termsAccepted: false,
+    couponCode: '',
   });
+  const [couponData, setCouponData] = useState<{ code: string; discount: number } | null>(null);
+  const [validatingCoupon, setValidatingCoupon] = useState(false);
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -104,6 +107,7 @@ const Checkout: React.FC = () => {
       const res = await orderService.createOrder({
         items: products.map(p => ({ productId: p._id || p.productId, quantity: p.quantity })),
         deliveryMethod: form.deliveryMethod,
+        couponCode: couponData ? couponData.code : undefined,
         pickupLocation: form.deliveryMethod === 'pickup' ? form.pickupLocation : undefined,
         deliveryAddress: form.deliveryMethod === 'delivery' ? form.deliveryAddress : undefined,
         note: form.note || undefined,
@@ -307,6 +311,59 @@ const Checkout: React.FC = () => {
                     <span className="opacity-60 uppercase">Subtotal</span>
                     <span className="font-black">GHS {subtotal.toLocaleString('en-GH')}</span>
                   </div>
+                  
+                  {/* Coupon Input */}
+                  <div className="py-4 border-y border-black/10 dark:border-white/10">
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        value={form.couponCode}
+                        onChange={(e) => setForm((f) => ({ ...f, couponCode: e.target.value }))}
+                        placeholder="COUPON CODE"
+                        className="flex-1 bg-white dark:bg-black border-2 border-black p-2 text-[10px] font-black uppercase focus:outline-none"
+                      />
+                      <button
+                        onClick={async () => {
+                          if (!form.couponCode.trim()) return;
+                          setValidatingCoupon(true);
+                          try {
+                            // Using first product's seller for now as coupons are seller-specific
+                            const sellerId = products[0].seller?._id || products[0].seller;
+                            const res = await orderService.validateCoupon(form.couponCode, sellerId, subtotal);
+                            if (res.success) {
+                              setCouponData(res.data);
+                              toast.success(`Coupon Applied: GHS ${res.data.discount.toFixed(2)} off`);
+                            }
+                          } catch (err: any) {
+                            toast.error(err.response?.data?.message || 'Invalid coupon');
+                            setCouponData(null);
+                          } finally {
+                            setValidatingCoupon(false);
+                          }
+                        }}
+                        disabled={validatingCoupon || !form.couponCode.trim()}
+                        className="bg-black text-white px-4 py-2 text-[10px] font-black uppercase hover:bg-[#ff6b6b] transition-colors disabled:opacity-40"
+                      >
+                        {validatingCoupon ? '...' : 'Apply'}
+                      </button>
+                    </div>
+                    {couponData && (
+                      <div className="mt-2 flex justify-between items-center text-[#ff6b6b]">
+                        <span className="text-[9px] font-black uppercase">Promo: {couponData.code}</span>
+                        <button onClick={() => { setCouponData(null); setForm(f => ({...f, couponCode: ''})) }}>
+                          <X className="h-3 w-3" />
+                        </button>
+                      </div>
+                    )}
+                  </div>
+
+                  {couponData && (
+                    <div className="flex justify-between items-center text-[#ff6b6b]">
+                      <span className="opacity-60 uppercase">Discount</span>
+                      <span className="font-black">-GHS {couponData.discount.toLocaleString('en-GH')}</span>
+                    </div>
+                  )}
+
                   <div className="flex justify-between items-center text-[#2e7d32] dark:text-emerald-400">
                     <span className="opacity-60 uppercase text-[10px]">Processing fee</span>
                     <span className="font-black italic">Free</span>
@@ -318,7 +375,7 @@ const Checkout: React.FC = () => {
                   <div className="border-t-2 border-dashed border-black/20 dark:border-white/20 pt-4 flex justify-between items-baseline">
                     <span className="font-black uppercase text-sm">Amount Due</span>
                     <span className="font-black text-2xl tracking-tighter">
-                      GHS {subtotal.toLocaleString('en-GH', { minimumFractionDigits: 2 })}
+                      GHS {(subtotal - (couponData?.discount || 0)).toLocaleString('en-GH', { minimumFractionDigits: 2 })}
                     </span>
                   </div>
                 </div>

@@ -14,6 +14,7 @@ import {
   getSellerBundles,
   runAutomationSweep,
   verifyHandoff,
+  validateCoupon,
 } from '../controllers/order.controller';
 import { authenticate, ensureProfileComplete } from '../middleware/auth';
 import { isSeller, isAdmin } from '../middleware/roleCheck';
@@ -39,6 +40,7 @@ router.post('/automation/run-sweep', isAdmin, runAutomationSweep);
 // Seller growth toolkit: coupons
 router.post('/seller/coupons', isSeller, createCoupon);
 router.get('/seller/coupons', isSeller, getSellerCoupons);
+router.get('/validate-coupon', ensureProfileComplete(), validateCoupon);
 
 // Seller growth toolkit: bundles
 router.post('/seller/bundles', isSeller, createBundle);
