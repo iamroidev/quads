@@ -1,7 +1,7 @@
 # QUADS - Integrated Deployment Script (PowerShell)
 # Automates GitHub push (Vercel) and AWS EC2 synchronization.
 
-$Branch = "bulleting"
+$Branch = "mobile"
 $Ec2User = "ec2-user"
 $Ec2Ip = "54.167.221.2"
 $PemKey = "quads-key.pem"
@@ -24,7 +24,7 @@ Write-Host "Step 2: Synchronizing AWS EC2 Backend..."
 # Upload local .env to server (using ${} to avoid PowerShell parser errors with ':')
 scp -i $PemKey .env "${Ec2User}@${Ec2Ip}:${RemotePath}/.env"
 
-$RemoteCmds = 'export NVM_DIR="$HOME/.nvm"; [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"; nvm use 16; cd /home/ec2-user/quads; git fetch origin bulleting; git reset --hard origin/bulleting; cd server; npm install --production; npm run build; pm2 restart quads-api --update-env || pm2 start dist/app.js --name quads-api; pm2 status quads-api'
+$RemoteCmds = "export NVM_DIR=`$HOME/.nvm; [ -s `$NVM_DIR/nvm.sh ] && . `$NVM_DIR/nvm.sh; nvm use 16; cd $RemotePath; git fetch origin $Branch; git reset --hard origin/$Branch; cd server; npm install --production; npm run build; pm2 restart quads-api --update-env || pm2 start dist/app.js --name quads-api; pm2 status quads-api"
 
 ssh -i $PemKey -o StrictHostKeyChecking=no "$Ec2User@$Ec2Ip" $RemoteCmds
 
