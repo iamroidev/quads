@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Eye, TrendingUp, MapPin, Sparkles, ArrowRight } from 'lucide-react';
+import { Eye, TrendingUp, MapPin, Sparkles, ArrowRight, Activity as ActivityIcon, ShoppingBag, CheckCircle, Ticket } from 'lucide-react';
 import feedService, { PulseFeedResponse } from '../../services/feed.service';
 import { ProductCardSkeleton } from '../ui/BulletinSkeleton';
 
@@ -15,7 +15,6 @@ const PulseFeed: React.FC = () => {
       })
       .finally(() => setLoading(false));
   }, []);
-
   if (loading) {
     return (
       <div className="space-y-12 py-8">
@@ -32,6 +31,71 @@ const PulseFeed: React.FC = () => {
       </div>
     );
   }
+
+  const ActivityLog = ({ activities }: { activities: any[] }) => {
+    if (!activities || activities.length === 0) return null;
+
+    return (
+      <div className="mb-20">
+        <div className="flex items-center gap-3 mb-8">
+          <div className="p-2 border-2 border-black bg-[#ff6b6b] shadow-[3px_3px_0_0_black]">
+            <ActivityIcon size={18} className="text-black" />
+          </div>
+          <div>
+            <div className="text-[10px] font-black uppercase tracking-[0.3em] opacity-40 leading-none mb-1">System Events</div>
+            <h2 className="text-3xl font-black uppercase tracking-tighter leading-none">Live Board Activity</h2>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {activities.slice(0, 6).map((act, idx) => {
+            let icon = <ActivityIcon size={14} />;
+            let color = "bg-gray-100";
+            let message = "";
+
+            switch(act.type) {
+              case 'listing_created':
+                icon = <ShoppingBag size={14} />;
+                color = "bg-[#e0f2f7]";
+                message = `${act.metadata.userName} just pinned ${act.metadata.productTitle}`;
+                break;
+              case 'order_fulfilled':
+                icon = <CheckCircle size={14} />;
+                color = "bg-[#d4edda]";
+                message = `${act.metadata.userName} fulfilled order for ${act.metadata.productTitle}`;
+                break;
+              case 'coupon_created':
+                icon = <Ticket size={14} />;
+                color = "bg-[#fff3cd]";
+                message = `${act.metadata.userName} dropped a new coupon: ${act.metadata.location}`;
+                break;
+              default:
+                message = `${act.metadata.userName} performed an action`;
+            }
+
+            return (
+              <div 
+                key={act._id || idx} 
+                className="flex items-center gap-4 p-4 border-2 border-black bg-white shadow-[4px_4px_0_0_black] hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all"
+              >
+                <div className={`flex-shrink-0 h-10 w-10 border-2 border-black ${color} flex items-center justify-center`}>
+                  {icon}
+                </div>
+                <div className="min-w-0">
+                  <div className="text-[11px] font-bold text-black leading-tight line-clamp-2">
+                    {message}
+                  </div>
+                  <div className="text-[9px] font-black uppercase opacity-30 mt-1">
+                    {new Date(act.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} • {act.metadata.location || 'Campus'}
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    );
+  };
 
   if (!feed || feed.pulse.length === 0) return null;
 
@@ -121,6 +185,9 @@ const PulseFeed: React.FC = () => {
 
   return (
     <div className="py-12">
+       {/* 0. Live Log Section */}
+       <ActivityLog activities={feed.activities} />
+
        {/* 1. Near You Section */}
        <FeedSection 
          title="Hot In Your Hall" 

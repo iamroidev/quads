@@ -5,6 +5,7 @@ import productService from '../services/product.service';
 import ApiError from '../utils/ApiError';
 import { uploadToCloudinary } from '../utils/imageUpload';
 import growthService from '../services/growth.service';
+import feedService from '../services/feed.service';
 
 /**
  * @route   POST /api/products
@@ -62,6 +63,18 @@ export const createProduct = async (
       message: 'Product created successfully',
       data: { product },
     });
+
+    // Log activity to campus pulse
+    feedService.logActivity({
+      type: 'listing_created',
+      userId: req.user!._id.toString(),
+      productId: product._id.toString(),
+      metadata: {
+        userName: req.user!.name,
+        productTitle: product.title,
+        location: product.pickupLocation,
+      },
+    }).catch(err => console.error('Pulse log error:', err));
   } catch (error) {
     next(error);
   }

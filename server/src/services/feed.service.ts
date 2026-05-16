@@ -1,5 +1,6 @@
 import Product, { IProductDocument } from '../models/Product';
 import Order from '../models/Order';
+import Activity from '../models/Activity';
 import mongoose from 'mongoose';
 
 class FeedService {
@@ -62,6 +63,12 @@ class FeedService {
     .sort({ createdAt: -1 })
     .limit(10)
     .populate('seller', 'name avatar isVerified');
+    
+    // 4. Live Activities
+    const activities = await Activity.find()
+      .sort({ createdAt: -1 })
+      .limit(20)
+      .populate('user', 'name avatar');
 
     // Filter out duplicates and own products
     const seen = new Set();
@@ -75,6 +82,7 @@ class FeedService {
 
     return {
       pulse: allItems.slice(0, 30),
+      activities,
       sections: {
         fromFollowing: fromFollowing.slice(0, 8),
         nearYou: nearYou.slice(0, 8),
@@ -82,6 +90,34 @@ class FeedService {
         newArrivals: newArrivals.slice(0, 8)
       }
     };
+  }
+
+  /**
+   * Log a new activity to the pulse
+   */
+  async logActivity(data: {
+    type: 'listing_created' | 'order_fulfilled' | 'user_verified' | 'coupon_created';
+    userId: string;
+    productId?: string;
+    orderId?: string;
+    metadata: {
+      userName: string;
+      productTitle?: string;
+      location?: string;
+      amount?: number;
+    };
+  }) {
+    try {
+      await Activity.create({
+        type: data.type,
+        user: data.userId,
+        product: data.productId,
+        order: data.orderId,
+        metadata: data.metadata
+      });
+    } catch (err) {
+      console.error('Failed to log activity:', err);
+    }
   }
 }
 
