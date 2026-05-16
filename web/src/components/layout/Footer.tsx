@@ -43,6 +43,9 @@ const Footer: React.FC = () => {
                 </Link>
               </>
             )}
+            <Link to="/terms#privacy" className="text-[10px] font-bold uppercase tracking-[0.15em] text-earth-400 hover:text-earth-900 transition-colors">
+              Privacy
+            </Link>
           </div>
         </div>
       </footer>
@@ -121,6 +124,8 @@ const Footer: React.FC = () => {
                 {[
                   { to: '/messages', label: 'Messages' },
                   { to: '/notifications', label: 'Notifications' },
+                  { to: '/contact', label: 'Contact Us' },
+                  { to: '/support', label: 'Help Center' },
                 ].map(({ to, label }) => (
                   <li key={to}>
                     <Link to={to} className="text-sm text-white/50 transition-colors hover:text-white">
@@ -140,9 +145,17 @@ const Footer: React.FC = () => {
           <p className="text-[10px] text-white/25">
             &copy; {year} QUADS. All rights reserved.
           </p>
-          <p className="text-[10px] text-white/15">
-            Built for students, by students.
-          </p>
+          <div className="flex items-center gap-6">
+            <Link to="/terms#privacy" className="text-[10px] text-white/25 hover:text-white transition-colors">
+              Privacy Policy
+            </Link>
+            <Link to="/terms" className="text-[10px] text-white/25 hover:text-white transition-colors">
+              Terms of Service
+            </Link>
+            <p className="text-[10px] text-white/15">
+              Built for students, by students.
+            </p>
+          </div>
         </div>
       </div>
 
