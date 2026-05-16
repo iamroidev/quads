@@ -5,6 +5,7 @@ import Coupon from '../models/Coupon';
 import Bundle from '../models/Bundle';
 import ApiError from '../utils/ApiError';
 import notificationService from './notification.service';
+import feedService from './feed.service';
 
 interface OrderItemInput {
   productId: string;
@@ -359,6 +360,20 @@ class OrderService {
       for (const item of order.items) {
         await Product.findByIdAndUpdate(item.product, { status: 'sold' });
       }
+
+      // Log activity to pulse
+      const seller = await mongoose.model('User').findById(order.seller).select('name');
+      
+      feedService.logActivity({
+        type: 'order_fulfilled',
+        userId: order.seller.toString(),
+        orderId: order._id.toString(),
+        metadata: {
+          userName: seller?.name || 'Seller',
+          productTitle: order.items[0].title + (order.items.length > 1 ? ` (+${order.items.length - 1} more)` : ''),
+          amount: order.totalAmount,
+        }
+      }).catch(err => console.error('Pulse log error:', err));
     }
 
     if (newStatus === 'cancelled') {
@@ -525,7 +540,7 @@ class OrderService {
       expiresAt?: string;
     }
   ) {
-    return Coupon.create({
+    const coupon = await Coupon.create({
       seller: sellerId,
       code: input.code.toUpperCase(),
       type: input.type,
@@ -536,6 +551,19 @@ class OrderService {
       expiresAt: input.expiresAt ? new Date(input.expiresAt) : undefined,
       isActive: true,
     });
+
+    // Log activity to pulse
+    const seller = await mongoose.model('User').findById(sellerId).select('name');
+    feedService.logActivity({
+      type: 'coupon_created',
+      userId: sellerId,
+      metadata: {
+        userName: seller?.name || 'Merchant',
+        location: coupon.code, // Use code as location for display
+      }
+    }).catch(err => console.error('Pulse log error:', err));
+
+    return coupon;
   }
 
   async getSellerCoupons(sellerId: string) {
