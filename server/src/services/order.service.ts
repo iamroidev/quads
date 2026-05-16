@@ -541,6 +541,46 @@ class OrderService {
   async getSellerCoupons(sellerId: string) {
     return Coupon.find({ seller: sellerId }).sort({ createdAt: -1 });
   }
+  
+  async validateCoupon(code: string, sellerId: string, subtotal: number) {
+    const coupon = await Coupon.findOne({ 
+      code: code.toUpperCase(), 
+      seller: sellerId,
+      isActive: true 
+    });
+
+    if (!coupon) {
+      throw ApiError.notFound('Invalid or inactive coupon code');
+    }
+
+    const now = new Date();
+    if (coupon.startsAt && coupon.startsAt > now) {
+      throw ApiError.badRequest('Coupon campaign hasn\'t started yet');
+    }
+    if (coupon.expiresAt && coupon.expiresAt < now) {
+      throw ApiError.badRequest('Coupon has expired');
+    }
+    if (coupon.usageLimit && coupon.usedCount >= coupon.usageLimit) {
+      throw ApiError.badRequest('Coupon usage limit reached');
+    }
+    if (subtotal < coupon.minOrderAmount) {
+      throw ApiError.badRequest(`Minimum order amount of GHS ${coupon.minOrderAmount} required`);
+    }
+
+    let discount = 0;
+    if (coupon.type === 'percentage') {
+      discount = (subtotal * coupon.value) / 100;
+    } else {
+      discount = Math.min(subtotal, coupon.value);
+    }
+
+    return {
+      code: coupon.code,
+      type: coupon.type,
+      value: coupon.value,
+      discount
+    };
+  }
 
   async createBundle(
     sellerId: string,

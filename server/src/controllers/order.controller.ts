@@ -249,6 +249,27 @@ export const getSellerCoupons = async (
   }
 };
 
+export const validateCoupon = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const { code, sellerId, subtotal } = req.query;
+    if (!code || !sellerId || !subtotal) {
+      throw ApiError.badRequest('Code, sellerId and subtotal are required');
+    }
+    const result = await orderService.validateCoupon(
+      code as string,
+      sellerId as string,
+      parseFloat(subtotal as string)
+    );
+    res.status(200).json({ success: true, data: result });
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const createBundle = async (
   req: Request,
   res: Response,
