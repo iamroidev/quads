@@ -383,7 +383,7 @@ export const BulletinLayout: React.FC<BulletinLayoutProps> = ({
             {/* Legal & Privacy */}
             <div className="mt-16 flex flex-col md:flex-row items-center justify-between border-t-2 border-[var(--bulletin-border)] pt-8 gap-6">
               <div className="flex flex-wrap items-center justify-center md:justify-start gap-3">
-                <Link to="/terms#privacy" className="text-[9px] font-black uppercase tracking-[0.3em] text-[var(--bulletin-text)] opacity-40 hover:opacity-100 hover:text-[#ff6b6b] transition-all">Privacy Policy</Link>
+                <Link to="/privacy" className="text-[9px] font-black uppercase tracking-[0.3em] text-[var(--bulletin-text)] opacity-40 hover:opacity-100 hover:text-[#ff6b6b] transition-all">Privacy Policy</Link>
                 <span className="text-[var(--bulletin-border)]">|</span>
                 <Link to="/terms#tos" className="text-[9px] font-black uppercase tracking-[0.3em] text-[var(--bulletin-text)] opacity-40 hover:opacity-100 hover:text-[#ff6b6b] transition-all">Terms of Service</Link>
                 <span className="text-[var(--bulletin-border)]">|</span>
