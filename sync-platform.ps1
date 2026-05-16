@@ -21,7 +21,10 @@ Write-Host "GitHub Push Complete. Vercel is now rebuilding the frontend."
 # --- STEP 2: REMOTE SYNC (AWS/Backend) ---
 Write-Host "Step 2: Synchronizing AWS EC2 Backend..."
 
-$RemoteCmds = 'export NVM_DIR="$HOME/.nvm"; [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"; nvm use 16; cd /home/ec2-user/quads; git fetch origin bulleting; git reset --hard origin/bulleting; cd server; npm install --production; npm run build; pm2 restart quads-api || pm2 start dist/app.js --name quads-api; pm2 status quads-api'
+# Upload local .env to server (using ${} to avoid PowerShell parser errors with ':')
+scp -i $PemKey .env "${Ec2User}@${Ec2Ip}:${RemotePath}/.env"
+
+$RemoteCmds = 'export NVM_DIR="$HOME/.nvm"; [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"; nvm use 16; cd /home/ec2-user/quads; git fetch origin bulleting; git reset --hard origin/bulleting; cd server; npm install --production; npm run build; pm2 restart quads-api --update-env || pm2 start dist/app.js --name quads-api; pm2 status quads-api'
 
 ssh -i $PemKey -o StrictHostKeyChecking=no "$Ec2User@$Ec2Ip" $RemoteCmds
 
