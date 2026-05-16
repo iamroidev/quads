@@ -6,7 +6,7 @@ import categoryService, { CategoryWithCount } from '../services/category.service
 import api from '../services/api';
 import { ProductPopulated } from '../types';
 import { BulletinLayout, BulletinSection } from '../components/layout/BulletinLayout';
-import { ProductCardSkeleton, CategorySkeleton } from '../components/ui/BulletinSkeleton';
+import { ProductCardSkeleton, CategorySkeleton, CategoryIcon } from '../components/ui';
 import ProductCard from '../components/product/ProductCard';
 import { Package, Smartphone, Truck, Shield, TrendingUp } from 'lucide-react';
 import PulseFeed from '../components/feed/PulseFeed';
@@ -197,7 +197,9 @@ const HomePage: React.FC = () => {
                 style={{ transform: `rotate(${(idx % 2 === 0 ? 0.5 : -0.5)}deg)` }}>
                 <div className="absolute top-2 right-2 h-2 w-2 rounded-full bg-[#ff6b6b]" />
                 <div className="text-center">
-                  <div className="mb-4 text-4xl group-hover:scale-110 transition-transform">{cat.icon || '📦'}</div>
+                  <div className="mb-4 flex justify-center group-hover:scale-110 transition-transform text-[var(--bulletin-text)]">
+                    <CategoryIcon name={cat.icon} className="h-10 w-10" />
+                  </div>
                   <div className="text-[12px] font-black uppercase tracking-widest text-[var(--bulletin-text)] mb-1">{cat.name}</div>
                   <div className="text-[9px] font-black uppercase tracking-widest opacity-40 text-[var(--bulletin-text)]">{cat.productCount || 0} items</div>
                 </div>

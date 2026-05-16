@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Package } from 'lucide-react';
 import categoryService, { CategoryWithCount } from '../services/category.service';
-import { LoadingSpinner } from '../components/ui';
+import { LoadingSpinner, CategoryIcon } from '../components/ui';
 import { BulletinLayout, BulletinSection } from '../components/layout/BulletinLayout';
 
 const Categories: React.FC = () => {
@@ -65,7 +65,9 @@ const Categories: React.FC = () => {
                 }}
               >
                 <div className="text-center">
-                  <div className="mb-4 text-4xl whitespace-nowrap">{cat.icon || '📦'}</div>
+                  <div className="mb-6 flex justify-center text-[var(--bulletin-text)] group-hover:scale-110 transition-transform">
+                    <CategoryIcon name={cat.icon} className="h-12 w-12" />
+                  </div>
                   <div className="font-black uppercase tracking-tight text-lg text-[var(--bulletin-text)] truncate">{cat.name}</div>
                   <div className="mt-3 text-[10px] font-black uppercase tracking-widest opacity-40 text-[var(--bulletin-text)]">
                     {cat.productCount} Items Available
