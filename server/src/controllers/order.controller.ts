@@ -270,6 +270,20 @@ export const validateCoupon = async (
   }
 };
 
+export const getPublicSellerCoupons = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const { sellerId } = req.params;
+    const coupons = await orderService.getPublicSellerCoupons(sellerId);
+    res.status(200).json({ success: true, data: { coupons } });
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const createBundle = async (
   req: Request,
   res: Response,

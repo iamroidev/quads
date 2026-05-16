@@ -19,6 +19,7 @@ import {
   ChevronLeft,
   ChevronRight,
   X,
+  BadgePercent,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import productService from '../services/product.service';
@@ -26,6 +27,7 @@ import chatService from '../services/chat.service';
 import reviewService from '../services/review.service';
 import growthService from '../services/growth.service';
 import savedItemService from '../services/savedItem.service';
+import orderService from '../services/order.service';
 import { LoadingSpinner } from '../components/ui';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
@@ -64,6 +66,8 @@ const ProductDetail: React.FC = () => {
   const [relatedProducts, setRelatedProducts] = useState<ProductPopulated[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [sellerCoupons, setSellerCoupons] = useState<any[]>([]);
+  const [productBundles, setProductBundles] = useState<any[]>([]);
   const [showReportModal, setShowReportModal] = useState(false);
   const [reportReason, setReportReason] = useState('');
   const [reporting, setReporting] = useState(false);
@@ -575,7 +579,30 @@ const ProductDetail: React.FC = () => {
               </div>
             )}
 
-            {/* Action buttons */}
+            {/* Discovery: Available Coupons */}
+            {sellerCoupons.length > 0 && (
+              <div className="mb-10 p-6 border-4 border-black bg-[#fffacd] dark:bg-yellow-900/20 shadow-[8px_8px_0_0_#000] rotate-[-0.5deg]">
+                <div className="flex items-center gap-2 mb-4">
+                  <BadgePercent className="h-5 w-5 text-[#ff6b6b]" />
+                  <h3 className="text-[12px] font-black uppercase tracking-[0.2em]">Seller Promotions</h3>
+                </div>
+                <div className="grid gap-3">
+                  {sellerCoupons.map((coupon) => (
+                    <div key={coupon._id} className="flex items-center justify-between border-2 border-dashed border-black/30 p-3 bg-white/40 dark:bg-black/40">
+                      <div>
+                        <div className="text-[14px] font-black">{coupon.type === 'percentage' ? `${coupon.value}% OFF` : `GHS ${coupon.value} OFF`}</div>
+                        <div className="text-[9px] font-bold opacity-60 uppercase">Min Order: GHS {coupon.minOrderAmount}</div>
+                      </div>
+                      <div className="flex flex-col items-end">
+                        <div className="bg-black text-white px-3 py-1 text-[12px] font-mono font-bold select-all cursor-copy">{coupon.code}</div>
+                        <div className="text-[8px] font-black mt-1 opacity-40">CLICK TO COPY</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <p className="text-[9px] font-bold mt-4 opacity-50 italic">* Apply code at checkout to redeem.</p>
+              </div>
+            )}
             <div className="flex flex-wrap gap-4 mt-auto">
               {isOwner ? (
                 <Link

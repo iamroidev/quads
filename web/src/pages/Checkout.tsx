@@ -30,6 +30,7 @@ interface CheckoutFormState {
   note: string;
   paymentMethod: PaymentMethod;
   termsAccepted: boolean;
+  couponCode: string;
 }
 
 const Checkout: React.FC = () => {
