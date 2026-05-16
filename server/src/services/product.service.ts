@@ -593,11 +593,37 @@ class ProductService {
   }
 
   /**
-   * Get featured products
+   * Get featured products (including those boosted by campaigns)
    */
   async getFeaturedProducts(limit: number = 8): Promise<IProductDocument[]> {
-    return Product.find({ status: 'active', isFeatured: true, isFlagged: false })
-      .sort({ createdAt: -1 })
+    const now = new Date();
+    // 1. Get products in active featured campaigns
+    const PromotionCampaign = mongoose.model('PromotionCampaign');
+    const activeCampaigns = await PromotionCampaign.find({
+      isActive: true,
+      featuredBoost: true,
+      startsAt: { $lte: now },
+      endsAt: { $gte: now }
+    }).select('targetProductIds targetType targetCategory');
+
+    const boostedProductIds: mongoose.Types.ObjectId[] = [];
+    for (const camp of activeCampaigns as any[]) {
+       if (camp.targetType === 'product' && camp.targetProductIds) {
+         boostedProductIds.push(...camp.targetProductIds);
+       }
+       // Note: handling 'category' or 'all' targetType could be added here
+    }
+
+    // 2. Fetch products: either explicitly marked featured OR in a boosted campaign
+    return Product.find({
+      status: 'active',
+      isFlagged: false,
+      $or: [
+        { isFeatured: true },
+        { _id: { $in: boostedProductIds } }
+      ]
+    })
+      .sort({ isFeatured: -1, createdAt: -1 })
       .limit(limit)
       .populate('category', 'name slug icon')
       .populate('seller', 'name storeName brandName avatar isVerified location');

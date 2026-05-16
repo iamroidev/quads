@@ -90,13 +90,71 @@ class OrderService {
       }
 
       const deliveryFee = deliveryMethod === 'delivery' ? 5.00 : 0;
-      const totalAmount = orderSubtotal + deliveryFee;
+      let orderSubtotalAfterBundles = orderSubtotal;
+      let bundleDiscountTotal = 0;
+
+      // 1. Check for active Bundles from this seller
+      const activeBundles = await Bundle.find({ seller: sellerId, isActive: true });
+      const cartItemIds = groupItems.map(gi => gi.product._id.toString());
+
+      for (const bundle of activeBundles) {
+        // Check if ALL products in the bundle are in the cart
+        const bundleProductIds = bundle.productIds.map(id => id.toString());
+        const isMatch = bundleProductIds.every(id => cartItemIds.includes(id));
+
+        if (isMatch) {
+          // Calculate bundle discount on the items involved
+          let bundleSubtotal = 0;
+          for (const pid of bundleProductIds) {
+            const cartItem = groupItems.find(gi => gi.product._id.toString() === pid);
+            if (cartItem) {
+              bundleSubtotal += cartItem.product.price; // assuming quantity 1 for bundle match for now
+            }
+          }
+          const discount = (bundleSubtotal * bundle.discountPercent) / 100;
+          bundleDiscountTotal += discount;
+        }
+      }
+
+      orderSubtotalAfterBundles -= bundleDiscountTotal;
+      let totalAmount = orderSubtotalAfterBundles + deliveryFee;
+      let discountAmount = bundleDiscountTotal;
+
+      // 2. Apply Coupon if provided
+      if (couponCode) {
+        const coupon = await Coupon.findOne({ 
+          code: couponCode.toUpperCase(), 
+          seller: sellerId,
+          isActive: true 
+        });
+
+        if (coupon) {
+          const now = new Date();
+          const isStarted = !coupon.startsAt || coupon.startsAt <= now;
+          const isNotExpired = !coupon.expiresAt || coupon.expiresAt >= now;
+          const underLimit = coupon.usageLimit ? coupon.usedCount < coupon.usageLimit : true;
+
+          if (isStarted && isNotExpired && underLimit && orderSubtotalAfterBundles >= coupon.minOrderAmount) {
+             let couponDiscount = 0;
+             if (coupon.type === 'percentage') {
+               couponDiscount = (orderSubtotalAfterBundles * coupon.value) / 100;
+             } else {
+               couponDiscount = Math.min(orderSubtotalAfterBundles, coupon.value);
+             }
+             discountAmount += couponDiscount;
+             totalAmount -= couponDiscount;
+             coupon.usedCount += 1;
+             await coupon.save();
+          }
+        }
+      }
 
       const order = await Order.create({
         buyer: buyerId,
         seller: sellerId,
         items: orderItems,
         totalAmount,
+        discountAmount,
         deliveryMethod,
         pickupLocation: deliveryMethod === 'pickup' ? pickupLocation : undefined,
         deliveryAddress: deliveryMethod === 'delivery' ? deliveryAddress : undefined,

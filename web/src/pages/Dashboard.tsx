@@ -11,6 +11,9 @@ import {
   BarChart2,
   X,
   Repeat,
+  TrendingUp,
+  Megaphone,
+  BadgePercent,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import productService from '../services/product.service';
@@ -177,25 +180,48 @@ const Dashboard: React.FC = () => {
           )}
         </BulletinSection>
 
-        {/* Growth Toolkit shortcut */}
-        <BulletinSection 
-          bgColor="bg-[#f0e8f4] dark:bg-purple-900/10" 
-          title="Growth Toolkit" 
-          subtitle="Promotions"
-          action={<Link to="/seller/growth" className="text-[11px] underline">Manage Tools →</Link>}
-        >
-          <div className="grid gap-4 md:grid-cols-3">
-            <div className="border border-black dark:border-white/20 bg-[var(--bulletin-card)] p-5 opacity-80">
-              <div className="font-bold text-sm mb-1 uppercase tracking-tighter italic underline">Campaigns</div>
-              <p className="text-[10px] opacity-60 dark:opacity-80 leading-tight">Schedule featured listing boosts to reach more students.</p>
-            </div>
-            <div className="border border-black dark:border-white/20 bg-[var(--bulletin-card)] p-5 opacity-80">
-              <div className="font-bold text-sm mb-1 uppercase tracking-tighter italic underline">Coupons</div>
-              <p className="text-[10px] opacity-60 dark:opacity-80 leading-tight">Create discount codes for your loyal buyers.</p>
-            </div>
-            <div className="border border-black dark:border-white/20 bg-[var(--bulletin-card)] p-5 opacity-80">
-              <div className="font-bold text-sm mb-1 uppercase tracking-tighter italic underline">Bundles</div>
-              <p className="text-[10px] opacity-60 dark:opacity-80 leading-tight">Offer price drops when buyers purchase multiple items.</p>
+        {/* Accelerator / Growth Toolkit */}
+        <BulletinSection bgColor="bg-[#f0e8f4] dark:bg-purple-900/10">
+          <div className="grid lg:grid-cols-2 gap-8">
+            <BulletinCard rotation={0.3} bgColor="bg-[#e0f2f7] dark:bg-sky-900/20" className="border-4 border-black shadow-[12px_12px_0_0_#000] p-10 h-full flex flex-col">
+              <div className="flex items-center gap-3 mb-8">
+                 <div className="h-12 w-12 border-4 border-black bg-white flex items-center justify-center shadow-[6px_6px_0_0_#000]">
+                    <TrendingUp className="h-6 w-6 text-black" />
+                 </div>
+                 <div className="text-[12px] font-black uppercase tracking-[0.4em] opacity-40">Accelerator</div>
+              </div>
+              <h3 className="text-4xl font-black uppercase mb-6 leading-none">Scale Your <br />Storefront.</h3>
+              <p className="text-sm font-bold opacity-60 mb-10 leading-relaxed max-w-md">Access pro-grade marketing tools: Campaigns, Coupons, and Dynamic Bundles designed to maximize your campus reach and conversion.</p>
+              <div className="mt-auto">
+                <Link to="/seller/growth" className="inline-block border-4 border-black bg-black text-white px-10 py-5 text-[12px] font-black uppercase text-center tracking-[0.2em] hover:bg-[#ff6b6b] transition-all shadow-[8px_8px_0_0_#ff6b6b] hover:translate-y-1 hover:shadow-none">Open Growth Toolkit →</Link>
+              </div>
+            </BulletinCard>
+
+            <div className="grid grid-cols-1 gap-4">
+               <div className="border-4 border-black bg-[var(--bulletin-card)] p-6 shadow-[8px_8px_0_0_rgba(0,0,0,0.1)] hover:translate-x-1 transition-transform cursor-pointer">
+                  <div className="flex justify-between items-start mb-2">
+                    <span className="text-[10px] font-black uppercase tracking-widest opacity-40">Strategy 01</span>
+                    <Megaphone className="h-4 w-4 opacity-20" />
+                  </div>
+                  <div className="text-xl font-black uppercase">Active Campaigns</div>
+                  <p className="text-xs opacity-60 mt-2">Boost your items to the top of the "Featured" board instantly.</p>
+               </div>
+               <div className="border-4 border-black bg-[var(--bulletin-card)] p-6 shadow-[8px_8px_0_0_rgba(0,0,0,0.1)] hover:translate-x-1 transition-transform cursor-pointer">
+                  <div className="flex justify-between items-start mb-2">
+                    <span className="text-[10px] font-black uppercase tracking-widest opacity-40">Strategy 02</span>
+                    <BadgePercent className="h-4 w-4 opacity-20" />
+                  </div>
+                  <div className="text-xl font-black uppercase">Loyalty Coupons</div>
+                  <p className="text-xs opacity-60 mt-2">Distribute unique codes to drive repeat purchases from buyers.</p>
+               </div>
+               <div className="border-4 border-black bg-[var(--bulletin-card)] p-6 shadow-[8px_8px_0_0_rgba(0,0,0,0.1)] hover:translate-x-1 transition-transform cursor-pointer">
+                  <div className="flex justify-between items-start mb-2">
+                    <span className="text-[10px] font-black uppercase tracking-widest opacity-40">Strategy 03</span>
+                    <Package className="h-4 w-4 opacity-20" />
+                  </div>
+                  <div className="text-xl font-black uppercase">Multi-Buy Bundles</div>
+                  <p className="text-xs opacity-60 mt-2">Create starter packs or clearing-out deals with automatic discounts.</p>
+               </div>
             </div>
           </div>
         </BulletinSection>
