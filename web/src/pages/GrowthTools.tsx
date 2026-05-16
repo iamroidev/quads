@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { TrendingUp, Ticket, Package, Sparkles, Megaphone, Target, ArrowRight, Clock, Plus, Trash2 } from 'lucide-react';
+import { TrendingUp, Ticket, Package, BadgePercent, Megaphone, Target, ArrowRight, Clock, Plus, Trash2 } from 'lucide-react';
 import { BulletinLayout, BulletinSection } from '../components/layout/BulletinLayout';
 import { useQuery } from '@tanstack/react-query';
 import orderService from '../services/order.service';
@@ -192,7 +192,7 @@ const GrowthTools: React.FC = () => {
               </div>
               <div className="relative z-10 text-black dark:text-white">
                 <div className="h-12 w-12 border-4 border-black bg-white flex items-center justify-center mb-6 shadow-[4px_4px_0_0_#000]">
-                  <Sparkles className="h-6 w-6 text-black" />
+                  <BadgePercent className="h-6 w-6 text-black" />
                 </div>
                 <h3 className="text-2xl font-black uppercase tracking-tight mb-3">Smart Coupons</h3>
                 <p className="text-sm opacity-70 mb-8 leading-tight">Create unique codes for your loyal buyers or social media campaigns.</p>
