@@ -192,7 +192,7 @@ export const BulletinLayout: React.FC<BulletinLayoutProps> = ({
                            <div className="text-[8px] font-black uppercase tracking-widest opacity-40 dark:opacity-70 text-black dark:text-white">Currently viewing as</div>
                            <div className="text-[10px] font-black uppercase tracking-widest flex items-center gap-2 text-black dark:text-white">
                              <div className={`h-2 w-2 rounded-full ${user?.viewMode === 'seller' ? 'bg-[#ff6b6b]' : 'bg-sky-500'} animate-pulse`} />
-                             {user?.viewMode?.toUpperCase()}
+                             {(user?.viewMode || (user?.roles?.includes('seller') ? 'seller' : 'buyer')).toUpperCase()}
                            </div>
                         </div>
                         

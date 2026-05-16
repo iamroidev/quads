@@ -101,7 +101,7 @@ export const getDispute = async (
 ): Promise<void> => {
   try {
     const userId = req.user!._id.toString();
-    const isAdmin = req.user!.role === 'admin';
+    const isAdmin = req.user!.roles.includes('admin');
 
     const dispute = await Dispute.findById(req.params.id)
       .populate('order', 'orderNumber totalAmount status items')

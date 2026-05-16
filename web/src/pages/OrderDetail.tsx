@@ -16,7 +16,12 @@ import {
   Clock,
   DollarSign,
   ThumbsUp,
+  QrCode,
+  Camera,
+  CheckCircle2
 } from 'lucide-react';
+import { QRCodeSVG } from 'qrcode.react';
+import { Html5QrcodeScanner } from 'html5-qrcode';
 import toast from 'react-hot-toast';
 import orderService from '../services/order.service';
 import chatService from '../services/chat.service';
@@ -99,6 +104,12 @@ const OrderDetail: React.FC = () => {
   const [reviewRating, setReviewRating] = useState(5);
   const [reviewComment, setReviewComment] = useState('');
   const [submittingReview, setSubmittingReview] = useState(false);
+  
+  // Handover state
+  const [showScanner, setShowScanner] = useState(false);
+  const [showManualCodeModal, setShowManualCodeModal] = useState(false);
+  const [manualCode, setManualCode] = useState('');
+  const [verifyingCode, setVerifyingCode] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -157,6 +168,66 @@ const OrderDetail: React.FC = () => {
     }
   };
 
+  const handleVerifyCode = async (code: string) => {
+    if (!id || !code || code.length !== 6) {
+      toast.error('Please enter a valid 6-digit code');
+      return;
+    }
+
+    setVerifyingCode(true);
+    try {
+      const response = await api.post(`/orders/${id}/verify-handoff`, { code });
+      if (response.data.success) {
+        toast.success('Handoff verified! Transaction completed.');
+        setOrder(response.data.data.order);
+        setShowManualCodeModal(false);
+        setShowScanner(false);
+      }
+    } catch (error: any) {
+      console.error('Handoff verification failed:', error);
+      toast.error(error.response?.data?.message || 'Verification failed. Please check the code.');
+    } finally {
+      setVerifyingCode(false);
+    }
+  };
+
+  useEffect(() => {
+    let scanner: Html5QrcodeScanner | null = null;
+
+    if (showScanner) {
+      scanner = new Html5QrcodeScanner(
+        "qr-reader",
+        { fps: 10, qrbox: { width: 250, height: 250 } },
+        /* verbose= */ false
+      );
+
+      scanner.render((decodedText) => {
+        try {
+          const data = JSON.parse(decodedText);
+          if (data.type === 'HANDOVER' && data.code) {
+            scanner?.clear();
+            handleVerifyCode(data.code);
+          } else {
+            toast.error('Invalid QR code format');
+          }
+        } catch (e) {
+          // If not JSON, maybe it's just the code string
+          if (decodedText.length === 6) {
+            scanner?.clear();
+            handleVerifyCode(decodedText);
+          }
+        }
+      }, (error) => {
+        // console.warn(error);
+      });
+    }
+
+    return () => {
+      if (scanner) {
+        scanner.clear().catch(console.error);
+      }
+    };
+  }, [showScanner]);
   const handleSubmitReview = async () => {
     if (!id) return;
     if (!reviewComment.trim()) { toast.error('Please add a comment'); return; }
@@ -440,7 +511,71 @@ const OrderDetail: React.FC = () => {
           </div>
         </div>
 
-        {/* Note */}
+        {/* Handover System */}
+        {order.status === 'ready' && (
+          <div className="border-4 border-black dark:border-[var(--bulletin-border)] bg-[var(--bulletin-card)] p-8 shadow-[8px_8px_0_0_var(--bulletin-shadow)] mb-8" style={{ transform: 'rotate(-0.2deg)' }}>
+            <div className="flex flex-col md:flex-row gap-8 items-center">
+              {!isBuyer ? (
+                <>
+                  <div className="flex-1">
+                    <div className="text-[10px] font-black uppercase tracking-widest text-[#ff6b6b] mb-2">Handover Protocol</div>
+                    <h3 className="text-2xl font-black uppercase tracking-tight mb-4 text-[var(--bulletin-text)]">Show this to the buyer</h3>
+                    <p className="text-sm font-bold opacity-60 mb-6 text-[var(--bulletin-text)]">The buyer must scan this code to confirm receipt and release your funds from escrow.</p>
+                    <div className="bg-black text-white p-4 font-mono text-center text-2xl font-black tracking-[0.5em] border-2 border-dashed border-white/20">
+                      {order.handoffCode}
+                    </div>
+                  </div>
+                  <div className="bg-white p-6 border-4 border-black shadow-[4px_4px_0_0_black]">
+                    <QRCodeSVG 
+                      value={JSON.stringify({ orderId: order._id, code: order.handoffCode, type: 'HANDOVER' })}
+                      size={180}
+                      level="H"
+                    />
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="flex-1">
+                    <div className="text-[10px] font-black uppercase tracking-widest text-emerald-600 mb-2">Handover Verification</div>
+                    <h3 className="text-2xl font-black uppercase tracking-tight mb-4 text-[var(--bulletin-text)]">Ready to pick up?</h3>
+                    <p className="text-sm font-bold opacity-60 mb-6 text-[var(--bulletin-text)]">Scan the seller's QR code or enter their handover code to finalize the transaction and release payment.</p>
+                    <div className="flex flex-col sm:flex-row gap-4">
+                      <button
+                        onClick={() => setShowScanner(true)}
+                        className="flex-1 border-2 border-black dark:border-[var(--bulletin-border)] bg-black text-white px-6 py-4 text-[10px] font-black uppercase tracking-widest shadow-[4px_4px_0_0_var(--bulletin-shadow)] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-none transition-all"
+                      >
+                        <Camera className="inline-block h-4 w-4 mr-2" />
+                        Scan QR Code
+                      </button>
+                      <button
+                        onClick={() => setShowManualCodeModal(true)}
+                        className="flex-1 border-2 border-black dark:border-[var(--bulletin-border)] bg-[var(--bulletin-card)] px-6 py-4 text-[10px] font-black uppercase tracking-widest shadow-[4px_4px_0_0_var(--bulletin-shadow)] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-none transition-all text-[var(--bulletin-text)]"
+                      >
+                        <QrCode className="inline-block h-4 w-4 mr-2" />
+                        Enter Code Manually
+                      </button>
+                    </div>
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+        )}
+
+        {order.status === 'completed' && order.handoffStatus === 'verified' && (
+          <div className="border-4 border-emerald-600 bg-emerald-50 dark:bg-emerald-900/10 p-8 shadow-[8px_8px_0_0_rgba(5,150,105,0.2)] mb-8" style={{ transform: 'rotate(0.1deg)' }}>
+            <div className="flex items-center gap-6">
+              <div className="bg-emerald-600 text-white p-4 rounded-full">
+                <CheckCircle2 className="h-8 w-8" />
+              </div>
+              <div>
+                <div className="text-[10px] font-black uppercase tracking-widest text-emerald-600 mb-1">Handover Success</div>
+                <h3 className="text-2xl font-black uppercase tracking-tight text-emerald-900 dark:text-emerald-100">Transaction Finalized</h3>
+                <p className="text-sm font-bold opacity-60 text-emerald-800 dark:text-emerald-200">The escrow has been released. {isBuyer ? 'Thank you for shopping on QUADS!' : 'Funds have been added to your payout balance.'}</p>
+              </div>
+            </div>
+          </div>
+        )}
         {order.note && (
           <div className="border-2 border-[var(--bulletin-border)] bg-[#fffacd] dark:bg-yellow-900/10 p-6 shadow-[4px_4px_0_0_var(--bulletin-shadow)] mb-6">
             <div className="text-[10px] font-black uppercase tracking-widest opacity-40 mb-2 text-black dark:text-yellow-200">Note</div>
@@ -589,6 +724,67 @@ const OrderDetail: React.FC = () => {
                   {submittingReview ? 'Submitting...' : 'Post Review'}
                 </button>
               </div>
+            </div>
+          </div>
+        )}
+
+        {/* Manual Code Modal */}
+        {showManualCodeModal && (
+          <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+            <div className="border-4 border-black dark:border-[var(--bulletin-border)] bg-[var(--bulletin-card)] shadow-[16px_16px_0_0_var(--bulletin-shadow)] max-w-sm w-full p-10 animate-in zoom-in-95 duration-200">
+              <div className="text-[10px] font-black uppercase tracking-widest opacity-40 mb-2 text-[var(--bulletin-text)]">Manual Entry</div>
+              <h3 className="text-2xl font-black uppercase tracking-tight mb-8 text-[var(--bulletin-text)]">Enter Handover Code</h3>
+              
+              <input
+                type="text"
+                maxLength={6}
+                value={manualCode}
+                onChange={(e) => setManualCode(e.target.value.replace(/\D/g, ''))}
+                placeholder="000000"
+                className="w-full text-center text-4xl font-black tracking-[0.5em] py-4 border-4 border-black dark:border-[var(--bulletin-border)] bg-[var(--bulletin-bg)] mb-8 focus:outline-none focus:ring-4 focus:ring-[#ff6b6b] text-[var(--bulletin-text)]"
+              />
+
+              <div className="flex flex-col gap-4">
+                <button
+                  onClick={() => handleVerifyCode(manualCode)}
+                  disabled={verifyingCode || manualCode.length !== 6}
+                  className="w-full border-2 border-black dark:border-[var(--bulletin-border)] bg-black text-white py-4 text-[10px] font-black uppercase tracking-widest shadow-[4px_4px_0_0_var(--bulletin-shadow)] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-none transition-all disabled:opacity-50"
+                >
+                  {verifyingCode ? 'Verifying...' : 'Verify & Release Funds'}
+                </button>
+                <button
+                  onClick={() => setShowManualCodeModal(false)}
+                  className="w-full border-2 border-black dark:border-[var(--bulletin-border)] bg-[var(--bulletin-card)] py-4 text-[10px] font-black uppercase tracking-widest shadow-[4px_4px_0_0_var(--bulletin-shadow)] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-none transition-all text-[var(--bulletin-text)]"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Scanner Modal */}
+        {showScanner && (
+          <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+            <div className="border-4 border-black dark:border-[var(--bulletin-border)] bg-[var(--bulletin-card)] shadow-[16px_16px_0_0_var(--bulletin-shadow)] max-w-lg w-full p-8 animate-in zoom-in-95 duration-200">
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <div className="text-[10px] font-black uppercase tracking-widest opacity-40 text-[var(--bulletin-text)]">Scanner</div>
+                  <h3 className="text-2xl font-black uppercase tracking-tight text-[var(--bulletin-text)]">Scan Handover QR</h3>
+                </div>
+                <button
+                  onClick={() => setShowScanner(false)}
+                  className="border-2 border-black dark:border-[var(--bulletin-border)] bg-[var(--bulletin-card)] p-2 shadow-[2px_2px_0_0_var(--bulletin-shadow)] hover:shadow-none transition-all text-[var(--bulletin-text)]"
+                >
+                  <XCircle className="h-6 w-6" />
+                </button>
+              </div>
+              
+              <div id="qr-reader" className="overflow-hidden border-4 border-black mb-6 bg-black"></div>
+              
+              <p className="text-center text-xs font-bold opacity-40 text-[var(--bulletin-text)] uppercase tracking-widest">
+                Center the QR code within the frame
+              </p>
             </div>
           </div>
         )}

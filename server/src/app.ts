@@ -78,12 +78,6 @@ app.use(
   })
 );
 
-// Input sanitization — runs on every request BEFORE body parsing
-app.use(sanitizeInput);
-
-// Body size validation
-app.use(validateBodySize(10 * 1024 * 1024)); // 10MB max
-
 // Body parsing — capture raw body for Paystack webhook signature validation
 app.use(
   express.json({
@@ -97,6 +91,12 @@ app.use(
   })
 );
 app.use(express.urlencoded({ extended: true }));
+
+// Input sanitization — runs on every request AFTER body parsing
+app.use(sanitizeInput);
+
+// Body size validation
+app.use(validateBodySize(10 * 1024 * 1024)); // 10MB max
 
 // Cookie parser
 app.use(cookieParser());
@@ -115,8 +115,8 @@ app.use('/uploads', express.static('uploads'));
 // Global API rate limiting — 100 requests per 15 minutes
 app.use('/api', apiLimiter);
 
-// Auth routes — stricter limits to prevent brute force
-app.use('/api/auth', authLimiter);
+// Auth routes — stricter limits applied per route in auth.routes.ts
+// app.use('/api/auth', authLimiter);
 
 // Payment routes — protect against payment abuse
 app.use('/api/payments', paymentLimiter);

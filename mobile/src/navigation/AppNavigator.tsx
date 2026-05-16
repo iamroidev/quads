@@ -44,6 +44,7 @@ import {
    MaintenanceScreen,
    CollectionDetailScreen,
    ResetPasswordScreen,
+   ScannerScreen,
  } from '../screens';
 import { navigationRef } from './navigationRef';
 import { colors } from '../theme';
@@ -125,6 +126,11 @@ const OrdersStackScreen = () => (
       name="OrderDetail"
       component={OrderDetailScreen}
       options={{ ...defaultStackHeader, title: 'Order Details' }}
+    />
+    <OrdersStack.Screen
+      name="Scanner"
+      component={ScannerScreen}
+      options={{ ...defaultStackHeader, title: 'Scanner', headerShown: false }}
     />
   </OrdersStack.Navigator>
 );
@@ -238,6 +244,11 @@ const ProfileStackScreen = () => (
               name="CollectionDetail"
               component={CollectionDetailScreen}
               options={{ ...defaultStackHeader, title: 'Collection' }}
+            />
+            <ProfileStack.Screen
+              name="Scanner"
+              component={ScannerScreen}
+              options={{ ...defaultStackHeader, title: 'Scanner', headerShown: false }}
             />
           </ProfileStack.Navigator>
         );

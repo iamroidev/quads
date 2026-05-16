@@ -18,6 +18,7 @@ import {
 } from '../controllers/auth.controller';
 import { authenticate } from '../middleware/auth';
 import { validate } from '../middleware/validate';
+import { authLimiter } from '../middleware/rateLimit';
 import { upload } from '../utils/imageUpload';
 
 const router = Router();
@@ -25,6 +26,7 @@ const router = Router();
 // @route   POST /api/auth/register
 router.post(
   '/register',
+  authLimiter,
   [
     body('name')
       .trim()
@@ -52,6 +54,7 @@ router.post(
 // @route   POST /api/auth/login
 router.post(
   '/login',
+  authLimiter,
   [
     body('supabaseAccessToken')
       .trim()
@@ -109,6 +112,7 @@ router.post('/profile/avatar', authenticate, upload.single('avatar'), uploadAvat
 router.put(
   '/change-password',
   authenticate,
+  authLimiter,
   [
     body('currentPassword')
       .notEmpty()
@@ -140,9 +144,8 @@ router.put(
   '/switch-role',
   authenticate,
   [
-    body('role')
-      .isIn(['buyer', 'seller'])
-      .withMessage('Role must be buyer or seller'),
+    body('targetMode').optional().isIn(['buyer', 'seller']),
+    body('role').optional().isIn(['buyer', 'seller']),
     validate,
   ],
   switchRole

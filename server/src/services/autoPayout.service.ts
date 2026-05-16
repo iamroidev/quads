@@ -31,10 +31,19 @@ class AutoPayoutService {
 
     try {
       // Get all pending payouts with populated seller info
+      // CRITICAL: Only process if the associated order is 'completed'
       const pendingPayouts = await Payout.find({ status: 'pending' })
+        .populate({
+          path: 'order',
+          match: { status: 'completed' },
+          select: 'status'
+        })
         .populate('seller', 'name email sellerOnboarding');
 
-      for (const payout of pendingPayouts) {
+      // Filter out payouts where the order wasn't completed (populate returns null for match failure)
+      const eligiblePayouts = pendingPayouts.filter(p => p.order !== null);
+
+      for (const payout of eligiblePayouts) {
         const seller = payout.seller as any;
 
         // Skip if seller hasn't completed payout setup
@@ -100,7 +109,7 @@ class AutoPayoutService {
       }
 
       return {
-        processed: pendingPayouts.length,
+        processed: eligiblePayouts.length,
         succeeded,
         failed,
         skipped,

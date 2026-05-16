@@ -259,7 +259,13 @@ class OrderService {
       throw ApiError.forbidden('You do not have access to this order');
     }
 
-    return order;
+    // Hide handoffCode from buyer
+    const result = order.toObject();
+    if (order.buyer._id?.toString() === userId && !isAdmin && sellerOwnerId !== userId) {
+      delete (result as any).handoffCode;
+    }
+
+    return result;
   }
 
   /**

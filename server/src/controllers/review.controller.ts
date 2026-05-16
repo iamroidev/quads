@@ -154,7 +154,7 @@ export const getOrderReview = async (
     const isOwner =
       order.buyer.toString() === userId ||
       order.seller.toString() === userId ||
-      req.user!.role === 'admin';
+      req.user!.roles.includes('admin');
 
     if (!isOwner) throw ApiError.forbidden('Not authorized to view this order review');
 
@@ -185,7 +185,7 @@ export const hasReviewed = async (
 
     if (
       order.buyer.toString() !== req.user!._id.toString() &&
-      req.user!.role !== 'admin'
+      !req.user!.roles.includes('admin')
     ) {
       throw ApiError.forbidden('Only the buyer can check review status for this order');
     }
