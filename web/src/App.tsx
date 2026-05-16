@@ -42,6 +42,7 @@ import TermsPage from './pages/Terms';
 import CartPage from './pages/Cart';
 import MaintenancePage from './pages/Maintenance';
 import SellersPage from './pages/Sellers';
+import GrowthToolsPage from './pages/GrowthTools';
 
 import { LoadingSpinner } from './components/ui';
 
@@ -176,6 +177,14 @@ const App: React.FC = () => {
           }
         />
         <Route
+          path="/seller/growth"
+          element={
+            <ProtectedRoute roles={['seller', 'admin']}>
+              <GrowthToolsPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
           path="/seller/analytics"
           element={
             <ProtectedRoute roles={['seller', 'admin']}>
@@ -194,7 +203,7 @@ const App: React.FC = () => {
         <Route
           path="/seller/onboarding"
           element={
-            <ProtectedRoute roles={['seller', 'admin']}>
+            <ProtectedRoute roles={['buyer', 'seller', 'admin']}>
               <SellerOnboardingPage />
             </ProtectedRoute>
           }

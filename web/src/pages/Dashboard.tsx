@@ -178,20 +178,25 @@ const Dashboard: React.FC = () => {
         </BulletinSection>
 
         {/* Growth Toolkit shortcut */}
-        <BulletinSection bgColor="bg-[#f0e8f4] dark:bg-purple-900/10" title="Growth Toolkit" subtitle="Promotions">
+        <BulletinSection 
+          bgColor="bg-[#f0e8f4] dark:bg-purple-900/10" 
+          title="Growth Toolkit" 
+          subtitle="Promotions"
+          action={<Link to="/seller/growth" className="text-[11px] underline">Manage Tools →</Link>}
+        >
           <div className="grid gap-4 md:grid-cols-3">
-            <Link to="/seller/analytics" className="border border-black dark:border-white/20 bg-[var(--bulletin-card)] p-5 hover:shadow-[4px_4px_0_0_var(--bulletin-shadow)] transition-all">
+            <div className="border border-black dark:border-white/20 bg-[var(--bulletin-card)] p-5 opacity-80">
               <div className="font-bold text-sm mb-1 uppercase tracking-tighter italic underline">Campaigns</div>
               <p className="text-[10px] opacity-60 dark:opacity-80 leading-tight">Schedule featured listing boosts to reach more students.</p>
-            </Link>
-            <Link to="/seller/analytics" className="border border-black dark:border-white/20 bg-[var(--bulletin-card)] p-5 hover:shadow-[4px_4px_0_0_var(--bulletin-shadow)] transition-all">
+            </div>
+            <div className="border border-black dark:border-white/20 bg-[var(--bulletin-card)] p-5 opacity-80">
               <div className="font-bold text-sm mb-1 uppercase tracking-tighter italic underline">Coupons</div>
               <p className="text-[10px] opacity-60 dark:opacity-80 leading-tight">Create discount codes for your loyal buyers.</p>
-            </Link>
-            <Link to="/seller/analytics" className="border border-black dark:border-white/20 bg-[var(--bulletin-card)] p-5 hover:shadow-[4px_4px_0_0_var(--bulletin-shadow)] transition-all">
+            </div>
+            <div className="border border-black dark:border-white/20 bg-[var(--bulletin-card)] p-5 opacity-80">
               <div className="font-bold text-sm mb-1 uppercase tracking-tighter italic underline">Bundles</div>
               <p className="text-[10px] opacity-60 dark:opacity-80 leading-tight">Offer price drops when buyers purchase multiple items.</p>
-            </Link>
+            </div>
           </div>
         </BulletinSection>
       </BulletinLayout>
