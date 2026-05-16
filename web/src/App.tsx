@@ -45,6 +45,7 @@ import SellersPage from './pages/Sellers';
 import GrowthToolsPage from './pages/GrowthTools';
 import PulsePage from './pages/Pulse';
 import DisputeCenterPage from './pages/DisputeCenter';
+import PrivacyPolicyPage from './pages/PrivacyPolicy';
 
 import { LoadingSpinner } from './components/ui';
 
@@ -264,6 +265,7 @@ const App: React.FC = () => {
         <Route path="/support" element={<SupportPage />} />
         <Route path="/contact" element={<ContactPage />} />
         <Route path="/terms" element={<TermsPage />} />
+        <Route path="/privacy" element={<PrivacyPolicyPage />} />
         <Route path="/maintenance" element={<MaintenancePage />} />
         <Route path="/sellers" element={<SellersPage />} />
         <Route
