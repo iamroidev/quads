@@ -43,6 +43,7 @@ import CartPage from './pages/Cart';
 import MaintenancePage from './pages/Maintenance';
 import SellersPage from './pages/Sellers';
 import GrowthToolsPage from './pages/GrowthTools';
+import PulsePage from './pages/Pulse';
 
 import { LoadingSpinner } from './components/ui';
 
@@ -230,6 +231,7 @@ const App: React.FC = () => {
         {/* Redirect routes for backward compat */}
         <Route path="/search" element={<SearchRedirect />} />
         <Route path="/category/:slug" element={<CategoryRedirect />} />
+        <Route path="/pulse" element={<PulsePage />} />
         <Route path="/categories" element={<CategoriesPage />} />
         <Route path="/collections/:slug" element={<CollectionDetailPage />} />
 
