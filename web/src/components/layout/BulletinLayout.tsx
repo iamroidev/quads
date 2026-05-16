@@ -314,6 +314,7 @@ export const BulletinLayout: React.FC<BulletinLayoutProps> = ({
                 ) : (
                   <>
                     <Link to="/support" className="text-[14px] font-black uppercase tracking-widest hover:text-[#ff6b6b] transition-colors">Buyer Help</Link>
+                    <Link to="/contact" className="text-[14px] font-black uppercase tracking-widest hover:text-[#ff6b6b] transition-colors">Contact Us</Link>
                     <Link to="/terms" className="text-[14px] font-black uppercase tracking-widest hover:text-[#ff6b6b] transition-colors">Terms of Service</Link>
                   </>
                 )}
