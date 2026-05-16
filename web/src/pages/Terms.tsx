@@ -39,7 +39,7 @@ const TermsPage: React.FC = () => {
       <BulletinSection id="tos" title="01. Rules" subtitle="User Agreement" bgColor="bg-[var(--bulletin-bg)] border-t-4 border-[var(--bulletin-border)]">
         <div className="max-w-4xl space-y-10 py-8">
           <div className="prose prose-sm prose-slate max-w-none text-[var(--bulletin-text)]">
-            <h3 className="text-2xl font-black uppercase tracking-tight mb-6">By using Quads</h3>
+            <h3 className="text-2xl font-black uppercase tracking-tight mb-6">By using QUADS</h3>
             <p className="text-base font-bold leading-relaxed opacity-80 mb-8">
               By accessing QUADS, you agree to comply with and be bound by these terms. This platform is strictly for students, staff, and faculty of the University of Mines and Technology (UMaT). Use of the platform for illegal activities or by non-institutional members is strictly prohibited.
             </p>

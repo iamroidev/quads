@@ -133,7 +133,7 @@ const SellersPage: React.FC = () => {
 
       {/* Seller Call to Action - Only show if not a seller */}
       {(!user || !user.roles?.includes('seller')) && (
-        <BulletinSection bgColor="bg-black text-white" title="Sell on Quads" subtitle="Apply to be a verified seller">
+        <BulletinSection bgColor="bg-black text-white" title="Sell on QUADS" subtitle="Apply to be a verified seller">
            <div className="flex flex-col md:flex-row items-center justify-between gap-8">
               <div className="max-w-xl text-center md:text-left">
                  <p className="text-xl font-medium leading-tight opacity-70">

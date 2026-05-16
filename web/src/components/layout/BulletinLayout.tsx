@@ -112,9 +112,7 @@ export const BulletinLayout: React.FC<BulletinLayoutProps> = ({
         <nav className="border-b-2 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] px-6 py-4 md:px-12 relative z-[900]">
           <div className="mx-auto flex max-w-[1400px] items-center justify-between">
             <Link to="/" className="flex items-center gap-3 group">
-              <div className="bg-[var(--bulletin-text)] text-[var(--bulletin-bg)] px-2 py-1 text-xl font-black uppercase tracking-tighter transition-colors group-hover:bg-[#ff6b6b]">
-                Q
-              </div>
+              <BrandMark className="h-8 w-8 transition-transform group-hover:scale-110" />
               <span className="hidden md:block text-sm font-black uppercase tracking-widest text-[var(--bulletin-text)]">QUADS</span>
             </Link>
 
@@ -152,7 +150,7 @@ export const BulletinLayout: React.FC<BulletinLayoutProps> = ({
                   className="hidden md:flex items-center gap-2 border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-text)] text-[var(--bulletin-bg)] px-4 py-2 text-[10px] font-black uppercase tracking-widest shadow-[3px_3px_0_0_var(--bulletin-accent)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all"
                   id="sell-on-quads-btn"
                 >
-                  Sell on Quads
+                  Sell on QUADS
                 </Link>
               )}
                {user?.viewMode === 'seller' && (
