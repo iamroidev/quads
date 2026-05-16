@@ -119,40 +119,45 @@ export const BulletinLayout: React.FC<BulletinLayoutProps> = ({
               <div className="hidden lg:flex items-center gap-6 text-[10px] font-black uppercase tracking-widest">
                 {user?.role === 'seller' ? (
                   <>
-                    <Link to="/seller/analytics" className="hover:text-[#ff6b6b]">Shop Insights</Link>
-                    <Link to="/my-listings" className="hover:text-[#ff6b6b]">My Listings</Link>
-                    <Link to="/seller/growth" className="hover:text-[#ff6b6b]">Growth Toolkit</Link>
-                    <Link 
-                      to={user?.sellerOnboarding?.payoutSetupComplete ? "/seller/payouts" : "/seller/onboarding"} 
-                      className="hover:text-[#ff6b6b]"
-                    >
-                      Payouts
-                    </Link>
+                    <Link to="/dashboard" className="hover:text-[#ff6b6b]">Hub</Link>
+                    <Link to="/seller/analytics" className="hover:text-[#ff6b6b]">Analytics</Link>
+                    <Link to="/my-listings" className="hover:text-[#ff6b6b]">Listings</Link>
+                    <Link to="/seller/orders" className="hover:text-[#ff6b6b]">Shop Orders</Link>
+                    <Link to="/seller/payouts" className="hover:text-[#ff6b6b]">Payouts</Link>
                   </>
-                ) : location.pathname === '/' ? (
+                ) : isAuthenticated ? (
+                  <>
+                    <Link to="/products" className="hover:text-[#ff6b6b]">Marketplace</Link>
+                    <Link to="/pulse" className="hover:text-[#ff6b6b]">Pulse</Link>
+                    <Link to="/saved" className="hover:text-[#ff6b6b]">Saved</Link>
+                    <Link to="/orders" className="hover:text-[#ff6b6b]">Orders</Link>
+                    <Link to="/messages" className="hover:text-[#ff6b6b]">Messages</Link>
+                  </>
+                ) : (
                   <>
                     <Link to="/products" className="hover:text-[#ff6b6b]">The Board</Link>
                     <Link to="/sellers" className="hover:text-[#ff6b6b]">Merchants</Link>
                     <Link to="/pulse" className="hover:text-[#ff6b6b]">Pulse</Link>
-                    <Link to="/safety" className="hover:text-[#ff6b6b]">Protocol</Link>
-                  </>
-                ) : (
-                  <>
-                    <Link to="/products" className="hover:text-[#ff6b6b]">Marketplace</Link>
-                    <Link to="/pulse" className="hover:text-[#ff6b6b]">Pulse</Link>
-                    <Link to="/saved" className="hover:text-[#ff6b6b]">Wishlist</Link>
-                    <Link to="/orders" className="hover:text-[#ff6b6b]">Orders</Link>
+                    <Link to="/support" className="hover:text-[#ff6b6b]">Protocol</Link>
                   </>
                 )}
               </div>
 
-              {!isSeller && (
+              {(!isAuthenticated || user?.role === 'buyer') && (
                 <Link 
                   to={isAuthenticated ? "/seller/onboarding" : "/register"} 
                   className="hidden md:flex items-center gap-2 border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-text)] text-[var(--bulletin-bg)] px-4 py-2 text-[10px] font-black uppercase tracking-widest shadow-[3px_3px_0_0_var(--bulletin-accent)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all"
                   id="sell-on-quads-btn"
                 >
                   Sell on Quads
+                </Link>
+              )}
+              {user?.role === 'seller' && (
+                <Link 
+                  to="/sell" 
+                  className="hidden md:flex items-center gap-2 border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-accent)] text-white px-4 py-2 text-[10px] font-black uppercase tracking-widest shadow-[3px_3px_0_0_var(--bulletin-text)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all"
+                >
+                  + Post Notice
                 </Link>
               )}
 
@@ -294,12 +299,26 @@ export const BulletinLayout: React.FC<BulletinLayoutProps> = ({
                 </p>
               </div>
               
-              {/* Marketplace Column */}
+              {/* Organized Navigation Column */}
               <div className="flex flex-col gap-4">
-                <div className="text-[10px] font-black uppercase tracking-[0.3em] text-[#ff6b6b] mb-2">Marketplace</div>
-                <Link to="/products" className="text-[14px] font-black uppercase tracking-widest hover:text-[#ff6b6b] transition-colors">All Listings</Link>
-                <Link to="/categories" className="text-[14px] font-black uppercase tracking-widest hover:text-[#ff6b6b] transition-colors">Categories</Link>
-                <Link to="/sellers" className="text-[14px] font-black uppercase tracking-widest hover:text-[#ff6b6b] transition-colors">Merchant Directory</Link>
+                <div className="text-[10px] font-black uppercase tracking-[0.3em] text-[#ff6b6b] mb-2">
+                  {user?.role === 'seller' ? 'Shop Management' : isAuthenticated ? 'Marketplace' : 'Discovery'}
+                </div>
+                {user?.role === 'seller' ? (
+                  <>
+                    <Link to="/dashboard" className="text-[14px] font-black uppercase tracking-widest hover:text-[#ff6b6b] transition-colors">Seller Hub</Link>
+                    <Link to="/seller/analytics" className="text-[14px] font-black uppercase tracking-widest hover:text-[#ff6b6b] transition-colors">Insights</Link>
+                    <Link to="/my-listings" className="text-[14px] font-black uppercase tracking-widest hover:text-[#ff6b6b] transition-colors">Inventory</Link>
+                    <Link to="/sell" className="text-[14px] font-black uppercase tracking-widest hover:text-[#ff6b6b] transition-colors">New Listing</Link>
+                  </>
+                ) : (
+                  <>
+                    <Link to="/products" className="text-[14px] font-black uppercase tracking-widest hover:text-[#ff6b6b] transition-colors">All Listings</Link>
+                    <Link to="/categories" className="text-[14px] font-black uppercase tracking-widest hover:text-[#ff6b6b] transition-colors">Categories</Link>
+                    <Link to="/sellers" className="text-[14px] font-black uppercase tracking-widest hover:text-[#ff6b6b] transition-colors">Merchants</Link>
+                    <Link to="/pulse" className="text-[14px] font-black uppercase tracking-widest hover:text-[#ff6b6b] transition-colors">Market Pulse</Link>
+                  </>
+                )}
               </div>
 
               {/* Protocols Column */}
@@ -308,29 +327,32 @@ export const BulletinLayout: React.FC<BulletinLayoutProps> = ({
                 {user?.role === 'seller' ? (
                   <>
                     <Link to="/seller/payouts" className="text-[14px] font-black uppercase tracking-widest hover:text-[#ff6b6b] transition-colors">Disbursements</Link>
+                    <Link to="/support" className="text-[14px] font-black uppercase tracking-widest hover:text-[#ff6b6b] transition-colors">Help Desk</Link>
+                    <Link to="/terms" className="text-[14px] font-black uppercase tracking-widest hover:text-[#ff6b6b] transition-colors">Guidelines</Link>
                   </>
                 ) : (
                   <>
-                    <Link to="/support" className="text-[14px] font-black uppercase tracking-widest hover:text-[#ff6b6b] transition-colors">Buyer Help</Link>
+                    <Link to="/support" className="text-[14px] font-black uppercase tracking-widest hover:text-[#ff6b6b] transition-colors">Support Hub</Link>
                     <Link to="/contact" className="text-[14px] font-black uppercase tracking-widest hover:text-[#ff6b6b] transition-colors">Contact Us</Link>
-                    <Link to="/terms" className="text-[14px] font-black uppercase tracking-widest hover:text-[#ff6b6b] transition-colors">Terms of Service</Link>
+                    <Link to="/terms" className="text-[14px] font-black uppercase tracking-widest hover:text-[#ff6b6b] transition-colors">User Policy</Link>
                   </>
                 )}
               </div>
 
               {/* My Hub Column */}
               <div className="flex flex-col gap-4">
-                <div className="text-[10px] font-black uppercase tracking-[0.3em] text-[#ff6b6b] mb-2">My Hub</div>
+                <div className="text-[10px] font-black uppercase tracking-[0.3em] text-[#ff6b6b] mb-2">Account</div>
                 {isAuthenticated ? (
                   <>
-                    <Link to="/orders" className="text-[14px] font-black uppercase tracking-widest hover:text-[#ff6b6b] transition-colors">My Orders</Link>
-                    <Link to="/messages" className="text-[14px] font-black uppercase tracking-widest hover:text-[#ff6b6b] transition-colors">Discussions</Link>
+                    <Link to="/orders" className="text-[14px] font-black uppercase tracking-widest hover:text-[#ff6b6b] transition-colors">{user?.role === 'seller' ? 'Shop Orders' : 'My Orders'}</Link>
+                    <Link to="/messages" className="text-[14px] font-black uppercase tracking-widest hover:text-[#ff6b6b] transition-colors">Messages</Link>
                     <Link to="/settings" className="text-[14px] font-black uppercase tracking-widest hover:text-[#ff6b6b] transition-colors">Preferences</Link>
                   </>
                 ) : (
                   <>
-                    <Link to="/login" className="text-[14px] font-black uppercase tracking-widest hover:text-[#ff6b6b] transition-colors italic opacity-40">Login to Hub</Link>
-                    <Link to="/register" className="text-[14px] font-black uppercase tracking-widest hover:text-[#ff6b6b] transition-colors">Create Account</Link>
+                    <Link to="/login" className="text-[14px] font-black uppercase tracking-widest hover:text-[#ff6b6b] transition-colors">Sign In</Link>
+                    <Link to="/register" className="text-[14px] font-black uppercase tracking-widest hover:text-[#ff6b6b] transition-colors">Register</Link>
+                    <Link to="/seller/onboarding" className="text-[14px] font-black uppercase tracking-widest hover:text-[#ff6b6b] transition-colors font-black">Start Selling</Link>
                   </>
                 )}
               </div>
