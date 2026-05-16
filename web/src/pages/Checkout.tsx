@@ -114,12 +114,19 @@ const Checkout: React.FC = () => {
         note: form.note || undefined,
       });
 
-      if (res.success) {
-        const orders = (res.data as any).orders || [res.data.order];
-        const orderIds = orders.map((o: any) => o._id);
-        
-        // 2. Initiate payment
-        toast.loading('Initiating secure payment...', { id: 'payment-init' });
+        if (res.success) {
+          const orders = (res.data as any).orders || [res.data.order];
+          const orderIds = orders.map((o: any) => o._id);
+          
+          if (form.paymentMethod === 'cash_on_delivery') {
+            toast.success('Order placed! Please meet the seller to complete the transaction.');
+            if (isCartCheckout) clearCart();
+            navigate(`/orders/${orderIds[0]}`);
+            return;
+          }
+
+          // 2. Initiate payment
+          toast.loading('Initiating secure payment...', { id: 'payment-init' });
         
         const callbackUrl = `${window.location.origin}/payment/verify`;
         const payRes = await paymentService.initiatePayment(
@@ -283,17 +290,26 @@ const Checkout: React.FC = () => {
             </BulletinCard>
 
             {/* Trust */}
-            <BulletinCard rotation={-0.3} bgColor="bg-[#e0f2f7] dark:bg-sky-900/20">
-              <div className="flex items-start gap-3">
-                <Shield className="h-5 w-5 flex-shrink-0 mt-0.5" />
-                <div>
-                  <div className="text-[12px] font-bold mb-1">Buyer Protection Active</div>
-                  <div className="text-[11px] opacity-70">
-                    Payment is held securely until you confirm receipt. Learn more about buyer protection.
+            <div className="space-y-4">
+              <BulletinCard rotation={-0.3} bgColor="bg-[#e0f2f7] dark:bg-sky-900/20">
+                <div className="flex items-start gap-3">
+                  <Shield className="h-5 w-5 flex-shrink-0 mt-0.5 text-sky-600 dark:text-sky-400" />
+                  <div>
+                    <div className="text-[12px] font-black uppercase mb-1">Buyer Protection Active</div>
+                    <div className="text-[11px] font-bold opacity-70 leading-relaxed">
+                      Money is held securely until you confirm receipt. Not happy? Open a dispute for a refund.
+                    </div>
                   </div>
                 </div>
-              </div>
-            </BulletinCard>
+              </BulletinCard>
+
+              {form.paymentMethod !== 'cash_on_delivery' && (
+                <div className="flex items-center justify-center gap-4 py-4 border-2 border-dashed border-black/10 bg-white/50 dark:bg-white/5 opacity-60 grayscale hover:grayscale-0 transition-all">
+                  <CreditCard className="h-4 w-4" />
+                  <span className="text-[9px] font-black uppercase tracking-[0.2em]">Secured by Paystack</span>
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Right: Order Summary */}
@@ -399,15 +415,15 @@ const Checkout: React.FC = () => {
                 <button
                   onClick={handleSubmit}
                   disabled={submitting || (form.deliveryMethod === 'delivery' && !form.deliveryAddress.trim())}
-                  className="w-full border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-text)] mt-8 px-4 py-4 text-[13px] font-black uppercase text-[var(--bulletin-bg)] shadow-[4px_4px_0_0_var(--bulletin-shadow)] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[3px_3px_0_0_var(--bulletin-shadow)] active:translate-x-[4px] active:translate-y-[4px] active:shadow-none transition-all disabled:opacity-40"
+                  className={`w-full border-2 border-[var(--bulletin-border)] ${form.paymentMethod === 'cash_on_delivery' ? 'bg-[#fffacd] text-black' : 'bg-[var(--bulletin-text)] text-[var(--bulletin-bg)]'} mt-8 px-4 py-4 text-[13px] font-black uppercase shadow-[4px_4px_0_0_var(--bulletin-shadow)] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[3px_3px_0_0_var(--bulletin-shadow)] active:translate-x-[4px] active:translate-y-[4px] active:shadow-none transition-all disabled:opacity-40`}
                 >
-                  {submitting ? 'Connecting...' : 'Pay Now →'}
+                  {submitting ? 'Connecting...' : form.paymentMethod === 'cash_on_delivery' ? 'Confirm Order →' : 'Pay Now →'}
                 </button>
 
                 <div className="mt-6 flex items-center justify-center gap-2 opacity-30">
                   <Shield className="h-3 w-3" />
                   <span className="text-[9px] font-black uppercase tracking-widest">
-                    Secure Payment
+                    {form.paymentMethod === 'cash_on_delivery' ? 'Campus Safety Guaranteed' : 'Secure Payment Powered by Paystack'}
                   </span>
                 </div>
               </div>
