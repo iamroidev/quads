@@ -5,6 +5,7 @@ export interface CategoryWithCount {
   name: string;
   slug: string;
   productCount: number;
+  icon?: string;
 }
 
 interface ApiCategoryWithCountsResponse {

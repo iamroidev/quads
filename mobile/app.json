@@ -29,9 +29,6 @@
       "package": "com.quads.app"
     },
     "scheme": "quads",
-    "web": {
-      "favicon": "./assets/favicon.png"
-    },
     "extra": {
       "apiUrl": "http://172.20.10.10:5000/api",
       "socketUrl": "http://172.20.10.10:5000",
