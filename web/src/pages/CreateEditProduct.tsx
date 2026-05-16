@@ -483,7 +483,6 @@ const CreateEditProduct = () => {
                     </select>
                   </BulletinCard>
                 </div>
->
 
                 <BulletinCard rotation={0.4} bgColor="bg-[var(--bulletin-card)]" className="border-2 sm:border-4 border-[var(--bulletin-border)] p-4 sm:p-6 shadow-[6px_6px_0_0_var(--bulletin-text)] sm:shadow-[8px_8px_0_0_var(--bulletin-text)]">
                   <label className="block text-[9px] sm:text-[10px] font-black uppercase tracking-widest mb-2 sm:mb-3">DISCOVERY TAGS</label>
