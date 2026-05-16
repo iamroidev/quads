@@ -111,20 +111,20 @@ const HomePage: React.FC = () => {
           </div>
 
           <div className="relative lg:absolute lg:top-20 lg:right-20 flex flex-col sm:flex-row lg:flex-col gap-4 lg:gap-8 z-10 px-4 md:px-8 pb-8 lg:pb-0 lg:max-w-[280px]">
-            <div className="border-4 border-black bg-white dark:bg-[#eee] p-4 md:p-6 shadow-[4px_4px_0_0_#ff6b6b] md:shadow-[8px_8px_0_0_#ff6b6b] lg:ml-auto w-full sm:w-1/3 lg:w-full" style={{ transform: 'rotate(1.2deg)' }}>
+            <div className="border-4 border-black bg-white p-4 md:p-6 shadow-[4px_4px_0_0_#ff6b6b] md:shadow-[8px_8px_0_0_#ff6b6b] lg:ml-auto w-full sm:w-1/3 lg:w-full" style={{ transform: 'rotate(1.2deg)' }}>
               <div className="text-2xl md:text-4xl font-black text-[#ff6b6b] mb-1">0%</div>
-              <div className="text-[8px] md:text-[10px] font-black uppercase tracking-widest opacity-40 dark:opacity-80 text-black dark:text-white/70">Trading Fees</div>
-              <div className="text-[10px] md:text-[12px] font-bold text-black dark:text-white mt-1">Free for every student.</div>
+              <div className="text-[8px] md:text-[10px] font-black uppercase tracking-widest opacity-40 text-black">Trading Fees</div>
+              <div className="text-[10px] md:text-[12px] font-bold text-black mt-1">Free for every student.</div>
             </div>
-            <div className="border-4 border-black bg-[#e0f2f7] dark:bg-[#cde9f0] p-4 md:p-6 shadow-[4px_4px_0_0_var(--bulletin-shadow)] md:shadow-[8px_8px_0_0_var(--bulletin-shadow)] w-full sm:w-1/3 lg:w-full" style={{ transform: 'rotate(-2.5deg)' }}>
-              <div className="text-[2xl] md:text-4xl font-black text-black mb-1">{totalProducts || '...'}</div>
-              <div className="text-[8px] md:text-[10px] font-black uppercase tracking-widest opacity-40 dark:opacity-80 text-black dark:text-white/70">Items</div>
-              <div className="text-[10px] md:text-[12px] font-bold text-black dark:text-white mt-1">Live campus inventory.</div>
+            <div className="border-4 border-black bg-[#e0f2f7] p-4 md:p-6 shadow-[4px_4px_0_0_var(--bulletin-shadow)] md:shadow-[8px_8px_0_0_var(--bulletin-shadow)] w-full sm:w-1/3 lg:w-full" style={{ transform: 'rotate(-2.5deg)' }}>
+              <div className="text-2xl md:text-4xl font-black text-black mb-1">{totalProducts || '...'}</div>
+              <div className="text-[8px] md:text-[10px] font-black uppercase tracking-widest opacity-40 text-black">Items</div>
+              <div className="text-[10px] md:text-[12px] font-bold text-black mt-1">Live campus inventory.</div>
             </div>
-            <div className="border-4 border-black bg-[#fce4ec] dark:bg-[#f8d0de] p-4 md:p-6 shadow-[4px_4px_0_0_var(--bulletin-shadow)] md:shadow-[8px_8px_0_0_var(--bulletin-shadow)] w-full sm:w-1/3 lg:w-full" style={{ transform: 'rotate(0.5deg)' }}>
+            <div className="border-4 border-black bg-[#fce4ec] p-4 md:p-6 shadow-[4px_4px_0_0_var(--bulletin-shadow)] md:shadow-[8px_8px_0_0_var(--bulletin-shadow)] w-full sm:w-1/3 lg:w-full" style={{ transform: 'rotate(0.5deg)' }}>
               <div className="text-2xl md:text-4xl font-black text-black mb-1">{totalSellers || '...'}</div>
-              <div className="text-[8px] md:text-[10px] font-black uppercase tracking-widest opacity-40 dark:opacity-80 text-black dark:text-white/70">Sellers</div>
-              <div className="text-[10px] md:text-[12px] font-bold text-black dark:text-white mt-1">Verified UMaT students.</div>
+              <div className="text-[8px] md:text-[10px] font-black uppercase tracking-widest opacity-40 text-black">Sellers</div>
+              <div className="text-[10px] md:text-[12px] font-bold text-black mt-1">Verified UMaT students.</div>
             </div>
           </div>
         </div>
