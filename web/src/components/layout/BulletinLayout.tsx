@@ -296,7 +296,7 @@ export const BulletinLayout: React.FC<BulletinLayoutProps> = ({
               
               {/* Marketplace Column */}
               <div className="flex flex-col gap-4">
-                <div className="text-[10px] font-black uppercase tracking-[0.3em] opacity-30 mb-2">Marketplace</div>
+                <div className="text-[10px] font-black uppercase tracking-[0.3em] text-[#ff6b6b] mb-2">Marketplace</div>
                 <Link to="/products" className="text-[14px] font-black uppercase tracking-widest hover:text-[#ff6b6b] transition-colors">All Listings</Link>
                 <Link to="/categories" className="text-[14px] font-black uppercase tracking-widest hover:text-[#ff6b6b] transition-colors">Categories</Link>
                 <Link to="/sellers" className="text-[14px] font-black uppercase tracking-widest hover:text-[#ff6b6b] transition-colors">Merchant Directory</Link>
@@ -304,7 +304,7 @@ export const BulletinLayout: React.FC<BulletinLayoutProps> = ({
 
               {/* Protocols Column */}
               <div className="flex flex-col gap-4">
-                <div className="text-[10px] font-black uppercase tracking-[0.3em] opacity-30 mb-2">Protocols</div>
+                <div className="text-[10px] font-black uppercase tracking-[0.3em] text-[#ff6b6b] mb-2">Protocols</div>
                 {user?.role === 'seller' ? (
                   <>
                     <Link to="/seller/support" className="text-[14px] font-black uppercase tracking-widest hover:text-[#ff6b6b] transition-colors">Merchant Help</Link>
@@ -322,7 +322,7 @@ export const BulletinLayout: React.FC<BulletinLayoutProps> = ({
 
               {/* My Hub Column */}
               <div className="flex flex-col gap-4">
-                <div className="text-[10px] font-black uppercase tracking-[0.3em] opacity-30 mb-2">My Hub</div>
+                <div className="text-[10px] font-black uppercase tracking-[0.3em] text-[#ff6b6b] mb-2">My Hub</div>
                 {isAuthenticated ? (
                   <>
                     <Link to="/orders" className="text-[14px] font-black uppercase tracking-widest hover:text-[#ff6b6b] transition-colors">My Orders</Link>
@@ -340,7 +340,9 @@ export const BulletinLayout: React.FC<BulletinLayoutProps> = ({
 
             {/* Bottom Bar: Socials & Node */}
             <div className="flex flex-col md:flex-row items-center justify-between border-t-4 border-black pt-12 gap-8">
-              <div className="flex items-center gap-10">
+              <div className="flex flex-col items-center md:items-start gap-4">
+                 <div className="text-[10px] font-black uppercase tracking-[0.3em] text-[#ff6b6b]">Official Channels</div>
+                 <div className="flex items-center gap-10">
                  <a href="mailto:support@quadsmarket.tech" title="Email Support" className="text-[var(--bulletin-text)] hover:text-[#ff6b6b] transition-all hover:scale-110">
                    <Mail className="h-6 w-6" />
                  </a>
