@@ -138,6 +138,7 @@ export const BulletinLayout: React.FC<BulletinLayoutProps> = ({
                 ) : (
                   <>
                     <Link to="/products" className="hover:text-[#ff6b6b]">Marketplace</Link>
+                    <Link to="/pulse" className="hover:text-[#ff6b6b]">Pulse</Link>
                     <Link to="/saved" className="hover:text-[#ff6b6b]">Wishlist</Link>
                     <Link to="/orders" className="hover:text-[#ff6b6b]">Orders</Link>
                   </>
