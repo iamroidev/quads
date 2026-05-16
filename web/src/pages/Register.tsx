@@ -137,8 +137,8 @@ const RegisterPage: React.FC = () => {
         if (user.department) setValue('department', user.department);
         if (user.residenceHall) setValue('residenceHall', user.residenceHall);
         if (user.currentLevel) setValue('currentLevel', user.currentLevel);
-        if (user.role && (user.role === 'buyer' || user.role === 'seller')) {
-           setValue('role', user.role);
+        if (user.roles?.length > 0) {
+           setValue('role', (user.viewMode || user.roles[0]) as any);
         }
       }
 
@@ -169,7 +169,7 @@ const RegisterPage: React.FC = () => {
   useEffect(() => {
     if (isGoogleFlow && user && step === 1) {
       // Step 1: Role
-      if (user.role && (user.role === 'buyer' || user.role === 'seller')) {
+      if (user.roles?.length > 0) {
         // Step 2: Account details (name, email, phone)
         if (user.phone && user.phone.trim().length >= 10) {
           // Step 3: Campus info (department, residenceHall, level)

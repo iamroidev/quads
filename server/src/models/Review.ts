@@ -33,7 +33,7 @@ const reviewSchema = new Schema<IReviewDocument>(
     },
     seller: {
       type: Schema.Types.ObjectId,
-      ref: 'User',
+      ref: 'Store',
       required: true,
     },
     rating: {

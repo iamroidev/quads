@@ -30,8 +30,9 @@ const MyListings: React.FC = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
 
+  const isSeller = user?.roles?.includes('seller') || user?.roles?.includes('admin');
   const isUnverifiedSeller =
-    user?.role === 'seller' &&
+    user?.roles?.includes('seller') &&
     !user?.isVerified &&
     !user?.emailVerified &&
     !user?.phoneVerified;

@@ -39,13 +39,14 @@ const Dashboard: React.FC = () => {
   const [stats, setStats] = useState<UserStats | null>(null);
   const [loadingStats, setLoadingStats] = useState(false);
 
-  const isSeller = user?.role === 'seller' || user?.role === 'admin';
+  const isAdmin = user?.roles?.includes('admin');
+  const isSeller = user?.roles?.includes('seller') || isAdmin;
 
   useEffect(() => {
-    if (isSeller) {
-      setViewMode('seller');
+    if (user?.viewMode) {
+      setViewMode(user.viewMode);
     }
-  }, [isSeller]);
+  }, [user?.viewMode]);
 
   const [collections, setCollections] = useState<any[]>([]);
   const [loadingCollections, setLoadingCollections] = useState(true);
@@ -469,7 +470,7 @@ const Dashboard: React.FC = () => {
       )}
 
       {/* Upgrade CTA for buyers */}
-      {user?.role === 'buyer' && (
+      {!user?.roles.includes('seller') && (
         <BulletinSection bgColor="bg-[#111] dark:bg-[#111]">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-6 py-4 border-l-4 border-[#ff6b6b] pl-8">
             <div>

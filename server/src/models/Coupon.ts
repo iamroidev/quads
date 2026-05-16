@@ -25,7 +25,7 @@ const couponSchema = new Schema<ICouponDocument>(
     },
     seller: {
       type: Schema.Types.ObjectId,
-      ref: 'User',
+      ref: 'Store',
       required: true,
     },
     type: {

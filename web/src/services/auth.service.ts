@@ -4,7 +4,7 @@ export interface RegisterData {
   supabaseAccessToken: string;
   name: string;
   phone: string;
-  role: 'buyer' | 'seller';
+  roles: ('buyer' | 'seller' | 'admin')[];
   studentId?: string;
   department?: string;
   residenceHall?: string;
@@ -101,8 +101,8 @@ const authService = {
     return response.data;
   },
 
-  switchRole: async (role: 'buyer' | 'seller') => {
-    const response = await api.put('/auth/switch-role', { role });
+  switchRole: async (targetMode: 'buyer' | 'seller') => {
+    const response = await api.put('/auth/switch-role', { targetMode });
     return response.data;
   },
 

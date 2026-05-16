@@ -14,7 +14,7 @@ const promoteUser = async (email: string) => {
     
     const user = await User.findOneAndUpdate(
       { email: email.toLowerCase().trim() },
-      { role: 'admin' },
+      { $addToSet: { roles: 'admin' } },
       { new: true }
     );
 
@@ -23,7 +23,7 @@ const promoteUser = async (email: string) => {
       console.log('SUCCESS: ADMINISTRATIVE PRIVILEGES GRANTED');
       console.log(`User: ${user.name}`);
       console.log(`Email: ${user.email}`);
-      console.log(`New Role: ${user.role}`);
+      console.log(`New Roles: ${user.roles.join(', ')}`);
       console.log('------------------------------------------');
     } else {
       console.log('------------------------------------------');

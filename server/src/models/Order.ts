@@ -70,7 +70,7 @@ const orderSchema = new Schema<IOrderDocument>(
     },
     seller: {
       type: Schema.Types.ObjectId,
-      ref: 'User',
+      ref: 'Store',
       required: true,
     },
     items: {

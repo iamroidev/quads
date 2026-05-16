@@ -44,7 +44,10 @@ class OrderService {
 
     // 1. Fetch all products and group by seller
     const productIds = items.map(i => i.productId);
-    const products = await Product.find({ _id: { $in: productIds } }).populate('seller', '_id name');
+    const products = await Product.find({ _id: { $in: productIds } }).populate({
+      path: 'seller',
+      select: '_id ownerId name'
+    });
     
     const sellerGroups: Record<string, { product: any, quantity: number }[]> = {};
     
@@ -54,7 +57,8 @@ class OrderService {
       if (product.status !== 'active') throw ApiError.badRequest(`Product ${product.title} is no longer available`);
       
       const sId = product.seller._id.toString();
-      if (sId === buyerId) throw ApiError.badRequest('You cannot buy your own products');
+      const ownerId = (product.seller as any).ownerId.toString();
+      if (ownerId === buyerId) throw ApiError.badRequest('You cannot buy your own products');
       
       if (!sellerGroups[sId]) sellerGroups[sId] = [];
       sellerGroups[sId].push({ product, quantity: item.quantity });
@@ -167,7 +171,7 @@ class OrderService {
 
       createdOrders.push(await order.populate([
         { path: 'buyer', select: 'name avatar phone email' },
-        { path: 'seller', select: 'name avatar phone isVerified' },
+        { path: 'seller', select: 'name avatar isVerified slug' },
         { path: 'items.product', select: 'title price images status seller' },
       ]));
     }
@@ -209,8 +213,12 @@ class OrderService {
     await order.save();
 
     // Notify seller
+    const populatedOrder = await order.populate('seller');
+    const ownerId = (populatedOrder.seller as any).ownerId.toString();
+
+    // Notify seller owner
     await notificationService.create(
-      order.seller.toString(),
+      ownerId,
       'handoff_verified',
       'Order Completed! 💰',
       `Handoff for order #${order.orderNumber} was verified. Funds are being processed.`,
@@ -220,7 +228,7 @@ class OrderService {
 
     return order.populate([
       { path: 'buyer', select: 'name avatar phone email' },
-      { path: 'seller', select: 'name avatar phone isVerified' },
+      { path: 'seller', select: 'name avatar isVerified slug' },
       { path: 'items.product', select: 'title price images status seller' },
     ]);
   }
@@ -231,7 +239,7 @@ class OrderService {
   async getOrderById(orderId: string, userId: string, isAdmin: boolean = false): Promise<IOrderDocument> {
     const order = await Order.findById(orderId)
       .populate('buyer', 'name avatar phone email')
-      .populate('seller', 'name storeName brandName avatar phone isVerified')
+      .populate('seller', 'name slug avatar isVerified')
       .populate('items.product', 'title price images status seller')
       .populate('payment');
 
@@ -240,10 +248,13 @@ class OrderService {
     }
 
     // Verify access
+    const populatedOrder = await order.populate('seller');
+    const sellerOwnerId = (populatedOrder.seller as any).ownerId.toString();
+
     if (
       !isAdmin &&
       order.buyer._id?.toString() !== userId &&
-      order.seller._id?.toString() !== userId
+      sellerOwnerId !== userId
     ) {
       throw ApiError.forbidden('You do not have access to this order');
     }
@@ -271,7 +282,7 @@ class OrderService {
       .skip(skip)
       .limit(limit)
       .populate('buyer', 'name avatar phone email')
-      .populate('seller', 'name storeName brandName avatar phone isVerified')
+      .populate('seller', 'name slug avatar isVerified')
       .populate('items.product', 'title price images status seller')
       .populate('payment');
 
@@ -306,7 +317,7 @@ class OrderService {
       .skip(skip)
       .limit(limit)
       .populate('buyer', 'name avatar phone email')
-      .populate('seller', 'name storeName brandName avatar phone isVerified')
+      .populate('seller', 'name slug avatar isVerified')
       .populate('items.product', 'title price images status seller')
       .populate('payment');
 
@@ -333,8 +344,11 @@ class OrderService {
     const order = await Order.findById(orderId);
     if (!order) throw ApiError.notFound('Order not found');
 
+    const populatedOrder = await order.populate('seller');
+    const sellerOwnerId = (populatedOrder.seller as any).ownerId.toString();
+
     // Only seller or admin can update status
-    if (!isAdmin && order.seller.toString() !== userId) {
+    if (!isAdmin && sellerOwnerId !== userId) {
       throw ApiError.forbidden('Only the seller can update order status');
     }
 
@@ -369,7 +383,7 @@ class OrderService {
         userId: order.seller.toString(),
         orderId: order._id.toString(),
         metadata: {
-          userName: seller?.name || 'Seller',
+          userName: (populatedOrder.seller as any).name || 'Seller',
           productTitle: order.items[0].title + (order.items.length > 1 ? ` (+${order.items.length - 1} more)` : ''),
           amount: order.totalAmount,
         }
@@ -405,8 +419,11 @@ class OrderService {
     const order = await Order.findById(orderId);
     if (!order) throw ApiError.notFound('Order not found');
 
+    const populatedOrder = await order.populate('seller');
+    const sellerOwnerId = (populatedOrder.seller as any).ownerId.toString();
+
     const isBuyer = order.buyer.toString() === userId;
-    const isSeller = order.seller.toString() === userId;
+    const isSeller = sellerOwnerId === userId;
 
     if (!isBuyer && !isSeller) {
       throw ApiError.forbidden('You do not have access to this order');

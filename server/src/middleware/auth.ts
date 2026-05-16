@@ -43,7 +43,7 @@ export const authenticate = async (
     const decoded = verifyToken(token);
 
     // Find user
-    const user = await User.findById(decoded.userId);
+    const user = await User.findById(decoded.userId).populate('activeStore');
 
     if (!user) {
       throw ApiError.unauthorized('User not found. Token is invalid.');
@@ -76,7 +76,7 @@ export const authenticate = async (
  */
 export const authorize = (...roles: string[]) => {
   return (req: Request, res: Response, next: NextFunction): void => {
-    if (!req.user || !roles.includes(req.user.role)) {
+    if (!req.user || !roles.some(role => req.user!.roles.includes(role as any))) {
       next(ApiError.forbidden('You do not have permission to perform this action.'));
       return;
     }
@@ -106,7 +106,7 @@ export const optionalAuth = async (
 
     if (token) {
       const decoded = verifyToken(token);
-      const user = await User.findById(decoded.userId);
+      const user = await User.findById(decoded.userId).populate('activeStore');
       if (user && !user.isBanned) {
         req.user = user;
       }
@@ -137,11 +137,9 @@ export const ensureProfileComplete = (options?: { forSelling?: boolean }) => {
       return;
     }
 
-    if (options?.forSelling && ['seller', 'admin'].includes(req.user.role)) {
-      const storeName = (req.user.storeName || '').trim();
-      const brandName = (req.user.brandName || '').trim();
-      if (!storeName && !brandName) {
-        next(ApiError.badRequest('Complete your profile first: add store name or brand name.'));
+    if (options?.forSelling && (req.user.roles.includes('seller') || req.user.roles.includes('admin'))) {
+      if (!req.user.activeStore) {
+        next(ApiError.badRequest('Complete your profile first: your store hasn\'t been initialized.'));
         return;
       }
     }

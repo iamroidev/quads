@@ -158,7 +158,7 @@ const Header: React.FC = () => {
           <div className="hidden items-center gap-1 md:flex">
             {isAuthenticated ? (
               <>
-                {(user?.role === 'seller' || user?.role === 'admin') && (
+                {(user?.roles?.includes('seller') || user?.roles?.includes('admin')) && (
                   <Link
                     to="/sell"
                     className="mr-3 text-xs font-bold uppercase tracking-[0.18em] text-earth-900 transition-opacity hover:opacity-60"
@@ -236,14 +236,14 @@ const Header: React.FC = () => {
                         {[
                           { to: '/profile', icon: <User className="h-3.5 w-3.5" />, label: 'Profile' },
                           { to: '/messages', icon: <MessageSquare className="h-3.5 w-3.5" />, label: 'Messages' },
-                          ...(user?.role === 'seller' || user?.role === 'admin' ? [
+                          ...(user?.roles?.includes('seller') || user?.roles?.includes('admin') ? [
                             { to: '/my-listings', icon: <ShoppingBag className="h-3.5 w-3.5" />, label: 'My listings' },
                             { to: '/seller/orders', icon: <ClipboardList className="h-3.5 w-3.5" />, label: 'Seller orders' },
                           ] : []),
                           { to: '/orders', icon: <Package className="h-3.5 w-3.5" />, label: 'My orders' },
                           { to: '/notifications', icon: <Bell className="h-3.5 w-3.5" />, label: 'Notifications' },
                           { to: '/settings', icon: <Settings className="h-3.5 w-3.5" />, label: 'Settings' },
-                          ...(user?.role === 'admin' ? [
+                          ...(user?.roles?.includes('admin') ? [
                             { to: '/admin', icon: <Grid className="h-3.5 w-3.5" />, label: 'Admin' },
                             { to: '/admin/growth', icon: <Grid className="h-3.5 w-3.5" />, label: 'Growth Suite' },
                           ] : []),
@@ -317,7 +317,7 @@ const Header: React.FC = () => {
                 { to: '/saved', label: 'Saved items' },
                 { to: '/notifications', label: 'Notifications' },
                 { to: '/settings', label: 'Settings' },
-                ...(user?.role === 'admin' ? [{ to: '/admin', label: 'Admin dashboard' }, { to: '/admin/growth', label: 'Growth suite' }] : []),
+                ...(user?.roles?.includes('admin') ? [{ to: '/admin', label: 'Admin dashboard' }, { to: '/admin/growth', label: 'Growth suite' }] : []),
                 { to: '/orders', label: 'My orders' },
               ] : []),
             ].map(({ to, label }) => (
@@ -332,7 +332,7 @@ const Header: React.FC = () => {
             ))}
             {isAuthenticated ? (
               <div className="pt-3 flex flex-col gap-2">
-                {(user?.role === 'seller' || user?.role === 'admin') && (
+                {(user?.roles?.includes('seller') || user?.roles?.includes('admin')) && (
                   <Link
                     to="/sell"
                     className="block bg-earth-900 py-3 text-center text-xs font-black uppercase tracking-[0.18em] text-white"

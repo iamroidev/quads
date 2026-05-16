@@ -8,7 +8,9 @@ export interface IUserDocument extends Document {
   supabaseId?: string;
   phone: string;
   password: string;
-  role: 'buyer' | 'seller' | 'admin';
+  roles: ('buyer' | 'seller' | 'admin')[];
+  viewMode: 'buyer' | 'seller';
+  activeStore: mongoose.Types.ObjectId;
   avatar: string;
   studentId: string;
   department: string;
@@ -106,10 +108,19 @@ const userSchema = new Schema<IUserDocument>(
       minlength: [6, 'Password must be at least 6 characters'],
       select: false, // Don't include password in queries by default
     },
-    role: {
-      type: String,
+    roles: {
+      type: [String],
       enum: ['buyer', 'seller', 'admin'],
+      default: ['buyer'],
+    },
+    viewMode: {
+      type: String,
+      enum: ['buyer', 'seller'],
       default: 'buyer',
+    },
+    activeStore: {
+      type: Schema.Types.ObjectId,
+      ref: 'Store',
     },
     avatar: {
       type: String,

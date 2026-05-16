@@ -52,7 +52,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
           image: product.images[0]?.url || '',
           quantity,
           sellerId: product.seller._id,
-          sellerName: product.seller.storeName || product.seller.name,
+          sellerName: product.seller.name,
           pickupLocation: product.pickupLocation,
         },
       ];

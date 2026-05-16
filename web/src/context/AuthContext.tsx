@@ -50,7 +50,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     loadUser();
   }, [token]);
 
-  const register = useCallback(async (data: Omit<RegisterData, 'supabaseAccessToken'> & { email: string; password: string }) => {
+  const register = useCallback(async (data: Omit<RegisterData, 'supabaseAccessToken' | 'roles'> & { email: string; password: string; role?: any; roles?: any }) => {
     if (!isSupabaseConfigured) {
       toast.error('Authentication service is currently offline. Please contact the administrator.');
       throw new Error('Supabase is not configured.');
@@ -63,7 +63,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         emailRedirectTo: 'https://quadsmarket.tech/auth/callback',
         data: {
           name: data.name,
-          role: data.role,
+          roles: data.roles || [data.role],
         },
       },
     });
@@ -89,7 +89,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       supabaseAccessToken: authData.session.access_token,
       name: data.name,
       phone: data.phone,
-      role: data.role,
+      roles: data.roles || [data.role],
       studentId: data.studentId,
       department: data.department,
       residenceHall: data.residenceHall,
@@ -188,14 +188,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     toast.success('Password changed successfully', { duration: 1200 });
   }, []);
 
-  const switchRole = useCallback(async (role: 'buyer' | 'seller') => {
-    const response = await authService.switchRole(role);
+  const switchRole = useCallback(async (targetMode: 'buyer' | 'seller') => {
+    const response = await authService.switchRole(targetMode);
     const { user: updatedUser, token: newToken } = response.data;
     localStorage.setItem('token', newToken);
     localStorage.setItem('user', JSON.stringify(updatedUser));
     setToken(newToken);
     setUser(updatedUser);
-    toast.success(`Switched to ${role} mode`, { duration: 1200 });
+    toast.success(`Switched to ${targetMode} mode`, { duration: 1200 });
   }, []);
 
   const refreshUser = useCallback(async () => {

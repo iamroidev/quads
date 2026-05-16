@@ -689,7 +689,7 @@ const ProductDetail: React.FC = () => {
             </div>
             <div className="flex-1 text-center md:text-left">
               <div className="flex items-center justify-center md:justify-start gap-3 text-2xl font-black uppercase tracking-tight text-[var(--bulletin-text)]">
-                <span>{seller.storeName || seller.brandName || seller.name}</span>
+                <span>{seller.name}</span>
                 {seller.isVerified && (
                   <span className="text-[9px] font-black uppercase tracking-widest px-3 py-1 bg-sky-500 text-white rounded-full">Verified</span>
                 )}

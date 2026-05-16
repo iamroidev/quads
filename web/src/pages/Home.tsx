@@ -47,7 +47,7 @@ const HomePage: React.FC = () => {
 
   const getImage = (p: ProductPopulated) => p.images[0]?.url || 'https://placehold.co/400x500/ddd/666?text=Item';
 
-  const isSeller = user?.role === 'seller' || user?.role === 'admin';
+  const isSeller = user?.roles?.includes('seller') || user?.roles?.includes('admin');
 
   return (
     <BulletinLayout

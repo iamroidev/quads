@@ -5,7 +5,9 @@ export interface User {
   brandName?: string;
   email: string;
   phone: string;
-  role: 'buyer' | 'seller' | 'admin';
+  roles: ('buyer' | 'seller' | 'admin')[];
+  viewMode: 'buyer' | 'seller';
+  activeStore?: Store | string;
   avatar?: string;
   studentId?: string;
   department?: string;
@@ -47,6 +49,28 @@ export interface User {
   createdAt: string;
   updatedAt: string;
 }
+export interface Store {
+  _id: string;
+  ownerId: string;
+  name: string;
+  slug: string;
+  avatar?: string;
+  bio?: string;
+  location?: string;
+  phone?: string;
+  isVerified: boolean;
+  rating: number;
+  reviewCount: number;
+  payoutSetupComplete: boolean;
+  payoutMethod?: string;
+  payoutProvider?: string;
+  payoutAccountName?: string;
+  payoutAccountNumber?: string;
+  vacationMode: boolean;
+  vacationMessage?: string;
+  createdAt: string;
+  updatedAt: string;
+}
 
 export interface Category {
   _id: string;
@@ -75,7 +99,7 @@ export interface Product {
   price: number;
   originalPrice?: number;
   category: Category | string;
-  seller: Pick<User, '_id' | 'name' | 'storeName' | 'brandName' | 'avatar' | 'isVerified' | 'location' | 'residenceHall'> | string;
+  seller: Store | string;
   images: ProductImage[];
   video?: { url: string; publicId: string };
   condition: ProductCondition;
@@ -99,7 +123,7 @@ export interface Product {
 // Product with populated references
 export interface ProductPopulated extends Omit<Product, 'category' | 'seller'> {
   category: Category;
-  seller: Pick<User, '_id' | 'name' | 'storeName' | 'brandName' | 'avatar' | 'isVerified' | 'location'>;
+  seller: Store;
 }
 
 export interface ProductFilters {
@@ -192,7 +216,7 @@ export interface Order {
   _id: string;
   orderNumber: string;
   buyer: string | Pick<User, '_id' | 'name' | 'avatar' | 'phone' | 'email'>;
-  seller: string | Pick<User, '_id' | 'name' | 'avatar' | 'phone' | 'isVerified'>;
+  seller: string | Store;
   items: OrderItem[];
   totalAmount: number;
   status: OrderStatus;
@@ -217,15 +241,7 @@ export interface OrderPopulated extends Omit<Order, 'buyer' | 'seller'> {
     phone: string;
     email: string;
   };
-  seller: {
-    _id: string;
-    name: string;
-    storeName?: string;
-    brandName?: string;
-    avatar?: string;
-    phone: string;
-    isVerified: boolean;
-  };
+  seller: Store;
 }
 
 export const ORDER_STATUS_LABELS: Record<OrderStatus, string> = {

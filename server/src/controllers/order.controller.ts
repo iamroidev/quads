@@ -56,7 +56,7 @@ export const getOrderById = async (
   next: NextFunction
 ): Promise<void> => {
   try {
-    const isAdmin = req.user!.role === 'admin';
+    const isAdmin = req.user!.roles.includes('admin');
     const order = await orderService.getOrderById(
       req.params.id,
       req.user!._id.toString(),
@@ -114,7 +114,7 @@ export const getMySales = async (
   try {
     const { status, page, limit } = req.query;
     const result = await orderService.getSellerOrders(
-      req.user!._id.toString(),
+      req.user!.activeStore!._id.toString(),
       status as string | undefined,
       parseInt(page as string) || 1,
       parseInt(limit as string) || 20
@@ -141,7 +141,7 @@ export const updateOrderStatus = async (
   next: NextFunction
 ): Promise<void> => {
   try {
-    const isAdmin = req.user!.role === 'admin';
+    const isAdmin = req.user!.roles.includes('admin');
     const order = await orderService.updateOrderStatus(
       req.params.id,
       req.user!._id.toString(),
@@ -197,7 +197,7 @@ export const getSellerStats = async (
   next: NextFunction
 ): Promise<void> => {
   try {
-    const stats = await orderService.getSellerStats(req.user!._id.toString());
+    const stats = await orderService.getSellerStats(req.user!.activeStore!._id.toString());
 
     res.status(200).json({
       success: true,
@@ -229,7 +229,7 @@ export const createCoupon = async (
   next: NextFunction
 ): Promise<void> => {
   try {
-    const coupon = await orderService.createCoupon(req.user!._id.toString(), req.body);
+    const coupon = await orderService.createCoupon(req.user!.activeStore!._id.toString(), req.body);
     res.status(201).json({ success: true, message: 'Coupon created', data: { coupon } });
   } catch (error) {
     next(error);
@@ -242,7 +242,7 @@ export const getSellerCoupons = async (
   next: NextFunction
 ): Promise<void> => {
   try {
-    const coupons = await orderService.getSellerCoupons(req.user!._id.toString());
+    const coupons = await orderService.getSellerCoupons(req.user!.activeStore!._id.toString());
     res.status(200).json({ success: true, data: { coupons } });
   } catch (error) {
     next(error);
@@ -290,7 +290,7 @@ export const createBundle = async (
   next: NextFunction
 ): Promise<void> => {
   try {
-    const bundle = await orderService.createBundle(req.user!._id.toString(), req.body);
+    const bundle = await orderService.createBundle(req.user!.activeStore!._id.toString(), req.body);
     res.status(201).json({ success: true, message: 'Bundle created', data: { bundle } });
   } catch (error) {
     next(error);
@@ -303,7 +303,7 @@ export const getSellerBundles = async (
   next: NextFunction
 ): Promise<void> => {
   try {
-    const bundles = await orderService.getSellerBundles(req.user!._id.toString());
+    const bundles = await orderService.getSellerBundles(req.user!.activeStore!._id.toString());
     res.status(200).json({ success: true, data: { bundles } });
   } catch (error) {
     next(error);
