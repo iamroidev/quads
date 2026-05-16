@@ -1,7 +1,7 @@
 # QUADS - Integrated Deployment Script (PowerShell)
 # Automates GitHub push (Vercel) and AWS EC2 synchronization.
 
-$Branch = "mobile"
+$Branch = "main"
 $Ec2User = "ec2-user"
 $Ec2Ip = "54.167.221.2"
 $PemKey = "quads-key.pem"
