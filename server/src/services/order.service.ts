@@ -582,6 +582,18 @@ class OrderService {
     };
   }
 
+  async getPublicSellerCoupons(sellerId: string) {
+    const now = new Date();
+    return Coupon.find({
+      seller: sellerId,
+      isActive: true,
+      $and: [
+        { $or: [{ startsAt: { $exists: false } }, { startsAt: { $lte: now } }] },
+        { $or: [{ expiresAt: { $exists: false } }, { expiresAt: { $gte: now } }] }
+      ]
+    }).sort({ createdAt: -1 });
+  }
+
   async createBundle(
     sellerId: string,
     input: {

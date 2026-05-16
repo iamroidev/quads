@@ -15,11 +15,15 @@ import {
   runAutomationSweep,
   verifyHandoff,
   validateCoupon,
+  getPublicSellerCoupons,
 } from '../controllers/order.controller';
 import { authenticate, ensureProfileComplete } from '../middleware/auth';
 import { isSeller, isAdmin } from '../middleware/roleCheck';
 
 const router = Router();
+
+// Public growth toolkit access
+router.get('/public/seller/:sellerId/coupons', getPublicSellerCoupons);
 
 // All order routes require authentication
 router.use(authenticate);
@@ -45,6 +49,7 @@ router.get('/validate-coupon', ensureProfileComplete(), validateCoupon);
 // Seller growth toolkit: bundles
 router.post('/seller/bundles', isSeller, createBundle);
 router.get('/seller/bundles', isSeller, getSellerBundles);
+
 
 // POST /api/orders — create a new order
 router.post('/', ensureProfileComplete(), createOrder);

@@ -20,7 +20,7 @@ import productService from '../services/product.service';
 import authService, { UserStats } from '../services/auth.service';
 import categoryService, { CategoryWithCount } from '../services/category.service';
 import { ProductPopulated } from '../types';
-import { BulletinLayout, BulletinSection } from '../components/layout/BulletinLayout';
+import { BulletinLayout, BulletinSection, BulletinCard } from '../components/layout/BulletinLayout';
 import { ProductCardSkeleton, CategorySkeleton, CollectionSkeleton } from '../components/ui/BulletinSkeleton';
 
 const Dashboard: React.FC = () => {

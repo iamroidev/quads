@@ -181,6 +181,11 @@ const orderService = {
     const response = await api.get(`/orders/validate-coupon?code=${code}&sellerId=${sellerId}&subtotal=${subtotal}`);
     return response.data;
   },
+
+  getPublicSellerCoupons: async (sellerId: string): Promise<{ success: boolean; data: { coupons: any[] } }> => {
+    const response = await api.get(`/orders/public/seller/${sellerId}/coupons`);
+    return response.data;
+  },
 };
 
 export default orderService;
