@@ -119,7 +119,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onSavedChange }) => 
         />
 
         {/* Quick View — slides up from bottom on hover */}
-        <div className="absolute inset-x-0 bottom-0 translate-y-full bg-earth-900/90 py-3 text-center text-[11px] font-semibold uppercase tracking-[0.22em] text-white backdrop-blur-sm transition-transform duration-300 group-hover:translate-y-0">
+        <div className="absolute inset-x-0 bottom-0 z-20 translate-y-full bg-earth-900/90 py-3 text-center text-[11px] font-semibold uppercase tracking-[0.22em] text-white backdrop-blur-sm transition-transform duration-300 group-hover:translate-y-0">
           Quick View
         </div>
 
@@ -166,8 +166,8 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onSavedChange }) => 
 
         {/* ── SVG VERIFIED Stamp (small, corner) ── */}
         {sellerVerified && product.status !== 'sold' && (
-          <div className="absolute left-3 bottom-3">
-            <svg width="64" height="28" viewBox="0 0 64 28" className="transform rotate-[-3deg] opacity-90">
+          <div className="absolute left-3 bottom-3 z-10 transition-transform duration-300 group-hover:-translate-y-10">
+            <svg width="64" height="28" viewBox="0 0 64 28" className="transform rotate-[-3deg] opacity-90 drop-shadow-sm">
               <rect x="1" y="1" width="62" height="26" rx="2" fill="#1f2937" stroke="#374151" strokeWidth="1" />
               <text x="32" y="18" textAnchor="middle" fill="#fff" fontSize="9" fontWeight="800" fontFamily="monospace" letterSpacing="1">
                 VERIFIED
@@ -185,7 +185,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onSavedChange }) => 
 
         {/* ── LAST ONE red stamp ── */}
         {isLastOne && (
-          <div className="absolute right-3 bottom-3">
+          <div className="absolute right-3 bottom-3 z-10 transition-transform duration-300 group-hover:-translate-y-10">
             <svg width="72" height="32" viewBox="0 0 72 32" className="transform rotate-[4deg] drop-shadow-md">
               <rect x="1" y="1" width="70" height="30" rx="2" fill="#dc2626" stroke="#991b1b" strokeWidth="1.5" />
               <text x="36" y="21" textAnchor="middle" fill="#fff" fontSize="11" fontWeight="900" fontFamily="Arial, sans-serif" letterSpacing="1.5">
@@ -197,7 +197,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onSavedChange }) => 
 
         {/* Image count */}
         {product.images.length > 1 && (
-          <div className="absolute bottom-10 right-3 bg-black/55 px-2 py-0.5 text-[10px] font-medium text-white">
+          <div className="absolute top-3 left-1/2 -translate-x-1/2 bg-black/55 px-2 py-0.5 text-[10px] font-medium text-white rounded-full">
             1/{product.images.length}
           </div>
         )}

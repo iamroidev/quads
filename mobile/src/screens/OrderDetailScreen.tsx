@@ -8,6 +8,8 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import QRCode from 'react-native-qrcode-svg';
+import { Ionicons } from '@expo/vector-icons';
 import orderService, { Order } from '../services/order.service';
 import api from '../services/api';
 import { useAuth } from '../context/AuthContext';
@@ -143,6 +145,42 @@ const OrderDetailScreen = ({ route, navigation }: any) => {
     ]);
   };
 
+  const handleVerifyHandoff = async (code: string) => {
+    setActionLoading(true);
+    try {
+      const res = await api.post(`/orders/${orderId}/verify-handoff`, { code });
+      if (res.data.success) {
+        Alert.alert('Success', 'Handoff verified! Transaction completed.');
+        setOrder(res.data.data.order);
+      }
+    } catch (err: any) {
+      Alert.alert('Error', err?.response?.data?.message || 'Verification failed.');
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleOpenScanner = () => {
+    navigation.navigate('Scanner', {
+      onScan: (code: string) => handleVerifyHandoff(code),
+    });
+  };
+
+  const handleManualEntry = () => {
+    Alert.prompt(
+      'Manual Entry',
+      'Enter the 6-digit handover code from the seller:',
+      (code) => {
+        if (code?.length === 6) {
+          handleVerifyHandoff(code);
+        } else {
+          Alert.alert('Invalid', 'Code must be 6 digits.');
+        }
+      },
+      'plain-text'
+    );
+  };
+
   if (loading || !order) {
     return (
       <View style={styles.centered}>
@@ -198,7 +236,57 @@ const OrderDetailScreen = ({ route, navigation }: any) => {
         </View>
       )}
 
-      {/* Items */}
+      {/* Handover System */}
+      {order.status === 'ready' && (
+        <View style={styles.handoverSection}>
+          {isSeller ? (
+            <View style={styles.sellerHandover}>
+              <View style={styles.handoverText}>
+                <Text style={styles.handoverBadge}>Handover Protocol</Text>
+                <Text style={styles.handoverTitle}>Show this to the buyer</Text>
+                <Text style={styles.handoverSub}>The buyer must scan this code to confirm receipt.</Text>
+                <View style={styles.codeContainer}>
+                  <Text style={styles.codeText}>{order.handoffCode}</Text>
+                </View>
+              </View>
+              <View style={styles.qrContainer}>
+                <QRCode 
+                  value={JSON.stringify({ orderId: order._id, code: order.handoffCode, type: 'HANDOVER' })}
+                  size={120}
+                />
+              </View>
+            </View>
+          ) : (
+            <View style={styles.buyerHandover}>
+              <Text style={styles.handoverBadgeBuyer}>Handover Verification</Text>
+              <Text style={styles.handoverTitle}>Ready to pick up?</Text>
+              <Text style={styles.handoverSub}>Scan the seller's QR code or enter their code manually.</Text>
+              <View style={styles.handoverActions}>
+                <TouchableOpacity style={styles.scanBtn} onPress={handleOpenScanner}>
+                  <Ionicons name="camera-outline" size={20} color="#fff" />
+                  <Text style={styles.scanBtnText}>Scan QR Code</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.manualBtn} onPress={handleManualEntry}>
+                  <Ionicons name="keypad-outline" size={20} color={colors.text} />
+                  <Text style={styles.manualBtnText}>Manual Code</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          )}
+        </View>
+      )}
+
+      {order.status === 'completed' && order.handoffStatus === 'verified' && (
+        <View style={styles.successSection}>
+          <Ionicons name="checkmark-circle" size={40} color={colors.accent} />
+          <View style={styles.successContent}>
+            <Text style={styles.successTitle}>Transaction Finalized</Text>
+            <Text style={styles.successSub}>
+              {isSeller ? 'Funds added to your payout balance.' : 'Thank you for shopping on QUADS!'}
+            </Text>
+          </View>
+        </View>
+      )}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Items</Text>
         {order.items.map((item, idx) => (
@@ -349,6 +437,37 @@ const styles = StyleSheet.create({
   disputeBtn: { borderWidth: 1, borderColor: colors.border, backgroundColor: colors.surface, paddingVertical: 12, alignItems: 'center' },
   disputeBtnText: { color: '#6f6559', fontWeight: '800', fontSize: 12, textTransform: 'uppercase', letterSpacing: 1 },
   btnDisabled: { opacity: 0.5 },
+
+  // Handover Styles
+  handoverSection: {
+    borderWidth: 1, borderColor: colors.border, backgroundColor: colors.surface,
+    padding: 16, marginBottom: 12,
+  },
+  sellerHandover: { flexDirection: 'row', alignItems: 'center', gap: 16 },
+  handoverText: { flex: 1 },
+  handoverBadge: { fontSize: 9, fontWeight: '800', color: '#ff6b6b', textTransform: 'uppercase', marginBottom: 4 },
+  handoverTitle: { fontSize: 16, fontWeight: '900', color: colors.text, marginBottom: 4 },
+  handoverSub: { fontSize: 11, color: '#7c6f60', fontWeight: '600' },
+  codeContainer: { marginTop: 12, backgroundColor: '#1f1a14', paddingVertical: 8, alignItems: 'center' },
+  codeText: { color: '#fff', fontSize: 18, fontWeight: '900', letterSpacing: 4 },
+  qrContainer: { padding: 8, backgroundColor: '#fff', borderWidth: 1, borderColor: colors.border },
+  
+  buyerHandover: { alignItems: 'center' },
+  handoverBadgeBuyer: { fontSize: 9, fontWeight: '800', color: colors.accent, textTransform: 'uppercase', marginBottom: 4 },
+  handoverActions: { flexDirection: 'row', gap: 10, marginTop: 16, width: '100%' },
+  scanBtn: { flex: 1, backgroundColor: '#1f1a14', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingVertical: 12, gap: 8 },
+  scanBtnText: { color: '#fff', fontSize: 11, fontWeight: '800', textTransform: 'uppercase' },
+  manualBtn: { flex: 1, borderWidth: 1, borderColor: colors.border, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingVertical: 12, gap: 8 },
+  manualBtnText: { color: colors.text, fontSize: 11, fontWeight: '800', textTransform: 'uppercase' },
+
+  successSection: {
+    flexDirection: 'row', alignItems: 'center', gap: 16,
+    borderWidth: 1, borderColor: colors.accent, backgroundColor: '#d6ede7',
+    padding: 16, marginBottom: 12,
+  },
+  successContent: { flex: 1 },
+  successTitle: { fontSize: 16, fontWeight: '900', color: colors.text },
+  successSub: { fontSize: 12, color: colors.accent, fontWeight: '600' },
 });
 
 export default OrderDetailScreen;

@@ -11,10 +11,10 @@ export const authorize = (...roles: string[]) => {
       return next(ApiError.unauthorized('Authentication required.'));
     }
 
-    if (!roles.includes(req.user.role)) {
+    if (!roles.some(r => req.user!.roles.includes(r as any))) {
       return next(
         ApiError.forbidden(
-          `Role '${req.user.role}' is not authorized to access this resource.`
+          `Roles '${req.user.roles.join(', ')}' are not authorized to access this resource.`
         )
       );
     }
@@ -46,7 +46,7 @@ export const isOwnerOrAdmin = (
 
     const ownerId = getResourceOwnerId(req);
     const isOwner = req.user._id.toString() === ownerId;
-    const isAdminUser = req.user.role === 'admin';
+    const isAdminUser = req.user.roles.includes('admin');
 
     if (!isOwner && !isAdminUser) {
       return next(

@@ -226,6 +226,8 @@ export interface Order {
   deliveryFee: number;
   note?: string;
   payment?: Transaction;
+  handoffCode?: string;
+  handoffStatus?: 'pending' | 'verified';
   cancelReason?: string;
   cancelledBy?: string;
   completedAt?: string;

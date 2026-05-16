@@ -87,13 +87,21 @@ const Dashboard: React.FC = () => {
     }
   }, [isSeller]);
 
+  const [switching, setSwitching] = React.useState(false);
+
   const handleBecomeSeller = async () => {
+    setSwitching(true);
     try {
       await switchRole('seller');
+      toast.success('You are now a seller!');
       setShowUpgradeModal(false);
       navigate('/seller/onboarding');
-    } catch (err) {
+    } catch (err: any) {
       console.error('Failed to switch to seller', err);
+      const msg = err.response?.data?.message || err.message || 'Failed to upgrade account';
+      toast.error(msg);
+    } finally {
+      setSwitching(false);
     }
   };
 
@@ -470,7 +478,7 @@ const Dashboard: React.FC = () => {
       )}
 
       {/* Upgrade CTA for buyers */}
-      {!user?.roles.includes('seller') && (
+      {!user?.roles?.includes('seller') && (
         <BulletinSection bgColor="bg-[#111] dark:bg-[#111]">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-6 py-4 border-l-4 border-[#ff6b6b] pl-8">
             <div>
@@ -540,9 +548,10 @@ const Dashboard: React.FC = () => {
               </button>
               <button
                 onClick={handleBecomeSeller}
-                className="flex-1 border-4 border-black dark:border-white/40 bg-black dark:bg-white text-white dark:text-black py-4 text-xs font-black uppercase tracking-widest hover:bg-[#ff6b6b] transition-all shadow-[4px_4px_0_0_rgba(255,107,107,1)]"
+                disabled={switching}
+                className="flex-1 border-4 border-black dark:border-white/40 bg-black dark:bg-white text-white dark:text-black py-4 text-xs font-black uppercase tracking-widest hover:bg-[#ff6b6b] transition-all shadow-[4px_4px_0_0_rgba(255,107,107,1)] disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Become a Seller →
+                {switching ? 'Upgrading...' : 'Become a Seller →'}
               </button>
             </div>
           </div>

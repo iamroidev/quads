@@ -34,3 +34,4 @@ export { default as ContactScreen } from './ContactScreen';
 export { default as TermsScreen } from './TermsScreen';
 export { default as MaintenanceScreen } from './MaintenanceScreen';
 export { default as CollectionDetailScreen } from './CollectionDetailScreen';
+export { default as ScannerScreen } from './ScannerScreen';

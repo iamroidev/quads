@@ -34,8 +34,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (token) {
         try {
           const response = await authService.getMe();
-          setUser(response.data.user);
-          localStorage.setItem('user', JSON.stringify(response.data.user));
+          const userData = response.data.user;
+          const sanitizedUser = { 
+            ...userData, 
+            roles: userData.roles || [],
+            viewMode: userData.viewMode || (userData.roles?.includes('seller') ? 'seller' : 'buyer')
+          };
+          setUser(sanitizedUser);
+          localStorage.setItem('user', JSON.stringify(sanitizedUser));
         } catch {
           // Token is invalid/expired
           localStorage.removeItem('token');
@@ -98,10 +104,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     });
     const { user: newUser, token: newToken } = response.data;
 
+    const sanitizedUser = { 
+      ...newUser, 
+      roles: newUser.roles || [],
+      viewMode: newUser.viewMode || (newUser.roles?.includes('seller') ? 'seller' : 'buyer')
+    };
     localStorage.setItem('token', newToken);
-    localStorage.setItem('user', JSON.stringify(newUser));
+    localStorage.setItem('user', JSON.stringify(sanitizedUser));
     setToken(newToken);
-    setUser(newUser);
+    setUser(sanitizedUser);
     toast.success('Account created successfully!', { duration: 1400 });
   }, []);
 
@@ -122,11 +133,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     const response = await authService.login({ supabaseAccessToken: authData.session.access_token });
     const { user: newUser, token: newToken } = response.data;
+    const sanitizedUser = { 
+      ...newUser, 
+      roles: newUser.roles || [],
+      viewMode: newUser.viewMode || (newUser.roles?.includes('seller') ? 'seller' : 'buyer')
+    };
 
     localStorage.setItem('token', newToken);
-    localStorage.setItem('user', JSON.stringify(newUser));
+    localStorage.setItem('user', JSON.stringify(sanitizedUser));
     setToken(newToken);
-    setUser(newUser);
+    setUser(sanitizedUser);
     toast.success(`Welcome back, ${newUser.name}!`, { duration: 1200 });
   }, []);
 
@@ -144,11 +160,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // 2. Send Supabase access token to our backend
     const response = await authService.googleLogin(session.access_token, role, profileData);
     const { user: newUser, token: newToken } = response.data;
+    const sanitizedUser = { 
+      ...newUser, 
+      roles: newUser.roles || [],
+      viewMode: newUser.viewMode || (newUser.roles?.includes('seller') ? 'seller' : 'buyer')
+    };
 
     localStorage.setItem('token', newToken);
-    localStorage.setItem('user', JSON.stringify(newUser));
+    localStorage.setItem('user', JSON.stringify(sanitizedUser));
     setToken(newToken);
-    setUser(newUser);
+    setUser(sanitizedUser);
     toast.success(`Welcome, ${newUser.name}!`, { duration: 1200 });
 
     return {
@@ -178,8 +199,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const updateProfile = useCallback(async (data: UpdateProfileData) => {
     const response = await authService.updateProfile(data);
     const updatedUser = response.data.user;
-    setUser(updatedUser);
-    localStorage.setItem('user', JSON.stringify(updatedUser));
+    const sanitizedUser = { 
+      ...updatedUser, 
+      roles: updatedUser.roles || [],
+      viewMode: updatedUser.viewMode || (updatedUser.roles?.includes('seller') ? 'seller' : 'buyer')
+    };
+    setUser(sanitizedUser);
+    localStorage.setItem('user', JSON.stringify(sanitizedUser));
     toast.success('Profile updated successfully', { duration: 1200 });
   }, []);
 
@@ -191,18 +217,29 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const switchRole = useCallback(async (targetMode: 'buyer' | 'seller') => {
     const response = await authService.switchRole(targetMode);
     const { user: updatedUser, token: newToken } = response.data;
+    const sanitizedUser = { 
+      ...updatedUser, 
+      roles: updatedUser.roles || [],
+      viewMode: updatedUser.viewMode || (updatedUser.roles?.includes('seller') ? 'seller' : 'buyer')
+    };
     localStorage.setItem('token', newToken);
-    localStorage.setItem('user', JSON.stringify(updatedUser));
+    localStorage.setItem('user', JSON.stringify(sanitizedUser));
     setToken(newToken);
-    setUser(updatedUser);
+    setUser(sanitizedUser);
     toast.success(`Switched to ${targetMode} mode`, { duration: 1200 });
   }, []);
 
   const refreshUser = useCallback(async () => {
     try {
       const response = await authService.getMe();
-      setUser(response.data.user);
-      localStorage.setItem('user', JSON.stringify(response.data.user));
+      const userData = response.data.user;
+      const sanitizedUser = { 
+        ...userData, 
+        roles: userData.roles || [],
+        viewMode: userData.viewMode || (userData.roles?.includes('seller') ? 'seller' : 'buyer')
+      };
+      setUser(sanitizedUser);
+      localStorage.setItem('user', JSON.stringify(sanitizedUser));
     } catch {
       // Silently fail
     }

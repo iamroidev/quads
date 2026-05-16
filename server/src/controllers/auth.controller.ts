@@ -163,9 +163,13 @@ export const switchRole = async (
   next: NextFunction
 ): Promise<void> => {
   try {
-    const { targetMode } = req.body;
+    const targetMode = req.body.targetMode || req.body.role;
     if (!targetMode || !['buyer', 'seller'].includes(targetMode)) {
-      res.status(400).json({ success: false, message: 'targetMode must be "buyer" or "seller".' });
+      res.status(400).json({ 
+        success: false, 
+        message: 'Role switch requires "targetMode" or "role" (buyer/seller).',
+        debug: { body: req.body }
+      });
       return;
     }
 
