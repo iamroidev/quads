@@ -6,6 +6,8 @@
 - [x] **Resend API Integration**: 100% email delivery via Axios-based API calls.
 - [x] **Role-Based Branding**: Personalized welcome emails for Buyers and Sellers.
 - [x] **Deployment Sync**: Robust `./sync-platform.ps1` for pushing local updates to EC2.
+- [x] **Growth Toolkit**: Functional Coupons, Bundles, and Campaign boosting.
+- [x] **Automatic Discovery**: In-page coupon surfacing for buyers (Amazon-style).
 
 ---
 
@@ -37,4 +39,4 @@
 | **Database Check** | Access MongoDB Atlas Dashboard (Cluster: `quads`) |
 
 ---
-*Updated by Antigravity AI — 2026-05-15*
+*Updated by Antigravity AI — 2026-05-16*
