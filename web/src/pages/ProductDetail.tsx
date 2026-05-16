@@ -605,7 +605,7 @@ const ProductDetail: React.FC = () => {
                 <p className="text-[9px] font-bold mt-4 opacity-50 italic">* Apply code at checkout to redeem.</p>
               </div>
             )}
-            <div className="flex flex-wrap gap-4 mt-auto">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-auto">
               {isOwner ? (
                 <Link
                   to={`/products/${product._id}/edit`}
@@ -616,7 +616,7 @@ const ProductDetail: React.FC = () => {
               ) : (
                 <>
                   <button
-                    className="flex-1 border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-text)] px-8 py-4 text-[11px] font-black uppercase tracking-widest text-[var(--bulletin-bg)] transition-all hover:bg-[#ff6b6b] hover:text-white shadow-[6px_6px_0_0_var(--bulletin-shadow)] hover:translate-y-1 hover:shadow-none disabled:opacity-20"
+                    className="w-full border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-text)] px-8 py-4 text-[11px] font-black uppercase tracking-widest text-[var(--bulletin-bg)] transition-all hover:bg-[#ff6b6b] hover:text-white shadow-[6px_6px_0_0_var(--bulletin-shadow)] hover:translate-y-1 hover:shadow-none disabled:opacity-20 flex items-center justify-center whitespace-nowrap"
                     disabled={product.status !== 'active'}
                     onClick={() => {
                       growthService.captureEvent(user?._id, 'buy_now_initiated', { productId: product._id, price: product.price });
@@ -627,49 +627,50 @@ const ProductDetail: React.FC = () => {
                     Buy Now
                   </button>
                   <button
-                    className="flex-1 border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] px-8 py-4 text-[11px] font-black uppercase tracking-widest text-[var(--bulletin-text)] transition-all hover:bg-[#fffacd] hover:text-black shadow-[6px_6px_0_0_var(--bulletin-shadow)] hover:translate-y-1 hover:shadow-none disabled:opacity-20"
+                    className="w-full border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] px-8 py-4 text-[11px] font-black uppercase tracking-widest text-[var(--bulletin-text)] transition-all hover:bg-[#fffacd] hover:text-black shadow-[6px_6px_0_0_var(--bulletin-shadow)] hover:translate-y-1 hover:shadow-none disabled:opacity-20 flex items-center justify-center whitespace-nowrap"
                     disabled={product.status !== 'active'}
                     onClick={() => {
                       growthService.captureEvent(user?._id, 'add_to_cart', { productId: product._id });
                       addItem(product);
                     }}
                   >
-                    <ShoppingCart className="inline-block h-5 w-5 mr-2" />
+                    <ShoppingCart className="h-5 w-5 mr-2 flex-shrink-0" />
                     Add to Cart
                   </button>
                   <button
-                    className="flex-1 border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] px-8 py-4 text-[11px] font-black uppercase tracking-widest text-[var(--bulletin-text)] transition-all hover:bg-[var(--bulletin-text)] hover:text-[var(--bulletin-bg)] shadow-[6px_6px_0_0_var(--bulletin-shadow)] hover:translate-y-1 hover:shadow-none disabled:opacity-20"
+                    className="w-full border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] px-8 py-4 text-[11px] font-black uppercase tracking-widest text-[var(--bulletin-text)] transition-all hover:bg-[var(--bulletin-text)] hover:text-[var(--bulletin-bg)] shadow-[6px_6px_0_0_var(--bulletin-shadow)] hover:translate-y-1 hover:shadow-none disabled:opacity-20 flex items-center justify-center whitespace-nowrap"
                     disabled={product.status !== 'active' || contacting}
                     onClick={handleContactSeller}
                   >
-                    <MessageCircle className="inline-block h-5 w-5 mr-2" />
+                    <MessageCircle className="h-5 w-5 mr-2 flex-shrink-0" />
                     {contacting ? '...' : 'Chat with Seller'}
                   </button>
-                  <button
-                    onClick={handleToggleSaved}
-                    disabled={saving}
-                    className="border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] px-5 py-4 text-[11px] font-black uppercase transition-all hover:bg-red-50 dark:hover:bg-red-900/10 shadow-[4px_4px_0_0_var(--bulletin-shadow)] hover:translate-y-1 hover:shadow-none text-[var(--bulletin-text)]"
-                  >
-                    <Heart className={`h-5 w-5 ${isSaved ? 'text-red-500 fill-red-500' : ''}`} />
-                  </button>
-                </>
-              )}
-              <button
-                onClick={handleShare}
-                className="border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] px-5 py-4 text-[11px] font-black uppercase transition-all hover:bg-[var(--bulletin-bg)] shadow-[4px_4px_0_0_var(--bulletin-shadow)] hover:translate-y-1 hover:shadow-none text-[var(--bulletin-text)]"
-                title="Share"
-              >
-                <Share2 className="h-5 w-5" />
-              </button>
-              {!isOwner && user && (
-                <button
-                  onClick={() => setShowReportModal(true)}
-                  className="border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] px-5 py-4 text-[11px] font-black uppercase transition-all hover:bg-red-50 dark:hover:bg-red-900/10 shadow-[4px_4px_0_0_var(--bulletin-shadow)] hover:translate-y-1 hover:shadow-none text-red-600"
-                  title="Report"
-                >
-                  <Flag className="h-5 w-5" />
-                </button>
-              )}
+                  
+                  <div className="md:col-span-2 flex gap-4">
+                    <button
+                      onClick={handleToggleSaved}
+                      disabled={saving}
+                      className="flex-1 border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] px-5 py-4 text-[11px] font-black uppercase transition-all hover:bg-red-50 dark:hover:bg-red-900/10 shadow-[4px_4px_0_0_var(--bulletin-shadow)] hover:translate-y-1 hover:shadow-none text-[var(--bulletin-text)] flex items-center justify-center"
+                    >
+                      <Heart className={`h-5 w-5 ${isSaved ? 'text-red-500 fill-red-500' : ''}`} />
+                    </button>
+                    <button
+                      onClick={handleShare}
+                      className="flex-1 border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] px-5 py-4 text-[11px] font-black uppercase transition-all hover:bg-[var(--bulletin-bg)] shadow-[4px_4px_0_0_var(--bulletin-shadow)] hover:translate-y-1 hover:shadow-none text-[var(--bulletin-text)] flex items-center justify-center"
+                      title="Share"
+                    >
+                      <Share2 className="h-5 w-5" />
+                    </button>
+                    {!isOwner && user && (
+                      <button
+                        onClick={() => setShowReportModal(true)}
+                        className="flex-1 border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] px-5 py-4 text-[11px] font-black uppercase transition-all hover:bg-red-50 dark:hover:bg-red-900/10 shadow-[4px_4px_0_0_var(--bulletin-shadow)] hover:translate-y-1 hover:shadow-none text-red-600 flex items-center justify-center"
+                        title="Report"
+                      >
+                        <Flag className="h-5 w-5" />
+                      </button>
+                    )}
+                  </div>
             </div>
           </div>
         </div>
