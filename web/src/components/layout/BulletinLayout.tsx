@@ -89,7 +89,7 @@ export const BulletinLayout: React.FC<BulletinLayoutProps> = ({
   return (
     <div className="min-h-screen bg-[var(--bulletin-bg)] text-[var(--bulletin-text)] font-sans selection:bg-[#ff6b6b] selection:text-white overflow-x-hidden">
       {/* Heavy Header Border */}
-      <div className="h-2 bg-black w-full fixed top-0 z-[1001]" />
+      <div className="h-2 bg-[var(--bulletin-border)] w-full fixed top-0 z-[1001]" />
 
       {/* Global Announcement Marquee */}
       <div className="fixed top-2 left-0 w-full z-[1001]">
@@ -149,7 +149,7 @@ export const BulletinLayout: React.FC<BulletinLayoutProps> = ({
               {!isSeller && (
                 <Link 
                   to={isAuthenticated ? "/seller/onboarding" : "/register"} 
-                  className="hidden md:flex items-center gap-2 border-2 border-black bg-black text-white px-4 py-2 text-[10px] font-black uppercase tracking-widest shadow-[3px_3px_0_0_#ff6b6b] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all"
+                  className="hidden md:flex items-center gap-2 border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-text)] text-[var(--bulletin-bg)] px-4 py-2 text-[10px] font-black uppercase tracking-widest shadow-[3px_3px_0_0_var(--bulletin-accent)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all"
                   id="sell-on-quads-btn"
                 >
                   Sell on Quads
@@ -158,7 +158,7 @@ export const BulletinLayout: React.FC<BulletinLayoutProps> = ({
 
               <button 
                 onClick={toggleTheme}
-                className="p-2 border-2 border-black bg-white dark:bg-black/20 hover:bg-[#fffacd] dark:hover:bg-white/10 transition-colors shadow-[2px_2px_0_0_var(--bulletin-shadow)] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none"
+                className="p-2 border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] hover:bg-[#fffacd] dark:hover:bg-white/10 transition-colors shadow-[2px_2px_0_0_var(--bulletin-shadow)] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none"
                 title={isDark ? "Switch to Light Mode" : "Switch to Dark Mode"}
               >
                 {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
@@ -224,7 +224,7 @@ export const BulletinLayout: React.FC<BulletinLayoutProps> = ({
                   )}
                 </div>
               ) : (
-                <Link to="/login" className="border-2 border-black bg-black text-white px-4 py-1.5 text-[10px] font-black uppercase tracking-widest hover:bg-[#fffacd] hover:text-black transition-colors">
+                <Link to="/login" className="border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-text)] text-[var(--bulletin-bg)] px-4 py-1.5 text-[10px] font-black uppercase tracking-widest hover:bg-[#fffacd] hover:text-black transition-colors">
                   Join Market
                 </Link>
               )}
@@ -274,15 +274,15 @@ export const BulletinLayout: React.FC<BulletinLayoutProps> = ({
         </div>
 
         {/* ── SIMPLIFIED BULLETIN FOOTER ── */}
-        <div className="border-t-4 border-black bg-[var(--bulletin-card)] px-6 py-16 md:px-12">
+        <div className="border-t-4 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] px-6 py-16 md:px-12">
           <div className="mx-auto max-w-[1400px]">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 lg:gap-24 mb-16">
               
               {/* Institutional Branding */}
               <div className="flex flex-col gap-6">
                 <div className="flex items-center gap-4">
-                  <div className="border-4 border-black bg-white p-3 shadow-[4px_4px_0_0_#ff6b6b] rotate-[-2deg]">
-                    <BrandMark className="h-8 w-8 text-black" />
+                  <div className="border-4 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] p-3 shadow-[4px_4px_0_0_var(--bulletin-accent)] rotate-[-2deg]">
+                    <BrandMark className="h-8 w-8 text-[var(--bulletin-text)]" />
                   </div>
                   <div>
                     <h2 className="text-xl font-black uppercase tracking-tighter text-[var(--bulletin-text)]">QUADS</h2>
@@ -339,7 +339,7 @@ export const BulletinLayout: React.FC<BulletinLayoutProps> = ({
             </div>
 
             {/* Bottom Bar: Socials & Node */}
-            <div className="flex flex-col md:flex-row items-center justify-between border-t-4 border-black pt-12 gap-8">
+            <div className="flex flex-col md:flex-row items-center justify-between border-t-4 border-[var(--bulletin-border)] pt-12 gap-8">
               <div className="flex flex-col items-center md:items-start gap-4">
                  <div className="text-[10px] font-black uppercase tracking-[0.3em] text-[#ff6b6b]">Official Channels</div>
                   <div className="flex items-center gap-10">
@@ -355,7 +355,7 @@ export const BulletinLayout: React.FC<BulletinLayoutProps> = ({
                   </div>
                 </div>
 
-              <div className="border-4 border-black bg-[#fffacd] dark:bg-yellow-900/20 px-6 py-2 shadow-[4px_4px_0_0_#000]">
+              <div className="border-4 border-[var(--bulletin-border)] bg-[#fffacd] dark:bg-yellow-900/20 px-6 py-2 shadow-[4px_4px_0_0_var(--bulletin-text)]">
                  <div className="text-[10px] font-black uppercase tracking-tighter flex items-center gap-2">
                    <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
                    SYSTEM NODE: TARKWA-HQ-01
@@ -364,7 +364,7 @@ export const BulletinLayout: React.FC<BulletinLayoutProps> = ({
             </div>
 
             {/* Legal / Metadata */}
-            <div className="mt-16 flex flex-col md:flex-row items-center justify-between border-t-2 border-black/10 pt-8 gap-6">
+            <div className="mt-16 flex flex-col md:flex-row items-center justify-between border-t-2 border-[var(--bulletin-border)] opacity-20 pt-8 gap-6">
               <div className="flex items-center gap-3">
                 <div className="h-1.5 w-1.5 rounded-full bg-[#ff6b6b] animate-pulse" />
                 <span className="text-[9px] font-black uppercase tracking-[0.3em] opacity-30 text-[var(--bulletin-text)]">System Online · {new Date().getFullYear()} Operations</span>
@@ -394,10 +394,10 @@ export const BulletinSection: React.FC<{
   const bgClass = bgColor ? bgColor : 'bg-[var(--bulletin-bg)]';
   
   return (
-    <div id={id} className={`border-b border-black dark:border-white/20 ${bgClass} p-6 md:p-12 transition-colors duration-200 ${className}`}>
+    <div id={id} className={`border-b border-[var(--bulletin-border)] ${bgClass} p-6 md:p-12 transition-colors duration-200 ${className}`}>
       <div className="mx-auto max-w-[1400px]">
         {(title || action) && (
-          <div className="mb-8 flex items-end justify-between border-b border-black dark:border-white/20 pb-2">
+          <div className="mb-8 flex items-end justify-between border-b border-[var(--bulletin-border)] pb-2">
             <div>
               {subtitle && (
                 <div className="text-[10px] uppercase tracking-wider opacity-40">{subtitle}</div>
@@ -428,7 +428,7 @@ export const BulletinCard: React.FC<{
   return (
     <div
       onClick={onClick}
-      className={`border border-black dark:border-white/40 ${bgClass} p-4 shadow-[4px_4px_0_0_var(--bulletin-shadow)] transition-all hover:-translate-y-1 ${className} ${onClick ? 'cursor-pointer' : ''}`}
+      className={`border-2 border-[var(--bulletin-border)] ${bgClass} p-4 shadow-[4px_4px_0_0_var(--bulletin-shadow)] transition-all hover:-translate-y-1 ${className} ${onClick ? 'cursor-pointer' : ''}`}
       style={{ transform: `rotate(${rotation}deg)` }}
     >
       {children}
