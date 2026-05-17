@@ -41,7 +41,7 @@ This guide walks you through everything needed to make QUADS work online for rea
 | `NODE_ENV` | `server/.env.production` | `development` | `production` | Just type it |
 | `MONGODB_URI` | `server/.env.production` | `mongodb+srv://...` | MongoDB Atlas string | [MongoDB Atlas](https://cloud.mongodb.com) |
 | `JWT_SECRET` | `server/.env.production` | (current) | Random 64-char string | `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"` |
-| `CLIENT_URL` | `server/.env.production` | `http://localhost:5173` | Your Vercel URL | Vercel dashboard |
+| `CLIENT_URL` | `server/.env.production` | `http://localhost:5200` | Your Vercel URL | Vercel dashboard |
 | `PAYSTACK_SECRET_KEY` | shared (root `.env`) | `sk_live_...` | ✅ Already live — keep it | Paystack dashboard |
 | `PAYSTACK_PUBLIC_KEY` | shared (root `.env`) | `pk_live_...` | ✅ Already live — keep it | Paystack dashboard |
 | `SMTP_FROM` | `server/.env.production` | `noreply@campusmarketplace.com` | `noreply@yourdomain.com` | Your domain |

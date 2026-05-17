@@ -122,7 +122,7 @@ Admin:          /api/admin/* (stats, moderation, ops, users)
 cd server && npm run dev         # starts on :5000
 
 # Web
-cd web && npm run dev            # starts on :5173
+cd web && npm run dev            # starts on :5200
 
 # Mobile
 cd mobile && npx expo start      # open in Expo Go
