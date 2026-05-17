@@ -1,5 +1,10 @@
 import { Request, Response } from 'express';
-import { sanitizeInput, validateObjectId, validateAuthInput } from '../middleware/validateRequest';
+import {
+  sanitizeInput,
+  validateBodySize,
+  validateObjectId,
+  validateAuthInput
+} from '../middleware/validateRequest';
 
 describe('Input Validation Middleware', () => {
   let mockReq: Partial<Request>;
@@ -107,6 +112,50 @@ describe('Input Validation Middleware', () => {
       });
       expect(nextFunction).not.toHaveBeenCalled();
     });
+
+    it('should validate productId fallback param', () => {
+      mockReq.params = { productId: '507f1f77bcf86cd799439011' };
+
+      validateObjectId(mockReq as Request, mockRes as Response, nextFunction);
+
+      expect(nextFunction).toHaveBeenCalled();
+      expect(mockRes.status).not.toHaveBeenCalled();
+    });
+
+    it('should validate orderId fallback param', () => {
+      mockReq.params = { orderId: 'invalid-order-id' };
+
+      validateObjectId(mockReq as Request, mockRes as Response, nextFunction);
+
+      expect(mockRes.status).toHaveBeenCalledWith(400);
+      expect(nextFunction).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('validateBodySize', () => {
+    it('should reject request body larger than configured max', () => {
+      mockReq.headers = { 'content-length': '2048' };
+      const middleware = validateBodySize(1024);
+
+      middleware(mockReq as Request, mockRes as Response, nextFunction);
+
+      expect(mockRes.status).toHaveBeenCalledWith(413);
+      expect(mockRes.json).toHaveBeenCalledWith({
+        success: false,
+        message: 'Request body too large. Max allowed: 0.0009765625MB',
+      });
+      expect(nextFunction).not.toHaveBeenCalled();
+    });
+
+    it('should pass request body within configured max', () => {
+      mockReq.headers = { 'content-length': '512' };
+      const middleware = validateBodySize(1024);
+
+      middleware(mockReq as Request, mockRes as Response, nextFunction);
+
+      expect(nextFunction).toHaveBeenCalled();
+      expect(mockRes.status).not.toHaveBeenCalled();
+    });
   });
 
   describe('validateAuthInput', () => {
@@ -147,6 +196,38 @@ describe('Input Validation Middleware', () => {
           errors: expect.arrayContaining(['Password must be at least 6 characters']),
         })
       );
+    });
+
+    it('should reject overly long fields', () => {
+      mockReq.body = {
+        email: `${'a'.repeat(250)}@test.com`,
+        password: 'a'.repeat(129),
+        name: 'a'.repeat(101),
+      };
+
+      validateAuthInput(mockReq as Request, mockRes as Response, nextFunction);
+
+      expect(mockRes.status).toHaveBeenCalledWith(400);
+      expect(mockRes.json).toHaveBeenCalledWith(
+        expect.objectContaining({
+          errors: expect.arrayContaining(['Email too long', 'Password too long', 'Name too long']),
+        })
+      );
+      expect(nextFunction).not.toHaveBeenCalled();
+    });
+
+    it('should reject too-short name', () => {
+      mockReq.body = { name: 'A' };
+
+      validateAuthInput(mockReq as Request, mockRes as Response, nextFunction);
+
+      expect(mockRes.status).toHaveBeenCalledWith(400);
+      expect(mockRes.json).toHaveBeenCalledWith(
+        expect.objectContaining({
+          errors: expect.arrayContaining(['Name must be at least 2 characters']),
+        })
+      );
+      expect(nextFunction).not.toHaveBeenCalled();
     });
   });
 });
