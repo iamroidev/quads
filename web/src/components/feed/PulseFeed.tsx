@@ -3,18 +3,48 @@ import { Link } from 'react-router-dom';
 import { Eye, TrendingUp, MapPin, Sparkles, ArrowRight, Activity as ActivityIcon, ShoppingBag, CheckCircle, Ticket } from 'lucide-react';
 import feedService, { PulseFeedResponse } from '../../services/feed.service';
 import { ProductCardSkeleton } from '../ui/BulletinSkeleton';
+import { useAuth } from '../../context/AuthContext';
 
 const PulseFeed: React.FC = () => {
+  const { isAuthenticated } = useAuth();
   const [feed, setFeed] = useState<PulseFeedResponse['data'] | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (!isAuthenticated) {
+      setLoading(false);
+      return;
+    }
     feedService.getPulseFeed()
       .then(res => {
         if (res.success) setFeed(res.data);
       })
       .finally(() => setLoading(false));
-  }, []);
+  }, [isAuthenticated]);
+
+  if (!isAuthenticated) {
+    return (
+      <div className="py-12 text-center max-w-2xl mx-auto">
+        <div className="border-4 border-black bg-[#fffacd] dark:bg-yellow-950/20 p-8 shadow-[8px_8px_0_0_black] rotate-[-0.5deg]">
+          <div className="h-16 w-16 bg-white border-4 border-black flex items-center justify-center mx-auto mb-6 shadow-[4px_4px_0_0_black] rotate-[3deg]">
+            <ActivityIcon size={32} className="text-black animate-pulse" />
+          </div>
+          <div className="text-[10px] font-black uppercase tracking-[0.2em] opacity-40 mb-2">Unauthenticated Access</div>
+          <h3 className="text-2xl font-black uppercase tracking-tight mb-4 text-black dark:text-yellow-200">Unlock the Campus Pulse Feed</h3>
+          <p className="text-sm font-bold opacity-60 max-w-md mx-auto mb-8 leading-relaxed text-black dark:text-yellow-200/80">
+            Log in to see live board transactions, custom notifications, and hyper-local deals trending in your specific residence hall.
+          </p>
+          <Link
+            to="/login"
+            className="inline-block border-4 border-black bg-black hover:bg-[#ff6b6b] px-8 py-3 text-[11px] font-black uppercase tracking-widest text-white hover:text-black transition-all shadow-[4px_4px_0_0_#ff6b6b] hover:shadow-none hover:translate-x-1 hover:translate-y-1"
+          >
+            Sign In to Unlock
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
   if (loading) {
     return (
       <div className="space-y-12 py-8">
