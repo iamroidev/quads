@@ -266,7 +266,7 @@ export const BulletinLayout: React.FC<BulletinLayoutProps> = ({
 
         {/* Navigation Breadcrumbs */}
         {!hideBreadcrumbs && (
-          <div className="border-b border-[var(--bulletin-border)] bg-[var(--bulletin-card)] px-6 py-3">
+          <div className="border-b border-[var(--bulletin-border)] bg-[var(--bulletin-card)] px-4 py-1.5 md:px-6 md:py-3">
             <div className="mx-auto flex max-w-[1400px] items-center gap-2 text-[10px] font-black uppercase tracking-widest opacity-40 text-[var(--bulletin-text)]">
               <Link to="/" className="hover:text-[#ff6b6b] text-[var(--bulletin-text)]"><Home className="h-3 w-3" /></Link>
               <ChevronRight className="h-3 w-3" />
@@ -283,16 +283,16 @@ export const BulletinLayout: React.FC<BulletinLayoutProps> = ({
 
         {/* Hero Section */}
         {title && !hideHero && (
-          <div className="border-b border-[var(--bulletin-border)] bg-[var(--bulletin-card)] px-6 py-12 md:px-12 md:py-20">
+          <div className="border-b border-[var(--bulletin-border)] bg-[var(--bulletin-card)] px-4 py-5 md:px-12 md:py-16">
             <div className="mx-auto max-w-[1400px]">
-              <div className="mb-4 inline-block border-2 border-[var(--bulletin-border)] bg-[#ff6b6b] px-3 py-1 text-[10px] font-black uppercase tracking-tighter text-white">
+              <div className="mb-2 md:mb-4 inline-block border-2 border-[var(--bulletin-border)] bg-[#ff6b6b] px-2 py-0.5 md:px-3 md:py-1 text-[9px] md:text-[10px] font-black uppercase tracking-tighter text-white">
                 Bulletin · {section}
               </div>
-              <h1 className="mb-4 text-6xl font-black uppercase tracking-tighter md:text-8xl lg:text-9xl">
+              <h1 className="mb-2 md:mb-4 text-2xl sm:text-5xl md:text-8xl lg:text-9xl font-black uppercase tracking-tighter">
                 {title}
               </h1>
               {subtitle && (
-                <p className="max-w-xl text-xl font-medium leading-tight opacity-60">
+                <p className="max-w-xl text-xs sm:text-lg md:text-xl font-medium leading-tight opacity-60">
                   {subtitle}
                 </p>
               )}
@@ -442,16 +442,16 @@ export const BulletinSection: React.FC<{
   const bgClass = bgColor ? bgColor : 'bg-[var(--bulletin-bg)]';
   
   return (
-    <div id={id} className={`border-b border-[var(--bulletin-border)] ${bgClass} p-6 md:p-12 transition-colors duration-200 ${className}`}>
+    <div id={id} className={`border-b border-[var(--bulletin-border)] ${bgClass} py-5 px-4 md:py-12 md:px-12 transition-colors duration-200 ${className}`}>
       <div className="mx-auto max-w-[1400px]">
         {(title || action) && (
-          <div className="mb-8 flex items-end justify-between border-b border-[var(--bulletin-border)] pb-2">
+          <div className="mb-4 md:mb-8 flex items-end justify-between border-b border-[var(--bulletin-border)] pb-2">
             <div>
               {subtitle && (
-                <div className="text-[10px] uppercase tracking-wider opacity-40">{subtitle}</div>
+                <div className="text-[8px] md:text-[10px] uppercase tracking-wider opacity-40">{subtitle}</div>
               )}
               {title && (
-                <div className="text-lg font-black uppercase tracking-tight">{title}</div>
+                <div className="text-sm md:text-lg font-black uppercase tracking-tight">{title}</div>
               )}
             </div>
             {action}
