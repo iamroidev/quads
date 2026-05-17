@@ -426,7 +426,7 @@ export const BulletinLayout: React.FC<BulletinLayoutProps> = ({
                   </div>
                 </div>
                 <p className="text-[11px] font-bold text-white/50 leading-relaxed max-w-[220px]">
-                  The official UMaT student marketplace. Built for the community, powered by the community.
+                  An independent UMaT student marketplace. Engineered for the community, powered by the community.
                 </p>
                 {/* Social icons */}
                 <div className="flex items-center gap-3 mt-1">
@@ -471,7 +471,7 @@ export const BulletinLayout: React.FC<BulletinLayoutProps> = ({
               <div className="flex flex-col gap-3">
                 <p className="text-[9px] font-black uppercase tracking-[0.3em] text-[#ff6b6b] mb-1">Company</p>
                 {[
-                  { to: '/about', label: 'About Us' },
+                  { to: '/about', label: 'About' },
                   { to: '/faq', label: 'FAQ' },
                   { to: '/support', label: 'Help Center' },
                   { to: '/contact', label: 'Contact Us' },
@@ -526,7 +526,7 @@ export const BulletinLayout: React.FC<BulletinLayoutProps> = ({
 
             <div className="mt-4 text-center">
               <p className="text-[8px] font-black uppercase tracking-[0.4em] text-white/15">
-                Made at UMaT, Tarkwa 🇬🇭 &nbsp;·&nbsp; Built for students, by students
+                UMaT, Tarkwa 🇬🇭 &nbsp;·&nbsp; Engineered by an independent student developer
               </p>
             </div>
           </div>

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
   ActivityIndicator,
   KeyboardAvoidingView,
@@ -10,32 +10,40 @@ import {
   TouchableOpacity,
   View,
   Image,
-} from 'react-native';
-import * as ImagePicker from 'expo-image-picker';
-import { useAuth } from '../context/AuthContext';
-import api from '../services/api';
-import { colors } from '../theme';
-import AppAlert from '../components/AppAlert';
+} from "react-native";
+import * as ImagePicker from "expo-image-picker";
+import { useAuth } from "../context/AuthContext";
+import api from "../services/api";
+import { colors } from "../theme";
+import AppAlert from "../components/AppAlert";
 
 const ProfileEditScreen = ({ navigation }: any) => {
   const { user, refreshUser } = useAuth();
-  const [name, setName] = useState(user?.name ?? '');
-  const [phone, setPhone] = useState(user?.phone ?? '');
-  const [location, setLocation] = useState(user?.location ?? '');
-  const [storeName, setStoreName] = useState(user?.storeName ?? '');
-  const [brandName, setBrandName] = useState(user?.brandName ?? '');
-  const [avatar, setAvatar] = useState(user?.avatar ?? '');
+  const [name, setName] = useState(user?.name ?? "");
+  const [phone, setPhone] = useState(user?.phone ?? "");
+  const [location, setLocation] = useState(user?.location ?? "");
+  const [storeName, setStoreName] = useState(user?.storeName ?? "");
+  const [brandName, setBrandName] = useState(user?.brandName ?? "");
+  const [avatar, setAvatar] = useState(user?.avatar ?? "");
   const [loading, setLoading] = useState(false);
-  const [alertState, setAlertState] = useState<{ visible: boolean; title: string; message: string }>({ visible: false, title: '', message: '' });
+  const [alertState, setAlertState] = useState<{
+    visible: boolean;
+    title: string;
+    message: string;
+  }>({ visible: false, title: "", message: "" });
 
   const handleSave = async () => {
     if (!name.trim()) {
-      setAlertState({ visible: true, title: 'Required', message: 'Name cannot be empty.' });
+      setAlertState({
+        visible: true,
+        title: "Required",
+        message: "Name cannot be empty.",
+      });
       return;
     }
     setLoading(true);
     try {
-      const res = await api.put('/auth/profile', {
+      const res = await api.put("/auth/profile", {
         name: name.trim(),
         phone: phone.trim(),
         location: location.trim(),
@@ -44,12 +52,16 @@ const ProfileEditScreen = ({ navigation }: any) => {
       });
       if (res.data.success) {
         await refreshUser();
-        setAlertState({ visible: true, title: 'Saved', message: 'Profile updated successfully.' });
+        setAlertState({
+          visible: true,
+          title: "Saved",
+          message: "Profile updated successfully.",
+        });
         setTimeout(() => navigation.goBack(), 400);
       }
     } catch (err: any) {
-      const msg = err?.response?.data?.message ?? 'Failed to update profile.';
-      setAlertState({ visible: true, title: 'Error', message: msg });
+      const msg = err?.response?.data?.message ?? "Failed to update profile.";
+      setAlertState({ visible: true, title: "Error", message: msg });
     } finally {
       setLoading(false);
     }
@@ -58,12 +70,16 @@ const ProfileEditScreen = ({ navigation }: any) => {
   const handlePickAvatar = async () => {
     const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (!permission.granted) {
-      setAlertState({ visible: true, title: 'Permission needed', message: 'Allow photos access to upload avatar.' });
+      setAlertState({
+        visible: true,
+        title: "Permission needed",
+        message: "Allow photos access to upload avatar.",
+      });
       return;
     }
 
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ['images'],
+      mediaTypes: ["images"],
       quality: 0.8,
     });
 
@@ -71,24 +87,24 @@ const ProfileEditScreen = ({ navigation }: any) => {
 
     const image = result.assets[0];
     const formData = new FormData();
-    formData.append('avatar', {
+    formData.append("avatar", {
       uri: image.uri,
-      type: image.mimeType || 'image/jpeg',
+      type: image.mimeType || "image/jpeg",
       name: image.fileName || `avatar-${Date.now()}.jpg`,
     } as any);
 
     setLoading(true);
     try {
-      const res = await api.post('/auth/profile/avatar', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
+      const res = await api.post("/auth/profile/avatar", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
       });
       if (res.data.success) {
-        setAvatar(res.data.data.user.avatar || '');
+        setAvatar(res.data.data.user.avatar || "");
         await refreshUser();
       }
     } catch (err: any) {
-      const msg = err?.response?.data?.message ?? 'Failed to upload avatar.';
-      setAlertState({ visible: true, title: 'Error', message: msg });
+      const msg = err?.response?.data?.message ?? "Failed to upload avatar.";
+      setAlertState({ visible: true, title: "Error", message: msg });
     } finally {
       setLoading(false);
     }
@@ -97,7 +113,7 @@ const ProfileEditScreen = ({ navigation }: any) => {
   return (
     <KeyboardAvoidingView
       style={{ flex: 1 }}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      behavior={Platform.OS === "ios" ? "padding" : undefined}
     >
       <ScrollView
         style={styles.container}
@@ -105,7 +121,15 @@ const ProfileEditScreen = ({ navigation }: any) => {
         keyboardShouldPersistTaps="handled"
       >
         <TouchableOpacity style={styles.avatarWrap} onPress={handlePickAvatar}>
-          {avatar ? <Image source={{ uri: avatar }} style={styles.avatar} /> : <View style={styles.avatarFallback}><Text style={styles.avatarInitial}>{name?.charAt(0)?.toUpperCase() || '?'}</Text></View>}
+          {avatar ? (
+            <Image source={{ uri: avatar }} style={styles.avatar} />
+          ) : (
+            <View style={styles.avatarFallback}>
+              <Text style={styles.avatarInitial}>
+                {name?.charAt(0)?.toUpperCase() || "?"}
+              </Text>
+            </View>
+          )}
           <Text style={styles.avatarHint}>Change profile photo</Text>
         </TouchableOpacity>
 
@@ -173,7 +197,9 @@ const ProfileEditScreen = ({ navigation }: any) => {
         visible={alertState.visible}
         title={alertState.title}
         message={alertState.message}
-        onClose={() => setAlertState({ visible: false, title: '', message: '' })}
+        onClose={() =>
+          setAlertState({ visible: false, title: "", message: "" })
+        }
       />
     </KeyboardAvoidingView>
   );
@@ -182,49 +208,78 @@ const ProfileEditScreen = ({ navigation }: any) => {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.bg },
   content: { padding: 16, paddingBottom: 40 },
-  avatarWrap: { alignItems: 'center', marginBottom: 4 },
-  avatar: { width: 84, height: 84, borderRadius: 42, borderWidth: 1, borderColor: colors.border, backgroundColor: '#eee' },
-  avatarFallback: { width: 84, height: 84, borderRadius: 42, borderWidth: 1, borderColor: colors.border, backgroundColor: '#1f1a14', alignItems: 'center', justifyContent: 'center' },
-  avatarInitial: { color: '#fff', fontSize: 30, fontWeight: '800' },
-  avatarHint: { marginTop: 8, fontSize: 11, color: '#2f5d4f', fontWeight: '800', textTransform: 'uppercase', letterSpacing: 1.1 },
+  avatarWrap: { alignItems: "center", marginBottom: 4 },
+  avatar: {
+    width: 84,
+    height: 84,
+    borderRadius: 42,
+    borderWidth: 1,
+    borderColor: colors.border,
+    backgroundColor: "#eee",
+  },
+  avatarFallback: {
+    width: 84,
+    height: 84,
+    borderRadius: 42,
+    borderWidth: 1,
+    borderColor: colors.border,
+    backgroundColor: "#1f1a14",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  avatarInitial: { color: "#fff", fontSize: 30, fontWeight: "800" },
+  avatarHint: {
+    marginTop: 8,
+    fontSize: 11,
+    color: "#2f5d4f",
+    fontWeight: "800",
+    textTransform: "uppercase",
+    letterSpacing: 1.1,
+  },
   label: {
     fontSize: 12,
-    fontWeight: '700',
-    color: '#6f6559',
-    textTransform: 'uppercase',
+    fontWeight: "700",
+    color: "#6f6559",
+    textTransform: "uppercase",
     letterSpacing: 0.5,
     marginTop: 18,
     marginBottom: 6,
   },
   input: {
-    backgroundColor: '#fffdf8',
+    backgroundColor: "#fffdf8",
     borderWidth: 1,
     borderColor: colors.border,
     borderRadius: 0,
     paddingHorizontal: 12,
     paddingVertical: 11,
     fontSize: 15,
-    color: '#111827',
+    color: "#111827",
   },
   readonlyWrap: { marginTop: 18 },
   readonlyValue: {
     fontSize: 15,
-    color: '#111827',
+    color: "#111827",
     paddingVertical: 11,
     paddingHorizontal: 12,
-    backgroundColor: '#f1ebdf',
+    backgroundColor: "#f1ebdf",
     borderRadius: 0,
     borderWidth: 1,
     borderColor: colors.border,
   },
-  readonlyNote: { marginTop: 4, fontSize: 11, color: '#9ca3af' },
+  readonlyNote: { marginTop: 4, fontSize: 11, color: "#9ca3af" },
   saveBtn: {
     marginTop: 28,
-    backgroundColor: '#1f1a14',
+    backgroundColor: "#1f1a14",
     paddingVertical: 14,
-    alignItems: 'center',
+    alignItems: "center",
   },
-  saveBtnText: { color: '#fff', fontSize: 12, fontWeight: '800', textTransform: 'uppercase', letterSpacing: 1.3 },
+  saveBtnText: {
+    color: "#fff",
+    fontSize: 12,
+    fontWeight: "800",
+    textTransform: "uppercase",
+    letterSpacing: 1.3,
+  },
 });
 
 export default ProfileEditScreen;

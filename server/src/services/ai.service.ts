@@ -22,7 +22,7 @@ class AiService {
 
     try {
       const systemPrompt = `
-You are the Official QUADS (Institutional Marketplace) AI Assistant. 
+You are the Official QUADS (Institutional Marketplace) AI Assistant.
 Your goal is to help UMaT students with their marketplace queries.
 
 GUIDELINES:
@@ -83,17 +83,17 @@ ${userMessage}
       }));
 
       const prompt = `
-        You are a creative marketplace curator for UMaT (University of Mines and Technology) campus.
+        You are a creative marketplace curator for the UMaT campus.
         Below is a list of products currently available on the QUADS marketplace.
         Group them into 3-5 catchy, relevant campus-themed collections.
-        
+
         Examples of collection themes:
         - "Freshman Starter Pack" (essentials for new students)
         - "Engineer's Toolkit" (tech, gadgets, tools)
         - "Hostel Hype" (room decor, comfort items)
         - "Exam Survival Kit" (snacks, stationery, coffee)
         - "Graduation Clear-out" (items from departing students)
-        
+
         Return ONLY a JSON array of objects with the following structure:
         [
           {
@@ -105,7 +105,7 @@ ${userMessage}
         ]
 
         Only include products that actually fit the theme. A product can be in multiple collections if it fits.
-        
+
         PRODUCTS:
         ${JSON.stringify(productList)}
       `;
@@ -136,7 +136,7 @@ ${userMessage}
       if (jsonMatch) {
         return JSON.parse(jsonMatch[0]);
       }
-      
+
       // If it's an object with a collections key
       const data = JSON.parse(content);
       return data.collections || data;

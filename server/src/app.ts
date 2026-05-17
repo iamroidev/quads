@@ -96,7 +96,7 @@ app.use(
     origin: (origin, callback) => {
       // Allow requests with no origin (like mobile apps or curl)
       if (!origin) return callback(null, true);
-      
+
       if (allowedOrigins.indexOf(origin) !== -1 || allowedOrigins.includes('*')) {
         callback(null, true);
       } else {
@@ -159,7 +159,6 @@ app.use('/api/products', uploadLimiter); // product creation has image uploads
 // ========================
 // Routes
 // ========================
-app.use('/api', routes);
 
 // Root route
 app.get('/', (_req, res) => {
@@ -170,6 +169,8 @@ app.get('/', (_req, res) => {
     docs: '/api/health',
   });
 });
+
+app.use('/api', routes);
 
 // ========================
 // Error Handling

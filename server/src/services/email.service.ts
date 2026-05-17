@@ -71,7 +71,7 @@ class EmailService {
     try {
       const fromEmail = process.env.SMTP_FROM || 'support@quadsmarket.tech';
       console.log(`[EmailService] Posting to Resend API for: ${options.to}`);
-      
+
       const response = await axios.post(
         this.apiUrl,
         {
@@ -110,13 +110,13 @@ class EmailService {
   async sendWelcomeEmail(to: string, name: string, role: string = 'buyer'): Promise<boolean> {
     const isSeller = role === 'seller' || role === 'admin';
     const subject = `Welcome to QUADS — Ready to ${isSeller ? 'Sell' : 'Shop'}? 🎉`;
-    
-    const roleContent = isSeller 
+
+    const roleContent = isSeller
       ? `
         <div class="role-badge">💼 CAMPUS MERCHANT ACTIVATED</div>
         <h2>Start Your Student Business Empire, ${name}!</h2>
-        <p>Your seller store is officially active. You are now fully unlocked to list products, accept secure campus payments, and reach thousands of potential UMaT student buyers immediately.</p>
-        
+        <p>Your seller store is officially active. You are now fully unlocked to list products, accept secure campus payments, and reach thousands of potential UMaT buyers immediately.</p>
+
         <div style="background: #fffacd; padding: 20px; border: 2px solid #000; margin: 24px 0;">
           <p style="margin: 0; font-weight: 900; text-transform: uppercase; font-size: 14px; letter-spacing: 0.5px;">🚀 GETTING STARTED:</p>
           <ul style="margin: 12px 0 0 0; padding-left: 20px; font-size: 14px; line-height: 1.8;">
@@ -128,9 +128,9 @@ class EmailService {
       `
       : `
         <div class="role-badge">🎉 CAMPUS ACCESS GRANTED</div>
-        <h2>Welcome to UMaT's Official Marketplace, ${name}!</h2>
+        <h2>Welcome to QUADS @ UMaT, ${name}!</h2>
         <p>Your student credentials have been verified. You're now unlocked to browse, buy, and trade directly with fellow peers on campus. No shipping fees, no off-campus meetups, just pure convenience.</p>
-        
+
         <div style="background: #fffacd; padding: 20px; border: 2px solid #000; margin: 24px 0;">
           <p style="margin: 0; font-weight: 900; text-transform: uppercase; font-size: 14px; letter-spacing: 0.5px;">🔍 SHOPPING TIPS:</p>
           <ul style="margin: 12px 0 0 0; padding-left: 20px; font-size: 14px; line-height: 1.8;">
@@ -143,18 +143,18 @@ class EmailService {
 
     const body = `
       ${roleContent}
-      
+
       <div style="text-align: center;">
         <a href="${process.env.CLIENT_URL || 'https://quadsmarket.tech'}/dashboard" class="btn btn-primary" style="display: inline-block; background: #ff6b6b; color: #ffffff !important; text-decoration: none; padding: 16px 32px; font-weight: 900; text-transform: uppercase; font-size: 13px; letter-spacing: 1px; margin: 24px 0; border: 2px solid #000; box-shadow: 4px 4px 0 0 #000000;">Enter Dashboard</a>
       </div>
-      
+
       <div class="divider"></div>
-      
+
       <p style="font-size: 13px; color: #666;">
         <strong>Safety First:</strong> Never share sensitive personal info. Keep all coordination inside the campus platform for your peace of mind and protection.
       </p>
     `;
-    
+
     return this.sendEmail({ to, subject, html: this.wrapEmail(body) });
   }
 
@@ -163,11 +163,11 @@ class EmailService {
     const body = `
       <h2>Identity Verification</h2>
       <p>Hi ${name}, use the security code below to verify your account action:</p>
-      
+
       <div style="background: #000000; color: #ff6b6b; padding: 32px; text-align: center; margin: 24px 0; font-size: 42px; font-weight: 900; letter-spacing: 10px;">
         ${code}
       </div>
-      
+
       <p style="font-size: 12px; color: #666; text-align: center;">This code expires in 10 minutes. If you did not request this, please secure your account.</p>
     `;
     return this.sendEmail({ to, subject, html: this.wrapEmail(body) });
@@ -186,12 +186,12 @@ class EmailService {
     const body = `
       <h2>Order Status Update</h2>
       <p>Your order <strong>#${orderId.slice(-8).toUpperCase()}</strong> has shifted status:</p>
-      
+
       <div style="background: #faf8f5; border: 2px solid #000; padding: 24px; text-align: center; margin: 24px 0;">
         <span style="font-size: 24px; font-weight: 900; text-transform: uppercase;">${status}</span>
         <p style="margin-top: 8px; font-size: 14px; opacity: 0.6;">${statusMessages[status] || ''}</p>
       </div>
-      
+
       <div style="text-align: center;">
         <a href="${process.env.CLIENT_URL || 'https://quadsmarket.tech'}/orders/${orderId}" class="btn">View Order Details</a>
       </div>
@@ -204,7 +204,7 @@ class EmailService {
     const body = `
       <h2>Payment Confirmed ✓</h2>
       <p>Your payment has been received and is being held securely in escrow.</p>
-      
+
       <div style="background: #faf8f5; border: 2px solid #000; padding: 24px; margin: 24px 0;">
         <table style="width: 100%; border-collapse: collapse;">
           <tr>
@@ -221,7 +221,7 @@ class EmailService {
           </tr>
         </table>
       </div>
-      
+
       <div style="text-align: center;">
         <a href="${process.env.CLIENT_URL || 'https://quadsmarket.tech'}/orders/${orderId}" class="btn btn-primary">Track Progress</a>
       </div>
@@ -233,26 +233,26 @@ class EmailService {
   async sendPriceDropAlert(to: string, name: string, productTitle: string, currentPrice: number, originalPrice: number, productId: string): Promise<boolean> {
     const savings = originalPrice - currentPrice;
     const savingsPercent = ((savings / originalPrice) * 100).toFixed(0);
-    
+
     const subject = `Price Drop Alert: ${productTitle} is now GHS ${currentPrice.toFixed(2)}`;
     const body = `
       <h2>📉 Price Drop Alert!</h2>
       <p>Hi ${name},</p>
       <p>One of your saved items has dropped in price:</p>
-      
+
       <div style="background: #fffacd; border: 2px solid #000; padding: 24px; margin: 24px 0;">
         <h3 style="margin-top: 0; color: #000;">${productTitle}</h3>
         <p><span class="highlight">Was:</span> GHS ${originalPrice.toFixed(2)}</p>
         <p><span class="highlight">Now:</span> GHS ${currentPrice.toFixed(2)}</p>
         <p><span class="highlight">You save:</span> GHS ${savings.toFixed(2)} (${savingsPercent}% off)</p>
       </div>
-      
+
       <div style="text-align: center;">
         <a href="${process.env.CLIENT_URL || 'https://quadsmarket.tech'}/products/${productId}" class="btn btn-primary">View Item</a>
       </div>
-      
+
       <div class="divider"></div>
-      
+
       <p style="font-size: 13px; color: #666; text-align: center;">
         You're receiving this because you saved this item and have price alerts enabled.
         <br>Manage your alert preferences in your account settings.
@@ -264,26 +264,26 @@ class EmailService {
   async sendPriceIncreaseAlert(to: string, name: string, productTitle: string, currentPrice: number, originalPrice: number, productId: string): Promise<boolean> {
     const increase = currentPrice - originalPrice;
     const increasePercent = ((increase / originalPrice) * 100).toFixed(0);
-    
+
     const subject = `Price Increase Alert: ${productTitle} is now GHS ${currentPrice.toFixed(2)}`;
     const body = `
       <h2>📈 Price Increase Alert</h2>
       <p>Hi ${name},</p>
       <p>One of your saved items has increased in price:</p>
-      
+
       <div style="background: #ffebee; border: 2px solid #000; padding: 24px; margin: 24px 0;">
         <h3 style="margin-top: 0; color: #000;">${productTitle}</h3>
         <p><span class="highlight">Was:</span> GHS ${originalPrice.toFixed(2)}</p>
         <p><span class="highlight">Now:</span> GHS ${currentPrice.toFixed(2)}</p>
         <p><span class="highlight">Increase:</span> GHS ${increase.toFixed(2)} (${increasePercent}% increase)</p>
       </div>
-      
+
       <div style="text-align: center;">
         <a href="${process.env.CLIENT_URL || 'https://quadsmarket.tech'}/products/${productId}" class="btn">View Item</a>
       </div>
-      
+
       <div class="divider"></div>
-      
+
       <p style="font-size: 13px; color: #666; text-align: center;">
         You're receiving this because you saved this item and have price alerts enabled.
         <br>Manage your alert preferences in your account settings.
