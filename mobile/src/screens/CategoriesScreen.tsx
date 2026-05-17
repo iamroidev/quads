@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, ScrollView, StyleSheet, Text, View, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { colors } from '../theme';
+import { colors, shadows } from '../theme';
 import ScreenHeader from '../components/ScreenHeader';
 import categoryService, { CategoryWithCount } from '../services/category.service';
 
@@ -61,6 +61,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surface,
     padding: 20,
     alignItems: 'center',
+    ...shadows.bulletin,
   },
   cardIcon: { fontSize: 32, marginBottom: 8 },
   cardName: { fontSize: 12, fontWeight: '900', textTransform: 'uppercase', textAlign: 'center' },

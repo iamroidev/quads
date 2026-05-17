@@ -41,7 +41,7 @@
     "plugins": [
       "expo-secure-store",
       "expo-web-browser",
-      "expo-barcode-scanner"
+      "expo-camera"
     ],
     "owner": "richieroidev"
   }

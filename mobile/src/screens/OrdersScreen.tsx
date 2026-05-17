@@ -11,7 +11,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import orderService, { Order } from '../services/order.service';
 import { useAuth } from '../context/AuthContext';
-import { colors } from '../theme';
+import { colors, shadows } from '../theme';
 import ScreenHeader from '../components/ScreenHeader';
 
 const STATUS_COLORS: Record<string, { bg: string; text: string }> = {
@@ -189,6 +189,7 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
     borderRadius: 0,
     padding: 14,
+    ...shadows.bulletin,
   },
   cardTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   orderNumber: { fontSize: 12, fontWeight: '700', color: '#6b7280', letterSpacing: 0.5 },

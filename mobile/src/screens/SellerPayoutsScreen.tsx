@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, ScrollView, StyleSheet, Text, View, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { colors } from '../theme';
+import { colors, shadows } from '../theme';
 import ScreenHeader from '../components/ScreenHeader';
 import api from '../services/api';
 
@@ -121,11 +121,12 @@ const styles = StyleSheet.create({
     padding: 12,
     backgroundColor: colors.surface,
     alignItems: 'center',
+    ...shadows.bulletin,
   },
   statLabel: { fontSize: 9, fontWeight: '800', textTransform: 'uppercase', color: colors.muted },
   statValue: { fontSize: 20, fontWeight: '900', color: colors.text, marginTop: 4 },
   section: { marginTop: 24, paddingHorizontal: 16 },
-  sectionLabel: { fontSize: 10, fontWeight: '900', color: 'rgba(0,0,0,0.3)', textTransform: 'uppercase', letterSpacing: 1.5, marginBottom: 12 },
+  sectionLabel: { fontSize: 10, fontWeight: '900', color: '#ff6b6b', textTransform: 'uppercase', letterSpacing: 1.5, marginBottom: 12 },
   emptyText: { textAlign: 'center', color: colors.muted, fontSize: 12, marginTop: 20 },
   payoutRow: {
     flexDirection: 'row',

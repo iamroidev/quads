@@ -4,7 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import productService from '../services/product.service';
 import { useAuth } from '../context/AuthContext';
-import { colors } from '../theme';
+import { colors, shadows } from '../theme';
 import ScreenHeader from '../components/ScreenHeader';
 
 const SellerAnalyticsScreen = ({ navigation }: any) => {
@@ -70,14 +70,14 @@ const SellerAnalyticsScreen = ({ navigation }: any) => {
         {/* Growth Toolkit */}
         <View style={styles.section}>
           <Text style={styles.sectionLabel}>Growth Toolkit</Text>
-          <TouchableOpacity style={styles.toolItem} onPress={() => {}}>
+          <TouchableOpacity style={styles.toolItem} onPress={() => navigation.getParent()?.navigate('ProfileTab', { screen: 'GrowthTools' })}>
             <View>
               <Text style={styles.toolTitle}>Store Campaigns</Text>
               <Text style={styles.toolSub}>Boost listings to reach more students.</Text>
             </View>
             <Ionicons name="megaphone-outline" size={20} color="#000" />
           </TouchableOpacity>
-          <TouchableOpacity style={styles.toolItem} onPress={() => {}}>
+          <TouchableOpacity style={styles.toolItem} onPress={() => navigation.getParent()?.navigate('ProfileTab', { screen: 'GrowthTools' })}>
             <View>
               <Text style={styles.toolTitle}>Coupons & Deals</Text>
               <Text style={styles.toolSub}>Create discount codes for buyers.</Text>
@@ -99,6 +99,18 @@ const SellerAnalyticsScreen = ({ navigation }: any) => {
             onPress={() => navigation.navigate('MyListings')}
           >
             <Text style={styles.secondaryBtnText}>Edit My Inventory</Text>
+          </TouchableOpacity>
+          <TouchableOpacity 
+            style={styles.secondaryBtn} 
+            onPress={() => navigation.getParent()?.navigate('ProfileTab', { screen: 'SellerPayouts' })}
+          >
+            <Text style={styles.secondaryBtnText}>View Earnings & Payouts</Text>
+          </TouchableOpacity>
+          <TouchableOpacity 
+            style={styles.secondaryBtn} 
+            onPress={() => navigation.getParent()?.navigate('ProfileTab', { screen: 'DisputeCenter' })}
+          >
+            <Text style={styles.secondaryBtnText}>Dispute Center</Text>
           </TouchableOpacity>
         </View>
         
@@ -126,7 +138,7 @@ const styles = StyleSheet.create({
   content: { paddingBottom: 40 },
   centered: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: colors.bg },
   section: { marginTop: 24, paddingHorizontal: 16 },
-  sectionLabel: { fontSize: 10, fontWeight: '900', color: 'rgba(0,0,0,0.3)', textTransform: 'uppercase', letterSpacing: 1.5, marginBottom: 12 },
+  sectionLabel: { fontSize: 10, fontWeight: '900', color: '#ff6b6b', textTransform: 'uppercase', letterSpacing: 1.5, marginBottom: 12 },
   statsGrid: { flexDirection: 'row', gap: 12, marginBottom: 12 },
   statCard: { 
     flex: 1, 
@@ -134,6 +146,7 @@ const styles = StyleSheet.create({
     borderColor: colors.border, 
     padding: 16,
     backgroundColor: colors.surface,
+    ...shadows.bulletin,
   },
   statLabel: { fontSize: 10, fontWeight: '800', textTransform: 'uppercase', color: colors.muted },
   statValue: { fontSize: 22, fontWeight: '900', marginTop: 4, color: colors.text },
@@ -146,6 +159,7 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
     backgroundColor: colors.surface,
     marginBottom: 10,
+    ...shadows.bulletin,
   },
   toolTitle: { fontSize: 13, fontWeight: '900', textTransform: 'uppercase', color: colors.text },
   toolSub: { fontSize: 11, color: colors.muted, marginTop: 2 },
@@ -156,6 +170,7 @@ const styles = StyleSheet.create({
     borderWidth: 1, 
     borderColor: colors.text,
     marginBottom: 10,
+    ...shadows.bulletin,
   },
   primaryBtnText: { color: '#fff', fontWeight: '900', textTransform: 'uppercase', fontSize: 12, letterSpacing: 1 },
   secondaryBtn: { 
@@ -173,6 +188,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     marginTop: 8,
+    ...shadows.bulletin,
   },
   modeBannerTitle: { color: '#fff', fontSize: 13, fontWeight: '900', textTransform: 'uppercase', letterSpacing: 1 },
   modeBannerSub: { color: 'rgba(255,255,255,0.6)', fontSize: 11, marginTop: 2 },

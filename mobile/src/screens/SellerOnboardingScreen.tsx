@@ -4,7 +4,7 @@ import { ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
 import ScreenHeader from '../components/ScreenHeader';
-import { colors } from '../theme';
+import { colors, shadows } from '../theme';
 
 const SellerOnboardingScreen = ({ navigation }: any) => {
   const { user, refreshUser } = useAuth();

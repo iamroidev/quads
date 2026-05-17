@@ -14,7 +14,7 @@ import {
 import * as ImagePicker from "expo-image-picker";
 import { useAuth } from "../context/AuthContext";
 import api from "../services/api";
-import { colors } from "../theme";
+import { colors, shadows } from "../theme";
 import AppAlert from "../components/AppAlert";
 
 const ProfileEditScreen = ({ navigation }: any) => {

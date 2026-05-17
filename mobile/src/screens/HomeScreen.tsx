@@ -16,8 +16,9 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import productService from "../services/product.service";
 import { Product } from "../types";
 import { useAuth } from "../context/AuthContext";
-import { colors } from "../theme";
+import { colors, shadows } from "../theme";
 import ScreenHeader from "../components/ScreenHeader";
+import { SkeletonPulse, CardSkeleton } from "../components/SkeletonLoader";
 import categoryService, {
   CategoryWithCount,
 } from "../services/category.service";
@@ -178,9 +179,26 @@ const HomeScreen = ({ navigation }: any) => {
 
   if (loading) {
     return (
-      <View style={styles.centered}>
-        <ActivityIndicator size="large" color="#2563eb" />
-      </View>
+      <SafeAreaView style={styles.container} edges={["top"]}>
+        <ScreenHeader
+          eyebrow="QUADS"
+          title="Home"
+          subtitle="Curated highlights, featured drops, and fresh campus listings."
+        />
+        <ScrollView contentContainerStyle={{ padding: 16 }}>
+          <SkeletonPulse height={180} style={{ marginBottom: 24, borderWidth: 1, borderColor: colors.border }} />
+          <SkeletonPulse width="40%" height={16} style={{ marginBottom: 12 }} />
+          <View style={{ flexDirection: 'row', gap: 12, marginBottom: 24 }}>
+            <CardSkeleton />
+            <CardSkeleton />
+          </View>
+          <SkeletonPulse width="30%" height={16} style={{ marginBottom: 12 }} />
+          <View style={{ flexDirection: 'row', gap: 12 }}>
+            <CardSkeleton />
+            <CardSkeleton />
+          </View>
+        </ScrollView>
+      </SafeAreaView>
     );
   }
 
@@ -455,9 +473,12 @@ const styles = StyleSheet.create({
     color: "#fff",
   },
   searchBtn: {
-    backgroundColor: "#c57f3f",
+    backgroundColor: '#ff6b6b',
     paddingHorizontal: 18,
-    justifyContent: "center",
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: colors.border,
+    ...shadows.bulletin,
   },
   searchBtnText: {
     color: "#fff",
@@ -488,7 +509,7 @@ const styles = StyleSheet.create({
   sectionLabel: {
     fontSize: 10,
     fontWeight: "800",
-    color: "#7c6f60",
+    color: "#ff6b6b",
     letterSpacing: 1.8,
     textTransform: "uppercase",
   },
@@ -507,6 +528,7 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
     backgroundColor: "#fffdf8",
     padding: 14,
+    ...shadows.bulletin,
   },
   curatedCardTitle: {
     fontSize: 14,
@@ -534,6 +556,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#fffdf8",
     paddingVertical: 12,
     paddingHorizontal: 10,
+    ...shadows.bulletin,
   },
   categoryTileTitle: {
     fontSize: 11,
@@ -580,19 +603,20 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#fffdf8",
     borderRadius: 0,
-    overflow: "hidden",
     borderWidth: 1,
     borderColor: colors.border,
+    ...shadows.bulletin,
   },
   cardImage: { width: "100%", height: 120, backgroundColor: "#e5e7eb" },
   featuredBadge: {
     position: "absolute",
     top: 6,
     left: 6,
-    backgroundColor: "#f59e0b",
+    backgroundColor: "#ff6b6b",
     paddingHorizontal: 6,
     paddingVertical: 2,
-    borderRadius: 4,
+    borderWidth: 1,
+    borderColor: '#000',
   },
   featuredBadgeText: {
     fontSize: 9,
@@ -652,6 +676,7 @@ const styles = StyleSheet.create({
     borderColor: "#2f2921",
     backgroundColor: "#1f1a14",
     padding: 14,
+    ...shadows.bulletin,
   },
   buyerCtaTop: {
     fontSize: 10,
@@ -676,6 +701,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     paddingVertical: 8,
     backgroundColor: "#fffdf8",
+    ...shadows.bulletin,
   },
   loadMoreBtnText: {
     fontSize: 10,

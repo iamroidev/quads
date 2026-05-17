@@ -1,6 +1,6 @@
 import React from 'react';
 import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
-import { colors } from '../theme';
+import { colors, shadows } from '../theme';
 
 interface AppAlertProps {
   visible: boolean;
@@ -27,10 +27,10 @@ const AppAlert: React.FC<AppAlertProps> = ({ visible, title, message, onClose })
 
 const styles = StyleSheet.create({
   backdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.35)', justifyContent: 'center', padding: 20 },
-  card: { backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border, padding: 18 },
+  card: { backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border, padding: 18, ...shadows.bulletin },
   title: { color: colors.text, fontSize: 15, fontWeight: '800', textTransform: 'uppercase', letterSpacing: 1 },
   message: { marginTop: 8, color: colors.muted, fontSize: 13, lineHeight: 20 },
-  btn: { marginTop: 14, alignSelf: 'flex-end', backgroundColor: colors.text, paddingHorizontal: 16, paddingVertical: 9 },
+  btn: { marginTop: 14, alignSelf: 'flex-end', backgroundColor: colors.text, paddingHorizontal: 16, paddingVertical: 9, ...shadows.bulletin },
   btnText: { color: '#fff', fontSize: 11, fontWeight: '800', textTransform: 'uppercase', letterSpacing: 1.2 },
 });
 

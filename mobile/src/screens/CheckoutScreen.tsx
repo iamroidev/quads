@@ -13,7 +13,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import orderService from '../services/order.service';
-import { colors } from '../theme';
+import { colors, shadows } from '../theme';
 import ScreenHeader from '../components/ScreenHeader';
 
 const CheckoutScreen = ({ route, navigation }: any) => {
@@ -167,7 +167,7 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.bg },
   content: { padding: 16, paddingBottom: 40, gap: 12 },
 
-  section: { borderWidth: 1, borderColor: colors.border, backgroundColor: colors.surface, padding: 14 },
+  section: { borderWidth: 1, borderColor: colors.border, backgroundColor: colors.surface, padding: 14, ...shadows.bulletin },
   sectionLabel: { fontSize: 10, fontWeight: '800', color: '#7c6f60', textTransform: 'uppercase', letterSpacing: 1.4, marginBottom: 12 },
   summaryRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 8, gap: 12 },
   summaryKey: { fontSize: 13, color: colors.text, flex: 1 },
@@ -190,7 +190,7 @@ const styles = StyleSheet.create({
   },
   textarea: { minHeight: 80, textAlignVertical: 'top' },
 
-  ctaBtn: { backgroundColor: '#1f1a14', paddingVertical: 16, alignItems: 'center', borderWidth: 1, borderColor: '#1f1a14' },
+  ctaBtn: { backgroundColor: '#1f1a14', paddingVertical: 16, alignItems: 'center', borderWidth: 1, borderColor: '#1f1a14', ...shadows.bulletin },
   ctaBtnText: { color: '#fff', fontSize: 14, fontWeight: '900', textTransform: 'uppercase', letterSpacing: 1.2 },
   disclaimer: { fontSize: 11, color: '#9a8e7f', textAlign: 'center', lineHeight: 16 },
 });

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, ScrollView, StyleSheet, Text, View, TouchableOpacity, TextInput, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { colors } from '../theme';
+import { colors, shadows } from '../theme';
 import ScreenHeader from '../components/ScreenHeader';
 import api from '../services/api';
 
@@ -103,7 +103,7 @@ const styles = StyleSheet.create({
   content: { paddingBottom: 40 },
   centered: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: colors.bg },
   section: { marginTop: 24, paddingHorizontal: 16 },
-  sectionLabel: { fontSize: 10, fontWeight: '900', color: 'rgba(0,0,0,0.3)', textTransform: 'uppercase', letterSpacing: 1.5, marginBottom: 12 },
+  sectionLabel: { fontSize: 10, fontWeight: '900', color: '#ff6b6b', textTransform: 'uppercase', letterSpacing: 1.5, marginBottom: 12 },
   emptyText: { textAlign: 'center', color: colors.muted, fontSize: 12, marginTop: 40 },
   orderRow: {
     flexDirection: 'row',
@@ -113,6 +113,7 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
     backgroundColor: colors.surface,
     marginBottom: 8,
+    ...shadows.bulletin,
   },
   selectedOrder: { borderColor: colors.accent, backgroundColor: colors.accent + '10' },
   orderText: { fontSize: 12, fontWeight: '900' },
@@ -130,6 +131,7 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     alignItems: 'center',
     marginTop: 16,
+    ...shadows.bulletin,
   },
   submitBtnText: { color: '#fff', fontWeight: '900', textTransform: 'uppercase', fontSize: 12 },
 });

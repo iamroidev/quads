@@ -18,7 +18,7 @@ import { Ionicons } from "@expo/vector-icons";
 import api from "../services/api";
 import productService from "../services/product.service";
 import { useAuth } from "../context/AuthContext";
-import { colors } from "../theme";
+import { colors, shadows } from "../theme";
 import ScreenHeader from "../components/ScreenHeader";
 
 interface Category {

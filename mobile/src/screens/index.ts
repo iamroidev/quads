@@ -35,3 +35,9 @@ export { default as TermsScreen } from './TermsScreen';
 export { default as MaintenanceScreen } from './MaintenanceScreen';
 export { default as CollectionDetailScreen } from './CollectionDetailScreen';
 export { default as ScannerScreen } from './ScannerScreen';
+export { default as LostFoundScreen } from './LostFoundScreen';
+export { default as FAQScreen } from './FAQScreen';
+export { default as PrivacyPolicyScreen } from './PrivacyPolicyScreen';
+export { default as AboutUsScreen } from './AboutUsScreen';
+export { default as FollowingFeedScreen } from './FollowingFeedScreen';
+
