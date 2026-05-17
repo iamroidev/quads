@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 
-const rootEnvPath = path.join(__dirname, '.env');
+const rootEnvPath = path.join(__dirname, '../.env');
 
 if (!fs.existsSync(rootEnvPath)) {
   console.error('❌ Root .env file not found!');
@@ -17,7 +17,7 @@ const targets = [
 ];
 
 targets.forEach(target => {
-  const targetPath = path.join(__dirname, target);
+  const targetPath = path.join(__dirname, '../', target);
   const targetDir = path.dirname(targetPath);
   
   if (fs.existsSync(targetDir)) {
