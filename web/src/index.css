@@ -6,7 +6,7 @@
   --bulletin-border: #000000;
   --bulletin-shadow: rgba(0, 0, 0, 1);
   --bulletin-muted: rgba(0, 0, 0, 0.4);
-  
+
   /* Tactical Custom Card Theming */
   --bulletin-notice-bg: #fffacd;
   --bulletin-notice-text: #000000;
@@ -25,7 +25,7 @@
   --bulletin-shadow: #ff6b6b;     /* Solid coral-red offset block shadows! */
   --bulletin-muted: rgba(255, 255, 255, 0.4);
   color-scheme: dark;
-  
+
   /* Tactical Custom Card Theming */
   --bulletin-notice-bg: #2c2203;  /* Deep gold-dark backdrop */
   --bulletin-notice-text: #ffd700; /* Rich golden text */
@@ -108,7 +108,7 @@
     background-color: rgba(0, 0, 0, 0.2);
     border-radius: 9999px;
   }
-  
+
   .dark ::-webkit-scrollbar-thumb {
     background-color: rgba(255, 255, 255, 0.2);
   }
@@ -131,12 +131,12 @@
     .relative {
       overflow: visible;
     }
-    
+
     .w-max {
       max-width: 100% !important;
       width: auto !important;
     }
-    
+
     /* Keep margins, paddings, and shadow dimensions clean and contained */
     .p-20, .p-16, .p-12, .p-10, .p-8 {
       padding: 1rem !important; /* 16px */
@@ -149,7 +149,7 @@
       padding-top: 1.25rem !important;
       padding-bottom: 1.25rem !important;
     }
-    
+
     /* Auto-scale heavy neobrutalist box shadows to prevent viewport spilling */
     .shadow-\[16px_16px_0_0_var\(--bulletin-shadow\)\] {
       box-shadow: 4px 4px 0 0 var(--bulletin-shadow) !important;
@@ -166,14 +166,14 @@
     .shadow-\[16px_16px_0_0_\#000\] {
       box-shadow: 4px 4px 0 0 #000 !important;
     }
-    
+
     .bulletin-container {
       padding-left: 0.75rem;
       padding-right: 0.75rem;
     }
-    
+
     /* Prevent Tawk.to from covering content on mobile */
-    .tawk-min-container, 
+    .tawk-min-container,
     #tawk-chat-container {
       bottom: 12px !important;
       right: 12px !important;
@@ -209,12 +209,43 @@
     .hero-decorative-bg {
       display: none !important;
     }
+
+    /* Stack 2-col grids to single column */
+    .grid-cols-2 {
+      grid-template-columns: repeat(1, minmax(0, 1fr)) !important;
+    }
+
+    /* Reduce large gaps on mobile */
+    .gap-12 { gap: 1.5rem !important; }
+    .gap-16 { gap: 2rem !important; }
+    .gap-24 { gap: 2rem !important; }
+
+    /* Remove fixed min-heights that block mobile layouts */
+    .min-h-\[700px\] { min-height: auto !important; }
+    .min-h-\[600px\] { min-height: auto !important; }
+
+    /* De-absolute elements that rely on lg: breakpoints */
+    .lg\:absolute { position: static !important; }
+
+    /* Ensure all sections are full-width and clipped */
+    section, .bulletin-section {
+      width: 100% !important;
+      overflow-x: hidden !important;
+    }
   }
 
-  /* Tablet adjustments */
+  /* Tablet adjustments (641px - 1024px) */
   @media (min-width: 641px) and (max-width: 1024px) {
     .text-6xl { font-size: clamp(2.5rem, 6vw, 4rem) !important; }
     .text-8xl { font-size: clamp(3rem, 8vw, 5rem) !important; }
+  }
+
+  /* Tablet grid caps (641px - 768px) */
+  @media (min-width: 641px) and (max-width: 768px) {
+    .lg\:grid-cols-4 { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+    .lg\:grid-cols-3 { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+    .lg\:col-span-8 { grid-column: span 2 !important; }
+    .lg\:col-span-4 { grid-column: span 2 !important; }
   }
 }
 
@@ -322,7 +353,7 @@
     -ms-overflow-style: none;
     scrollbar-width: none;
   }
-  
+
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
   }
@@ -354,7 +385,7 @@
     position: static !important;
     width: 100% !important;
   }
-  
+
   /* ── Polaroid Bulletin Tactility Utilities ── */
   @keyframes thumbtack-jiggle {
     0%, 100% { transform: translate(-50%, -50%) rotate(0deg) scale(1.1); }
@@ -397,8 +428,8 @@
   opacity: 0.65 !important;
 }
 
-.dark input, 
+.dark input,
 .dark textarea {
   background-color: #1a1a1a !important; /* Elegant dark-gray depth contrasting beautifully against dark cards */
   color: #ffffff !important;
-}
+}

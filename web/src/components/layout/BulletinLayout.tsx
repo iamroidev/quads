@@ -1,8 +1,8 @@
 import React from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { 
-  ChevronRight, 
-  Home, 
+import {
+  ChevronRight,
+  Home,
   ChevronDown,
   User,
   Settings,
@@ -16,7 +16,9 @@ import {
   Twitter,
   ShoppingCart,
   Shield,
-  TrendingUp
+  TrendingUp,
+  Menu,
+  X
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useCart } from '../../context/CartContext';
@@ -50,6 +52,8 @@ export const BulletinLayout: React.FC<BulletinLayoutProps> = ({
   const [isProfileOpen, setIsProfileOpen] = React.useState(false);
   const [isSwitching, setIsSwitching] = React.useState(false);
 
+  const [mobileOpen, setMobileOpen] = React.useState(false);
+
   const [isDark, setIsDark] = React.useState(() => {
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem('theme');
@@ -62,6 +66,7 @@ export const BulletinLayout: React.FC<BulletinLayoutProps> = ({
   // Scroll to top on route change
   React.useEffect(() => {
     window.scrollTo(0, 0);
+    setMobileOpen(false);
   }, [location.pathname]);
 
   // Sync theme with DOM
@@ -102,13 +107,13 @@ export const BulletinLayout: React.FC<BulletinLayoutProps> = ({
 
       {/* Global Announcement Marquee */}
       <div className="fixed top-2 left-0 w-full z-[1001]">
-        <BulletinMarquee 
+        <BulletinMarquee
           messages={[
             "System Audit Complete: QUADS Platform is now Production Ready",
             "Safe Trading: Always meet in safe places on campus",
             "Listing Alert: Electronics category is trending this week",
             "Security Notice: Never share your login credentials with anyone"
-          ]} 
+          ]}
         />
       </div>
 
@@ -156,8 +161,8 @@ export const BulletinLayout: React.FC<BulletinLayoutProps> = ({
               </div>
 
                {(!isAuthenticated || user?.viewMode === 'buyer') && (
-                <Link 
-                  to={isAuthenticated ? "/seller/onboarding" : "/register"} 
+                <Link
+                  to={isAuthenticated ? "/seller/onboarding" : "/register"}
                   className="hidden md:flex items-center gap-2 border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-text)] text-[var(--bulletin-bg)] px-4 py-2 text-[10px] font-black uppercase tracking-widest shadow-[3px_3px_0_0_var(--bulletin-accent)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all"
                   id="sell-on-quads-btn"
                 >
@@ -165,15 +170,15 @@ export const BulletinLayout: React.FC<BulletinLayoutProps> = ({
                 </Link>
               )}
                {user?.viewMode === 'seller' && (
-                <Link 
-                  to="/sell" 
+                <Link
+                  to="/sell"
                   className="hidden md:flex items-center gap-2 border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-accent)] text-white px-4 py-2 text-[10px] font-black uppercase tracking-widest shadow-[3px_3px_0_0_var(--bulletin-text)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all"
                 >
                   + Sell Something
                 </Link>
               )}
 
-              <button 
+              <button
                 onClick={toggleTheme}
                 className="p-2 border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] hover:bg-[#fffacd] dark:hover:bg-white/10 transition-colors shadow-[2px_2px_0_0_var(--bulletin-shadow)] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none"
                 title={isDark ? "Switch to Light Mode" : "Switch to Dark Mode"}
@@ -181,7 +186,7 @@ export const BulletinLayout: React.FC<BulletinLayoutProps> = ({
                 {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
               </button>
 
-              <Link 
+              <Link
                 to="/cart"
                 className="p-2 border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] hover:bg-[#ffd700] dark:hover:bg-white/10 transition-colors shadow-[2px_2px_0_0_var(--bulletin-shadow)] relative active:translate-x-[1px] active:translate-y-[1px] active:shadow-none"
                 title="Your Shopping Cart"
@@ -196,7 +201,7 @@ export const BulletinLayout: React.FC<BulletinLayoutProps> = ({
 
               {isAuthenticated ? (
                 <div className="relative">
-                  <button 
+                  <button
                     onClick={() => setIsProfileOpen(!isProfileOpen)}
                     className="flex items-center gap-3 border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] px-3 py-1.5 shadow-[4px_4px_0_0_var(--bulletin-shadow)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all active:scale-95"
                   >
@@ -220,13 +225,13 @@ export const BulletinLayout: React.FC<BulletinLayoutProps> = ({
                              {(user?.viewMode || (user?.roles?.includes('seller') ? 'seller' : 'buyer')).toUpperCase()}
                            </div>
                         </div>
-                        
+
                         <Link to="/profile" className="px-4 py-3 text-[10px] font-black uppercase tracking-widest border-b border-[var(--bulletin-border)]/10 hover:bg-[var(--bulletin-bg)] hover:text-[#ff6b6b] transition-colors flex items-center gap-2 text-[var(--bulletin-text)]">
                            <User className="h-3 w-3" /> My Profile
                         </Link>
-                        
+
                         {!user?.roles?.includes('admin') && (
-                          <button 
+                          <button
                             disabled={isSwitching}
                             onClick={handleRoleSwitch}
                             className="px-4 py-3 text-[10px] font-black uppercase tracking-widest border-b border-[var(--bulletin-border)]/10 hover:bg-sky-50 dark:hover:bg-sky-900/10 hover:text-[#ff6b6b] transition-colors flex items-center gap-2 text-sky-700 dark:text-sky-400">
@@ -251,7 +256,7 @@ export const BulletinLayout: React.FC<BulletinLayoutProps> = ({
                            <Bell className="h-3 w-3" /> Notifications
                         </Link>
 
-                        <button 
+                        <button
                           onClick={handleLogout}
                           className="px-4 py-3 text-[10px] font-black uppercase tracking-widest text-left text-[#ff6b6b] hover:bg-[#fff0f0] transition-colors flex items-center gap-2"
                         >
@@ -266,9 +271,98 @@ export const BulletinLayout: React.FC<BulletinLayoutProps> = ({
                   Join Market
                 </Link>
               )}
+
+              {/* Mobile hamburger */}
+              <button
+                onClick={() => setMobileOpen(!mobileOpen)}
+                className="lg:hidden border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] p-2 shadow-[2px_2px_0_0_var(--bulletin-shadow)] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all"
+                aria-label="Toggle menu"
+              >
+                {mobileOpen ? <X className="h-4 w-4 text-[var(--bulletin-text)]" /> : <Menu className="h-4 w-4 text-[var(--bulletin-text)]" />}
+              </button>
             </div>
           </div>
         </nav>
+
+        {/* Mobile menu drawer */}
+        {mobileOpen && (
+          <div className="lg:hidden border-b-2 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] z-[800] relative">
+            <div className="mx-auto max-w-[1400px] px-4 py-2">
+              {/* Nav links */}
+              {(user?.viewMode === 'seller' ? [
+                { to: '/dashboard', label: 'My Shop' },
+                { to: '/seller/analytics', label: 'My Stats' },
+                { to: '/my-listings', label: 'My Items' },
+                { to: '/seller/orders', label: 'Orders' },
+                { to: '/seller/payouts', label: 'Payments' },
+                { to: '/seller/growth', label: 'Growth Tools' },
+              ] : isAuthenticated ? [
+                { to: '/products', label: 'All Items' },
+                { to: '/categories', label: 'Categories' },
+                { to: '/lost-found', label: 'Lost & Found' },
+                { to: '/pulse', label: 'Activity' },
+                { to: '/saved', label: 'Saved' },
+                { to: '/orders', label: 'Orders' },
+                { to: '/messages', label: 'Messages' },
+              ] : [
+                { to: '/products', label: 'All Items' },
+                { to: '/categories', label: 'Categories' },
+                { to: '/lost-found', label: 'Lost & Found' },
+                { to: '/sellers', label: 'Sellers' },
+                { to: '/pulse', label: 'Activity' },
+              ]).map(({ to, label }) => (
+                <Link
+                  key={to}
+                  to={to}
+                  className="flex items-center border-b border-[var(--bulletin-border)]/10 py-3 text-[11px] font-black uppercase tracking-widest text-[var(--bulletin-text)] hover:text-[#ff6b6b] transition-colors"
+                >
+                  {label}
+                </Link>
+              ))}
+              {/* Company links */}
+              {[
+                { to: '/about', label: 'About Us' },
+                { to: '/faq', label: 'FAQ' },
+                { to: '/support', label: 'Help Center' },
+                { to: '/contact', label: 'Contact' },
+              ].map(({ to, label }) => (
+                <Link
+                  key={to}
+                  to={to}
+                  className="flex items-center border-b border-[var(--bulletin-border)]/10 py-3 text-[11px] font-black uppercase tracking-widest text-[var(--bulletin-text)]/60 hover:text-[#ff6b6b] transition-colors"
+                >
+                  {label}
+                </Link>
+              ))}
+              {/* Auth row */}
+              <div className="py-4">
+                {isAuthenticated ? (
+                  <button
+                    onClick={handleLogout}
+                    className="w-full border-2 border-[#ff6b6b] py-3 text-[11px] font-black uppercase tracking-widest text-[#ff6b6b] hover:bg-[#ff6b6b] hover:text-white transition-all"
+                  >
+                    Sign Out
+                  </button>
+                ) : (
+                  <div className="flex flex-col gap-3">
+                    <Link
+                      to="/login"
+                      className="block border-2 border-[var(--bulletin-border)] py-3 text-center text-[11px] font-black uppercase tracking-widest text-[var(--bulletin-text)] hover:bg-[var(--bulletin-bg)] transition-colors"
+                    >
+                      Sign In
+                    </Link>
+                    <Link
+                      to="/register"
+                      className="block border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-text)] py-3 text-center text-[11px] font-black uppercase tracking-widest text-[var(--bulletin-bg)] hover:bg-[#ff6b6b] hover:text-white transition-all"
+                    >
+                      Join Market
+                    </Link>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Navigation Breadcrumbs */}
         {!hideBreadcrumbs && (
@@ -311,125 +405,132 @@ export const BulletinLayout: React.FC<BulletinLayoutProps> = ({
           {children}
         </div>
 
-        {/* ── SIMPLIFIED BULLETIN FOOTER ── */}
+        {/* ── RESTYLED BULLETIN FOOTER ── */}
         {showFooter && (
-        <div className="border-t-4 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] px-6 py-16 md:px-12">
-          <div className="mx-auto max-w-[1400px]">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 lg:gap-24 mb-16">
-              
+        <footer className="bg-[#0a0a0a] text-white">
+          {/* Coral accent stripe */}
+          <div className="h-2 bg-[#ff6b6b] w-full" />
+
+          <div className="mx-auto max-w-[1400px] px-4 py-10 md:px-12 md:py-16">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 lg:gap-16 mb-12">
+
               {/* Institutional Branding */}
-              <div className="flex flex-col gap-6">
-                <div className="flex items-center gap-4">
-                  <div className="border-4 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] p-3 shadow-[4px_4px_0_0_var(--bulletin-accent)] rotate-[-2deg]">
-                    <BrandMark className="h-8 w-8 text-[var(--bulletin-text)]" />
+              <div className="flex flex-col gap-5 sm:col-span-2 lg:col-span-1">
+                <div className="flex items-center gap-3">
+                  <div className="border-2 border-white/20 bg-white/5 p-2.5 rotate-[-2deg]">
+                    <BrandMark className="h-8 w-8 text-white" />
                   </div>
                   <div>
-                    <h2 className="text-xl font-black uppercase tracking-tighter text-[var(--bulletin-text)]">QUADS</h2>
-                    <p className="text-[8px] font-black uppercase tracking-[0.2em] opacity-40 text-[var(--bulletin-text)]">Student Marketplace</p>
+                    <h2 className="text-lg font-black uppercase tracking-tighter text-white">QUADS</h2>
+                    <p className="text-[8px] font-black uppercase tracking-[0.2em] text-white/30">Student Marketplace</p>
                   </div>
                 </div>
-                <p className="text-[11px] font-bold opacity-60 leading-relaxed max-w-[200px]">
+                <p className="text-[11px] font-bold text-white/50 leading-relaxed max-w-[220px]">
                   The official UMaT student marketplace. Built for the community, powered by the community.
                 </p>
-              </div>
-              
-              {/* Organized Navigation Column */}
-              <div className="flex flex-col gap-4">
-                {user?.viewMode === 'seller' ? (
-                  <>
-                    <Link to="/dashboard" className="text-[14px] font-black uppercase tracking-widest hover:text-[#ff6b6b] transition-colors">My Shop</Link>
-                    <Link to="/seller/analytics" className="text-[14px] font-black uppercase tracking-widest hover:text-[#ff6b6b] transition-colors">My Stats</Link>
-                    <Link to="/my-listings" className="text-[14px] font-black uppercase tracking-widest hover:text-[#ff6b6b] transition-colors">My Items</Link>
-                    <Link to="/sell" className="text-[14px] font-black uppercase tracking-widest hover:text-[#ff6b6b] transition-colors">Sell Something</Link>
-                  </>
-                ) : (
-                  <>
-                    <Link to="/products" className="text-[14px] font-black uppercase tracking-widest hover:text-[#ff6b6b] transition-colors">All Items</Link>
-                    <Link to="/categories" className="text-[14px] font-black uppercase tracking-widest hover:text-[#ff6b6b] transition-colors">Categories</Link>
-                    <Link to="/lost-found" className="text-[14px] font-black uppercase tracking-widest hover:text-[#ff6b6b] transition-colors">Lost & Found</Link>
-                    <Link to="/sellers" className="text-[14px] font-black uppercase tracking-widest hover:text-[#ff6b6b] transition-colors">Sellers</Link>
-                    <Link to="/pulse" className="text-[14px] font-black uppercase tracking-widest hover:text-[#ff6b6b] transition-colors">Activity</Link>
-                  </>
-                )}
+                {/* Social icons */}
+                <div className="flex items-center gap-3 mt-1">
+                  <a href="mailto:support@quadsmarket.tech" title="Email Support"
+                    className="border-2 border-white/20 p-2 text-white/60 hover:border-[#ff6b6b] hover:text-[#ff6b6b] transition-all">
+                    <Mail className="h-4 w-4" />
+                  </a>
+                  <a href="https://wa.me/233551500736" target="_blank" rel="noopener noreferrer" title="WhatsApp Support"
+                    className="border-2 border-white/20 p-2 text-white/60 hover:border-[#25D366] hover:text-[#25D366] transition-all">
+                    <MessageCircle className="h-4 w-4" />
+                  </a>
+                  <a href="https://twitter.com/quadsmarket" target="_blank" rel="noopener noreferrer" title="Follow on X"
+                    className="border-2 border-white/20 p-2 text-white/60 hover:border-[#1DA1F2] hover:text-[#1DA1F2] transition-all">
+                    <Twitter className="h-4 w-4" />
+                  </a>
+                </div>
               </div>
 
-              {/* Safety & Rules Column */}
-              <div className="flex flex-col gap-4">
-                <div className="text-[10px] font-black uppercase tracking-[0.3em] text-[#ff6b6b] mb-2">Safety & Rules</div>
-                {user?.viewMode === 'seller' ? (
-                  <>
-                    <Link to="/seller/payouts" className="text-[14px] font-black uppercase tracking-widest hover:text-[#ff6b6b] transition-colors">Payments</Link>
-                    <Link to="/support" className="text-[14px] font-black uppercase tracking-widest hover:text-[#ff6b6b] transition-colors">Help Desk</Link>
-                    <Link to="/terms" className="text-[14px] font-black uppercase tracking-widest hover:text-[#ff6b6b] transition-colors">Rules</Link>
-                  </>
-                ) : (
-                  <>
-                    <Link to="/support" className="text-[14px] font-black uppercase tracking-widest hover:text-[#ff6b6b] transition-colors">Help Center</Link>
-                    <Link to="/contact" className="text-[14px] font-black uppercase tracking-widest hover:text-[#ff6b6b] transition-colors">Contact Us</Link>
-                    <Link to="/terms" className="text-[14px] font-black uppercase tracking-widest hover:text-[#ff6b6b] transition-colors">User Policy</Link>
-                  </>
-                )}
+              {/* Marketplace Column */}
+              <div className="flex flex-col gap-3">
+                <p className="text-[9px] font-black uppercase tracking-[0.3em] text-[#ff6b6b] mb-1">Marketplace</p>
+                {(user?.viewMode === 'seller' ? [
+                  { to: '/dashboard', label: 'My Shop' },
+                  { to: '/seller/analytics', label: 'My Stats' },
+                  { to: '/my-listings', label: 'My Items' },
+                  { to: '/sell', label: 'Sell Something' },
+                ] : [
+                  { to: '/products', label: 'All Items' },
+                  { to: '/categories', label: 'Categories' },
+                  { to: '/lost-found', label: 'Lost & Found' },
+                  { to: '/sellers', label: 'Sellers' },
+                  { to: '/pulse', label: 'Activity' },
+                ]).map(({ to, label }) => (
+                  <Link key={to} to={to}
+                    className="text-[13px] font-black uppercase tracking-widest text-white/60 hover:text-white hover:underline decoration-[#ff6b6b] underline-offset-4 transition-all">
+                    {label}
+                  </Link>
+                ))}
               </div>
 
-              {/* My Hub Column */}
-              <div className="flex flex-col gap-4">
-                <div className="text-[10px] font-black uppercase tracking-[0.3em] text-[#ff6b6b] mb-2">Account</div>
-                {isAuthenticated ? (
-                  <>
-                    <Link to={user?.viewMode === 'seller' ? "/seller/orders" : "/orders"} className="text-[14px] font-black uppercase tracking-widest hover:text-[#ff6b6b] transition-colors">{user?.viewMode === 'seller' ? 'Incoming Orders' : 'My Orders'}</Link>
-                    <Link to="/messages" className="text-[14px] font-black uppercase tracking-widest hover:text-[#ff6b6b] transition-colors">Messages</Link>
-                    <Link to="/settings" className="text-[14px] font-black uppercase tracking-widest hover:text-[#ff6b6b] transition-colors">Settings</Link>
-                  </>
-                ) : (
-                  <>
-                    <Link to="/login" className="text-[14px] font-black uppercase tracking-widest hover:text-[#ff6b6b] transition-colors">Sign In</Link>
-                    <Link to="/register" className="text-[14px] font-black uppercase tracking-widest hover:text-[#ff6b6b] transition-colors">Register</Link>
-                    <Link to="/seller/onboarding" className="text-[14px] font-black uppercase tracking-widest hover:text-[#ff6b6b] transition-colors font-black">Start Selling</Link>
-                  </>
-                )}
+              {/* Company Column */}
+              <div className="flex flex-col gap-3">
+                <p className="text-[9px] font-black uppercase tracking-[0.3em] text-[#ff6b6b] mb-1">Company</p>
+                {[
+                  { to: '/about', label: 'About Us' },
+                  { to: '/faq', label: 'FAQ' },
+                  { to: '/support', label: 'Help Center' },
+                  { to: '/contact', label: 'Contact Us' },
+                  { to: '/terms', label: 'User Policy' },
+                ].map(({ to, label }) => (
+                  <Link key={to} to={to}
+                    className="text-[13px] font-black uppercase tracking-widest text-white/60 hover:text-white hover:underline decoration-[#ff6b6b] underline-offset-4 transition-all">
+                    {label}
+                  </Link>
+                ))}
+              </div>
+
+              {/* Account Column */}
+              <div className="flex flex-col gap-3">
+                <p className="text-[9px] font-black uppercase tracking-[0.3em] text-[#ff6b6b] mb-1">Account</p>
+                {(isAuthenticated ? [
+                  { to: user?.viewMode === 'seller' ? '/seller/orders' : '/orders', label: user?.viewMode === 'seller' ? 'Incoming Orders' : 'My Orders' },
+                  { to: '/messages', label: 'Messages' },
+                  { to: '/saved', label: 'Saved Items' },
+                  { to: '/settings', label: 'Settings' },
+                ] : [
+                  { to: '/login', label: 'Sign In' },
+                  { to: '/register', label: 'Register' },
+                  { to: '/seller/onboarding', label: 'Start Selling' },
+                ]).map(({ to, label }) => (
+                  <Link key={to} to={to}
+                    className="text-[13px] font-black uppercase tracking-widest text-white/60 hover:text-white hover:underline decoration-[#ff6b6b] underline-offset-4 transition-all">
+                    {label}
+                  </Link>
+                ))}
               </div>
             </div>
 
-            {/* Bottom Bar: Socials & Node */}
-            <div className="flex flex-col md:flex-row items-center justify-between border-t-4 border-[var(--bulletin-border)] pt-12 gap-8">
-              <div className="flex flex-col items-center md:items-start gap-4">
-                 <div className="text-[10px] font-black uppercase tracking-[0.3em] text-[#ff6b6b]">Official Channels</div>
-                  <div className="flex items-center gap-10">
-                    <a href="mailto:support@quadsmarket.tech" title="Email Support" className="text-[var(--bulletin-text)] hover:text-[#ff6b6b] transition-all hover:scale-110">
-                      <Mail className="h-6 w-6" />
-                    </a>
-                    <a href="https://wa.me/233551500736" target="_blank" rel="noopener noreferrer" title="WhatsApp Support" className="text-[var(--bulletin-text)] hover:text-[#25D366] transition-all hover:scale-110">
-                      <MessageCircle className="h-6 w-6" />
-                    </a>
-                    <a href="https://twitter.com/quadsmarket" target="_blank" rel="noopener noreferrer" title="Follow on X" className="text-[var(--bulletin-text)] hover:text-[#1DA1F2] transition-all hover:scale-110">
-                      <Twitter className="h-6 w-6" />
-                    </a>
+            {/* Bottom Bar */}
+            <div className="border-t border-white/10 pt-8 flex flex-col sm:flex-row items-center justify-between gap-6">
+              <div className="flex flex-wrap items-center justify-center sm:justify-start gap-x-3 gap-y-2">
+                <Link to="/privacy" className="text-[9px] font-black uppercase tracking-[0.3em] text-white/30 hover:text-[#ff6b6b] transition-all">Privacy Policy</Link>
+                <span className="text-white/15">·</span>
+                <Link to="/terms" className="text-[9px] font-black uppercase tracking-[0.3em] text-white/30 hover:text-[#ff6b6b] transition-all">Terms of Service</Link>
+                <span className="text-white/15">·</span>
+                <span className="text-[9px] font-black uppercase tracking-[0.3em] text-white/20">&copy; {new Date().getFullYear()} QUADS</span>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="border-2 border-white/10 bg-white/5 px-4 py-1.5">
+                  <div className="text-[9px] font-black uppercase tracking-tighter flex items-center gap-2 text-white/40">
+                    <div className="h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse" />
+                    TARKWA-HQ-01
                   </div>
                 </div>
-
-              <div className="border-4 border-[var(--bulletin-border)] bg-[#fffacd] dark:bg-yellow-900/20 px-6 py-2 shadow-[4px_4px_0_0_var(--bulletin-text)]">
-                 <div className="text-[10px] font-black uppercase tracking-tighter flex items-center gap-2">
-                   <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
-                   SYSTEM NODE: TARKWA-HQ-01
-                 </div>
               </div>
             </div>
 
-            {/* Legal & Privacy */}
-            <div className="mt-16 flex flex-col md:flex-row items-center justify-between border-t-2 border-[var(--bulletin-border)] pt-8 gap-6">
-              <div className="flex flex-wrap items-center justify-center md:justify-start gap-3">
-                <Link to="/privacy" className="text-[9px] font-black uppercase tracking-[0.3em] text-[var(--bulletin-text)] opacity-40 hover:opacity-100 hover:text-[#ff6b6b] transition-all">Privacy Policy</Link>
-                <span className="text-[var(--bulletin-border)]">|</span>
-                <Link to="/terms#tos" className="text-[9px] font-black uppercase tracking-[0.3em] text-[var(--bulletin-text)] opacity-40 hover:opacity-100 hover:text-[#ff6b6b] transition-all">Terms of Service</Link>
-                <span className="text-[var(--bulletin-border)]">|</span>
-                <span className="text-[9px] font-black uppercase tracking-[0.3em] opacity-30 text-[var(--bulletin-text)]">© {new Date().getFullYear()} QUADS</span>
-              </div>
-              <div className="text-[9px] font-black uppercase tracking-[0.5em] opacity-30 text-[var(--bulletin-text)]">
-                /// QUADS DEPLOYMENT V2.4.0 ///
-              </div>
+            <div className="mt-4 text-center">
+              <p className="text-[8px] font-black uppercase tracking-[0.4em] text-white/15">
+                Made at UMaT, Tarkwa 🇬🇭 &nbsp;·&nbsp; Built for students, by students
+              </p>
             </div>
           </div>
-        </div>
+        </footer>
         )}
       </div>
     </div>
@@ -448,7 +549,7 @@ export const BulletinSection: React.FC<{
 }> = ({ children, title, subtitle, action, bgColor, id, className = '' }) => {
   // If no bgColor provided, use theme variable
   const bgClass = bgColor ? bgColor : 'bg-[var(--bulletin-bg)]';
-  
+
   return (
     <div id={id} className={`border-b border-[var(--bulletin-border)] ${bgClass} py-5 px-4 md:py-12 md:px-12 transition-colors duration-200 ${className}`}>
       <div className="mx-auto max-w-[1400px]">

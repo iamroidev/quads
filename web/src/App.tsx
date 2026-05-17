@@ -46,6 +46,8 @@ import SellersPage from './pages/Sellers';
 import GrowthToolsPage from './pages/GrowthTools';
 import PulsePage from './pages/Pulse';
 import PrivacyPolicyPage from './pages/PrivacyPolicy';
+import FAQPage from './pages/FAQ';
+import AboutUsPage from './pages/AboutUs';
 
 const LostFoundPage = lazy(() => import('./pages/LostFound'));
 
@@ -269,6 +271,8 @@ const App: React.FC = () => {
         <Route path="/contact" element={<ContactPage />} />
         <Route path="/terms" element={<TermsPage />} />
         <Route path="/privacy" element={<PrivacyPolicyPage />} />
+        <Route path="/faq" element={<FAQPage />} />
+        <Route path="/about" element={<AboutUsPage />} />
         <Route path="/maintenance" element={<MaintenancePage />} />
         <Route path="/sellers" element={<SellersPage />} />
         <Route

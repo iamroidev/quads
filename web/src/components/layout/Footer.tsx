@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import BrandMark from './BrandMark';
 
 const Footer: React.FC = () => {
   const year = new Date().getFullYear();
@@ -9,43 +10,58 @@ const Footer: React.FC = () => {
 
   const isHomeLanding = pathname === '/';
 
-  /* ── Compact footer — all inner pages ── */
+  /* ── Restyled compact footer — all inner pages ── */
   if (!isHomeLanding) {
     return (
-      <footer className="border-t border-earth-100 bg-white">
-        <div className="mx-auto flex max-w-7xl flex-col items-center gap-6 px-4 py-6 sm:flex-row sm:items-start sm:justify-between sm:px-6 lg:px-8 text-center sm:text-left">
-          <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-earth-400">
-            QUADS &copy; {year}
-          </p>
-          <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2">
-            <Link to="/products" className="text-[9px] font-bold uppercase tracking-[0.15em] text-earth-400 hover:text-earth-900 transition-colors px-3 py-1">
-              Browse
-            </Link>
-            <Link to="/categories" className="text-[9px] font-bold uppercase tracking-[0.15em] text-earth-400 hover:text-earth-900 transition-colors px-3 py-1">
-              Categories
-            </Link>
-            {isAuthenticated ? (
-              <>
-                <Link to="/orders" className="text-[9px] font-bold uppercase tracking-[0.15em] text-earth-400 hover:text-earth-900 transition-colors px-3 py-1">
-                  Orders
+      <footer className="bg-[#0f0f0f] text-white">
+        {/* Coral accent stripe */}
+        <div className="h-1 bg-[#ff6b6b] w-full" />
+
+        <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+          <div className="flex flex-col items-center gap-5 sm:flex-row sm:items-center sm:justify-between">
+            {/* Brand */}
+            <div className="flex items-center gap-2.5">
+              <BrandMark className="h-5 w-5 text-white opacity-70" />
+              <p className="text-[10px] font-black uppercase tracking-[0.25em] text-white/40">
+                QUADS &copy; {year}
+              </p>
+            </div>
+
+            {/* Links */}
+            <div className="flex flex-wrap items-center justify-center gap-x-1 gap-y-2">
+              {[
+                { to: '/products', label: 'Browse' },
+                { to: '/categories', label: 'Categories' },
+                { to: '/about', label: 'About' },
+                { to: '/faq', label: 'FAQ' },
+                ...(isAuthenticated
+                  ? [
+                      { to: '/orders', label: 'Orders' },
+                      { to: '/profile', label: 'Profile' },
+                    ]
+                  : [
+                      { to: '/login', label: 'Sign in' },
+                      { to: '/register', label: 'Register' },
+                    ]),
+                { to: '/privacy', label: 'Privacy' },
+                { to: '/terms', label: 'Terms' },
+              ].map(({ to, label }) => (
+                <Link
+                  key={to}
+                  to={to}
+                  className="px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.15em] text-white/50 hover:text-white hover:underline decoration-[#ff6b6b] underline-offset-4 transition-all"
+                >
+                  {label}
                 </Link>
-                <Link to="/profile" className="text-[9px] font-bold uppercase tracking-[0.15em] text-earth-400 hover:text-earth-900 transition-colors px-3 py-1">
-                  Profile
-                </Link>
-              </>
-            ) : (
-              <>
-                <Link to="/login" className="text-[9px] font-bold uppercase tracking-[0.15em] text-earth-400 hover:text-earth-900 transition-colors px-3 py-1">
-                  Sign in
-                </Link>
-                <Link to="/register" className="text-[9px] font-bold uppercase tracking-[0.15em] text-earth-400 hover:text-earth-900 transition-colors px-3 py-1">
-                  Register
-                </Link>
-              </>
-            )}
-            <Link to="/terms#privacy" className="text-[9px] font-bold uppercase tracking-[0.15em] text-earth-400 hover:text-earth-900 transition-colors px-3 py-1">
-              Privacy
-            </Link>
+              ))}
+            </div>
+          </div>
+
+          {/* Bottom tagline */}
+          <div className="mt-4 border-t border-white/10 pt-4 text-center">
+            <p className="text-[8px] font-black uppercase tracking-[0.3em] text-white/20">
+              Built for students, by students &mdash; UMaT, Tarkwa 🇬🇭
+            </p>
           </div>
         </div>
       </footer>
@@ -55,8 +71,11 @@ const Footer: React.FC = () => {
   /* ── Full editorial footer — home/landing only ── */
   return (
     <footer className="bg-[#0a0a0a] text-white">
+      {/* Coral accent stripe */}
+      <div className="h-2 bg-[#ff6b6b] w-full" />
+
       {/* Top: large typographic block */}
-      <div className="mx-auto max-w-7xl px-4 pt-16 pb-12 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-7xl px-4 pt-14 pb-10 sm:px-6 lg:px-8">
         <div className="flex flex-col gap-12 lg:flex-row lg:items-end lg:justify-between">
           {/* Statement */}
           <div className="items-center text-center lg:text-left">
@@ -71,19 +90,20 @@ const Footer: React.FC = () => {
           </div>
 
           {/* Link columns */}
-          <div className="w-full flex flex-col lg:flex-row lg:space-x-8">
-            <div className="flex-1 lg:w-1/3 space-y-4">
-              <p className="mb-2 text-[9px] font-bold uppercase tracking-[0.28em] text-white/25">
+          <div className="w-full flex flex-col gap-8 sm:flex-row sm:gap-4 lg:gap-8">
+            <div className="flex-1 space-y-3">
+              <p className="mb-2 text-[9px] font-black uppercase tracking-[0.28em] text-white/25">
                 Marketplace
               </p>
               <ul className="space-y-2 text-sm">
                 {[
                   { to: '/products', label: 'All listings' },
                   { to: '/categories', label: 'Categories' },
+                  { to: '/lost-found', label: 'Lost & Found' },
                   ...(isAuthenticated ? [{ to: '/sell', label: 'Sell something' }] : []),
                 ].map(({ to, label }) => (
                   <li key={to}>
-                    <Link to={to} className="text-white/60 transition-colors hover:text-white px-2 py-1">
+                    <Link to={to} className="text-white/60 transition-colors hover:text-white hover:underline decoration-[#ff6b6b] underline-offset-4 text-sm">
                       {label}
                     </Link>
                   </li>
@@ -91,8 +111,8 @@ const Footer: React.FC = () => {
               </ul>
             </div>
 
-            <div className="flex-1 lg:w-1/3 space-y-4">
-              <p className="mb-2 text-[9px] font-bold uppercase tracking-[0.28em] text-white/25">
+            <div className="flex-1 space-y-3">
+              <p className="mb-2 text-[9px] font-black uppercase tracking-[0.28em] text-white/25">
                 Account
               </p>
               <ul className="space-y-2 text-sm">
@@ -106,7 +126,7 @@ const Footer: React.FC = () => {
                   { to: '/register', label: 'Register' },
                 ]).map(({ to, label }) => (
                   <li key={to}>
-                    <Link to={to} className="text-white/60 transition-colors hover:text-white px-2 py-1">
+                    <Link to={to} className="text-white/60 transition-colors hover:text-white hover:underline decoration-[#ff6b6b] underline-offset-4 text-sm">
                       {label}
                     </Link>
                   </li>
@@ -114,19 +134,19 @@ const Footer: React.FC = () => {
               </ul>
             </div>
 
-            <div className="flex-1 lg:w-1/3 space-y-4">
-              <p className="mb-2 text-[9px] font-bold uppercase tracking-[0.28em] text-white/25">
-                Support
+            <div className="flex-1 space-y-3">
+              <p className="mb-2 text-[9px] font-black uppercase tracking-[0.28em] text-white/25">
+                Company
               </p>
               <ul className="space-y-2 text-sm">
                 {[
-                  { to: '/messages', label: 'Messages' },
-                  { to: '/notifications', label: 'Notifications' },
+                  { to: '/about', label: 'About Us' },
+                  { to: '/faq', label: 'FAQ' },
                   { to: '/contact', label: 'Contact Us' },
                   { to: '/support', label: 'Help Center' },
                 ].map(({ to, label }) => (
                   <li key={to}>
-                    <Link to={to} className="text-white/60 transition-colors hover:text-white px-2 py-1">
+                    <Link to={to} className="text-white/60 transition-colors hover:text-white hover:underline decoration-[#ff6b6b] underline-offset-4 text-sm">
                       {label}
                     </Link>
                   </li>
@@ -139,21 +159,32 @@ const Footer: React.FC = () => {
 
       {/* Bottom rule + legal */}
       <div className="border-t border-white/[0.08]">
-        <div className="mx-auto max-w-7xl px-4 pt-6 pb-4 sm:px-6 lg:px-8 flex flex-col items-center gap-4 sm:flex-row sm:justify-between">
+        <div className="mx-auto max-w-7xl px-4 pt-6 pb-5 sm:px-6 lg:px-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-between">
           <p className="text-[9px] text-white/25">
             &copy; {year} QUADS. All rights reserved.
           </p>
-          <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2">
-            <Link to="/terms#privacy" className="text-[9px] text-white/25 hover:text-white transition-colors px-2 py-1">
+          <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-2">
+            <Link to="/privacy" className="text-[9px] text-white/25 hover:text-white transition-colors">
               Privacy Policy
             </Link>
-            <Link to="/terms" className="text-[9px] text-white/25 hover:text-white transition-colors px-2 py-1">
+            <span className="text-white/10">·</span>
+            <Link to="/terms" className="text-[9px] text-white/25 hover:text-white transition-colors">
               Terms of Service
             </Link>
-            <p className="text-[9px] text-white/20 w-full text-center">
-              Built for students, by students.
-            </p>
+            <span className="text-white/10">·</span>
+            <Link to="/about" className="text-[9px] text-white/25 hover:text-white transition-colors">
+              About
+            </Link>
+            <span className="text-white/10">·</span>
+            <Link to="/faq" className="text-[9px] text-white/25 hover:text-white transition-colors">
+              FAQ
+            </Link>
           </div>
+        </div>
+        <div className="text-center pb-4">
+          <p className="text-[8px] font-black uppercase tracking-[0.3em] text-white/15">
+            Made at UMaT, Tarkwa 🇬🇭
+          </p>
         </div>
       </div>
     </footer>
