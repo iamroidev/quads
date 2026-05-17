@@ -60,15 +60,17 @@ export const errorHandler = (
     isOperational = true;
   }
 
-  // Log error in development
+  // Log error in development (mute 404s to prevent bot scanner log flooding)
   if (env.NODE_ENV === 'development') {
-    console.error('Error:', {
-      statusCode,
-      message: err.message,
-      stack: err.stack,
-    });
-  } else if (!isOperational) {
-    // Log unexpected errors in production
+    if (statusCode !== 404) {
+      console.error('Error:', {
+        statusCode,
+        message: err.message,
+        stack: err.stack,
+      });
+    }
+  } else if (!isOperational && statusCode !== 404) {
+    // Log unexpected unexpected errors in production
     console.error('Unexpected Error:', err);
   }
 
