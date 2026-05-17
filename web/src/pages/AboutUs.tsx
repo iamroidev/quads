@@ -74,35 +74,35 @@ const STATS: {
   label: string;
   sub: string;
   rotate: string;
-  accentShadow: string;
+  accent: boolean;
 }[] = [
   {
     value: '0%',
     label: 'Trading Fees',
     sub: 'Always free for every student',
     rotate: '-0.8deg',
-    accentShadow: '#ff6b6b',
+    accent: true,
   },
   {
     value: 'UMaT',
     label: 'Verified Only',
     sub: 'Student-exclusive access',
     rotate: '1.2deg',
-    accentShadow: 'var(--bulletin-shadow)',
+    accent: false,
   },
   {
-    value: '\uD83D\uDD12',
+    value: '🔒',
     label: 'Escrow Protected',
     sub: 'Every single transaction',
     rotate: '-1.5deg',
-    accentShadow: 'var(--bulletin-shadow)',
+    accent: false,
   },
   {
-    value: '\u26A1',
+    value: '⚡',
     label: 'Student Built',
     sub: 'No external investors',
     rotate: '0.7deg',
-    accentShadow: '#ff6b6b',
+    accent: true,
   },
 ];
 
@@ -302,11 +302,15 @@ const AboutUsPage: React.FC = () => {
         subtitle="What Sets Us Apart"
       >
         <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
-          {STATS.map(({ value, label, sub, rotate, accentShadow }) => (
+          {STATS.map(({ value, label, sub, rotate, accent }) => (
             <div
               key={label}
-              className="group border-4 border-[var(--bulletin-border)] bg-[var(--bulletin-bg)] p-6 md:p-8 flex flex-col gap-3 relative overflow-hidden hover:-translate-y-1 transition-transform cursor-default"
-              style={{ transform: `rotate(${rotate})`, boxShadow: `8px 8px 0 0 ${accentShadow}` }}
+              className={`group border-4 border-[var(--bulletin-border)] p-6 md:p-8 flex flex-col gap-3 relative overflow-hidden hover:-translate-y-1 transition-transform cursor-default shadow-[8px_8px_0_0_var(--bulletin-shadow)] ${
+                accent
+                  ? 'bg-[#ffe4e4] dark:bg-red-900/20'
+                  : 'bg-[var(--bulletin-bg)]'
+              }`}
+              style={{ transform: `rotate(${rotate})` }}
             >
               <div className="text-4xl md:text-5xl font-black text-[var(--bulletin-text)] leading-none">
                 {value}
@@ -435,37 +439,6 @@ const AboutUsPage: React.FC = () => {
                 <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
               </Link>
             </div>
-          </div>
-        </div>
-      </BulletinSection>
-
-      {/* ══════════════════════════════════════════════════════
-          FOOTER STRIP
-      ══════════════════════════════════════════════════════ */}
-      <BulletinSection bgColor="bg-[var(--bulletin-card)]">
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 py-2">
-          <p className="text-[10px] font-black uppercase tracking-[0.35em] opacity-30 text-[var(--bulletin-text)]">
-            QUADS &middot; University of Mines &amp; Technology &middot; Tarkwa, Ghana
-          </p>
-          <div className="flex items-center gap-6">
-            <Link
-              to="/contact"
-              className="text-[10px] font-black uppercase tracking-widest opacity-40 hover:opacity-100 text-[var(--bulletin-text)] transition-opacity"
-            >
-              Contact Us
-            </Link>
-            <Link
-              to="/terms"
-              className="text-[10px] font-black uppercase tracking-widest opacity-40 hover:opacity-100 text-[var(--bulletin-text)] transition-opacity"
-            >
-              Terms
-            </Link>
-            <Link
-              to="/privacy"
-              className="text-[10px] font-black uppercase tracking-widest opacity-40 hover:opacity-100 text-[var(--bulletin-text)] transition-opacity"
-            >
-              Privacy
-            </Link>
           </div>
         </div>
       </BulletinSection>
