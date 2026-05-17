@@ -91,12 +91,23 @@ const Support: React.FC = () => {
               </div>
             </div>
 
-            <div>
-              <div className="border-4 border-[var(--bulletin-border)] bg-[#e0f2f7] dark:bg-sky-900/40 p-8 shadow-[8px_8px_0_0_var(--bulletin-shadow)] rotate-[-1deg]">
+            <div className="flex flex-col gap-6">
+              <div className="border-4 border-[var(--bulletin-border)] bg-[#fffacd] dark:bg-yellow-950/10 p-6 shadow-[6px_6px_0_0_var(--bulletin-shadow)] rotate-[0.5deg]">
+                <div className="text-[10px] font-black uppercase tracking-widest opacity-40 mb-2 text-[#b25e00] dark:text-[#ffcc80]">Instant Assistance</div>
+                <h3 className="text-lg font-black uppercase tracking-tight mb-2 text-zinc-950 dark:text-zinc-50 flex items-center gap-2">
+                  🤖 QUADS AI Assistant
+                </h3>
+                <p className="text-[11px] font-bold opacity-60 mb-4 leading-tight">Need help with escrow, payment verification, or listing? Ask our live support bot!</p>
+                <Link to="/messages?support=true" className="w-full inline-block border-2 border-black dark:border-white bg-black text-white dark:bg-white dark:text-black py-2.5 text-center text-[10px] font-black uppercase tracking-widest hover:bg-[#ff6b6b] hover:text-white dark:hover:bg-[#ff6b6b] dark:hover:text-white transition-all shadow-[3px_3px_0_0_var(--bulletin-shadow)] hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5">
+                  Start Live Chat →
+                </Link>
+              </div>
+
+              <div className="border-4 border-[var(--bulletin-border)] bg-[#e0f2f7] dark:bg-sky-900/40 p-6 shadow-[6px_6px_0_0_var(--bulletin-shadow)] rotate-[-0.5deg]">
                 <div className="text-[10px] font-black uppercase tracking-widest opacity-40 mb-2 text-sky-900 dark:text-sky-200">Institutional Safety</div>
-                <h3 className="text-xl font-black uppercase tracking-tight mb-4 text-sky-900 dark:text-sky-200">Official Protocols</h3>
-                <p className="text-[13px] font-bold opacity-60 mb-6 leading-tight text-sky-900 dark:text-sky-200">Read our community guidelines and safety documentation to ensure secure transactions.</p>
-                <Link to="/terms" className="w-full inline-block border-2 border-black bg-black text-white py-3 text-center text-[11px] font-black uppercase tracking-widest hover:bg-white hover:text-black transition-all">
+                <h3 className="text-lg font-black uppercase tracking-tight mb-2 text-sky-900 dark:text-sky-200">Official Protocols</h3>
+                <p className="text-[11px] font-bold opacity-60 mb-4 leading-tight text-sky-900 dark:text-sky-200">Read our community guidelines and safety documentation to ensure secure transactions.</p>
+                <Link to="/terms" className="w-full inline-block border-2 border-black bg-black text-white py-2.5 text-center text-[10px] font-black uppercase tracking-widest hover:bg-white hover:text-black transition-all">
                   Read Rules →
                 </Link>
               </div>
