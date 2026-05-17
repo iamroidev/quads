@@ -14,7 +14,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import * as DocumentPicker from 'expo-document-picker';
 import productService from '../services/product.service';
 import { Product } from '../types';
-import { colors } from '../theme';
+import { colors, shadows } from '../theme';
 import ScreenHeader from '../components/ScreenHeader';
 
 const STATUS_OPTIONS = ['all', 'active', 'draft', 'reserved', 'sold', 'removed'] as const;
@@ -204,7 +204,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1, borderBottomColor: colors.border,
     backgroundColor: colors.surface, flexDirection: 'row', gap: 10,
   },
-  primaryAction: { flex: 1, backgroundColor: colors.text, borderWidth: 1, borderColor: colors.text, alignItems: 'center', paddingVertical: 11 },
+  primaryAction: { flex: 1, backgroundColor: colors.text, borderWidth: 1, borderColor: colors.text, alignItems: 'center', paddingVertical: 11, ...shadows.bulletin },
   primaryActionText: { color: '#fff', fontSize: 11, fontWeight: '900', textTransform: 'uppercase', letterSpacing: 1.1 },
   secondaryAction: { borderWidth: 1, borderColor: colors.border, paddingHorizontal: 12, alignItems: 'center', justifyContent: 'center', backgroundColor: '#fffdf8' },
   secondaryActionText: { color: '#463d31', fontSize: 11, fontWeight: '800', textTransform: 'uppercase', letterSpacing: 1.1 },
@@ -221,7 +221,7 @@ const styles = StyleSheet.create({
   emptyWrap: { marginTop: 44, alignItems: 'center' },
   empty: { textAlign: 'center', color: '#1f1a14', fontSize: 18, fontWeight: '900', textTransform: 'uppercase' },
   emptySub: { marginTop: 8, textAlign: 'center', color: '#7b6f61', fontSize: 13 },
-  card: { flexDirection: 'row', gap: 12, padding: 12, backgroundColor: '#fffdf8', borderWidth: 1, borderColor: colors.border, borderRadius: 0, marginBottom: 12 },
+  card: { flexDirection: 'row', gap: 12, padding: 12, backgroundColor: '#fffdf8', borderWidth: 1, borderColor: colors.border, borderRadius: 0, marginBottom: 12, ...shadows.bulletin },
   image: { width: 88, height: 88, borderRadius: 0, backgroundColor: '#e5e7eb' },
   meta: { flex: 1 },
   title: { fontSize: 15, fontWeight: '700', color: '#111827' },

@@ -14,7 +14,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuth } from '../context/AuthContext';
 import verificationService from '../services/verification.service';
-import { colors } from '../theme';
+import { colors, shadows } from '../theme';
 import ScreenHeader from '../components/ScreenHeader';
 
 type TabType = 'email' | 'phone';

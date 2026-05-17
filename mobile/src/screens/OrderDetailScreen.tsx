@@ -13,7 +13,7 @@ import { Ionicons } from '@expo/vector-icons';
 import orderService, { Order } from '../services/order.service';
 import api from '../services/api';
 import { useAuth } from '../context/AuthContext';
-import { colors } from '../theme';
+import { colors, shadows } from '../theme';
 
 const STATUS_STEPS = ['pending', 'paid', 'confirmed', 'ready', 'completed'] as const;
 const STEP_LABELS: Record<string, string> = {
@@ -384,7 +384,7 @@ const styles = StyleSheet.create({
   orderHeader: {
     flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
     borderWidth: 1, borderColor: colors.border, backgroundColor: colors.surface,
-    padding: 14, marginBottom: 12,
+    padding: 14, marginBottom: 12, ...shadows.bulletin,
   },
   orderNumberLabel: { fontSize: 10, fontWeight: '800', color: '#7c6f60', textTransform: 'uppercase', letterSpacing: 1.4 },
   orderNumber: { fontSize: 15, fontWeight: '900', color: colors.text, marginTop: 2, textTransform: 'uppercase' },
@@ -393,7 +393,7 @@ const styles = StyleSheet.create({
 
   section: {
     borderWidth: 1, borderColor: colors.border, backgroundColor: colors.surface,
-    padding: 14, marginBottom: 12,
+    padding: 14, marginBottom: 12, ...shadows.bulletin,
   },
   sectionTitle: { fontSize: 10, fontWeight: '800', color: '#7c6f60', textTransform: 'uppercase', letterSpacing: 1.4, marginBottom: 12 },
 
@@ -428,7 +428,7 @@ const styles = StyleSheet.create({
 
   // Actions
   actions: { gap: 8 },
-  actionBtn: { backgroundColor: '#1f1a14', paddingVertical: 14, alignItems: 'center', borderWidth: 1, borderColor: '#1f1a14' },
+  actionBtn: { backgroundColor: '#1f1a14', paddingVertical: 14, alignItems: 'center', borderWidth: 1, borderColor: '#1f1a14', ...shadows.bulletin },
   actionBtnText: { color: '#fff', fontWeight: '800', fontSize: 13, textTransform: 'uppercase', letterSpacing: 1 },
   cancelBtn: { borderWidth: 1, borderColor: '#d6b8b4', backgroundColor: '#fde8e6', paddingVertical: 12, alignItems: 'center' },
   cancelBtnText: { color: '#9f3d34', fontWeight: '800', fontSize: 12, textTransform: 'uppercase', letterSpacing: 1 },
@@ -441,7 +441,7 @@ const styles = StyleSheet.create({
   // Handover Styles
   handoverSection: {
     borderWidth: 1, borderColor: colors.border, backgroundColor: colors.surface,
-    padding: 16, marginBottom: 12,
+    padding: 16, marginBottom: 12, ...shadows.bulletin,
   },
   sellerHandover: { flexDirection: 'row', alignItems: 'center', gap: 16 },
   handoverText: { flex: 1 },

@@ -1,0 +1,11 @@
+{
+  "remoteName": "origin",
+  "projects": [
+    {
+      "id": "prj_F2gGvkG0iyxZIfZvckkh52rftFiz",
+      "name": "quads",
+      "directory": ".",
+      "orgId": "team_CLIIppVLh61RT0kGJTHCnOUx"
+    }
+  ]
+}

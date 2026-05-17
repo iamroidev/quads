@@ -95,6 +95,11 @@ const chatService = {
     const response = await api.get('/conversations/unread-count');
     return response.data;
   },
+
+  getAiUser: async (): Promise<{ success: boolean; data: { userId: string } }> => {
+    const response = await api.get('/support/ai-user');
+    return response.data;
+  },
 };
 
 export default chatService;

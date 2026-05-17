@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import notificationService, { Notification } from '../services/notification.service';
-import { colors } from '../theme';
+import { colors, shadows } from '../theme';
 
 const TYPE_ICONS: Record<string, string> = {
   order_placed: '🛒',
@@ -182,7 +182,7 @@ const styles = StyleSheet.create({
   markAllBtn: { paddingBottom: 2 },
   markAllText: { fontSize: 11, color: '#2f5d4f', fontWeight: '800', textTransform: 'uppercase', letterSpacing: 1 },
   pushTestWrap: { paddingHorizontal: 16, paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: colors.border, backgroundColor: '#fffdf8' },
-  pushTestBtn: { borderWidth: 1, borderColor: colors.border, paddingVertical: 11, alignItems: 'center' },
+  pushTestBtn: { borderWidth: 1, borderColor: colors.border, paddingVertical: 11, alignItems: 'center', ...shadows.bulletin },
   pushTestBtnText: { fontSize: 11, fontWeight: '800', color: '#463d31', textTransform: 'uppercase', letterSpacing: 1.2 },
   centered: { flex: 1, justifyContent: 'center', alignItems: 'center' },
   row: {

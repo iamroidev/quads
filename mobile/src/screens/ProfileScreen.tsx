@@ -2,38 +2,111 @@ import React from 'react';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuth } from '../context/AuthContext';
-import { colors } from '../theme';
+import { colors, shadows } from '../theme';
 import ScreenHeader from '../components/ScreenHeader';
 
 const ProfileScreen = ({ navigation }: any) => {
   const { user, logout, viewMode, setViewMode } = useAuth();
 
-  const menuItems = [
-    {
-      label: 'Edit Profile',
-      onPress: () => navigation.navigate('ProfileEdit'),
-    },
-    {
-      label: 'Settings',
-      onPress: () => navigation.navigate('Settings'),
-    },
-    {
-      label: 'My Purchases', // Clarified for sellers
-      onPress: () => navigation.navigate('Orders'),
-    },
-    {
-      label: 'Saved Items',
-      onPress: () => navigation.navigate('SavedItems'),
-    },
-    {
-      label: 'Alerts',
-      onPress: () => navigation.navigate('Alerts'),
-    },
-    {
-      label: 'Messages',
-      onPress: () => navigation.navigate('MessagesCenter'),
-    },
-  ];
+  const isSellerMode = (user?.role === 'seller' || user?.role === 'admin') && viewMode === 'seller';
+
+  const menuItems = isSellerMode
+    ? [
+        {
+          label: 'Edit Profile',
+          onPress: () => navigation.navigate('ProfileEdit'),
+        },
+        {
+          label: 'Settings',
+          onPress: () => navigation.navigate('Settings'),
+        },
+        {
+          label: 'My Listings',
+          onPress: () => navigation.navigate('InventoryTab', { screen: 'MyListings' }),
+        },
+        {
+          label: 'Sales Orders',
+          onPress: () => navigation.navigate('SellerOrdersTab'),
+        },
+        {
+          label: 'Growth Toolkit',
+          onPress: () => navigation.navigate('GrowthTab'),
+        },
+        {
+          label: 'Dispute Center',
+          onPress: () => navigation.navigate('DisputeCenter'),
+        },
+        {
+          label: 'Frequently Asked Questions',
+          onPress: () => navigation.navigate('FAQ'),
+        },
+        {
+          label: 'About QUADS',
+          onPress: () => navigation.navigate('AboutUs'),
+        },
+      ]
+    : [
+        {
+          label: 'Edit Profile',
+          onPress: () => navigation.navigate('ProfileEdit'),
+        },
+        {
+          label: 'Settings',
+          onPress: () => navigation.navigate('Settings'),
+        },
+        {
+          label: 'My Purchases',
+          onPress: () => navigation.navigate('OrdersTab'),
+        },
+        {
+          label: 'Saved Items',
+          onPress: () => navigation.navigate('SavedItems'),
+        },
+        {
+          label: 'Alerts',
+          onPress: () => navigation.navigate('Alerts'),
+        },
+        {
+          label: 'Messages',
+          onPress: () => navigation.navigate('MessagesTab'),
+        },
+        {
+          label: 'Lost & Found',
+          onPress: () => navigation.navigate('LostFound'),
+        },
+        {
+          label: 'Support Desk',
+          onPress: () => navigation.navigate('Support'),
+        },
+        {
+          label: 'Contact Support',
+          onPress: () => navigation.navigate('Contact'),
+        },
+        {
+          label: 'Campus Pulse',
+          onPress: () => navigation.navigate('PulseTab'),
+        },
+        {
+          label: 'Following Feed',
+          onPress: () => navigation.navigate('FollowingFeed'),
+        },
+        {
+          label: 'Frequently Asked Questions',
+          onPress: () => navigation.navigate('FAQ'),
+        },
+        {
+          label: 'About QUADS',
+          onPress: () => navigation.navigate('AboutUs'),
+        },
+        {
+          label: 'Terms of Service',
+          onPress: () => navigation.navigate('Terms'),
+        },
+        {
+          label: 'Privacy Policy',
+          onPress: () => navigation.navigate('PrivacyPolicy'),
+        },
+      ];
 
   const sellerOnboardingDone = !!(user as any)?.sellerOnboarding?.completed;
 
@@ -159,6 +232,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     marginHorizontal: 16,
     marginBottom: 14,
+    ...shadows.bulletin,
   },
   modeBanner: {
     marginHorizontal: 16,
@@ -170,6 +244,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     borderWidth: 1,
     borderColor: '#2f2921',
+    ...shadows.bulletin,
   },
   modeBannerTitle: { color: '#fff', fontSize: 13, fontWeight: '900', textTransform: 'uppercase', letterSpacing: 0.8 },
   modeBannerSub: { color: 'rgba(255,255,255,0.6)', fontSize: 11, marginTop: 2 },
@@ -198,6 +273,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 16,
     marginBottom: 14,
     overflow: 'hidden',
+    ...shadows.bulletin,
   },
   menuItem: {
     flexDirection: 'row',
@@ -216,6 +292,8 @@ const styles = StyleSheet.create({
     borderRadius: 0,
     alignItems: 'center',
     paddingVertical: 13,
+    marginHorizontal: 16,
+    ...shadows.bulletin,
   },
   logoutText: { color: '#9f3d34', fontSize: 12, fontWeight: '800', textTransform: 'uppercase', letterSpacing: 1.2 },
   sellerPrimaryBtn: {

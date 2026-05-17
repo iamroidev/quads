@@ -15,7 +15,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import productService from "../services/product.service";
 import { Product } from "../types";
-import { colors } from "../theme";
+import { colors, shadows } from "../theme";
 import ScreenHeader from "../components/ScreenHeader";
 
 const PRODUCTS_CACHE_KEY = "products_cache_v2";
@@ -303,6 +303,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.text,
     justifyContent: "center",
     paddingHorizontal: 14,
+    ...shadows.bulletin,
   },
   searchBtnText: {
     color: "#fff",
@@ -380,9 +381,9 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#fffdf8",
     borderRadius: 0,
-    overflow: "hidden",
     borderWidth: 1,
     borderColor: colors.border,
+    ...shadows.bulletin,
   },
   image: { width: "100%", height: 130, backgroundColor: "#e5e7eb" },
   cardContent: { padding: 10 },

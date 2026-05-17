@@ -45,6 +45,11 @@ import {
    CollectionDetailScreen,
    ResetPasswordScreen,
    ScannerScreen,
+   LostFoundScreen,
+   FAQScreen,
+   PrivacyPolicyScreen,
+   AboutUsScreen,
+   FollowingFeedScreen,
  } from '../screens';
 import { navigationRef } from './navigationRef';
 import { colors } from '../theme';
@@ -180,87 +185,153 @@ const ProfileStackScreen = () => (
       component={ConversationListScreen}
       options={{ ...defaultStackHeader, title: 'Messages' }}
     />
-<ProfileStack.Screen
-              name="Chat"
-              component={ChatScreen}
-              options={{ ...defaultStackHeader }}
-            />
-            <ProfileStack.Screen
-              name="Verification"
-              component={VerificationScreen}
-              options={{ ...defaultStackHeader, title: 'Verify Account' }}
-            />
-<ProfileStack.Screen
-              name="Checkout"
-              component={CheckoutScreen}
-              options={{ ...defaultStackHeader, title: 'Checkout' }}
-            />
-            <ProfileStack.Screen
-              name="Categories"
-              component={CategoriesScreen}
-              options={{ ...defaultStackHeader, title: 'Categories' }}
-            />
-            <ProfileStack.Screen
-              name="Sellers"
-              component={SellersScreen}
-              options={{ ...defaultStackHeader, title: 'Sellers' }}
-            />
-            <ProfileStack.Screen
-              name="SellerOrders"
-              component={SellerOrdersScreen}
-              options={{ ...defaultStackHeader, title: 'Sales Orders' }}
-            />
-            <ProfileStack.Screen
-              name="Cart"
-              component={CartScreen}
-              options={{ ...defaultStackHeader, title: 'Shopping Cart' }}
-            />
-            <ProfileStack.Screen
-              name="PaymentVerification"
-              component={PaymentVerificationScreen}
-              options={{ ...defaultStackHeader, title: 'Payment Status' }}
-            />
-             <ProfileStack.Screen
-               name="MessagesList"
-               component={ConversationListScreen}
-               options={{ ...defaultStackHeader, title: 'Messages' }}
-             />
-            <ProfileStack.Screen
-              name="Support"
-              component={SupportScreen}
-              options={{ ...defaultStackHeader, title: 'Support' }}
-            />
-            <ProfileStack.Screen
-              name="Contact"
-              component={ContactScreen}
-              options={{ ...defaultStackHeader, title: 'Contact' }}
-            />
-            <ProfileStack.Screen
-              name="Terms"
-              component={TermsScreen}
-              options={{ ...defaultStackHeader, title: 'Terms' }}
-            />
-            <ProfileStack.Screen
-              name="CollectionDetail"
-              component={CollectionDetailScreen}
-              options={{ ...defaultStackHeader, title: 'Collection' }}
-            />
-            <ProfileStack.Screen
-              name="Scanner"
-              component={ScannerScreen}
-              options={{ ...defaultStackHeader, title: 'Scanner', headerShown: false }}
-            />
-          </ProfileStack.Navigator>
-        );
+    <ProfileStack.Screen
+      name="Chat"
+      component={ChatScreen}
+      options={{ ...defaultStackHeader }}
+    />
+    <ProfileStack.Screen
+      name="Verification"
+      component={VerificationScreen}
+      options={{ ...defaultStackHeader, title: 'Verify Account' }}
+    />
+    <ProfileStack.Screen
+      name="Checkout"
+      component={CheckoutScreen}
+      options={{ ...defaultStackHeader, title: 'Checkout' }}
+    />
+    <ProfileStack.Screen
+      name="Categories"
+      component={CategoriesScreen}
+      options={{ ...defaultStackHeader, title: 'Categories' }}
+    />
+    <ProfileStack.Screen
+      name="Sellers"
+      component={SellersScreen}
+      options={{ ...defaultStackHeader, title: 'Sellers' }}
+    />
+    <ProfileStack.Screen
+      name="SellerOrders"
+      component={SellerOrdersScreen}
+      options={{ ...defaultStackHeader, title: 'Sales Orders' }}
+    />
+    <ProfileStack.Screen
+      name="Cart"
+      component={CartScreen}
+      options={{ ...defaultStackHeader, title: 'Shopping Cart' }}
+    />
+    <ProfileStack.Screen
+      name="PaymentVerification"
+      component={PaymentVerificationScreen}
+      options={{ ...defaultStackHeader, title: 'Payment Status' }}
+    />
+    <ProfileStack.Screen
+      name="Support"
+      component={SupportScreen}
+      options={{ ...defaultStackHeader, title: 'Support' }}
+    />
+    <ProfileStack.Screen
+      name="Contact"
+      component={ContactScreen}
+      options={{ ...defaultStackHeader, title: 'Contact' }}
+    />
+    <ProfileStack.Screen
+      name="Terms"
+      component={TermsScreen}
+      options={{ ...defaultStackHeader, title: 'Terms' }}
+    />
+    <ProfileStack.Screen
+      name="CollectionDetail"
+      component={CollectionDetailScreen}
+      options={{ ...defaultStackHeader, title: 'Collection' }}
+    />
+    <ProfileStack.Screen
+      name="Scanner"
+      component={ScannerScreen}
+      options={{ ...defaultStackHeader, title: 'Scanner', headerShown: false }}
+    />
+    <ProfileStack.Screen
+      name="LostFound"
+      component={LostFoundScreen}
+      options={{ ...defaultStackHeader, title: 'Lost & Found' }}
+    />
+    {/* Previously dead screens — now registered */}
+    <ProfileStack.Screen
+      name="SellerPayouts"
+      component={SellerPayoutsScreen}
+      options={{ ...defaultStackHeader, title: 'Earnings' }}
+    />
+    <ProfileStack.Screen
+      name="DisputeCenter"
+      component={DisputeCenterScreen}
+      options={{ ...defaultStackHeader, title: 'Disputes' }}
+    />
+    <ProfileStack.Screen
+      name="GrowthTools"
+      component={GrowthToolsScreen}
+      options={{ ...defaultStackHeader, title: 'Growth Tools' }}
+    />
+    <ProfileStack.Screen
+      name="Maintenance"
+      component={MaintenanceScreen}
+      options={{ ...defaultStackHeader, title: 'Maintenance' }}
+    />
+    <ProfileStack.Screen
+      name="FAQ"
+      component={FAQScreen}
+      options={{ ...defaultStackHeader, title: 'FAQ' }}
+    />
+    <ProfileStack.Screen
+      name="PrivacyPolicy"
+      component={PrivacyPolicyScreen}
+      options={{ ...defaultStackHeader, title: 'Privacy Policy' }}
+    />
+    <ProfileStack.Screen
+      name="AboutUs"
+      component={AboutUsScreen}
+      options={{ ...defaultStackHeader, title: 'About Us' }}
+    />
+    <ProfileStack.Screen
+      name="FollowingFeed"
+      component={FollowingFeedScreen}
+      options={{ ...defaultStackHeader, title: 'Following Feed' }}
+    />
+    <ProfileStack.Screen
+      name="Pulse"
+      component={PulseScreen}
+      options={{ ...defaultStackHeader, title: 'Campus Pulse' }}
+    />
+  </ProfileStack.Navigator>
+);
+
+const PulseStack = createNativeStackNavigator();
+const PulseStackScreen = () => (
+  <PulseStack.Navigator screenOptions={{ headerShown: false }}>
+    <PulseStack.Screen name="PulseHome" component={PulseScreen} />
+  </PulseStack.Navigator>
+);
+
+const SellerOrdersStack = createNativeStackNavigator();
+const SellerOrdersStackScreen = () => (
+  <SellerOrdersStack.Navigator screenOptions={{ headerShown: false }}>
+    <SellerOrdersStack.Screen name="SellerOrdersHome" component={SellerOrdersScreen} />
+  </SellerOrdersStack.Navigator>
+);
+
+const GrowthToolsStack = createNativeStackNavigator();
+const GrowthToolsStackScreen = () => (
+  <GrowthToolsStack.Navigator screenOptions={{ headerShown: false }}>
+    <GrowthToolsStack.Screen name="GrowthToolsHome" component={GrowthToolsScreen} />
+  </GrowthToolsStack.Navigator>
+);
 
 // ── Bottom tabs ───────────────────────────────────────────────────────────────
 const tabIcon = (name: any) => ({ color }: { color: string }) => (
   <Ionicons name={name} size={19} color={color} />
 );
 
-const MainTabs = () => {
-  const { user, viewMode } = useAuth();
-  const isSellerMode = (user?.role === 'seller' || user?.role === 'admin') && viewMode === 'seller';
+const BuyerTabs = () => {
+  const { unreadMessagesCount, unreadNotificationsCount } = useAuth();
   const insets = useSafeAreaInsets();
 
   const commonOptions = {
@@ -276,10 +347,10 @@ const MainTabs = () => {
       paddingHorizontal: 0,
     },
     tabBarLabelStyle: {
-      fontSize: 9,
+      fontSize: 8,
       fontWeight: '800',
       textTransform: 'uppercase',
-      letterSpacing: 1,
+      letterSpacing: 0.5,
       marginBottom: 0,
     } as any,
     tabBarItemStyle: {
@@ -293,68 +364,142 @@ const MainTabs = () => {
 
   return (
     <Tab.Navigator screenOptions={commonOptions as any}>
-      {isSellerMode && (
-        <Tab.Screen
-          name="SellerDashboard"
-          component={SellerAnalyticsScreen}
-          options={{ title: 'Dashboard', tabBarIcon: tabIcon('analytics-outline') }}
-        />
-      )}
-      {isSellerMode && (
-        <Tab.Screen
-          name="InventoryTab"
-          component={SellerStackScreen}
-          options={{ title: 'Inventory', tabBarIcon: tabIcon('cube-outline') }}
-        />
-      )}
-
-      {!isSellerMode && (
-        <Tab.Screen
-          name="HomeTab"
-          component={HomeScreen}
-          options={{ title: 'Home', tabBarIcon: tabIcon('home-outline') }}
-        />
-      )}
-{!isSellerMode && (
-         <Tab.Screen
-           name="ProductsTab"
-           component={ProductsStackScreen}
-           options={{ 
-             title: 'Browse', 
-             tabBarIcon: tabIcon('grid-outline')
-           }}
-           listeners={({ navigation }) => ({
-             tabPress: (e) => {
-               e.preventDefault();
-               navigation.navigate('ProductsTab', { screen: 'ProductsHome' });
-             },
-           })}
-         />
-       )}
-       {!isSellerMode && (
-         <Tab.Screen
-           name="PulseTab"
-           component={PulseScreen}
-           options={{ title: 'Pulse', tabBarIcon: tabIcon('pulse-outline') }}
-         />
-       )}
-       <Tab.Screen
-         name="MessagesTab"
-         component={MessagesStackScreen}
-         options={{ title: 'Chat', tabBarIcon: tabIcon('chatbubble-ellipses-outline') }}
-       />
+      <Tab.Screen
+        name="HomeTab"
+        component={HomeScreen}
+        options={{ title: 'Home', tabBarIcon: tabIcon('home-outline') }}
+      />
+      <Tab.Screen
+        name="ProductsTab"
+        component={ProductsStackScreen}
+        options={{ 
+          title: 'Browse', 
+          tabBarIcon: tabIcon('grid-outline')
+        }}
+        listeners={({ navigation }) => ({
+          tabPress: (e) => {
+            e.preventDefault();
+            navigation.navigate('ProductsTab', { screen: 'ProductsHome' });
+          },
+        })}
+      />
+      <Tab.Screen
+        name="PulseTab"
+        component={PulseStackScreen}
+        options={{ title: 'Pulse', tabBarIcon: tabIcon('flash-outline') }}
+      />
+      <Tab.Screen
+        name="OrdersTab"
+        component={OrdersStackScreen}
+        options={{ title: 'Orders', tabBarIcon: tabIcon('receipt-outline') }}
+      />
+      <Tab.Screen
+        name="MessagesTab"
+        component={MessagesStackScreen}
+        options={{
+          title: 'Chat',
+          tabBarIcon: tabIcon('chatbubble-ellipses-outline'),
+          tabBarBadge: unreadMessagesCount > 0 ? unreadMessagesCount : undefined,
+        }}
+      />
       <Tab.Screen
         name="ProfileTab"
         component={ProfileStackScreen}
-        options={{ title: 'Me', tabBarIcon: tabIcon('person-outline') }}
+        options={{
+          title: 'Me',
+          tabBarIcon: tabIcon('person-outline'),
+          tabBarBadge: unreadNotificationsCount > 0 ? unreadNotificationsCount : undefined,
+        }}
       />
     </Tab.Navigator>
   );
 };
 
+const SellerTabs = () => {
+  const { unreadMessagesCount, unreadNotificationsCount } = useAuth();
+  const insets = useSafeAreaInsets();
+
+  const commonOptions = {
+    headerShown: false,
+    tabBarActiveTintColor: colors.text,
+    tabBarInactiveTintColor: '#9f9382',
+    tabBarStyle: {
+      borderTopColor: colors.border,
+      backgroundColor: '#fffdf8',
+      height: 62 + (Platform.OS === 'ios' ? insets.bottom : 0),
+      paddingTop: 8,
+      paddingBottom: Math.max(insets.bottom, 8),
+      paddingHorizontal: 0,
+    },
+    tabBarLabelStyle: {
+      fontSize: 8,
+      fontWeight: '800',
+      textTransform: 'uppercase',
+      letterSpacing: 0.5,
+      marginBottom: 0,
+    } as any,
+    tabBarItemStyle: {
+      flex: 1,
+      minWidth: 0,
+      justifyContent: 'center',
+      alignItems: 'center',
+      paddingHorizontal: 0,
+    } as any,
+  };
+
+  return (
+    <Tab.Navigator screenOptions={commonOptions as any}>
+      <Tab.Screen
+        name="SellerDashboard"
+        component={SellerAnalyticsScreen}
+        options={{ title: 'Dashboard', tabBarIcon: tabIcon('analytics-outline') }}
+      />
+      <Tab.Screen
+        name="InventoryTab"
+        component={SellerStackScreen}
+        options={{ title: 'Inventory', tabBarIcon: tabIcon('cube-outline') }}
+      />
+      <Tab.Screen
+        name="SellerOrdersTab"
+        component={SellerOrdersStackScreen}
+        options={{ title: 'Sales', tabBarIcon: tabIcon('receipt-outline') }}
+      />
+      <Tab.Screen
+        name="GrowthTab"
+        component={GrowthToolsStackScreen}
+        options={{ title: 'Growth', tabBarIcon: tabIcon('rocket-outline') }}
+      />
+      <Tab.Screen
+        name="MessagesTab"
+        component={MessagesStackScreen}
+        options={{
+          title: 'Chat',
+          tabBarIcon: tabIcon('chatbubble-ellipses-outline'),
+          tabBarBadge: unreadMessagesCount > 0 ? unreadMessagesCount : undefined,
+        }}
+      />
+      <Tab.Screen
+        name="ProfileTab"
+        component={ProfileStackScreen}
+        options={{
+          title: 'Me',
+          tabBarIcon: tabIcon('person-outline'),
+          tabBarBadge: unreadNotificationsCount > 0 ? unreadNotificationsCount : undefined,
+        }}
+      />
+    </Tab.Navigator>
+  );
+};
+
+const MainTabsWrapper = () => {
+  const { user, viewMode } = useAuth();
+  const isSellerMode = (user?.role === 'seller' || user?.role === 'admin') && viewMode === 'seller';
+  return isSellerMode ? <SellerTabs /> : <BuyerTabs />;
+};
+
 // ── Root navigator ────────────────────────────────────────────────────────────
 const AppNavigator = () => {
-  const { isAuthenticated, isLoading, user } = useAuth();
+  const { isAuthenticated, isLoading } = useAuth();
 
   if (isLoading) {
     return (
@@ -368,7 +513,10 @@ const AppNavigator = () => {
     <NavigationContainer ref={navigationRef}>
       <Stack.Navigator screenOptions={{ headerShown: false }}>
         {isAuthenticated ? (
-          <Stack.Screen name="Main" component={MainTabs} />
+          <Stack.Screen 
+            name="Main" 
+            component={MainTabsWrapper} 
+          />
         ) : (
           <>
             <Stack.Screen name="Login" component={LoginScreen} />
@@ -377,6 +525,11 @@ const AppNavigator = () => {
               name="ForgotPassword"
               component={ForgotPasswordScreen}
               options={{ ...defaultStackHeader, title: 'Reset Password', headerShown: true }}
+            />
+            <Stack.Screen
+              name="ResetPassword"
+              component={ResetPasswordScreen}
+              options={{ ...defaultStackHeader, title: 'New Password', headerShown: true }}
             />
           </>
         )}

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, ScrollView, StyleSheet, Text, View, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { colors } from '../theme';
+import { colors, shadows } from '../theme';
 import ScreenHeader from '../components/ScreenHeader';
 import api from '../services/api';
 
@@ -61,11 +61,13 @@ const styles = StyleSheet.create({
   row: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 16,
-    borderWidth: 1,
+    borderWidth: 2,
     borderColor: colors.border,
     backgroundColor: colors.surface,
+    padding: 16,
     marginBottom: 10,
+    marginHorizontal: 16,
+    ...shadows.bulletin,
   },
   avatar: {
     width: 40,

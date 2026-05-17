@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { colors } from '../theme';
+import { colors, shadows } from '../theme';
 import ScreenHeader from '../components/ScreenHeader';
 import api from '../services/api';
 
@@ -48,7 +48,14 @@ const styles = StyleSheet.create({
   content: { padding: 16 },
   centered: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: colors.bg },
   empty: { textAlign: 'center', color: colors.muted, fontSize: 12, marginTop: 40 },
-  card: { padding: 16, borderWidth: 1, borderColor: colors.border, backgroundColor: colors.surface, marginBottom: 10 },
+  card: {
+    padding: 16,
+    borderWidth: 1,
+    borderColor: colors.border,
+    backgroundColor: colors.surface,
+    marginBottom: 10,
+    ...shadows.bulletin,
+  },
   title: { fontSize: 13, fontWeight: '900' },
   price: { fontSize: 12, color: colors.muted, marginTop: 4 },
 });

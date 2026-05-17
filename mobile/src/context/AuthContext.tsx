@@ -4,6 +4,8 @@ import authService, { RegisterPayload } from '../services/auth.service';
 import { User } from '../types';
 import { syncPushSubscription, removePushSubscription } from '../services/push.service';
 import { supabase } from '../services/supabase';
+import chatService from '../services/chat.service';
+import notificationService from '../services/notification.service';
 
 interface AuthContextType {
   user: User | null;
@@ -17,15 +19,28 @@ interface AuthContextType {
   refreshUser: () => Promise<void>;
   viewMode: 'buyer' | 'seller';
   setViewMode: (mode: 'buyer' | 'seller') => void;
+  unreadMessagesCount: number;
+  unreadNotificationsCount: number;
+  refreshUnreadCounts: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, _setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [viewMode, setViewMode] = useState<'buyer' | 'seller'>('buyer');
+
+  const normalizeUser = (u: any): User | null => {
+    if (!u) return null;
+    const role = u.role || (u.roles?.includes('admin') ? 'admin' : (u.roles?.includes('seller') ? 'seller' : 'buyer'));
+    return { ...u, role };
+  };
+
+  const setUser = (u: any) => {
+    _setUser(normalizeUser(u));
+  };
 
   const isAuthenticated = !!user && !!token;
 
@@ -45,8 +60,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           setToken(storedToken);
           const response = await authService.getMe();
           const newUser = response.data.user;
+          const normalized = normalizeUser(newUser);
           setUser(newUser);
-          setViewMode(newUser.role === 'seller' || newUser.role === 'admin' ? 'seller' : 'buyer');
+          if (normalized) {
+            setViewMode(normalized.role === 'seller' || normalized.role === 'admin' ? 'seller' : 'buyer');
+          }
         }
       } catch {
         await SecureStore.deleteItemAsync('token');
@@ -70,22 +88,28 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     const response = await authService.login({ supabaseAccessToken: data.session.access_token });
     const { user: newUser, token: newToken } = response.data;
+    const normalized = normalizeUser(newUser);
     await SecureStore.setItemAsync('token', newToken);
     await SecureStore.setItemAsync('user', JSON.stringify(newUser));
     setToken(newToken);
     setUser(newUser);
-    setViewMode(newUser.role === 'seller' || newUser.role === 'admin' ? 'seller' : 'buyer');
+    if (normalized) {
+      setViewMode(normalized.role === 'seller' || normalized.role === 'admin' ? 'seller' : 'buyer');
+    }
     await syncPushSubscription();
   }, []);
 
   const googleLogin = useCallback(async (credential: string, role?: 'buyer' | 'seller') => {
     const response = await authService.googleLogin(credential, role);
     const { user: newUser, token: newToken } = response.data;
+    const normalized = normalizeUser(newUser);
     await SecureStore.setItemAsync('token', newToken);
     await SecureStore.setItemAsync('user', JSON.stringify(newUser));
     setToken(newToken);
     setUser(newUser);
-    setViewMode(newUser.role === 'seller' || newUser.role === 'admin' ? 'seller' : 'buyer');
+    if (normalized) {
+      setViewMode(normalized.role === 'seller' || normalized.role === 'admin' ? 'seller' : 'buyer');
+    }
     await syncPushSubscription();
     return {
       isNewUser: !!response.data?.isNewUser,
@@ -118,13 +142,41 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       location: data.location,
     });
     const { user: newUser, token: newToken } = response.data;
+    const normalized = normalizeUser(newUser);
     await SecureStore.setItemAsync('token', newToken);
     await SecureStore.setItemAsync('user', JSON.stringify(newUser));
     setToken(newToken);
     setUser(newUser);
-    setViewMode(newUser.role === 'seller' || newUser.role === 'admin' ? 'seller' : 'buyer');
+    if (normalized) {
+      setViewMode(normalized.role === 'seller' || normalized.role === 'admin' ? 'seller' : 'buyer');
+    }
     await syncPushSubscription();
   }, []);
+
+  const [unreadMessagesCount, setUnreadMessagesCount] = useState(0);
+  const [unreadNotificationsCount, setUnreadNotificationsCount] = useState(0);
+
+  const refreshUnreadCounts = useCallback(async () => {
+    try {
+      const [chatRes, notifRes] = await Promise.all([
+        chatService.getUnreadCount(),
+        notificationService.getUnreadCount(),
+      ]);
+      if (chatRes.data) setUnreadMessagesCount(chatRes.data.unreadCount || 0);
+      if (notifRes.data) setUnreadNotificationsCount(notifRes.data.unreadCount || 0);
+    } catch {}
+  }, []);
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      refreshUnreadCounts();
+      const interval = setInterval(refreshUnreadCounts, 20000);
+      return () => clearInterval(interval);
+    } else {
+      setUnreadMessagesCount(0);
+      setUnreadNotificationsCount(0);
+    }
+  }, [isAuthenticated, refreshUnreadCounts]);
 
   const logout = useCallback(async () => {
     try {
@@ -137,7 +189,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     await SecureStore.deleteItemAsync('user');
     await removePushSubscription();
     setToken(null);
-    setUser(null);
+    _setUser(null);
   }, []);
 
   const refreshUser = useCallback(async () => {
@@ -154,7 +206,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   return (
     <AuthContext.Provider
-      value={{ user, token, isLoading, isAuthenticated, login, googleLogin, register, logout, refreshUser, viewMode, setViewMode }}
+      value={{
+        user,
+        token,
+        isLoading,
+        isAuthenticated,
+        login,
+        googleLogin,
+        register,
+        logout,
+        refreshUser,
+        viewMode,
+        setViewMode,
+        unreadMessagesCount,
+        unreadNotificationsCount,
+        refreshUnreadCounts,
+      }}
     >
       {children}
     </AuthContext.Provider>

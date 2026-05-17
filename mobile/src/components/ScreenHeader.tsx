@@ -1,6 +1,6 @@
-import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
-import { colors } from '../theme';
+import React from "react";
+import { StyleSheet, Text, View } from "react-native";
+import { colors } from "../theme";
 
 interface ScreenHeaderProps {
   eyebrow?: string;
@@ -23,29 +23,30 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingTop: 12,
     paddingBottom: 12,
-    borderBottomWidth: 1,
+    borderBottomWidth: 2,
     borderBottomColor: colors.border,
-    backgroundColor: '#f4ecdd',
+    backgroundColor: colors.bg,
   },
   eyebrow: {
     fontSize: 10,
-    color: '#7c6f60',
-    textTransform: 'uppercase',
-    letterSpacing: 1.6,
-    fontWeight: '800',
+    color: colors.accent,
+    textTransform: "uppercase",
+    letterSpacing: 2,
+    fontWeight: "900",
   },
   title: {
     marginTop: 4,
-    fontSize: 28,
-    fontWeight: '900',
+    fontSize: 26,
+    fontWeight: "900",
     color: colors.text,
-    textTransform: 'uppercase',
-    letterSpacing: -0.4,
+    textTransform: "uppercase",
+    letterSpacing: -0.5,
   },
   subtitle: {
     marginTop: 4,
-    color: '#7b6f61',
-    fontSize: 13,
+    color: colors.muted,
+    fontSize: 12,
+    fontWeight: "700",
     lineHeight: 18,
   },
 });

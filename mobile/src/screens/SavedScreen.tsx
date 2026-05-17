@@ -12,7 +12,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import savedService from "../services/saved.service";
 import { Product } from "../types";
-import { colors } from "../theme";
+import { colors, shadows } from "../theme";
 
 const SavedScreen = ({ navigation }: any) => {
   const [products, setProducts] = useState<Product[]>([]);
@@ -109,9 +109,9 @@ const styles = StyleSheet.create({
   card: {
     backgroundColor: "#fffdf8",
     borderRadius: 0,
-    overflow: "hidden",
     borderWidth: 1,
     borderColor: colors.border,
+    ...shadows.bulletin,
   },
   image: { width: "100%", height: 150, backgroundColor: "#e5e7eb" },
   content: { padding: 10 },

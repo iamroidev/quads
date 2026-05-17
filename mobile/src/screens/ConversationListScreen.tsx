@@ -13,7 +13,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
 import chatService, { Conversation } from '../services/chat.service';
 import { useAuth } from '../context/AuthContext';
-import { colors } from '../theme';
+import { colors, shadows } from '../theme';
 import ScreenHeader from '../components/ScreenHeader';
 
 const formatTime = (dateStr: string) => {

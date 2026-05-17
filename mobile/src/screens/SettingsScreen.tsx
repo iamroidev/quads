@@ -4,7 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
 import { supabase } from '../services/supabase';
-import { colors } from '../theme';
+import { colors, shadows } from '../theme';
 import ScreenHeader from '../components/ScreenHeader';
 
 const SettingsScreen = () => {
@@ -195,12 +195,12 @@ const styles = StyleSheet.create({
     letterSpacing: 1.6,
     textTransform: 'uppercase',
   },
-  card: { marginTop: 14, backgroundColor: '#fffdf8', borderWidth: 1, borderColor: colors.border },
+  card: { marginTop: 14, backgroundColor: '#fffdf8', borderWidth: 1, borderColor: colors.border, ...shadows.bulletin },
   row: { paddingHorizontal: 14, paddingVertical: 14, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   sep: { height: 1, backgroundColor: '#efe5d6' },
   rowTitle: { fontSize: 13, fontWeight: '800', color: '#1f1a14', textTransform: 'uppercase', letterSpacing: 1 },
   rowNote: { marginTop: 2, color: '#8b7f72', fontSize: 12 },
-  secondaryBtn: { marginTop: 16, borderWidth: 1, borderColor: colors.border, paddingVertical: 12, alignItems: 'center', backgroundColor: '#fff' },
+  secondaryBtn: { marginTop: 16, borderWidth: 1, borderColor: colors.border, paddingVertical: 12, alignItems: 'center', backgroundColor: '#fff', ...shadows.bulletin },
   secondaryBtnText: { fontSize: 11, color: '#3d352b', textTransform: 'uppercase', fontWeight: '800', letterSpacing: 1.1 },
   logoutBtn: { marginTop: 12, borderWidth: 1, borderColor: '#d6b8b4', paddingVertical: 12, alignItems: 'center', backgroundColor: '#fffdf8' },
   logoutText: { fontSize: 11, color: '#9f3d34', textTransform: 'uppercase', fontWeight: '800', letterSpacing: 1.1 },
@@ -208,7 +208,7 @@ const styles = StyleSheet.create({
     borderWidth: 1, borderColor: colors.border, backgroundColor: '#fff',
     borderRadius: 0, paddingHorizontal: 12, paddingVertical: 10, fontSize: 14, color: colors.text,
   },
-  pwBtn: { backgroundColor: '#1f1a14', paddingVertical: 12, alignItems: 'center', marginBottom: 14 },
+  pwBtn: { backgroundColor: '#1f1a14', paddingVertical: 12, alignItems: 'center', marginBottom: 14, ...shadows.bulletin },
   pwBtnText: { color: '#fff', fontSize: 11, fontWeight: '800', textTransform: 'uppercase', letterSpacing: 1.1 },
 });
 

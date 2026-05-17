@@ -13,7 +13,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { supabase } from '../services/supabase';
-import { colors } from '../theme';
+import { colors, shadows } from '../theme';
 import ScreenHeader from '../components/ScreenHeader';
 
 const ForgotPasswordScreen = ({ navigation }: any) => {
@@ -111,27 +111,28 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase', letterSpacing: 1.4,
   },
   input: {
-    borderWidth: 1, borderColor: colors.border,
+    borderWidth: 2, borderColor: colors.border,
     backgroundColor: '#fff', borderRadius: 0,
     paddingHorizontal: 14, paddingVertical: 12,
     fontSize: 15, color: colors.text,
   },
-  primaryBtn: { backgroundColor: '#1f1a14', paddingVertical: 14, alignItems: 'center', marginTop: 4 },
+  primaryBtn: { backgroundColor: '#1f1a14', paddingVertical: 14, alignItems: 'center', marginTop: 4, borderWidth: 2, borderColor: colors.border, ...shadows.bulletin },
   btnDisabled: { opacity: 0.5 },
   primaryBtnText: { color: '#fff', fontSize: 12, fontWeight: '800', textTransform: 'uppercase', letterSpacing: 1.3 },
 
-  cancelBtn: { paddingVertical: 12, alignItems: 'center', borderWidth: 1, borderColor: colors.border, backgroundColor: colors.surface },
+  cancelBtn: { paddingVertical: 12, alignItems: 'center', borderWidth: 2, borderColor: colors.border, backgroundColor: colors.surface, ...shadows.bulletin },
   cancelBtnText: { fontSize: 11, fontWeight: '800', color: '#6f6559', textTransform: 'uppercase', letterSpacing: 1.1 },
 
   successBox: {
-    borderWidth: 1, borderColor: colors.border,
+    borderWidth: 2, borderColor: colors.border,
     backgroundColor: '#fffacd',
     padding: 24, alignItems: 'center', gap: 12,
+    ...shadows.bulletin,
   },
   successIcon: { fontSize: 36 },
   successTitle: { fontSize: 20, fontWeight: '900', color: '#1f1a14', textTransform: 'uppercase' },
   successBody: { fontSize: 13, color: '#5e5038', lineHeight: 20, textAlign: 'center' },
-  backBtn: { marginTop: 8, backgroundColor: '#1f1a14', paddingVertical: 12, paddingHorizontal: 24, alignSelf: 'stretch', alignItems: 'center' },
+  backBtn: { marginTop: 8, backgroundColor: '#1f1a14', paddingVertical: 12, paddingHorizontal: 24, alignSelf: 'stretch', alignItems: 'center', borderWidth: 2, borderColor: colors.border, ...shadows.bulletin },
   backBtnText: { color: '#fff', fontSize: 11, fontWeight: '800', textTransform: 'uppercase', letterSpacing: 1.2 },
 });
 

@@ -5,7 +5,7 @@ import rateLimit from 'express-rate-limit';
  */
 export const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100,
+  max: process.env.NODE_ENV === 'development' ? 10000 : 2000, // Adjusted for development and campus NAT environments
   standardHeaders: true,
   legacyHeaders: false,
   message: {
@@ -14,8 +14,8 @@ export const apiLimiter = rateLimit({
   },
   // Trust proxy if behind a load balancer
   skip: (req) => {
-    // Skip rate limiting for health checks (used by monitoring)
-    return req.path === '/health';
+    // Skip rate limiting for health checks or local development environment
+    return req.path === '/health' || process.env.NODE_ENV === 'development';
   },
 });
 

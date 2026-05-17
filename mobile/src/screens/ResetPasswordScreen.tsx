@@ -13,7 +13,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { supabase } from '../services/supabase';
-import { colors } from '../theme';
+import { colors, shadows } from '../theme';
 import ScreenHeader from '../components/ScreenHeader';
 
 const ResetPasswordScreen = ({ navigation, route }: any) => {
@@ -185,7 +185,7 @@ const styles = StyleSheet.create({
   inputWrapper: {
     flexDirection: 'row',
     alignItems: 'center',
-    borderWidth: 1,
+    borderWidth: 2,
     borderColor: colors.border,
     backgroundColor: '#fff',
     borderRadius: 0,
@@ -212,6 +212,9 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     alignItems: 'center',
     marginTop: 4,
+    borderWidth: 2,
+    borderColor: colors.border,
+    ...shadows.bulletin,
   },
   btnDisabled: { opacity: 0.5 },
   primaryBtnText: {
@@ -224,10 +227,11 @@ const styles = StyleSheet.create({
   backBtn: {
     paddingVertical: 12,
     alignItems: 'center',
-    borderWidth: 1,
+    borderWidth: 2,
     borderColor: colors.border,
     backgroundColor: colors.surface,
     marginTop: 20,
+    ...shadows.bulletin,
   },
   backBtnText: {
     fontSize: 11,

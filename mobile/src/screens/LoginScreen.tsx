@@ -18,7 +18,7 @@ import * as Linking from "expo-linking";
 import { makeRedirectUri } from "expo-auth-session";
 import { useAuth } from "../context/AuthContext";
 import AppAlert from "../components/AppAlert";
-import { colors } from "../theme";
+import { colors, shadows } from "../theme";
 import { supabase } from "../services/supabase";
 
 WebBrowser.maybeCompleteAuthSession();
@@ -216,10 +216,16 @@ const LoginScreen = ({ navigation }: any) => {
             <Text style={styles.subtitle}>
               Sign in to continue buying and selling on campus.
             </Text>
-            <Image
-              source={require("../../assets/marketillustration1.jpg")}
-              style={styles.heroArt}
-            />
+            <View style={styles.polaroidFrame}>
+              <Image
+                source={require("../../assets/marketillustration1.jpg")}
+                style={styles.heroArt}
+              />
+              <View style={styles.redThumbtack}>
+                <View style={styles.pinReflection} />
+                <View style={styles.pinShadow} />
+              </View>
+            </View>
           </View>
 
           <View style={styles.form}>
@@ -335,122 +341,178 @@ const styles = StyleSheet.create({
     paddingHorizontal: 22,
     paddingVertical: 18,
   },
-  heroWrap: { marginBottom: 18 },
+  heroWrap: { marginBottom: 24, zIndex: 10 },
   eyebrow: {
-    color: "#8f806d",
+    color: colors.accent,
     fontSize: 10,
     textTransform: "uppercase",
     letterSpacing: 2,
-    fontWeight: "800",
+    fontWeight: "900",
   },
   title: {
-    marginTop: 8,
-    color: "#1f1a14",
-    fontSize: 34,
+    marginTop: 6,
+    color: colors.text,
+    fontSize: 32,
     fontWeight: "900",
     textTransform: "uppercase",
+    letterSpacing: -0.5,
   },
-  subtitle: { marginTop: 6, color: "#7b6f61", fontSize: 13, lineHeight: 20 },
+  subtitle: {
+    marginTop: 6,
+    color: colors.muted,
+    fontSize: 13,
+    fontWeight: "700",
+    lineHeight: 20,
+  },
+  polaroidFrame: {
+    marginTop: 20,
+    backgroundColor: "#fff",
+    borderWidth: 2,
+    borderColor: "#000",
+    padding: 8,
+    paddingBottom: 20,
+    transform: [{ rotate: "-1.5deg" }],
+    ...shadows.bulletin,
+    zIndex: 10,
+  },
   heroArt: {
-    marginTop: 14,
     width: "100%",
     height: 160,
-    borderWidth: 1,
-    borderColor: "#ddcfb8",
+    borderWidth: 2,
+    borderColor: "#000",
+  },
+  redThumbtack: {
+    position: "absolute",
+    top: -10,
+    left: "50%",
+    marginLeft: -10,
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    backgroundColor: "#ff6b6b",
+    borderWidth: 2,
+    borderColor: "#000",
+    zIndex: 30,
+  },
+  pinReflection: {
+    position: "absolute",
+    top: 2,
+    left: 2,
+    width: 5,
+    height: 5,
+    borderRadius: 2.5,
+    backgroundColor: "rgba(255,255,255,0.6)",
+  },
+  pinShadow: {
+    position: "absolute",
+    top: "50%",
+    left: "50%",
+    width: 3,
+    height: 3,
+    borderRadius: 1.5,
+    backgroundColor: "#991b1b",
+    transform: [{ translateX: -1.5 }, { translateY: -1.5 }],
   },
   form: {
-    backgroundColor: "#fffdf8",
-    borderWidth: 1,
-    borderColor: "#dccfb8",
+    backgroundColor: colors.surface,
+    borderWidth: 2,
+    borderColor: colors.border,
     padding: 20,
+    ...shadows.bulletin,
   },
-  inputGroup: { marginBottom: 14 },
+  inputGroup: { marginBottom: 16 },
   label: {
     fontSize: 11,
-    fontWeight: "800",
-    color: "#6f6559",
+    fontWeight: "900",
+    color: colors.text,
     marginBottom: 6,
     textTransform: "uppercase",
     letterSpacing: 1.2,
   },
   input: {
-    borderWidth: 1,
-    borderColor: "#ddcfb8",
+    borderWidth: 2,
+    borderColor: colors.border,
     paddingHorizontal: 14,
-    paddingVertical: 12,
-    fontSize: 15,
-    color: "#1f1a14",
+    paddingVertical: 14,
+    fontSize: 14,
+    fontWeight: "600",
+    color: colors.text,
     backgroundColor: "#fff",
+    borderRadius: 0,
   },
   passwordContainer: { position: "relative" },
   passwordInput: { paddingRight: 60 },
-  eyeButton: { position: "absolute", right: 12, top: 13 },
+  eyeButton: { position: "absolute", right: 12, top: 15 },
   eyeText: {
-    color: "#2f5d4f",
-    fontSize: 12,
-    fontWeight: "700",
+    color: colors.accent,
+    fontSize: 11,
+    fontWeight: "900",
     textTransform: "uppercase",
     letterSpacing: 1,
   },
   button: {
-    backgroundColor: "#1f1a14",
-    paddingVertical: 13,
+    backgroundColor: colors.text,
+    paddingVertical: 15,
     alignItems: "center",
     marginTop: 8,
+    borderWidth: 2,
+    borderColor: "#000",
+    ...shadows.bulletin,
   },
   buttonDisabled: { opacity: 0.6 },
   buttonText: {
     color: "#fff",
     fontSize: 12,
-    fontWeight: "800",
+    fontWeight: "900",
     textTransform: "uppercase",
     letterSpacing: 1.4,
   },
   dividerRow: {
     flexDirection: "row",
     alignItems: "center",
-    marginTop: 14,
-    marginBottom: 10,
+    marginTop: 18,
+    marginBottom: 14,
   },
-  divider: { flex: 1, height: 1, backgroundColor: "#ddcfb8" },
+  divider: { flex: 1, height: 2, backgroundColor: colors.border },
   dividerText: {
-    marginHorizontal: 8,
-    color: "#9a8e7f",
+    marginHorizontal: 12,
+    color: colors.text,
     fontSize: 10,
     textTransform: "uppercase",
     letterSpacing: 1.4,
-    fontWeight: "700",
+    fontWeight: "900",
   },
   googleBtn: {
-    borderWidth: 1,
-    borderColor: "#c8b89f",
-    paddingVertical: 12,
+    borderWidth: 2,
+    borderColor: colors.border,
+    paddingVertical: 14,
     alignItems: "center",
     backgroundColor: "#fff",
+    ...shadows.bulletin,
   },
-  googleInner: { flexDirection: "row", alignItems: "center", gap: 8 },
+  googleInner: { flexDirection: "row", alignItems: "center", gap: 10 },
   googleIcon: { width: 16, height: 16 },
   googleBtnText: {
-    color: "#1f1a14",
-    fontSize: 12,
-    fontWeight: "800",
+    color: colors.text,
+    fontSize: 11,
+    fontWeight: "900",
     textTransform: "uppercase",
     letterSpacing: 1.4,
   },
-  footer: { flexDirection: "row", justifyContent: "center", marginTop: 20 },
-  footerText: { fontSize: 13, color: "#7f7467" },
+  footer: { flexDirection: "row", justifyContent: "center", marginTop: 24 },
+  footerText: { fontSize: 12, fontWeight: "700", color: colors.muted },
   link: {
-    fontSize: 13,
-    color: "#2f5d4f",
-    fontWeight: "800",
+    fontSize: 12,
+    color: colors.accent,
+    fontWeight: "900",
     textTransform: "uppercase",
     letterSpacing: 1.1,
   },
-  forgotBtn: { alignItems: "center", paddingVertical: 8 },
+  forgotBtn: { alignItems: "center", paddingVertical: 10 },
   forgotText: {
-    fontSize: 12,
-    color: "#7b6f61",
-    fontWeight: "700",
+    fontSize: 11,
+    color: colors.text,
+    fontWeight: "900",
     textTransform: "uppercase",
     letterSpacing: 1,
   },

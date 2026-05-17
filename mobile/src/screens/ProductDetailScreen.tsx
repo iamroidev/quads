@@ -18,7 +18,7 @@ import savedService from "../services/saved.service";
 import chatService from "../services/chat.service";
 import { Product } from "../types";
 import { useAuth } from "../context/AuthContext";
-import { colors } from "../theme";
+import { colors, shadows } from "../theme";
 
 const ProductDetailScreen = ({ route, navigation }: any) => {
   const { productId } = route.params;
@@ -392,6 +392,7 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
     backgroundColor: "#fff",
     padding: 12,
+    ...shadows.bulletin,
   },
   intelTitle: {
     fontSize: 11,
@@ -446,6 +447,7 @@ const styles = StyleSheet.create({
     borderColor: colors.text,
     alignItems: "center",
     paddingVertical: 13,
+    ...shadows.bulletin,
   },
   primaryActionText: {
     color: "#fff",
@@ -461,6 +463,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     alignItems: "center",
     justifyContent: "center",
+    ...shadows.bulletin,
   },
   secondaryActionText: {
     color: "#463d31",
@@ -475,6 +478,7 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
     backgroundColor: "#fff",
     paddingBottom: 8,
+    ...shadows.bulletin,
   },
   miniImage: { width: "100%", height: 100, backgroundColor: "#e5e7eb" },
   miniTitle: {

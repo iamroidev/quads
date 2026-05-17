@@ -16,7 +16,7 @@ import * as SecureStore from 'expo-secure-store';
 import chatService, { Message } from '../services/chat.service';
 import verificationService from '../services/verification.service';
 import { useAuth } from '../context/AuthContext';
-import { colors } from '../theme';
+import { colors, shadows } from '../theme';
 
 const API_BASE = process.env.EXPO_PUBLIC_API_URL?.replace('/api', '') ?? 'http://localhost:5000';
 

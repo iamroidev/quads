@@ -30,6 +30,8 @@ export interface Order {
   note?: string;
   cancelReason?: string;
   completedAt?: string;
+  handoffCode?: string;
+  handoffStatus?: 'pending' | 'verified';
   createdAt: string;
   updatedAt: string;
 }
