@@ -225,10 +225,10 @@ const Messages: React.FC = () => {
                       <button
                         onClick={(e) => handleDeleteClick(e, conv._id)}
                         disabled={deletingId === conv._id}
-                        className="border border-[var(--bulletin-border)] bg-[var(--bulletin-card)] p-1 text-[9px] font-bold uppercase shadow-[1px_1px_0_0_var(--bulletin-shadow)] opacity-100 md:opacity-0 md:group-hover:opacity-100 hover:bg-[#fce4ec] dark:hover:bg-red-900/20 transition-all"
+                        className="border border-[var(--bulletin-border)] bg-[var(--bulletin-card)] p-1 text-[9px] font-bold uppercase shadow-[1px_1px_0_0_var(--bulletin-shadow)] hover:bg-[#fff0f0] dark:hover:bg-red-950/20 text-red-600 dark:text-red-400 transition-all flex items-center justify-center"
                         title="Delete"
                       >
-                        <Trash2 className="h-3 w-3" />
+                        <Trash2 className="h-3.5 w-3.5" />
                       </button>
                       <ChevronRight className="h-4 w-4 opacity-30" />
                     </div>
