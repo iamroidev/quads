@@ -122,7 +122,7 @@ const TEAM_ROLES: {
 
 const AboutUsPage: React.FC = () => {
   return (
-    <BulletinLayout title="About Us" subtitle="The QUADS Story" section="00">
+    <BulletinLayout title="About" subtitle="My Story" section="00">
 
       {/* ══════════════════════════════════════════════════════
           HERO — "Keep it campus."
@@ -180,7 +180,7 @@ const AboutUsPage: React.FC = () => {
       <BulletinSection
         id="story"
         bgColor="bg-[var(--bulletin-card)]"
-        title="Our Story"
+        title="My Story"
         subtitle="How It Started"
       >
         <div className="grid gap-8 lg:grid-cols-2 items-start">
@@ -200,9 +200,9 @@ const AboutUsPage: React.FC = () => {
                 </span>
               </div>
               <p className="text-sm md:text-base font-bold leading-relaxed opacity-80 text-[var(--bulletin-text)]">
-                We were UMaT students trying to sell a graphics calculator and a barely-used lab coat.
-                Spammy WhatsApp buy-and-sell groups were our only option — and they were a nightmare. Constant spam, flooded chats,
-                no search features, scammers, and zero accountability. We got burned. Our friends got burned.
+                I was a UMaT student trying to sell a graphics calculator and a barely-used lab coat.
+                Spammy WhatsApp buy-and-sell groups were my only option — and they were a nightmare. Constant spam, flooded chats,
+                no search features, scammers, and zero accountability. I got burned. My friends got burned.
                 Everyone had a horror story.
               </p>
             </div>
@@ -215,8 +215,8 @@ const AboutUsPage: React.FC = () => {
                 The Breaking Point
               </div>
               <p className="text-sm md:text-base font-bold leading-relaxed text-black dark:text-red-100 opacity-90">
-                After one too many sketchy WhatsApp DMs from anonymous phone numbers claiming to be &ldquo;interested buyers,&rdquo; a small
-                group of us decided: if no one else will fix this for UMaT students, we will.
+                After one too many sketchy WhatsApp DMs from anonymous phone numbers claiming to be &ldquo;interested buyers,&rdquo;
+                I decided: if no one else will fix this for UMaT students, I will.
               </p>
             </div>
           </div>
@@ -242,7 +242,7 @@ const AboutUsPage: React.FC = () => {
               QUADS was born.
             </h3>
             <p className="text-sm md:text-base font-bold leading-relaxed opacity-80 text-[var(--bulletin-text)] mb-8">
-              We built a marketplace that solves every pain point we experienced.
+              I built a marketplace that solves every pain point I experienced.
               Verified student identity so you always know who you are trading with.
               Escrow payments so nobody gets robbed. Campus-only access so strangers
               from outside can never touch the community. Zero fees because students
@@ -250,7 +250,7 @@ const AboutUsPage: React.FC = () => {
             </p>
             <div className="border-l-4 border-[#ff6b6b] pl-6">
               <p className="text-[13px] font-black italic uppercase tracking-tight text-[var(--bulletin-text)] opacity-70">
-                &ldquo;We didn&rsquo;t build QUADS for the idea. We built it because we needed it.&rdquo;
+                &ldquo;I didn&rsquo;t build QUADS for the idea. I built it because I needed it.&rdquo;
               </p>
             </div>
           </div>
@@ -263,7 +263,7 @@ const AboutUsPage: React.FC = () => {
       <BulletinSection
         id="values"
         bgColor="bg-[var(--bulletin-bg)]"
-        title="What We Stand For"
+        title="What QUADS Stands For"
         subtitle="Core Values"
       >
         <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
@@ -334,7 +334,7 @@ const AboutUsPage: React.FC = () => {
       <BulletinSection
         id="team"
         bgColor="bg-[#f0e8f4] dark:bg-purple-900/10"
-        title="The Team"
+        title="The Developer"
         subtitle="Who Built This"
       >
         <div className="grid gap-8 lg:grid-cols-2 items-start">
