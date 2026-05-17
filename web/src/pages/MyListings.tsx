@@ -283,7 +283,7 @@ const MyListings: React.FC = () => {
   };
 
   return (
-    <BulletinLayout title="My Items" subtitle="Selling" section="04">
+    <BulletinLayout title="My Items" subtitle="Selling" section="04" showFooter={false}>
       {/* Action bar */}
       <div className="border-b border-[var(--bulletin-border)] bg-[var(--bulletin-bg)] p-4 md:p-6">
         <div className="mx-auto max-w-[1400px]">

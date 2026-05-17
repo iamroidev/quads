@@ -111,7 +111,7 @@ const Messages: React.FC = () => {
   }
 
   return (
-    <BulletinLayout title="Messages" subtitle="My Chats" section="07">
+    <BulletinLayout title="Messages" subtitle="My Chats" section="07" showFooter={false}>
       <BulletinSection bgColor="bg-[var(--bulletin-bg)]">
         {/* Search */}
         {conversations.length > 0 && (

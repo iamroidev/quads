@@ -30,6 +30,7 @@ interface BulletinLayoutProps {
   section?: string;
   hideBreadcrumbs?: boolean;
   hideHero?: boolean;
+  showFooter?: boolean;
 }
 
 export const BulletinLayout: React.FC<BulletinLayoutProps> = ({
@@ -39,6 +40,7 @@ export const BulletinLayout: React.FC<BulletinLayoutProps> = ({
   section = '01',
   hideBreadcrumbs = false,
   hideHero = false,
+  showFooter = true,
 }) => {
   const { user, isAuthenticated, logout, switchRole } = useAuth();
   const { totalItems } = useCart();
@@ -310,6 +312,7 @@ export const BulletinLayout: React.FC<BulletinLayoutProps> = ({
         </div>
 
         {/* ── SIMPLIFIED BULLETIN FOOTER ── */}
+        {showFooter && (
         <div className="border-t-4 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] px-6 py-16 md:px-12">
           <div className="mx-auto max-w-[1400px]">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 lg:gap-24 mb-16">
@@ -427,6 +430,7 @@ export const BulletinLayout: React.FC<BulletinLayoutProps> = ({
             </div>
           </div>
         </div>
+        )}
       </div>
     </div>
   );
