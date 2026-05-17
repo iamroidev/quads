@@ -106,7 +106,7 @@ const Checkout: React.FC = () => {
     try {
       // 1. Create the orders
       const res = await orderService.createOrder({
-        items: products.map(p => ({ productId: p._id || p.productId, quantity: p.quantity })),
+        items: products.map(p => ({ productId: p.productId || p._id, quantity: p.quantity })),
         deliveryMethod: form.deliveryMethod,
         couponCode: couponData ? couponData.code : undefined,
         pickupLocation: form.deliveryMethod === 'pickup' ? form.pickupLocation : undefined,
@@ -345,7 +345,7 @@ const Checkout: React.FC = () => {
                           setValidatingCoupon(true);
                           try {
                             // Using first product's seller for now as coupons are seller-specific
-                            const sellerId = products[0].seller?._id || products[0].seller;
+                            const sellerId = products[0].sellerId || products[0].seller?._id || products[0].seller;
                             const res = await orderService.validateCoupon(form.couponCode, sellerId, subtotal);
                             if (res.success) {
                               setCouponData(res.data);
