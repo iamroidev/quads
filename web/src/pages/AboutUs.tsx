@@ -112,10 +112,10 @@ const TEAM_ROLES: {
   icon: React.FC<{ className?: string }>;
   rotate: string;
 }[] = [
-  { role: 'Engineering Lead', detail: 'Backend & infrastructure',  icon: Cpu,    rotate: '-1deg'   },
-  { role: 'Product Design',   detail: 'UI/UX & design system',     icon: Star,   rotate: '1.2deg'  },
-  { role: 'Frontend Dev',     detail: 'React & mobile apps',       icon: Globe,  rotate: '0.5deg'  },
-  { role: 'Operations',       detail: 'Support & campus outreach', icon: MapPin, rotate: '-0.8deg' },
+  { role: 'Full-Stack Eng.',   detail: 'Express, TS, WebSockets & MongoDB', icon: Cpu,    rotate: '-1deg'   },
+  { role: 'UI/UX & Identity',  detail: 'Hardened Neobrutalist Design System', icon: Star,   rotate: '1.2deg'  },
+  { role: 'Mobile App',        detail: 'Native Expo & React Native Client',  icon: Globe,  rotate: '0.5deg'  },
+  { role: 'Operations & Sec',  detail: 'MoMo Escrow, AWS & Supabase Auth',   icon: MapPin, rotate: '-0.8deg' },
 ];
 
 /* ─── page component ─────────────────────────────────────────── */
@@ -346,15 +346,14 @@ const AboutUsPage: React.FC = () => {
           >
             <div className="absolute -top-3 left-16 h-6 w-28 bg-[#ffd700]/50 rotate-[-1.5deg]" />
             <div className="text-[9px] font-black uppercase tracking-[0.35em] opacity-40 mb-4 text-[var(--bulletin-text)]">
-              Who We Are
+              Who Built This
             </div>
             <h3 className="text-3xl md:text-4xl font-black uppercase tracking-tighter leading-none mb-6 text-[var(--bulletin-text)]">
-              A small crew of UMaT engineers &amp; designers.
+              A solo, independent student engineering feat.
             </h3>
             <p className="text-sm font-bold leading-relaxed opacity-70 text-[var(--bulletin-text)] mb-6">
-              We are a tight-knit group of students from the University of Mines and Technology.
-              No venture capital. No external stakeholders. Just students who were frustrated
-              enough to build something that actually works for our campus community.
+              QUADS wasn't built by a massive corporate company or backed by venture capital. It was engineered entirely by a single student developer at the University of Mines and Technology.
+              Frustrated by the chaotic spam, security risks, and scams inside campus WhatsApp buy-and-sell groups, I built, designed, and deployed the entire cross-platform ecosystem to give my fellow students a secure trading experience they can depend on.
             </p>
             <div className="flex items-center gap-3">
               <Package className="h-5 w-5 text-[#ff6b6b]" />
