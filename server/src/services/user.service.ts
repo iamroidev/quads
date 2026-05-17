@@ -122,6 +122,62 @@ class UserService {
     if (!user) throw ApiError.notFound('User not found');
     return user.followersCount || 0;
   }
+
+  /**
+   * Get user's profile and shop stats
+   */
+  async getUserStats(userId: string): Promise<any> {
+    const user = await User.findById(userId);
+    if (!user) throw ApiError.notFound('User not found');
+
+    const Product = mongoose.model('Product');
+    const Order = mongoose.model('Order');
+    const Review = mongoose.model('Review');
+    const Notification = mongoose.model('Notification');
+
+    // 1. Active Listings (seller is userId, status is 'active')
+    const activeListings = await Product.countDocuments({ 
+      seller: userId, 
+      status: 'active' 
+    });
+
+    // 2. Total Orders (buyer is userId)
+    const totalOrders = await Order.countDocuments({ 
+      buyer: userId 
+    });
+
+    // 3. Total Sales (seller is userId, status is 'completed')
+    const totalSales = await Order.countDocuments({ 
+      seller: userId, 
+      status: 'completed' 
+    });
+
+    // 4. Rating & Reviews
+    const userReviews = await Review.find({ seller: userId });
+    const totalReviews = userReviews.length;
+    const rating = totalReviews > 0 
+      ? Number((userReviews.reduce((sum, r: any) => sum + r.rating, 0) / totalReviews).toFixed(1))
+      : 5.0;
+
+    // 5. Unread Notifications
+    const unreadNotifications = await Notification.countDocuments({ 
+      recipient: userId, 
+      read: false 
+    });
+
+    return {
+      stats: {
+        activeListings,
+        totalSales,
+        rating,
+        totalReviews,
+        totalOrders,
+        unreadNotifications,
+        responseTime: 15,
+        responseRate: 100
+      }
+    };
+  }
 }
 
 export default new UserService();

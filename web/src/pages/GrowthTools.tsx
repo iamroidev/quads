@@ -18,6 +18,9 @@ const GrowthTools: React.FC = () => {
   const [newBundleName, setNewBundleName] = useState('');
   const [newBundleDiscount, setNewBundleDiscount] = useState('10');
   const [selectedBundleProductIds, setSelectedBundleProductIds] = useState<string[]>([]);
+  
+  // --- State for QR Code Generator ---
+  const [selectedProduct, setSelectedProduct] = useState<any>(null);
 
   // --- State for Campaigns ---
   const [campaignName, setCampaignName] = useState('');
@@ -127,10 +130,10 @@ const GrowthTools: React.FC = () => {
       <BulletinSection bgColor="bg-[#faf8f5] dark:bg-black/20">
         <div className="max-w-4xl mb-16">
           <div className="text-[10px] font-black uppercase tracking-[0.4em] text-[#ff6b6b] mb-4">Strategic Tools</div>
-          <h1 className="text-4xl md:text-6xl font-black uppercase tracking-tighter leading-none mb-6">
+          <h1 className="text-4xl md:text-6xl font-black uppercase tracking-tighter leading-none mb-6 text-black dark:text-white">
             Scale Your <br />Campus Store.
           </h1>
-          <p className="text-lg font-medium opacity-70 mb-12 max-w-xl leading-relaxed">
+          <p className="text-lg font-medium opacity-70 mb-12 max-w-xl leading-relaxed text-black dark:text-white/80">
             Professional-grade tools designed to help student merchants reach more buyers, build loyalty, and maximize every listing.
           </p>
         </div>
@@ -140,10 +143,10 @@ const GrowthTools: React.FC = () => {
           {/* Tool 1: Campaigns */}
           <div className="flex flex-col gap-8">
             <div className="border-4 border-black bg-white dark:bg-black/40 p-8 shadow-[8px_8px_0_0_#000] relative overflow-hidden group">
-              <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
+              <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity text-black dark:text-white">
                 <Megaphone className="h-24 w-24 rotate-12" />
               </div>
-              <div className="relative z-10">
+              <div className="relative z-10 text-black dark:text-white">
                 <div className="h-12 w-12 border-4 border-black bg-[#fffacd] flex items-center justify-center mb-6 shadow-[4px_4px_0_0_#000]">
                   <Target className="h-6 w-6 text-black" />
                 </div>
@@ -151,15 +154,15 @@ const GrowthTools: React.FC = () => {
                 <p className="text-sm opacity-60 mb-8 leading-tight">Boost your listings to the top of the board for specific time slots.</p>
                 
                 <div className="grid gap-4 bg-black/5 dark:bg-white/5 p-6 border-2 border-black/10">
-                  <input value={campaignName} onChange={(e) => setCampaignName(e.target.value)} placeholder="Campaign Name" className="w-full bg-white dark:bg-black border-2 border-black p-3 text-xs font-black uppercase" />
+                  <input value={campaignName} onChange={(e) => setCampaignName(e.target.value)} placeholder="Campaign Name" className="w-full bg-white dark:bg-black border-2 border-black p-3 text-xs font-black uppercase text-black dark:text-white" />
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-1">
                       <label className="text-[8px] font-black uppercase opacity-40">Starts</label>
-                      <input type="datetime-local" value={campaignStart} onChange={(e) => setCampaignStart(e.target.value)} className="w-full bg-white dark:bg-black border-2 border-black p-2 text-[10px] font-black" />
+                      <input type="datetime-local" value={campaignStart} onChange={(e) => setCampaignStart(e.target.value)} className="w-full bg-white dark:bg-black border-2 border-black p-2 text-[10px] font-black text-black dark:text-white" />
                     </div>
                     <div className="space-y-1">
                       <label className="text-[8px] font-black uppercase opacity-40">Ends</label>
-                      <input type="datetime-local" value={campaignEnd} onChange={(e) => setCampaignEnd(e.target.value)} className="w-full bg-white dark:bg-black border-2 border-black p-2 text-[10px] font-black" />
+                      <input type="datetime-local" value={campaignEnd} onChange={(e) => setCampaignEnd(e.target.value)} className="w-full bg-white dark:bg-black border-2 border-black p-2 text-[10px] font-black text-black dark:text-white" />
                     </div>
                   </div>
                   <button onClick={createCampaign} className="w-full bg-black text-white dark:bg-white dark:text-black py-3 text-[10px] font-black uppercase tracking-widest hover:translate-y-[-2px] transition-transform shadow-[4px_4px_0_0_#ff6b6b]">Schedule Campaign</button>
@@ -168,17 +171,17 @@ const GrowthTools: React.FC = () => {
             </div>
 
             {campaigns.length > 0 && (
-              <div className="border-4 border-black bg-white dark:bg-black/20 p-6 shadow-[4px_4px_0_0_#000]">
+              <div className="border-4 border-black bg-white dark:bg-black/20 p-6 shadow-[4px_4px_0_0_#000] text-black dark:text-white">
                  <div className="text-[10px] font-black uppercase tracking-widest opacity-30 mb-4 flex items-center gap-2"><Clock size={12} /> Active & Scheduled</div>
                  <div className="space-y-3">
                    {campaigns.map((c: any) => (
-                     <div key={c._id} className="border-2 border-black p-4 flex justify-between items-center bg-black/5">
+                      <div key={c._id} className="border-2 border-black p-4 flex justify-between items-center bg-black/5">
                         <div>
                           <div className="text-xs font-black uppercase">{c.name}</div>
                           <div className="text-[9px] font-bold opacity-40 uppercase">{new Date(c.startsAt).toLocaleDateString()} - {new Date(c.endsAt).toLocaleDateString()}</div>
                         </div>
-                        <div className="text-[10px] font-black bg-green-500/20 text-green-700 px-2 py-1 uppercase">Active</div>
-                     </div>
+                        <div className="text-[10px] font-black bg-green-500/20 text-green-700 dark:text-green-300 px-2 py-1 uppercase">Active</div>
+                      </div>
                    ))}
                  </div>
               </div>
@@ -187,8 +190,8 @@ const GrowthTools: React.FC = () => {
 
           {/* Tool 2: Coupons */}
           <div className="flex flex-col gap-8">
-            <div className="border-4 border-black bg-[#fffacd] dark:bg-yellow-900/20 p-8 shadow-[8px_8px_0_0_#000] relative overflow-hidden group">
-              <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
+            <div className="border-4 border-black bg-[#fffacd] dark:bg-yellow-950/20 p-8 shadow-[8px_8px_0_0_#000] relative overflow-hidden group">
+              <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity text-black dark:text-white">
                 <Ticket className="h-24 w-24 rotate-12" />
               </div>
               <div className="relative z-10 text-black dark:text-white">
@@ -199,13 +202,13 @@ const GrowthTools: React.FC = () => {
                 <p className="text-sm opacity-70 mb-8 leading-tight">Create unique codes for your loyal buyers or social media campaigns.</p>
                 
                 <div className="grid gap-4 bg-white/40 dark:bg-black/20 p-6 border-2 border-black/10">
-                  <input value={newCouponCode} onChange={(e) => setNewCouponCode(e.target.value.toUpperCase())} placeholder="COUPON_CODE" className="w-full bg-white dark:bg-black border-2 border-black p-3 text-xs font-black uppercase" />
+                  <input value={newCouponCode} onChange={(e) => setNewCouponCode(e.target.value.toUpperCase())} placeholder="COUPON_CODE" className="w-full bg-white dark:bg-black border-2 border-black p-3 text-xs font-black uppercase text-black dark:text-white" />
                   <div className="grid grid-cols-2 gap-4">
-                    <select value={newCouponType} onChange={(e) => setNewCouponType(e.target.value as any)} className="w-full bg-white dark:bg-black border-2 border-black p-3 text-[10px] font-black">
+                    <select value={newCouponType} onChange={(e) => setNewCouponType(e.target.value as any)} className="w-full bg-white dark:bg-black border-2 border-black p-3 text-[10px] font-black text-black dark:text-white">
                       <option value="percentage">Percent (%)</option>
                       <option value="fixed">Fixed (GHS)</option>
                     </select>
-                    <input type="number" value={newCouponValue} onChange={(e) => setNewCouponValue(e.target.value)} className="w-full bg-white dark:bg-black border-2 border-black p-3 text-xs font-black" />
+                    <input type="number" value={newCouponValue} onChange={(e) => setNewCouponValue(e.target.value)} className="w-full bg-white dark:bg-black border-2 border-black p-3 text-xs font-black text-black dark:text-white" />
                   </div>
                   <button onClick={createCoupon} className="w-full bg-black text-white py-3 text-[10px] font-black uppercase tracking-widest hover:translate-y-[-2px] transition-transform shadow-[4px_4px_0_0_#000]">Create Coupon</button>
                 </div>
@@ -213,7 +216,7 @@ const GrowthTools: React.FC = () => {
             </div>
 
             {coupons.length > 0 && (
-              <div className="border-4 border-black bg-[#fffacd] dark:bg-yellow-900/10 p-6 shadow-[4px_4px_0_0_#000]">
+              <div className="border-4 border-black bg-[#fffacd] dark:bg-yellow-950/10 p-6 shadow-[4px_4px_0_0_#000] text-black dark:text-white">
                  <div className="text-[10px] font-black uppercase tracking-widest opacity-30 mb-4">Your Active Codes</div>
                  <div className="grid grid-cols-2 gap-3">
                    {coupons.map((c: any) => (
@@ -227,10 +230,70 @@ const GrowthTools: React.FC = () => {
             )}
           </div>
 
-          {/* Tool 3: Bundles */}
+          {/* Tool 3: QR Code Flyer Generator */}
           <div className="lg:col-span-2 flex flex-col gap-8">
-            <div className="border-4 border-black bg-[#e0f2f7] dark:bg-sky-900/20 p-8 shadow-[8px_8px_0_0_#000] relative overflow-hidden group">
-              <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
+            <div className="border-4 border-black bg-[#e0f2f7] dark:bg-sky-950/20 p-8 shadow-[8px_8px_0_0_#000] relative overflow-hidden group">
+              <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity text-black dark:text-white">
+                <Package className="h-24 w-24 rotate-12" />
+              </div>
+              <div className="relative z-10 text-black dark:text-white">
+                <div className="h-12 w-12 border-4 border-black bg-white flex items-center justify-center mb-6 shadow-[4px_4px_0_0_#000]">
+                  <TrendingUp className="h-6 w-6 text-black" />
+                </div>
+                <h3 className="text-2xl font-black uppercase tracking-tight mb-3">Polaroid Flyer Generator</h3>
+                <p className="text-sm opacity-70 mb-8 leading-tight">Generate printable flyers with QR codes for physical bulletin boards.</p>
+                
+                <div className="grid md:grid-cols-2 gap-8 bg-white/40 dark:bg-black/20 p-6 border-2 border-black/10">
+                  <div className="space-y-4">
+                    <label className="text-[10px] font-black uppercase opacity-40">1. Select Product for Flyer</label>
+                    <div className="h-64 overflow-y-auto border-2 border-black bg-white dark:bg-black p-4 space-y-2">
+                      {listings.length > 0 ? (
+                        listings.map((p: any) => (
+                          <label key={p._id} className="flex items-center gap-3 p-2 hover:bg-black/5 cursor-pointer border border-transparent hover:border-black">
+                            <input 
+                              type="radio" 
+                              name="flyerProduct"
+                              checked={selectedProduct?._id === p._id}
+                              onChange={() => setSelectedProduct(p)}
+                              className="h-4 w-4 accent-black" 
+                            />
+                            <div className="min-w-0">
+                              <div className="text-[10px] font-black uppercase truncate">{p.title}</div>
+                              <div className="text-[9px] opacity-40">GHS {p.price}</div>
+                            </div>
+                          </label>
+                        ))
+                      ) : (
+                        <div className="text-[10px] font-bold opacity-45 py-4 text-center">No active listings to promote.</div>
+                      )}
+                    </div>
+                  </div>
+                  
+                  <div className="flex flex-col justify-center">
+                    {selectedProduct ? (
+                      <div className="space-y-4">
+                        <div className="text-[10px] font-black uppercase opacity-40">2. Generate Polaroid Flyer</div>
+                        <QRCodeGenerator 
+                          productUrl={`https://quadsmarket.tech/products/${selectedProduct._id}`}
+                          productTitle={selectedProduct.title}
+                          onGenerate={() => toast.success('QR flyer generated!')}
+                        />
+                      </div>
+                    ) : (
+                      <div className="text-center py-8 border-2 border-dashed border-black/20">
+                        <p className="text-[11px] font-black uppercase opacity-40">Select a product on the left to load the flyer generator</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Tool 4: Dynamic Bundles */}
+          <div className="lg:col-span-2 flex flex-col gap-8">
+            <div className="border-4 border-black bg-white dark:bg-black/40 p-8 shadow-[8px_8px_0_0_#000] relative overflow-hidden group">
+              <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity text-black dark:text-white">
                 <Package className="h-24 w-24 rotate-12" />
               </div>
               <div className="relative z-10 text-black dark:text-white">
@@ -242,31 +305,37 @@ const GrowthTools: React.FC = () => {
                 
                 <div className="grid md:grid-cols-2 gap-8 bg-white/40 dark:bg-black/20 p-8 border-2 border-black/10">
                   <div className="space-y-4">
-                    <input value={newBundleName} onChange={(e) => setNewBundleName(e.target.value)} placeholder="Bundle Name (e.g. Starter Pack)" className="w-full bg-white dark:bg-black border-2 border-black p-3 text-xs font-black uppercase" />
-                    <input type="number" value={newBundleDiscount} onChange={(e) => setNewBundleDiscount(e.target.value)} placeholder="Bundle Discount %" className="w-full bg-white dark:bg-black border-2 border-black p-3 text-xs font-black" />
+                    <input value={newBundleName} onChange={(e) => setNewBundleName(e.target.value)} placeholder="Bundle Name (e.g. Starter Pack)" className="w-full bg-white dark:bg-black border-2 border-black p-3 text-xs font-black uppercase text-black dark:text-white" />
+                    <input type="number" value={newBundleDiscount} onChange={(e) => setNewBundleDiscount(e.target.value)} placeholder="Bundle Discount %" className="w-full bg-white dark:bg-black border-2 border-black p-3 text-xs font-black text-black dark:text-white" />
                     <button onClick={createBundle} className="w-full bg-black text-white py-4 text-[10px] font-black uppercase tracking-widest hover:translate-y-[-2px] transition-transform shadow-[4px_4px_0_0_#000]">Create Active Bundle</button>
                   </div>
                   <div className="space-y-2">
-                    <label className="text-[10px] font-black uppercase opacity-40">Select Products (Min 2)</label>
+                    <label className="text-[10px] font-black uppercase opacity-40 text-black dark:text-white">Select Products (Min 2)</label>
                     <div className="h-48 overflow-y-auto border-2 border-black bg-white dark:bg-black p-4 space-y-2">
-                      {listings.map((p: any) => (
-                        <label key={p._id} className="flex items-center gap-3 p-2 hover:bg-black/5 cursor-pointer border border-transparent hover:border-black">
-                          <input 
-                            type="checkbox" 
-                            checked={selectedBundleProductIds.includes(p._id)}
-                            onChange={() => {
-                              setSelectedBundleProductIds(prev => 
-                                prev.includes(p._id) ? prev.filter(id => id !== p._id) : [...prev, p._id]
-                              )
-                            }}
-                            className="h-4 w-4 accent-black" 
-                          />
-                          <div className="min-w-0">
-                            <div className="text-[10px] font-black uppercase truncate">{p.title}</div>
-                            <div className="text-[9px] opacity-40">GHS {p.price}</div>
-                          </div>
-                        </label>
-                      ))}
+                      {listings.length > 0 ? (
+                        listings.map((p: any) => (
+                          <label key={p._id} className="flex items-center gap-3 p-2 hover:bg-black/5 cursor-pointer border border-transparent hover:border-black text-black dark:text-white">
+                            <input 
+                              type="checkbox" 
+                              checked={selectedBundleProductIds.includes(p._id)}
+                              onChange={(e) => {
+                                if (e.target.checked) {
+                                  setSelectedBundleProductIds([...selectedBundleProductIds, p._id]);
+                                } else {
+                                  setSelectedBundleProductIds(selectedBundleProductIds.filter(id => id !== p._id));
+                                }
+                              }}
+                              className="h-4 w-4 accent-black" 
+                            />
+                            <div className="min-w-0">
+                              <div className="text-[10px] font-black uppercase truncate">{p.title}</div>
+                              <div className="text-[9px] opacity-40">GHS {p.price}</div>
+                            </div>
+                          </label>
+                        ))
+                      ) : (
+                        <div className="text-[10px] font-bold opacity-45 py-4 text-center text-black dark:text-white">No active listings to bundle.</div>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -274,7 +343,7 @@ const GrowthTools: React.FC = () => {
             </div>
 
             {bundles.length > 0 && (
-              <div className="grid md:grid-cols-3 gap-6">
+              <div className="grid md:grid-cols-3 gap-6 text-black dark:text-white">
                  {bundles.map((b: any) => (
                    <div key={b._id} className="border-4 border-black bg-white dark:bg-black/20 p-6 shadow-[4px_4px_0_0_#000]">
                       <div className="text-lg font-black uppercase tracking-tight mb-1">{b.name}</div>
@@ -290,6 +359,7 @@ const GrowthTools: React.FC = () => {
               </div>
             )}
           </div>
+
         </div>
       </BulletinSection>
     </BulletinLayout>
