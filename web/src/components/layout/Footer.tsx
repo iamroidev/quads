@@ -185,6 +185,7 @@ const Footer: React.FC = () => {
                 Engineered by an independent student developer &middot; UMaT, Tarkwa 🇬🇭
               </p>
             </div>
+        </div>
       </div>
     </footer>
   );
