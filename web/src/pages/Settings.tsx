@@ -169,7 +169,7 @@ const SettingsPage: React.FC = () => {
   const fieldBase = 'w-full border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-bg)] p-3 text-[12px] font-black focus:outline-none focus:ring-2 focus:ring-[var(--bulletin-text)] text-[var(--bulletin-text)] placeholder:text-[var(--bulletin-text)] placeholder:opacity-30';
 
   return (
-    <BulletinLayout subtitle="Settings" section="10" hideBreadcrumbs={true}>
+    <BulletinLayout subtitle="Settings" section="10" hideBreadcrumbs={true} showFooter={false}>
       <div className="border-b-4 border-[var(--bulletin-border)] bg-[#111] dark:bg-[#1a1a1a]">
         <div className="mx-auto max-w-[1400px] px-6 py-12">
           <div className="flex items-end justify-between">

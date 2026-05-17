@@ -116,7 +116,7 @@ const Dashboard: React.FC = () => {
   /* ── Seller View ── */
   if (isSeller && viewMode === 'seller') {
     return (
-      <BulletinLayout title={`My Shop: ${user?.name}`} subtitle="Seller Dashboard" section="01">
+      <BulletinLayout title={`My Shop: ${user?.name}`} subtitle="Seller Dashboard" section="01" showFooter={false}>
         {/* Seller Navigation */}
         <div className="border-b border-black dark:border-white/20 bg-black px-6 py-3 flex justify-between items-center">
           <div className="flex gap-4">
