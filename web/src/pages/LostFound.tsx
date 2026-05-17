@@ -55,11 +55,17 @@ export const LostFound: React.FC = () => {
   // State
   const [items, setItems] = useState<PolaroidItem[]>(() => {
     const cached = localStorage.getItem('quads_lost_found');
-    return cached ? JSON.parse(cached) : initialItems;
+    if (cached) {
+      const parsed = JSON.parse(cached) as PolaroidItem[];
+      // Filter out any legacy dummy/mock items that have simple short IDs (e.g. 'lf-1', 'lf-2')
+      return parsed.filter(item => item.id && item.id.length > 8);
+    }
+    return initialItems;
   });
   const [filter, setFilter] = useState<'all' | 'lost' | 'found'>('all');
   const [activeItem, setActiveItem] = useState<PolaroidItem | null>(null);
   const [chatting, setChatting] = useState(false);
+  const [itemToConfirmDelete, setItemToConfirmDelete] = useState<string | null>(null);
   
   // Modal forms
   const [showAddModal, setShowAddModal] = useState(false);
@@ -195,10 +201,19 @@ export const LostFound: React.FC = () => {
   const handleDeleteItem = (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
     soundEffects.playPinClick();
-    if (window.confirm('Remove this pin from the corkboard?')) {
-      setItems(items.filter(item => item.id !== id));
-      toast.success('Pin removed');
+    
+    // Find item to verify permissions (extra safety)
+    const item = items.find(i => i.id === id);
+    if (!item) return;
+    
+    const isOwner = item.userId === user?._id;
+    const isAdmin = user?.roles?.includes('admin');
+    if (!isOwner && !isAdmin) {
+      toast.error('You do not have permission to unpin this item');
+      return;
     }
+    
+    setItemToConfirmDelete(id);
   };
 
   const filteredItems = items.filter(item => {
@@ -305,6 +320,11 @@ export const LostFound: React.FC = () => {
           <button
             onClick={() => {
               soundEffects.playPinClick();
+              if (!isAuthenticated) {
+                toast.error('Please log in to pin a Polaroid');
+                navigate('/login');
+                return;
+              }
               setShowAddModal(true);
             }}
             className="flex items-center gap-2 border-4 border-[var(--bulletin-border)] bg-[var(--bulletin-text)] text-[var(--bulletin-bg)] px-6 py-4 text-[11px] font-black uppercase tracking-widest shadow-[6px_6px_0_0_var(--bulletin-shadow)] hover:translate-y-0.5 hover:shadow-[4px_4px_0_0_var(--bulletin-shadow)] transition-all flex-shrink-0"
@@ -415,8 +435,8 @@ export const LostFound: React.FC = () => {
                         </span>
                       </div>
 
-                      {/* User's Delete button (if authenticated and is owner) */}
-                      {isAuthenticated && (
+                      {/* User's Delete button (if authenticated and is owner or admin) */}
+                      {isAuthenticated && (item.userId === user?._id || user?.roles?.includes('admin')) && (
                         <button
                           onClick={(e) => handleDeleteItem(item.id, e)}
                           className="mt-3 opacity-0 group-hover:opacity-100 transition-opacity bg-red-100 dark:bg-red-950/40 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-900/50 hover:bg-red-600 hover:text-white px-2 py-1 text-[8px] font-black uppercase font-mono tracking-widest rounded"
@@ -710,6 +730,36 @@ export const LostFound: React.FC = () => {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+      {/* ── CUSTOM CONFIRM MODAL ── */}
+      {itemToConfirmDelete && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+          <div className="border-4 border-black dark:border-[var(--bulletin-border)] bg-[var(--bulletin-card)] shadow-[16px_16px_0_0_var(--bulletin-shadow)] max-w-sm w-full p-8 animate-in zoom-in-95 duration-200">
+            <h3 className="text-xl font-black uppercase tracking-tight text-[var(--bulletin-text)] mb-3">Unpin Polaroid?</h3>
+            <p className="text-xs font-bold text-[var(--bulletin-text)] opacity-60 mb-6 font-mono leading-relaxed">
+              Are you sure you want to permanently remove this polaroid pin from the UMaT campus corkboard?
+            </p>
+            <div className="flex gap-4">
+              <button
+                className="flex-1 border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] py-3 text-[10px] font-black uppercase tracking-widest shadow-[4px_4px_0_0_var(--bulletin-shadow)] hover:translate-y-0.5 hover:shadow-none transition-all text-[var(--bulletin-text)]"
+                onClick={() => setItemToConfirmDelete(null)}
+              >
+                Discard
+              </button>
+              <button
+                className="flex-1 border-2 border-black dark:border-white bg-[#ff6b6b] text-white py-3 text-[10px] font-black uppercase tracking-widest shadow-[4px_4px_0_0_var(--bulletin-shadow)] hover:translate-y-0.5 hover:shadow-none transition-all"
+                onClick={() => {
+                  soundEffects.playPinClick();
+                  setItems(items.filter(item => item.id !== itemToConfirmDelete));
+                  toast.success('Pin removed');
+                  setItemToConfirmDelete(null);
+                }}
+              >
+                Yes, Unpin
+              </button>
+            </div>
           </div>
         </div>
       )}
