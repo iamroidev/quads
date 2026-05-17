@@ -79,6 +79,21 @@ describe('Input Validation Middleware', () => {
       expect(mockReq.body.tags[1]).toBe('good');
     });
 
+
+    it('should preserve non-string primitive values', () => {
+      mockReq.body = {
+        quantity: 3,
+        published: true,
+        metadata: null,
+      };
+
+      sanitizeInput(mockReq as Request, mockRes as Response, nextFunction);
+
+      expect(mockReq.body.quantity).toBe(3);
+      expect(mockReq.body.published).toBe(true);
+      expect(mockReq.body.metadata).toBeNull();
+    });
+
     it('should handle query and params', () => {
       mockReq.query = { search: '<img src=x>' };
       mockReq.params = { id: 'javascript:evil' };

@@ -1,10 +1,12 @@
 import OrderService from '../services/order.service';
 import Order from '../models/Order';
 import notificationService from '../services/notification.service';
+import Product from '../models/Product';
 import ApiError from '../utils/ApiError';
 
 jest.mock('../models/Order');
 jest.mock('../services/notification.service');
+jest.mock('../models/Product');
 
 describe('OrderService - Secure Escrow QR Handoff Engine', () => {
   let mockOrder: any;
@@ -17,12 +19,12 @@ describe('OrderService - Secure Escrow QR Handoff Engine', () => {
       _id: 'order-123',
       orderNumber: 'Q-998877',
       buyer: {
-        _id: 'buyer-user-id',
-        toString: () => 'buyer-user-id',
+        _id: '507f1f77bcf86cd799439011',
+        toString: () => '507f1f77bcf86cd799439011',
       },
       seller: {
         _id: 'seller-id',
-        ownerId: 'seller-owner-id',
+        ownerId: '507f1f77bcf86cd799439012',
         name: 'UMaT Gadgets',
         toString: () => 'seller-id',
       },
@@ -63,11 +65,11 @@ describe('OrderService - Secure Escrow QR Handoff Engine', () => {
       (Order.findById as jest.Mock).mockReturnValue(null);
 
       await expect(
-        OrderService.verifyHandoff('non-existent', 'buyer-user-id', '776655')
+        OrderService.verifyHandoff('non-existent', '507f1f77bcf86cd799439011', '776655')
       ).rejects.toThrow(ApiError);
       
       try {
-        await OrderService.verifyHandoff('non-existent', 'buyer-user-id', '776655');
+        await OrderService.verifyHandoff('non-existent', '507f1f77bcf86cd799439011', '776655');
       } catch (err: any) {
         expect(err.statusCode).toBe(404);
         expect(err.message).toBe('Order not found');
@@ -94,11 +96,11 @@ describe('OrderService - Secure Escrow QR Handoff Engine', () => {
       (Order.findById as jest.Mock).mockReturnValue(mockOrder);
 
       await expect(
-        OrderService.verifyHandoff('order-123', 'buyer-user-id', '776655')
+        OrderService.verifyHandoff('order-123', '507f1f77bcf86cd799439011', '776655')
       ).rejects.toThrow(ApiError);
 
       try {
-        await OrderService.verifyHandoff('order-123', 'buyer-user-id', '776655');
+        await OrderService.verifyHandoff('order-123', '507f1f77bcf86cd799439011', '776655');
       } catch (err: any) {
         expect(err.statusCode).toBe(400);
         expect(err.message).toBe('This order is not for pickup');
@@ -109,11 +111,11 @@ describe('OrderService - Secure Escrow QR Handoff Engine', () => {
       (Order.findById as jest.Mock).mockReturnValue(mockOrder);
 
       await expect(
-        OrderService.verifyHandoff('order-123', 'buyer-user-id', 'wrong-code')
+        OrderService.verifyHandoff('order-123', '507f1f77bcf86cd799439011', 'wrong-code')
       ).rejects.toThrow(ApiError);
 
       try {
-        await OrderService.verifyHandoff('order-123', 'buyer-user-id', 'wrong-code');
+        await OrderService.verifyHandoff('order-123', '507f1f77bcf86cd799439011', 'wrong-code');
       } catch (err: any) {
         expect(err.statusCode).toBe(400);
         expect(err.message).toBe('Invalid handoff code');
@@ -123,7 +125,7 @@ describe('OrderService - Secure Escrow QR Handoff Engine', () => {
     it('should successfully release escrow funds, mark completed, and trigger seller notifications', async () => {
       (Order.findById as jest.Mock).mockReturnValue(mockOrder);
 
-      const result = await OrderService.verifyHandoff('order-123', 'buyer-user-id', '776655');
+      const result = await OrderService.verifyHandoff('order-123', '507f1f77bcf86cd799439011', '776655');
 
       expect(mockOrder.handoffStatus).toBe('verified');
       expect(mockOrder.status).toBe('completed');
@@ -131,7 +133,7 @@ describe('OrderService - Secure Escrow QR Handoff Engine', () => {
       expect(mockOrder.save).toHaveBeenCalled();
       
       expect(notificationService.create).toHaveBeenCalledWith(
-        'seller-owner-id',
+        '507f1f77bcf86cd799439012',
         'handoff_verified',
         'Order Completed! 💰',
         expect.stringContaining('verified'),
@@ -141,12 +143,106 @@ describe('OrderService - Secure Escrow QR Handoff Engine', () => {
     });
   });
 
+
+
+  describe('updateOrderStatus controls', () => {
+    it('should throw 403 when non-seller attempts status update', async () => {
+      (Order.findById as jest.Mock).mockReturnValue(mockOrder);
+
+      await expect(
+        OrderService.updateOrderStatus('order-123', 'intruder-user', 'confirmed')
+      ).rejects.toMatchObject({
+        statusCode: 403,
+        message: 'Only the seller can update order status',
+      });
+    });
+
+    it('should throw 400 for invalid status transition', async () => {
+      mockOrder.status = 'paid';
+      (Order.findById as jest.Mock).mockReturnValue(mockOrder);
+
+      await expect(
+        OrderService.updateOrderStatus('order-123', '507f1f77bcf86cd799439012', 'ready')
+      ).rejects.toMatchObject({
+        statusCode: 400,
+        message: expect.stringContaining('Cannot transition from "paid" to "ready"'),
+      });
+    });
+
+    it('should allow seller to cancel and restore product listing status', async () => {
+      mockOrder.status = 'paid';
+      mockOrder.items = [
+        { product: 'prod-88', title: 'UMaT Hoodie', quantity: 1 },
+        { product: 'prod-99', title: 'UMaT Cap', quantity: 1 },
+      ];
+      (Order.findById as jest.Mock).mockReturnValue(mockOrder);
+      (Product.findByIdAndUpdate as jest.Mock).mockResolvedValue(null);
+
+      await OrderService.updateOrderStatus('order-123', '507f1f77bcf86cd799439012', 'cancelled');
+
+      expect(mockOrder.status).toBe('cancelled');
+      expect(mockOrder.cancelledBy).toBeDefined();
+      expect(Product.findByIdAndUpdate).toHaveBeenCalledWith('prod-88', { status: 'active' });
+      expect(Product.findByIdAndUpdate).toHaveBeenCalledWith('prod-99', { status: 'active' });
+      expect(mockOrder.save).toHaveBeenCalled();
+    });
+  });
+
+  describe('cancelOrder flow', () => {
+    it('should throw 403 for unrelated users', async () => {
+      (Order.findById as jest.Mock).mockReturnValue(mockOrder);
+
+      await expect(
+        OrderService.cancelOrder('order-123', 'random-user')
+      ).rejects.toMatchObject({
+        statusCode: 403,
+        message: 'You do not have access to this order',
+      });
+    });
+
+    it('should reject seller cancellation for non-cancellable statuses', async () => {
+      mockOrder.status = 'pending';
+      (Order.findById as jest.Mock).mockReturnValue(mockOrder);
+
+      await expect(
+        OrderService.cancelOrder('order-123', '507f1f77bcf86cd799439012')
+      ).rejects.toMatchObject({
+        statusCode: 400,
+        message: 'This order can no longer be cancelled',
+      });
+    });
+
+    it('should allow buyer cancellation and apply default reason when missing', async () => {
+      mockOrder.status = 'paid';
+      (Order.findById as jest.Mock).mockReturnValue(mockOrder);
+      (Product.findByIdAndUpdate as jest.Mock).mockResolvedValue(null);
+
+      await OrderService.cancelOrder('order-123', '507f1f77bcf86cd799439011');
+
+      expect(mockOrder.status).toBe('cancelled');
+      expect(mockOrder.cancelReason).toBe('No reason provided');
+      expect(mockOrder.cancelledBy).toBeDefined();
+      expect(Product.findByIdAndUpdate).toHaveBeenCalledWith('prod-88', { status: 'active' });
+      expect(mockOrder.save).toHaveBeenCalled();
+    });
+  });
+
+  describe('getOrderById access variants', () => {
+    it('should preserve handoff code for admin users', async () => {
+      (Order.findById as jest.Mock).mockReturnValue(mockOrder);
+
+      const result = await OrderService.getOrderById('order-123', '507f1f77bcf86cd799439011', true);
+
+      expect(result.handoffCode).toBe('776655');
+    });
+  });
+
   describe('getOrderById Secure Privacy Controls', () => {
     it('should hide the secure handoff code from the buyer to prevent escrow cheating', async () => {
       (Order.findById as jest.Mock).mockReturnValue(mockOrder);
 
       // Act: Get order as buyer
-      const result = await OrderService.getOrderById('order-123', 'buyer-user-id');
+      const result = await OrderService.getOrderById('order-123', '507f1f77bcf86cd799439011');
 
       // Assert: handoffCode is completely stripped
       expect(result.handoffCode).toBeUndefined();
@@ -156,7 +252,7 @@ describe('OrderService - Secure Escrow QR Handoff Engine', () => {
       (Order.findById as jest.Mock).mockReturnValue(mockOrder);
 
       // Act: Get order as seller (ownerId)
-      const result = await OrderService.getOrderById('order-123', 'seller-owner-id');
+      const result = await OrderService.getOrderById('order-123', '507f1f77bcf86cd799439012');
 
       // Assert: handoffCode is preserved for the seller
       expect(result.handoffCode).toBe('776655');
