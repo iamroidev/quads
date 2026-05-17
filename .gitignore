@@ -61,3 +61,4 @@ mobile/ios/
 .env.development.local
 .env.test
 .env.test.local
+.env*.local

@@ -113,14 +113,14 @@ export const BulletinLayout: React.FC<BulletinLayoutProps> = ({
       {/* Main Container */}
       <div className="pt-[42px]">
         {/* Bulletin-Style Top Nav */}
-        <nav className="border-b-2 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] px-6 py-4 md:px-12 relative z-[900]">
+        <nav className="border-b-2 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] px-3 py-4 sm:px-6 md:px-12 relative z-[900]">
           <div className="mx-auto flex max-w-[1400px] items-center justify-between">
-            <Link to="/" className="flex items-center gap-3 group">
+            <Link to="/" className="flex items-center gap-2 sm:gap-3 group">
               <BrandMark className="h-8 w-8 transition-transform group-hover:scale-110" />
               <span className="hidden md:block text-sm font-black uppercase tracking-widest text-[var(--bulletin-text)]">QUADS</span>
             </Link>
 
-            <div className="flex items-center gap-8">
+            <div className="flex items-center gap-2 sm:gap-6 md:gap-8">
               <div className="hidden lg:flex items-center gap-6 text-[10px] font-black uppercase tracking-widest">
                 {user?.viewMode === 'seller' ? (
                   <>

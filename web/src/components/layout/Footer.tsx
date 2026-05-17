@@ -13,11 +13,11 @@ const Footer: React.FC = () => {
   if (!isHomeLanding) {
     return (
       <footer className="border-t border-earth-100 bg-white">
-        <div className="mx-auto flex max-w-7xl flex-col gap-2 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-8">
+        <div className="mx-auto flex max-w-7xl flex-col gap-4 px-4 py-6 sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-8 text-center sm:text-left">
           <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-earth-400">
             QUADS &copy; {year}
           </p>
-          <div className="flex items-center gap-5">
+          <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-3">
             <Link to="/products" className="text-[10px] font-bold uppercase tracking-[0.15em] text-earth-400 hover:text-earth-900 transition-colors">
               Browse
             </Link>
@@ -62,10 +62,10 @@ const Footer: React.FC = () => {
 
           {/* Statement */}
           <div>
-            <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-white/25 mb-5">
+            <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-white/25 mb-5 text-center lg:text-left">
               QUADS
             </p>
-            <h2 className="text-[clamp(2.5rem,6vw,5rem)] font-black leading-[0.9] tracking-[-0.04em] text-white">
+            <h2 className="text-[clamp(2.5rem,6vw,5rem)] font-black leading-[0.9] tracking-[-0.04em] text-white text-center lg:text-left">
               Buy it.<br />
               Sell it.<br />
               <span className="text-white/20">Keep it campus.</span>
@@ -73,7 +73,7 @@ const Footer: React.FC = () => {
           </div>
 
           {/* Link columns */}
-          <div className="grid grid-cols-2 gap-x-16 gap-y-8 sm:grid-cols-3 lg:gap-x-20">
+          <div className="grid grid-cols-2 gap-x-12 gap-y-8 sm:grid-cols-3 lg:gap-x-20">
             <div>
               <p className="mb-4 text-[9px] font-bold uppercase tracking-[0.28em] text-white/25">
                 Marketplace
@@ -116,7 +116,7 @@ const Footer: React.FC = () => {
               </ul>
             </div>
 
-            <div>
+            <div className="col-span-2 sm:col-span-1">
               <p className="mb-4 text-[9px] font-bold uppercase tracking-[0.28em] text-white/25">
                 Support
               </p>
@@ -141,18 +141,18 @@ const Footer: React.FC = () => {
 
       {/* Bottom rule + legal */}
       <div className="border-t border-white/[0.08]">
-        <div className="mx-auto flex max-w-7xl flex-col gap-3 px-4 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-8">
+        <div className="mx-auto flex max-w-7xl flex-col gap-4 px-4 py-6 sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-8 text-center sm:text-left">
           <p className="text-[10px] text-white/25">
             &copy; {year} QUADS. All rights reserved.
           </p>
-          <div className="flex items-center gap-6">
+          <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-3">
             <Link to="/terms#privacy" className="text-[10px] text-white/25 hover:text-white transition-colors">
               Privacy Policy
             </Link>
             <Link to="/terms" className="text-[10px] text-white/25 hover:text-white transition-colors">
               Terms of Service
             </Link>
-            <p className="text-[10px] text-white/15">
+            <p className="text-[10px] text-white/15 w-full sm:w-auto mt-1 sm:mt-0">
               Built for students, by students.
             </p>
           </div>
