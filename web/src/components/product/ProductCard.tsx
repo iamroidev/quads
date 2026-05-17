@@ -141,6 +141,22 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onSavedChange }) => 
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-0.5 w-0.5 md:h-1 md:w-1 rounded-full bg-red-800" />
         </div>
 
+        {/* ── Visual Stamp Overlay ── */}
+        {(product.status === 'sold' || product.status === 'reserved') && (
+          <div className="absolute inset-0 flex items-center justify-center z-20 pointer-events-none overflow-hidden" style={{ clipPath: 'inset(0 0 0 0)' }}>
+            {product.status === 'sold' && (
+              <div className="border-4 border-black bg-red-600 text-white px-6 py-1 md:py-2 text-2xl md:text-3xl font-black uppercase tracking-[0.2em] transform -rotate-12 shadow-[4px_4px_0_0_black]">
+                SOLD
+              </div>
+            )}
+            {product.status === 'reserved' && (
+              <div className="border-4 border-black bg-yellow-400 text-black px-6 py-1 md:py-2 text-xl md:text-2xl font-black uppercase tracking-[0.2em] transform -rotate-12 shadow-[4px_4px_0_0_black]">
+                PENDING
+              </div>
+            )}
+          </div>
+        )}
+
         {/* ── Image ── */}
         <div className="relative aspect-[4/3] overflow-hidden bg-earth-100 border-2 md:border-4 border-black dark:border-white shadow-[1px_1px_0_0_rgba(0,0,0,0.15)] flex-shrink-0">
           <img

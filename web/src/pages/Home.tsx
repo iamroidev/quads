@@ -68,9 +68,9 @@ const HomePage: React.FC = () => {
       <BulletinSection bgColor="bg-[var(--bulletin-bg)]" className="pt-4 md:pt-12 overflow-hidden">
         <div className="min-h-auto lg:min-h-[700px] w-full relative">
           <div className="absolute inset-0 border-4 border-[var(--bulletin-border)] bg-[#1a1a1a] dark:bg-[#0a0a0a] shadow-[16px_16px_0_0_var(--bulletin-shadow)]" />
-          
+
           <div className="relative z-20 flex flex-col lg:flex-row lg:items-start gap-6 lg:gap-0 p-4 md:p-8 lg:p-12">
-            <div 
+            <div
               className="w-full lg:w-auto lg:max-w-2xl border-4 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] p-6 md:p-10 lg:p-16 shadow-[8px_8px_0_0_var(--bulletin-shadow)] lg:shadow-[12px_12px_0_0_var(--bulletin-shadow)] transition-transform hover:scale-[1.01] lg:ml-8 lg:mt-8"
               style={{ transform: 'rotate(-1.5deg)' }}
             >
@@ -92,7 +92,7 @@ const HomePage: React.FC = () => {
             </div>
 
             {!isAuthenticated && (
-              <div 
+              <div
                 className="w-full lg:w-auto lg:absolute lg:left-[50%] lg:top-12 border-4 border-[var(--bulletin-border)] bg-[var(--bulletin-notice-bg)] p-6 md:p-8 shadow-[8px_8px_0_0_var(--bulletin-shadow)] lg:max-w-[280px]"
                 style={{ transform: 'rotate(3deg)' }}
               >
@@ -151,9 +151,9 @@ const HomePage: React.FC = () => {
       </BulletinSection>
 
       {/* ── Campus Pulse ── */}
-      <BulletinSection 
-        title="Recent Activity" 
-        subtitle="Discovery" 
+      <BulletinSection
+        title="Recent Activity"
+        subtitle="Discovery"
         bgColor="bg-[var(--bulletin-bg)] border-t-4 border-[var(--bulletin-border)]"
       >
         <PulseFeed />

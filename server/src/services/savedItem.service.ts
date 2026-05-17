@@ -155,7 +155,12 @@ class SavedItemService {
     );
 
     // Calculate price changes
-    const priceChanges = [];
+    const priceChanges: {
+      productId: string;
+      currentPrice: number;
+      priceWhenSaved: number;
+      changePercent: number;
+    }[] = [];
     const productsWithMetadata = products.map(product => {
       const savedItem = user.savedItems.find(item => 
         item.productId.toString() === product._id.toString()

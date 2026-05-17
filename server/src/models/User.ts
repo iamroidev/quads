@@ -23,7 +23,11 @@ export interface IUserDocument extends Document {
   isBanned: boolean;
   location: string;
   bio: string;
-  savedItems: mongoose.Types.ObjectId[];
+  savedItems: {
+    productId: mongoose.Types.ObjectId;
+    savedAt: Date;
+    priceWhenSaved: number;
+  }[];
   following: mongoose.Types.ObjectId[];
   followersCount: number;
   notificationPrefs: {

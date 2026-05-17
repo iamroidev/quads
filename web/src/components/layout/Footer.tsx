@@ -60,7 +60,7 @@ const Footer: React.FC = () => {
           {/* Bottom tagline */}
           <div className="mt-4 border-t border-white/10 pt-4 text-center">
             <p className="text-[8px] font-black uppercase tracking-[0.3em] text-white/20">
-              Built for students, by students &mdash; UMaT, Tarkwa 🇬🇭
+              Engineered by an independent student developer &mdash; UMaT, Tarkwa 🇬🇭
             </p>
           </div>
         </div>
@@ -140,7 +140,7 @@ const Footer: React.FC = () => {
               </p>
               <ul className="space-y-2 text-sm">
                 {[
-                  { to: '/about', label: 'About Us' },
+                  { to: '/about', label: 'About' },
                   { to: '/faq', label: 'FAQ' },
                   { to: '/contact', label: 'Contact Us' },
                   { to: '/support', label: 'Help Center' },
@@ -180,12 +180,11 @@ const Footer: React.FC = () => {
               FAQ
             </Link>
           </div>
-        </div>
-        <div className="text-center pb-4">
-          <p className="text-[8px] font-black uppercase tracking-[0.3em] text-white/15">
-            Made at UMaT, Tarkwa 🇬🇭
-          </p>
-        </div>
+            <div className="flex-grow flex flex-col gap-1.5 items-center justify-center">
+              <p className="text-[8px] font-black uppercase tracking-[0.3em] text-white/15 text-center">
+                Engineered by an independent student developer &middot; UMaT, Tarkwa 🇬🇭
+              </p>
+            </div>
       </div>
     </footer>
   );

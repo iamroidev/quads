@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>QUADS | The Official Institutional Marketplace</title>
     <meta name="description" content="The official marketplace for UMaT students. Buy, sell, and trade textbooks, electronics, and services with verified campus members." />
-    
+
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://quadsmarket.tech/" />
@@ -14,20 +14,20 @@
     <meta property="og:description" content="Exchange textbooks, electronics, and services within your university community. Secure escrow payments and verified student profiles." />
     <meta property="og:image" content="https://quadsmarket.tech/og-image.png" />
     <meta property="og:site_name" content="QUADS Marketplace" />
-    
+
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image" />
     <meta property="twitter:url" content="https://quadsmarket.tech/" />
     <meta property="twitter:title" content="QUADS | The Official Institutional Marketplace" />
     <meta property="twitter:description" content="Exchange textbooks, electronics, and services within your university community. Secure escrow payments and verified student profiles." />
     <meta property="twitter:image" content="https://quadsmarket.tech/og-image.png" />
-    
+
     <!-- Dynamic OG Tags (will be replaced by JS for product pages) -->
     <meta property="og:type" content="product" />
     <meta property="og:price:amount" content="0.00" />
     <meta property="og:price:currency" content="GHS" />
     <meta property="og:availability" content="instock" />
-    
+
     <link rel="canonical" href="https://quadsmarket.tech/" />
     <link rel="manifest" href="/manifest.webmanifest" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
@@ -38,7 +38,7 @@
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
-    
+
     <!-- Script to dynamically set OG tags for product pages -->
     <script>
       // This script runs after React hydrates to update meta tags for better social sharing
@@ -48,7 +48,7 @@
           // Extract product ID from URL
           const pathParts = window.location.pathname.split('/');
           const productId = pathParts[2];
-          
+
           if (productId) {
             // Fetch product data to populate OG tags
             fetch(`/api/products/${productId}`)
@@ -56,13 +56,13 @@
               .then(product => {
                 if (product.success && product.data) {
                   const p = product.data;
-                  
+
                   // Update Open Graph tags
                   document.querySelector('meta[property="og:title"]').setAttribute('content', `${p.title} - GHS ${p.price.toFixed(2)}`);
                   document.querySelector('meta[property="og:description"]').setAttribute('content', p.description.substring(0, 200) + '...');
                   document.querySelector('meta[property="og:image"]').setAttribute('content', p.images.length > 0 ? p.images[0].url : 'https://quadsmarket.tech/og-default.png');
                   document.querySelector('meta[property="og:price:amount"]').setAttribute('content', p.price.toFixed(2));
-                  
+
                   // Update Twitter tags
                   document.querySelector('meta[property="twitter:title"]').setAttribute('content', `${p.title} - GHS ${p.price.toFixed(2)}`);
                   document.querySelector('meta[property="twitter:description"]').setAttribute('content', p.description.substring(0, 200) + '...');
@@ -76,7 +76,7 @@
           }
         }
       }
-      
+
       // Run after React hydrates (brief delay to let React update the DOM)
       if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', () => {
