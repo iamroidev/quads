@@ -1,11 +1,6 @@
-import * as Sentry from '@sentry/react-native';
-
 function initSentry() {
-  Sentry.init({
-    dsn: process.env.SENTRY_DSN,
-    tracesSampleRate: 1.0,
-    debug: __DEV__,
-  });
+  // Disabled in Expo Go to avoid Metro bundling failure from Sentry's promise polyfill import.
+  if (__DEV__) return;
 }
 
 export default initSentry;
