@@ -46,12 +46,16 @@ export const setupSocketHandlers = (io: SocketServer): void => {
   // Service Event Listeners
   // ========================
   chatService.on('message', (message) => {
-    const conversationId = message.conversation.toString();
-    io.to(`conversation:${conversationId}`).emit('message:new', message);
-    
-    // Also emit conversation:updated to participants
-    // We'll let the clients fetch the updated list or just notify them
-    io.to(`conversation:${conversationId}`).emit('conversation:refreshed', { conversationId });
+    try {
+      const conversationId = message.conversation.toString();
+      io.to(`conversation:${conversationId}`).emit('message:new', message);
+      
+      // Also emit conversation:updated to participants
+      // We'll let the clients fetch the updated list or just notify them
+      io.to(`conversation:${conversationId}`).emit('conversation:refreshed', { conversationId });
+    } catch (error) {
+      console.error('Socket chatService message event error:', error);
+    }
   });
 
   // ========================
