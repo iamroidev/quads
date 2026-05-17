@@ -198,6 +198,20 @@ const startServer = async () => {
         console.log('MongoDB connection established');
         // Start background payout scheduler only after DB is ready
         startPayoutScheduler(15);
+
+        // Self-heal QUADS AI Support avatar to high-compatibility Base64
+        import('./models/User').then(({ default: User }) => {
+          const AI_EMAIL = 'support@quadsmarket.tech';
+          const AI_AVATAR = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHZpZXdCb3g9JzAgMCAxMDAgMTAwJyBmaWxsPSdub25lJz48cmVjdCB3aWR0aD0nMTAwJyBoZWlnaHQ9JzEwMCcgcng9JzEyJyBmaWxsPScjZmZkNzAwJy8+PGNpcmNsZSBjeD0nNTAnIGN5PSc1MCcgcj0nMzAnIGZpbGw9JyMwMDAwMDAnLz48Y2lyY2xlIGN4PSc0MCcgY3k9JzQ1JyByPSc1JyBmaWxsPScjZmY2YjZiJy8+PGNpcmNsZSBjeD0nNjAnIGN5PSc0NScgcj0nNScgZmlsbD0nI2ZmNmI2YicvPjxyZWN0IHg9JzQyJyB5PSc2NScgd2lkdGg9JzE2JyBoZWlnaHQ9JzQnIGZpbGw9JyNmZmZmZmYnLz48cGF0aCBkPSdNNTAgMTB2MTAnIHN0cm9rZT0nIzAwMDAwMCcgc3Ryb2tlLXdpZHRoPSc0Jy8+PGNpcmNsZSBjeD0nNTAnIGN5PSc4JyByPSc0JyBmaWxsPScjZmY2YjZiJy8+PC9zdmc+';
+          User.updateOne(
+            { email: AI_EMAIL },
+            { $set: { avatar: AI_AVATAR } }
+          ).then((res) => {
+            console.log('Self-healed AI support avatar database record:', res);
+          }).catch((err) => {
+            console.error('Failed to self-heal AI support avatar:', err);
+          });
+        });
       })
       .catch((err) => {
         console.error('Initial MongoDB connection failed:', err);
