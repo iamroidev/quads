@@ -211,6 +211,83 @@ class NotificationService {
     if (!result) throw ApiError.notFound('Notification not found');
   }
 
+  /**
+   * Send price drop alert notification
+   */
+  async notifyPriceDrop(
+    userId: string,
+    productTitle: string,
+    currentPrice: number,
+    originalPrice: number,
+    productId: string
+  ): Promise<void> {
+    const savings = originalPrice - currentPrice;
+    const savingsPercent = ((savings / originalPrice) * 100).toFixed(0);
+    
+    // Save notification to database
+    await this.create(
+      userId,
+      'price_drop', // We'll need to add this to NotificationType enum
+      'Price Drop Alert!',
+      `${productTitle} is now GHS ${currentPrice} (was GHS ${originalPrice}) - Save GHS ${savings} (${savingsPercent}% off)`,
+      `/products/${productId}`,
+      { 
+        productId,
+        currentPrice,
+        originalPrice,
+        savings: Number(savings.toFixed(2)),
+        savingsPercent: Number(savingsPercent)
+      }
+    );
+    
+    // Also send email notification
+    try {
+      const user = await User.findById(userId).select('email name');
+      if (user && user.email) {
+        await emailService.sendPriceDropAlert(
+          user.email,
+          user.name,
+          productTitle,
+          currentPrice,
+          originalPrice,
+          productId
+        );
+      }
+    } catch (error) {
+      console.error('Failed to send price drop email:', error);
+    }
+  }
+
+  /**
+   * Send price increase alert notification
+   */
+  async notifyPriceIncrease(
+    userId: string,
+    productTitle: string,
+    currentPrice: number,
+    originalPrice: number,
+    productId: string
+  ): Promise<void> {
+    const increase = currentPrice - originalPrice;
+    const increasePercent = ((increase / originalPrice) * 100).toFixed(0);
+    
+    // Save notification to database
+    await this.create(
+      userId,
+      'price_increase', // We'll need to add this to NotificationType enum
+      'Price Increase Alert',
+      `${productTitle} is now GHS ${currentPrice} (was GHS ${originalPrice}) - GHS ${increase} (${increasePercent}% increase)`,
+      `/products/${productId}`,
+      { 
+        productId,
+        currentPrice,
+        originalPrice,
+        increase: Number(increase.toFixed(2)),
+        increasePercent: Number(increasePercent)
+      }
+    );
+  }
+
   // ============================
   // Convenience helper methods for creating specific notification types
   // ============================

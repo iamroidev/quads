@@ -14,7 +14,9 @@ import {
   Mail,
   MessageCircle,
   Twitter,
-  ShoppingCart
+  ShoppingCart,
+  Shield,
+  TrendingUp
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useCart } from '../../context/CartContext';
@@ -48,7 +50,9 @@ export const BulletinLayout: React.FC<BulletinLayoutProps> = ({
 
   const [isDark, setIsDark] = React.useState(() => {
     if (typeof window !== 'undefined') {
-      return localStorage.getItem('theme') === 'dark' || document.documentElement.classList.contains('dark');
+      const saved = localStorage.getItem('theme');
+      if (saved) return saved === 'dark';
+      return window.matchMedia('(prefers-color-scheme: dark)').matches;
     }
     return false;
   });
@@ -125,10 +129,13 @@ export const BulletinLayout: React.FC<BulletinLayoutProps> = ({
                     <Link to="/my-listings" className="hover:text-[#ff6b6b]">My Items</Link>
                     <Link to="/seller/orders" className="hover:text-[#ff6b6b]">Orders</Link>
                     <Link to="/seller/payouts" className="hover:text-[#ff6b6b]">Payments</Link>
+                    <Link to="/seller/growth" className="hover:text-[#ff6b6b]">Growth Tools</Link>
                   </>
                 ) : isAuthenticated ? (
                   <>
                     <Link to="/products" className="hover:text-[#ff6b6b]">All Items</Link>
+                    <Link to="/categories" className="hover:text-[#ff6b6b]">Categories</Link>
+                    <Link to="/lost-found" className="hover:text-[#ff6b6b]">Lost & Found</Link>
                     <Link to="/pulse" className="hover:text-[#ff6b6b]">Activity</Link>
                     <Link to="/saved" className="hover:text-[#ff6b6b]">Saved</Link>
                     <Link to="/orders" className="hover:text-[#ff6b6b]">Orders</Link>
@@ -137,6 +144,8 @@ export const BulletinLayout: React.FC<BulletinLayoutProps> = ({
                 ) : (
                   <>
                     <Link to="/products" className="hover:text-[#ff6b6b]">All Items</Link>
+                    <Link to="/categories" className="hover:text-[#ff6b6b]">Categories</Link>
+                    <Link to="/lost-found" className="hover:text-[#ff6b6b]">Lost & Found</Link>
                     <Link to="/sellers" className="hover:text-[#ff6b6b]">Sellers</Link>
                     <Link to="/pulse" className="hover:text-[#ff6b6b]">Activity</Link>
                     <Link to="/support" className="hover:text-[#ff6b6b]">Safety & Rules</Link>
@@ -226,6 +235,10 @@ export const BulletinLayout: React.FC<BulletinLayoutProps> = ({
 
                         <Link to="/settings" className="px-4 py-3 text-[10px] font-black uppercase tracking-widest border-b border-[var(--bulletin-border)]/10 hover:bg-[var(--bulletin-bg)] hover:text-[#ff6b6b] transition-colors flex items-center gap-2 text-[var(--bulletin-text)]">
                            <Settings className="h-3 w-3" /> Account Settings
+                        </Link>
+
+                        <Link to="/dispute-center" className="px-4 py-3 text-[10px] font-black uppercase tracking-widest border-b border-[var(--bulletin-border)]/10 hover:bg-[var(--bulletin-bg)] hover:text-[#ff6b6b] transition-colors flex items-center gap-2 text-[var(--bulletin-text)]">
+                           <Shield className="h-3 w-3" /> Dispute Center
                         </Link>
 
                         <Link to="/notifications" className="px-4 py-3 text-[10px] font-black uppercase tracking-widest border-b border-[var(--bulletin-border)]/10 hover:bg-[var(--bulletin-bg)] hover:text-[#ff6b6b] transition-colors flex items-center gap-2 text-[var(--bulletin-text)]">
@@ -326,6 +339,7 @@ export const BulletinLayout: React.FC<BulletinLayoutProps> = ({
                   <>
                     <Link to="/products" className="text-[14px] font-black uppercase tracking-widest hover:text-[#ff6b6b] transition-colors">All Items</Link>
                     <Link to="/categories" className="text-[14px] font-black uppercase tracking-widest hover:text-[#ff6b6b] transition-colors">Categories</Link>
+                    <Link to="/lost-found" className="text-[14px] font-black uppercase tracking-widest hover:text-[#ff6b6b] transition-colors">Lost & Found</Link>
                     <Link to="/sellers" className="text-[14px] font-black uppercase tracking-widest hover:text-[#ff6b6b] transition-colors">Sellers</Link>
                     <Link to="/pulse" className="text-[14px] font-black uppercase tracking-widest hover:text-[#ff6b6b] transition-colors">Activity</Link>
                   </>

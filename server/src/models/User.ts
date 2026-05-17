@@ -178,8 +178,19 @@ const userSchema = new Schema<IUserDocument>(
     },
     savedItems: [
       {
-        type: Schema.Types.ObjectId,
-        ref: 'Product',
+        productId: {
+          type: Schema.Types.ObjectId,
+          ref: 'Product',
+          required: true,
+        },
+        savedAt: {
+          type: Date,
+          default: Date.now,
+        },
+        priceWhenSaved: {
+          type: Number,
+          required: true,
+        },
       },
     ],
     following: [
@@ -198,6 +209,7 @@ const userSchema = new Schema<IUserDocument>(
       reviews: { type: Boolean, default: true },
       promotions: { type: Boolean, default: false },
       systemAlerts: { type: Boolean, default: true },
+      priceAlerts: { type: Boolean, default: true }, // New preference for price change alerts
     },
     privacyPrefs: {
       showPhone: { type: Boolean, default: false },

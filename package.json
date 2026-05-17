@@ -15,6 +15,7 @@
     "build:server": "npm run build --workspace=server",
     "build:web": "npm run build --workspace=web",
     "sync-env": "node scripts/sync-env.js",
+    "price-check": "node server/src/scripts/price-check.cron.js",
     "predev": "npm run sync-env",
     "dev": "concurrently \"npm run dev:server\" \"npm run dev:web\"",
     "install:all": "npm install"

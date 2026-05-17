@@ -50,3 +50,14 @@ mobile/ios/
 
 .vercel
 .env.example
+
+# Secrets & Private Keys
+*.pem
+*.key
+*.pub
+
+# Local Environment files
+.env.development
+.env.development.local
+.env.test
+.env.test.local

@@ -6,6 +6,7 @@ import orderService from '../services/order.service';
 import productService from '../services/product.service';
 import growthService from '../services/growth.service';
 import toast from 'react-hot-toast';
+import QRCodeGenerator from '../components/seller/QRCodeGenerator';
 
 const GrowthTools: React.FC = () => {
   // --- State for Coupons ---

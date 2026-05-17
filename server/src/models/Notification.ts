@@ -15,7 +15,9 @@ export type NotificationType =
   | 'new_review'
   | 'review_reply'
   | 'product_sold'
-  | 'system';
+  | 'system'
+  | 'price_drop'
+  | 'price_increase';
 
 export interface INotificationDocument extends Document {
   _id: mongoose.Types.ObjectId;
@@ -55,6 +57,8 @@ const notificationSchema = new Schema<INotificationDocument>(
         'review_reply',
         'product_sold',
         'system',
+        'price_drop',
+        'price_increase',
       ],
       required: true,
     },

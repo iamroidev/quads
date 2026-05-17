@@ -6,17 +6,33 @@
   --bulletin-border: #000000;
   --bulletin-shadow: rgba(0, 0, 0, 1);
   --bulletin-muted: rgba(0, 0, 0, 0.4);
+  
+  /* Tactical Custom Card Theming */
+  --bulletin-notice-bg: #fffacd;
+  --bulletin-notice-text: #000000;
+  --bulletin-metric1-bg: #e0f2f7;
+  --bulletin-metric1-text: #004d40;
+  --bulletin-metric2-bg: #fce4ec;
+  --bulletin-metric2-text: #880e4f;
 }
 
 .dark {
-  --bulletin-bg: #000000;
-  --bulletin-text: #f0efec;
+  --bulletin-bg: #0a0a0a;
+  --bulletin-text: #ffffff;
   --bulletin-accent: #ff6b6b;
-  --bulletin-card: #111111;
-  --bulletin-border: #4a4a4a;
-  --bulletin-shadow: rgba(255, 255, 255, 0.1);
+  --bulletin-card: #121212;
+  --bulletin-border: #ffffff;     /* Sharp white borders for neobrutalist punch! */
+  --bulletin-shadow: #ff6b6b;     /* Solid coral-red offset block shadows! */
   --bulletin-muted: rgba(255, 255, 255, 0.4);
   color-scheme: dark;
+  
+  /* Tactical Custom Card Theming */
+  --bulletin-notice-bg: #2c2203;  /* Deep gold-dark backdrop */
+  --bulletin-notice-text: #ffd700; /* Rich golden text */
+  --bulletin-metric1-bg: #05262e;  /* Deep cyan-dark backdrop */
+  --bulletin-metric1-text: #80deea; /* High-contrast light cyan text */
+  --bulletin-metric2-bg: #2d0816;  /* Deep magenta-dark backdrop */
+  --bulletin-metric2-text: #f48fb1; /* High-contrast light pink text */
 }
 
 @tailwind base;
@@ -298,4 +314,51 @@
     position: static !important;
     width: 100% !important;
   }
+  
+  /* ── Polaroid Bulletin Tactility Utilities ── */
+  @keyframes thumbtack-jiggle {
+    0%, 100% { transform: translate(-50%, -50%) rotate(0deg) scale(1.1); }
+    15% { transform: translate(-50%, -50%) rotate(-12deg) scale(1.15); }
+    30% { transform: translate(-50%, -50%) rotate(10deg) scale(1.1); }
+    45% { transform: translate(-50%, -50%) rotate(-8deg) scale(1.12); }
+    60% { transform: translate(-50%, -50%) rotate(6deg) scale(1.1); }
+    75% { transform: translate(-50%, -50%) rotate(-3deg) scale(1.1); }
+  }
+
+  .animate-thumbtack-jiggle {
+    animation: thumbtack-jiggle 0.45s ease-in-out infinite;
+  }
 }
+
+/* ── Dark Mode Text Readability & Contrast Enhancements ── */
+.dark input::placeholder,
+.dark textarea::placeholder {
+  color: rgba(255, 255, 255, 0.65) !important;
+  opacity: 1 !important;
+}
+
+.dark label,
+.dark .opacity-40,
+.dark .text-\[var\(--bulletin-text\)\]\.opacity-40 {
+  opacity: 0.8 !important;
+}
+
+.dark select {
+  background-color: #1a1a1a !important;
+  color: #ffffff !important;
+}
+
+.dark select option {
+  background-color: #1a1a1a !important;
+  color: #ffffff !important;
+}
+
+.dark .opacity-30 {
+  opacity: 0.65 !important;
+}
+
+.dark input, 
+.dark textarea {
+  background-color: #1a1a1a !important; /* Elegant dark-gray depth contrasting beautifully against dark cards */
+  color: #ffffff !important;
+}

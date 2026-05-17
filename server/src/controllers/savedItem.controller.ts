@@ -56,6 +56,35 @@ export const getSavedItems = async (
 };
 
 /**
+ * @route   GET /api/saved/price-changes
+ * @desc    Get user's saved items with price change alerts
+ * @access  Private
+ */
+export const getSavedItemsWithPriceChanges = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const { page, limit } = req.query;
+    const result = await savedItemService.getSavedItemsWithPriceChanges(
+      req.user!._id.toString(),
+      parseInt(page as string) || 1,
+      parseInt(limit as string) || 20
+    );
+
+    res.status(200).json({
+      success: true,
+      data: { products: result.products },
+      pagination: result.pagination,
+      priceChanges: result.priceChanges
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
  * @route   GET /api/saved/:productId/is-saved
  * @desc    Check if a product is saved by the user
  * @access  Private

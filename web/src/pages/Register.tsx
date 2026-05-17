@@ -401,7 +401,7 @@ const RegisterPage: React.FC = () => {
                     SESSION RULES
                   </div>
                   <div className="flex items-start gap-4">
-                    <label className="relative flex h-8 w-8 cursor-pointer items-center justify-center border-2 border-black bg-white shadow-[3px_3px_0_0_var(--bulletin-shadow)] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-none transition-all">
+                    <label className="relative flex h-8 w-8 cursor-pointer items-center justify-center border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] shadow-[3px_3px_0_0_var(--bulletin-shadow)] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-none transition-all">
                       <input
                         type="checkbox"
                         className="peer sr-only"
@@ -409,7 +409,7 @@ const RegisterPage: React.FC = () => {
                         onChange={(e) => setProtocolAccepted(e.target.checked)}
                         required
                       />
-                      <Pin className="h-4 w-4 text-gray-300 peer-checked:text-red-600 peer-checked:rotate-45 transition-all" />
+                      <Pin className="h-4 w-4 text-[var(--bulletin-text)] opacity-35 peer-checked:text-[#ff6b6b] peer-checked:fill-[#ff6b6b] peer-checked:opacity-100 peer-checked:rotate-45 transition-all" />
                     </label>
                     <div className="flex-1">
                       <p className="text-[10px] font-black uppercase tracking-tight text-[var(--bulletin-text)] leading-tight">
@@ -540,13 +540,13 @@ const RegisterPage: React.FC = () => {
                           LEGAL RULES
                         </div>
                         <div className="flex items-start gap-4">
-                          <label className="relative flex h-8 w-8 cursor-pointer items-center justify-center border-2 border-black bg-white shadow-[3px_3px_0_0_var(--bulletin-shadow)] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-none transition-all">
+                          <label className="relative flex h-8 w-8 cursor-pointer items-center justify-center border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] shadow-[3px_3px_0_0_var(--bulletin-shadow)] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-none transition-all">
                             <input
                               type="checkbox"
                               className="peer sr-only"
                               {...register('termsAccepted')}
                             />
-                            <Pin className="h-4 w-4 text-gray-300 peer-checked:text-red-600 peer-checked:rotate-45 transition-all" />
+                            <Pin className="h-4 w-4 text-[var(--bulletin-text)] opacity-35 peer-checked:text-[#ff6b6b] peer-checked:fill-[#ff6b6b] peer-checked:opacity-100 peer-checked:rotate-45 transition-all" />
                           </label>
                           <div className="flex-1">
                             <p className="text-[11px] font-black uppercase tracking-tight text-[var(--bulletin-text)] leading-tight">
@@ -600,13 +600,13 @@ const RegisterPage: React.FC = () => {
                         LEGAL RULES
                       </div>
                       <div className="flex items-start gap-4">
-                        <label className="relative flex h-8 w-8 cursor-pointer items-center justify-center border-2 border-black bg-white shadow-[3px_3px_0_0_var(--bulletin-shadow)] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-none transition-all">
+                        <label className="relative flex h-8 w-8 cursor-pointer items-center justify-center border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] shadow-[3px_3px_0_0_var(--bulletin-shadow)] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-none transition-all">
                           <input
                             type="checkbox"
                             className="peer sr-only"
                             {...register('termsAccepted')}
                           />
-                          <Pin className="h-4 w-4 text-gray-300 peer-checked:text-red-600 peer-checked:rotate-45 transition-all" />
+                          <Pin className="h-4 w-4 text-[var(--bulletin-text)] opacity-35 peer-checked:text-[#ff6b6b] peer-checked:fill-[#ff6b6b] peer-checked:opacity-100 peer-checked:rotate-45 transition-all" />
                         </label>
                         <div className="flex-1">
                           <p className="text-[11px] font-black uppercase tracking-tight text-[var(--bulletin-text)] leading-tight">

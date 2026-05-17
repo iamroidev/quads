@@ -91,6 +91,14 @@ All auth, products, orders, chat, notifications, and verification go through thi
 - **Verification**: Institutional email & SMS OTP verification (AWS SNS).
 - **Operations**: Dispute mediation center, seller analytics, CSV bulk import (Web).
 - **Administration**: Command Center (/admin), moderation queues, retry job dispatch.
+- **Enhanced Wishlist**: Saved items with price tracking and alerts (>5% changes trigger notifications).
+- **Social Discovery**: Follow/unfollow system, followers/following feeds, new follower notifications.
+
+### 🚧 Recently Added
+
+- **Price Alert System**: Users get notified when saved items change price by >5%
+- **Follow System**: Users can follow sellers to see their updates in a dedicated feed
+- **Enhanced Notifications**: Push, in-app, and email notifications for price changes and social updates
 
 ---
 

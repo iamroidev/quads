@@ -6,7 +6,11 @@ interface ToggleSavedResponse {
   message: string;
   data: {
     saved: boolean;
-    savedItems: string[];
+    savedItems: {
+      productId: string;
+      savedAt: string; // ISO date string
+      priceWhenSaved: number;
+    }[];
   };
 }
 
@@ -26,6 +30,18 @@ interface SavedItemIdsResponse {
   data: { savedItemIds: string[] };
 }
 
+interface SavedItemsWithPriceChangesResponse {
+  success: boolean;
+  data: { products: ProductPopulated[] };
+  pagination: PaginationInfo;
+  priceChanges: {
+    productId: string;
+    currentPrice: number;
+    priceWhenSaved: number;
+    changePercent: number;
+  }[];
+}
+
 const savedItemService = {
   toggleSavedItem: async (productId: string): Promise<ToggleSavedResponse> => {
     const response = await api.post(`/saved/${productId}`);
@@ -37,6 +53,14 @@ const savedItemService = {
     limit: number = 20
   ): Promise<SavedItemsResponse> => {
     const response = await api.get('/saved', { params: { page, limit } });
+    return response.data;
+  },
+
+  getSavedItemsWithPriceChanges: async (
+    page: number = 1,
+    limit: number = 20
+  ): Promise<SavedItemsWithPriceChangesResponse> => {
+    const response = await api.get('/saved/price-changes', { params: { page, limit } });
     return response.data;
   },
 

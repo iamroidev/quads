@@ -22,7 +22,7 @@ class UserService {
 
     if (isFollowing) {
       // Unfollow
-      follower.following = follower.following.filter(id => id.toString() === sellerId);
+      follower.following = follower.following.filter(id => id.toString() !== sellerId);
       seller.followersCount = Math.max(0, seller.followersCount - 1);
     } else {
       // Follow
@@ -49,23 +49,78 @@ class UserService {
   }
 
   /**
-   * Get user performance statistics
+   * Get user's followers (paginated)
    */
-  async getUserStats(userId: string): Promise<any> {
+  async getFollowers(userId: string, page: number = 1, limit: number = 20): Promise<{ followers: any[]; pagination: any }> {
     const user = await User.findById(userId);
     if (!user) throw ApiError.notFound('User not found');
 
-    // Basic stats — expand as needed
-    const stats = {
-      totalSales: 0,
-      totalOrders: 0,
-      totalListings: 0,
-      followersCount: user.followersCount || 0,
-      followingCount: user.following?.length || 0,
-      responseTimeMinutes: user.responseTimeMinutes || 0,
-    };
+    // Find users who are following this user
+    const followers = await User.find({ following: userId })
+      .select('_id name avatar isVerified')
+      .skip((page - 1) * limit)
+      .limit(limit);
 
-    return stats;
+    const total = await User.countDocuments({ following: userId });
+
+    return {
+      followers,
+      pagination: {
+        page,
+        limit,
+        total,
+        pages: Math.ceil(total / limit),
+      },
+    };
+  }
+
+  /**
+   * Get who user is following (paginated)
+   */
+  async getFollowing(userId: string, page: number = 1, limit: number = 20): Promise<{ following: any[]; pagination: any }> {
+    const user = await User.findById(userId);
+    if (!user) throw ApiError.notFound('User not found');
+
+    // Get the IDs of users this user is following
+    const followingIds = user.following || [];
+
+    const total = followingIds.length;
+
+    // Get paginated slice of following IDs
+    const skip = (page - 1) * limit;
+    const paginatedIds = followingIds.slice(skip, skip + limit);
+
+    // Get user details for the paginated following IDs
+    const following = await User.find({ _id: { $in: paginatedIds } })
+      .select('_id name avatar isVerified');
+
+    return {
+      following,
+      pagination: {
+        page,
+        limit,
+        total,
+        pages: Math.ceil(total / limit),
+      },
+    };
+  }
+
+  /**
+   * Check if a user is following another user
+   */
+  async isFollowing(followerId: string, followingId: string): Promise<boolean> {
+    const follower = await User.findById(followerId);
+    if (!follower) return false;
+    return follower.following.some(id => id.toString() === followingId);
+  }
+
+  /**
+   * Get follower count for a user
+   */
+  async getFollowerCount(userId: string): Promise<number> {
+    const user = await User.findById(userId);
+    if (!user) throw ApiError.notFound('User not found');
+    return user.followersCount || 0;
   }
 }
 

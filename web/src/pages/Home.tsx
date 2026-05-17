@@ -93,17 +93,17 @@ const HomePage: React.FC = () => {
 
             {!isAuthenticated && (
               <div 
-                className="w-full lg:w-auto lg:absolute lg:left-[50%] lg:top-12 border-4 border-black bg-[#fffacd] p-6 md:p-8 shadow-[8px_8px_0_0_rgba(0,0,0,1)] lg:shadow-[12px_12px_0_0_rgba(0,0,0,1)] lg:max-w-[280px]"
+                className="w-full lg:w-auto lg:absolute lg:left-[50%] lg:top-12 border-4 border-[var(--bulletin-border)] bg-[var(--bulletin-notice-bg)] p-6 md:p-8 shadow-[8px_8px_0_0_var(--bulletin-shadow)] lg:max-w-[280px]"
                 style={{ transform: 'rotate(3deg)' }}
               >
-                <div className="absolute -top-3 left-1/2 -translate-x-1/2 h-8 w-8 rounded-full bg-red-600 border-2 border-black shadow-inner z-10 flex items-center justify-center">
+                <div className="absolute -top-3 left-1/2 -translate-x-1/2 h-8 w-8 rounded-full bg-[#ff6b6b] border-2 border-[var(--bulletin-border)] shadow-inner z-10 flex items-center justify-center">
                   <div className="h-2 w-2 rounded-full bg-white/60" />
                 </div>
-                <h3 className="text-xl md:text-2xl font-black uppercase tracking-tight text-black mb-3">New here?</h3>
-                <p className="text-[11px] md:text-[13px] font-bold opacity-80 text-black mb-4 md:mb-6 leading-tight">
+                <h3 className="text-xl md:text-2xl font-black uppercase tracking-tight text-[var(--bulletin-notice-text)] mb-3">New here?</h3>
+                <p className="text-[11px] md:text-[13px] font-bold opacity-80 text-[var(--bulletin-notice-text)] mb-4 md:mb-6 leading-tight">
                   Connect with the market. <br/>Use your student email <br/>to start trading.
                 </p>
-                <Link to="/register" className="inline-block w-full border-4 border-black bg-black text-white px-4 py-3 text-[10px] md:text-[11px] font-black uppercase text-center hover:bg-[#ff6b6b] transition-all">
+                <Link to="/register" className="inline-block w-full border-4 border-[var(--bulletin-border)] bg-[var(--bulletin-text)] text-[var(--bulletin-bg)] px-4 py-3 text-[10px] md:text-[11px] font-black uppercase text-center hover:bg-[#ff6b6b] hover:text-white transition-all">
                   Initialize Access →
                 </Link>
               </div>
@@ -111,20 +111,20 @@ const HomePage: React.FC = () => {
           </div>
 
           <div className="relative lg:absolute lg:top-20 lg:right-20 flex flex-col sm:flex-row lg:flex-col gap-4 lg:gap-8 z-10 px-4 md:px-8 pb-8 lg:pb-0 lg:max-w-[280px]">
-            <div className="border-4 border-black bg-white p-4 md:p-6 shadow-[4px_4px_0_0_#ff6b6b] md:shadow-[8px_8px_0_0_#ff6b6b] lg:ml-auto w-full sm:w-1/3 lg:w-full" style={{ transform: 'rotate(1.2deg)' }}>
+            <div className="border-4 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] p-4 md:p-6 shadow-[4px_4px_0_0_#ff6b6b] md:shadow-[8px_8px_0_0_#ff6b6b] lg:ml-auto w-full sm:w-1/3 lg:w-full" style={{ transform: 'rotate(1.2deg)' }}>
               <div className="text-2xl md:text-4xl font-black text-[#ff6b6b] mb-1">0%</div>
-              <div className="text-[8px] md:text-[10px] font-black uppercase tracking-widest opacity-40 text-black">Trading Fees</div>
-              <div className="text-[10px] md:text-[12px] font-bold text-black mt-1">Free for every student.</div>
+              <div className="text-[8px] md:text-[10px] font-black uppercase tracking-widest opacity-60 dark:opacity-85 text-[var(--bulletin-text)]">Trading Fees</div>
+              <div className="text-[10px] md:text-[12px] font-bold text-[var(--bulletin-text)] mt-1">Free for every student.</div>
             </div>
-            <div className="border-4 border-black bg-[#e0f2f7] p-4 md:p-6 shadow-[4px_4px_0_0_var(--bulletin-shadow)] md:shadow-[8px_8px_0_0_var(--bulletin-shadow)] w-full sm:w-1/3 lg:w-full" style={{ transform: 'rotate(-2.5deg)' }}>
-              <div className="text-2xl md:text-4xl font-black text-black mb-1">{totalProducts || '...'}</div>
-              <div className="text-[8px] md:text-[10px] font-black uppercase tracking-widest opacity-40 text-black">Items</div>
-              <div className="text-[10px] md:text-[12px] font-bold text-black mt-1">Live campus inventory.</div>
+            <div className="border-4 border-[var(--bulletin-border)] bg-[var(--bulletin-metric1-bg)] p-4 md:p-6 shadow-[4px_4px_0_0_var(--bulletin-shadow)] md:shadow-[8px_8px_0_0_var(--bulletin-shadow)] w-full sm:w-1/3 lg:w-full" style={{ transform: 'rotate(-2.5deg)' }}>
+              <div className="text-2xl md:text-4xl font-black text-[var(--bulletin-metric1-text)] mb-1">{totalProducts || '...'}</div>
+              <div className="text-[8px] md:text-[10px] font-black uppercase tracking-widest opacity-60 dark:opacity-85 text-[var(--bulletin-metric1-text)]">Items</div>
+              <div className="text-[10px] md:text-[12px] font-bold text-[var(--bulletin-metric1-text)] mt-1">Live campus inventory.</div>
             </div>
-            <div className="border-4 border-black bg-[#fce4ec] p-4 md:p-6 shadow-[4px_4px_0_0_var(--bulletin-shadow)] md:shadow-[8px_8px_0_0_var(--bulletin-shadow)] w-full sm:w-1/3 lg:w-full" style={{ transform: 'rotate(0.5deg)' }}>
-              <div className="text-2xl md:text-4xl font-black text-black mb-1">{totalSellers || '...'}</div>
-              <div className="text-[8px] md:text-[10px] font-black uppercase tracking-widest opacity-40 text-black">Sellers</div>
-              <div className="text-[10px] md:text-[12px] font-bold text-black mt-1">Verified UMaT students.</div>
+            <div className="border-4 border-[var(--bulletin-border)] bg-[var(--bulletin-metric2-bg)] p-4 md:p-6 shadow-[4px_4px_0_0_var(--bulletin-shadow)] md:shadow-[8px_8px_0_0_var(--bulletin-shadow)] w-full sm:w-1/3 lg:w-full" style={{ transform: 'rotate(0.5deg)' }}>
+              <div className="text-2xl md:text-4xl font-black text-[var(--bulletin-metric2-text)] mb-1">{totalSellers || '...'}</div>
+              <div className="text-[8px] md:text-[10px] font-black uppercase tracking-widest opacity-60 dark:opacity-85 text-[var(--bulletin-metric2-text)]">Sellers</div>
+              <div className="text-[10px] md:text-[12px] font-bold text-[var(--bulletin-metric2-text)] mt-1">Verified UMaT students.</div>
             </div>
           </div>
         </div>

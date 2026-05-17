@@ -22,6 +22,8 @@ The project has successfully transitioned from "Readiness" to **Active Productio
 *   **Seller Dashboard**: ✅ New **Earnings Ledger** implemented for transparent transaction tracking.
 *   **Email Engine**: ✅ Switched to **Resend API (Axios-based)** for 100% reliable delivery and dashboard logging.
 *   **Navigation Logic**: ✅ Smart routing redirects sellers between Onboarding and Payouts based on account status.
+*   **Price Alert System**: ✅ Saved items with price tracking and change notifications (>5% triggers alerts).
+*   **Social Discovery**: ✅ Follow/unfollow system, follower feeds, and new follower notifications.
 
 ---
 

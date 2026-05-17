@@ -188,7 +188,7 @@ class EmailService {
     return this.sendEmail({ to, subject, html: this.wrapEmail(body) });
   }
 
-  async sendPaymentReceiptEmail(to: string, orderId: string, amount: number): Promise<boolean> {
+    async sendPaymentReceiptEmail(to: string, orderId: string, amount: number): Promise<boolean> {
     const subject = 'Receipt for Order #' + orderId.slice(-8).toUpperCase();
     const body = `
       <h2>Payment Confirmed ✓</h2>
@@ -214,6 +214,69 @@ class EmailService {
       <div style="text-align: center;">
         <a href="${process.env.CLIENT_URL || 'https://quadsmarket.tech'}/orders/${orderId}" class="btn btn-primary">Track Progress</a>
       </div>
+    `;
+    return this.sendEmail({ to, subject, html: this.wrapEmail(body) });
+  }
+
+  // Price alert email templates
+  async sendPriceDropAlert(to: string, name: string, productTitle: string, currentPrice: number, originalPrice: number, productId: string): Promise<boolean> {
+    const savings = originalPrice - currentPrice;
+    const savingsPercent = ((savings / originalPrice) * 100).toFixed(0);
+    
+    const subject = `Price Drop Alert: ${productTitle} is now GHS ${currentPrice.toFixed(2)}`;
+    const body = `
+      <h2>📉 Price Drop Alert!</h2>
+      <p>Hi ${name},</p>
+      <p>One of your saved items has dropped in price:</p>
+      
+      <div style="background: #fffacd; border: 2px solid #000; padding: 24px; margin: 24px 0;">
+        <h3 style="margin-top: 0; color: #000;">${productTitle}</h3>
+        <p><span class="highlight">Was:</span> GHS ${originalPrice.toFixed(2)}</p>
+        <p><span class="highlight">Now:</span> GHS ${currentPrice.toFixed(2)}</p>
+        <p><span class="highlight">You save:</span> GHS ${savings.toFixed(2)} (${savingsPercent}% off)</p>
+      </div>
+      
+      <div style="text-align: center;">
+        <a href="${process.env.CLIENT_URL || 'https://quadsmarket.tech'}/products/${productId}" class="btn btn-primary">View Item</a>
+      </div>
+      
+      <div class="divider"></div>
+      
+      <p style="font-size: 13px; color: #666; text-align: center;">
+        You're receiving this because you saved this item and have price alerts enabled.
+        <br>Manage your alert preferences in your account settings.
+      </p>
+    `;
+    return this.sendEmail({ to, subject, html: this.wrapEmail(body) });
+  }
+
+  async sendPriceIncreaseAlert(to: string, name: string, productTitle: string, currentPrice: number, originalPrice: number, productId: string): Promise<boolean> {
+    const increase = currentPrice - originalPrice;
+    const increasePercent = ((increase / originalPrice) * 100).toFixed(0);
+    
+    const subject = `Price Increase Alert: ${productTitle} is now GHS ${currentPrice.toFixed(2)}`;
+    const body = `
+      <h2>📈 Price Increase Alert</h2>
+      <p>Hi ${name},</p>
+      <p>One of your saved items has increased in price:</p>
+      
+      <div style="background: #ffebee; border: 2px solid #000; padding: 24px; margin: 24px 0;">
+        <h3 style="margin-top: 0; color: #000;">${productTitle}</h3>
+        <p><span class="highlight">Was:</span> GHS ${originalPrice.toFixed(2)}</p>
+        <p><span class="highlight">Now:</span> GHS ${currentPrice.toFixed(2)}</p>
+        <p><span class="highlight">Increase:</span> GHS ${increase.toFixed(2)} (${increasePercent}% increase)</p>
+      </div>
+      
+      <div style="text-align: center;">
+        <a href="${process.env.CLIENT_URL || 'https://quadsmarket.tech'}/products/${productId}" class="btn">View Item</a>
+      </div>
+      
+      <div class="divider"></div>
+      
+      <p style="font-size: 13px; color: #666; text-align: center;">
+        You're receiving this because you saved this item and have price alerts enabled.
+        <br>Manage your alert preferences in your account settings.
+      </p>
     `;
     return this.sendEmail({ to, subject, html: this.wrapEmail(body) });
   }

@@ -135,6 +135,12 @@ const Header: React.FC = () => {
               >
                 Categories
               </Link>
+              <Link
+                to="/lost-found"
+                className="text-xs font-bold uppercase tracking-[0.18em] text-[#ff6b6b] transition-colors hover:opacity-85"
+              >
+                Lost & Found
+              </Link>
               {isAuthenticated && (
                 <Link
                   to="/saved"
@@ -310,6 +316,7 @@ const Header: React.FC = () => {
             {[
               { to: '/products', label: 'Browse listings' },
               { to: '/categories', label: 'Categories' },
+              { to: '/lost-found', label: '🔴 Lost & Found' },
               { to: '/cart', label: `Cart (${totalItems})` },
               ...(isAuthenticated ? [
                 { to: '/profile', label: 'My profile' },
