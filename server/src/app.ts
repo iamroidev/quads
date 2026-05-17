@@ -57,7 +57,7 @@ const io = new SocketServer(httpServer, {
   cors: {
     origin: env.NODE_ENV === 'production'
       ? [env.CLIENT_URL, 'https://quadsmarket.tech', 'https://www.quadsmarket.tech']
-      : [env.CLIENT_URL, 'http://localhost:5173', 'http://localhost:5185', 'http://127.0.0.1:5185', 'http://localhost:19006'],
+      : [env.CLIENT_URL, 'http://localhost:5173', 'http://localhost:5100', 'http://127.0.0.1:5100', 'http://localhost:19006'],
     credentials: true,
   },
 });
@@ -86,8 +86,8 @@ const allowedOrigins = [
    'https://quadsmarket.tech',
    'https://www.quadsmarket.tech',
    'http://localhost:5173',
-   'http://localhost:5185',
-   'http://127.0.0.1:5185',
+   'http://localhost:5100',
+   'http://127.0.0.1:5100',
    'http://localhost:19006',
 ].filter(Boolean);
 
