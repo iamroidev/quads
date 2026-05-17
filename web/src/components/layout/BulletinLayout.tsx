@@ -241,6 +241,10 @@ export const BulletinLayout: React.FC<BulletinLayoutProps> = ({
                            <Shield className="h-3 w-3" /> Dispute Center
                         </Link>
 
+                        <Link to="/messages?support=true" className="px-4 py-3 text-[10px] font-black uppercase tracking-widest border-b border-[var(--bulletin-border)]/10 hover:bg-[var(--bulletin-bg)] hover:text-[#ff6b6b] transition-colors flex items-center gap-2 text-[var(--bulletin-text)]">
+                           <MessageCircle className="h-3 w-3 text-[#ff6b6b]" /> QUADS AI Support
+                        </Link>
+
                         <Link to="/notifications" className="px-4 py-3 text-[10px] font-black uppercase tracking-widest border-b border-[var(--bulletin-border)]/10 hover:bg-[var(--bulletin-bg)] hover:text-[#ff6b6b] transition-colors flex items-center gap-2 text-[var(--bulletin-text)]">
                            <Bell className="h-3 w-3" /> Notifications
                         </Link>
