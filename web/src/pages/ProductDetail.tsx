@@ -413,68 +413,7 @@ const ProductDetail: React.FC = () => {
               </div>
             )}
 
-            {/* Product reviews - Moved beneath image */}
-            <div className="mt-12 pt-12 border-t-2 border-[var(--bulletin-border)]/10">
-              <div className="flex items-center justify-between mb-8">
-                <div className="text-[10px] font-black uppercase tracking-[0.3em] opacity-40 text-[var(--bulletin-text)]">Reviews</div>
-                {reviews.length > 0 && (
-                   <div className="flex items-center gap-2">
-                     <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                     <span className="text-sm font-black text-[var(--bulletin-text)]">{sellerRating?.averageRating.toFixed(1) || '0.0'}</span>
-                   </div>
-                )}
-              </div>
-              
-              {reviews.length > 0 ? (
-                <div className="space-y-6">
-                  {reviews.map((review, idx) => (
-                    <div
-                      key={review._id}
-                      className="border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] p-6 shadow-[4px_4px_0_0_var(--bulletin-shadow)]"
-                      style={{ transform: `rotate(${(idx % 2) * 0.5}deg)` }}
-                    >
-                      <div className="flex items-start justify-between gap-4">
-                        <div>
-                          <div className="text-xs font-black uppercase tracking-tight text-[var(--bulletin-text)]">{review.reviewer.name}</div>
-                          <div className="text-[9px] font-black uppercase tracking-widest opacity-40 mt-0.5 text-[var(--bulletin-text)]">
-                            {new Date(review.createdAt).toLocaleDateString('en-GH')}
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-0.5">
-                          {[1, 2, 3, 4, 5].map((star) => (
-                            <Star
-                              key={star}
-                              className={`h-3.5 w-3.5 ${star <= review.rating ? 'fill-yellow-400 text-yellow-400' : 'text-[var(--bulletin-border)] opacity-20'}`}
-                            />
-                          ))}
-                        </div>
-                      </div>
-                      <div className="text-sm font-medium leading-relaxed mt-4 italic text-[var(--bulletin-text)]">"{review.comment}"</div>
-                      {review.reply && (
-                        <div className="mt-4 border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-bg)] p-4 ml-4 shadow-[2px_2px_0_0_var(--bulletin-shadow)]">
-                          <div className="text-[8px] font-black uppercase tracking-widest opacity-40 mb-1 text-[var(--bulletin-text)]">Seller Response</div>
-                          <div className="text-[12px] font-medium text-[var(--bulletin-text)] leading-relaxed">{review.reply}</div>
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="border-4 border-dashed border-[var(--bulletin-border)]/20 p-12 text-center relative overflow-hidden group">
-                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-[0.03] select-none pointer-events-none group-hover:opacity-[0.05] transition-opacity">
-                    <Sparkles className="h-40 w-40" />
-                  </div>
-                  <div className="relative z-10">
-                    <div className="h-16 w-16 bg-[var(--bulletin-card)] border-2 border-[var(--bulletin-border)] flex items-center justify-center mx-auto mb-6 shadow-[4px_4px_0_0_var(--bulletin-shadow)] rotate-[-3deg]">
-                       <Star className="h-8 w-8 text-[var(--bulletin-border)] opacity-20" />
-                    </div>
-                    <div className="text-[10px] font-black uppercase tracking-widest opacity-40 text-[var(--bulletin-text)] mb-2">No Reviews Yet</div>
-                    <div className="text-sm font-black uppercase tracking-tight text-[var(--bulletin-text)]">No feedback yet.</div>
-                    <p className="mt-2 text-[11px] font-bold opacity-40 max-w-[200px] mx-auto text-[var(--bulletin-text)]">Be the first to review this seller after you buy from them.</p>
-                  </div>
-                </div>
-              )}
-            </div>
+
           </div>
 
           {/* Right: Details */}
@@ -676,6 +615,70 @@ const ProductDetail: React.FC = () => {
             </div>
           </div>
         </div>
+      </BulletinSection>
+
+      {/* Product Reviews */}
+      <BulletinSection title="Reviews" subtitle="Customer Feedback" bgColor="bg-[var(--bulletin-bg)]">
+        {reviews.length > 0 ? (
+          <div className="border-4 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] p-4 md:p-8 shadow-[8px_8px_0_0_var(--bulletin-shadow)] md:shadow-[12px_12px_0_0_var(--bulletin-shadow)]" style={{ transform: 'rotate(0.5deg)' }}>
+            <div className="flex items-center justify-between mb-8 border-b-2 border-[var(--bulletin-border)]/10 pb-4">
+              <div className="text-[10px] font-black uppercase tracking-widest opacity-40 text-[var(--bulletin-text)]">Item Reviews</div>
+              <div className="flex items-center gap-2">
+                <Star className="h-5 w-5 fill-yellow-400 text-yellow-400" />
+                <span className="text-lg font-black text-[var(--bulletin-text)]">{sellerRating?.averageRating.toFixed(1) || '0.0'}</span>
+              </div>
+            </div>
+            <div className="grid gap-6 md:grid-cols-2">
+              {reviews.map((review, idx) => (
+                <div
+                  key={review._id}
+                  className="border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] p-4 md:p-6 shadow-[4px_4px_0_0_var(--bulletin-shadow)]"
+                  style={{ transform: `rotate(${(idx % 2 - 0.5) * 0.8}deg)` }}
+                >
+                  <div className="flex items-start justify-between gap-4">
+                    <div>
+                      <div className="text-xs font-black uppercase tracking-tight text-[var(--bulletin-text)]">{review.reviewer.name}</div>
+                      <div className="text-[9px] font-black uppercase tracking-widest opacity-40 mt-0.5 text-[var(--bulletin-text)]">
+                        {new Date(review.createdAt).toLocaleDateString('en-GH')}
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-0.5">
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <Star
+                          key={star}
+                          className={`h-3.5 w-3.5 ${star <= review.rating ? 'fill-yellow-400 text-yellow-400' : 'text-[var(--bulletin-border)] opacity-20'}`}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                  <div className="text-sm font-medium leading-relaxed mt-4 italic text-[var(--bulletin-text)]">"{review.comment}"</div>
+                  {review.reply && (
+                    <div className="mt-4 border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-bg)] p-4 ml-4 shadow-[2px_2px_0_0_var(--bulletin-shadow)]">
+                      <div className="text-[8px] font-black uppercase tracking-widest opacity-40 mb-1 text-[var(--bulletin-text)]">Seller Response</div>
+                      <div className="text-[12px] font-medium text-[var(--bulletin-text)] leading-relaxed">{review.reply}</div>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : (
+          <div className="border-4 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] p-4 md:p-8 shadow-[8px_8px_0_0_var(--bulletin-shadow)] md:shadow-[12px_12px_0_0_var(--bulletin-shadow)]">
+            <div className="border-4 border-dashed border-[var(--bulletin-border)]/20 p-6 md:p-12 text-center relative overflow-hidden group">
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-[0.03] select-none pointer-events-none group-hover:opacity-[0.05] transition-opacity">
+                <Sparkles className="h-40 w-40" />
+              </div>
+              <div className="relative z-10">
+                <div className="h-16 w-16 bg-[var(--bulletin-card)] border-2 border-[var(--bulletin-border)] flex items-center justify-center mx-auto mb-6 shadow-[4px_4px_0_0_var(--bulletin-shadow)] rotate-[-3deg]">
+                   <Star className="h-8 w-8 text-[var(--bulletin-border)] opacity-20" />
+                </div>
+                <div className="text-[10px] font-black uppercase tracking-widest opacity-40 text-[var(--bulletin-text)] mb-2">No Reviews Yet</div>
+                <div className="text-sm font-black uppercase tracking-tight text-[var(--bulletin-text)]">No feedback yet.</div>
+                <p className="mt-2 text-[11px] font-bold opacity-40 max-w-[200px] mx-auto text-[var(--bulletin-text)]">Be the first to review this seller after you buy from them.</p>
+              </div>
+            </div>
+          </div>
+        )}
       </BulletinSection>
 
       {/* Seller info */}
