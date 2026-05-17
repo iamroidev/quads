@@ -19,6 +19,36 @@ import { startPayoutScheduler } from './services/payoutScheduler';
 const app = express();
 const httpServer = createServer(app);
 
+let isShuttingDown = false;
+
+const shutdownServer = (reason: string, err?: unknown): void => {
+  if (isShuttingDown) return;
+  isShuttingDown = true;
+  console.error(reason, err);
+
+  httpServer.close(() => {
+    process.exit(1);
+  });
+
+  setTimeout(() => {
+    process.exit(1);
+  }, 10000).unref();
+};
+
+const registerProcessErrorHandlers = (): void => {
+  if (process.listenerCount('unhandledRejection') === 0) {
+    process.on('unhandledRejection', (reason) => {
+      shutdownServer('Unhandled Promise Rejection:', reason);
+    });
+  }
+
+  if (process.listenerCount('uncaughtException') === 0) {
+    process.on('uncaughtException', (error) => {
+      shutdownServer('Uncaught Exception:', error);
+    });
+  }
+};
+
 // Trust proxy for Cloudflare/Nginx
 app.set('trust proxy', 1);
 
@@ -176,6 +206,7 @@ const startServer = async () => {
   }
 };
 
+registerProcessErrorHandlers();
 startServer();
 
 export { app, io };
