@@ -64,6 +64,19 @@ describe('errorHandler middleware', () => {
     });
   });
 
+
+  it('handles non-size multer errors with original message', () => {
+    const err = new multer.MulterError('LIMIT_UNEXPECTED_FILE');
+
+    errorHandler(err, mockReq as Request, mockRes as Response, nextFunction);
+
+    expect(mockRes.status).toHaveBeenCalledWith(400);
+    expect(mockRes.json).toHaveBeenCalledWith({
+      success: false,
+      message: 'Unexpected field',
+    });
+  });
+
   it('handles custom invalid csv file type errors', () => {
     const err = new Error('Invalid file type. Only CSV files are allowed.');
 
