@@ -201,8 +201,8 @@ const AboutUsPage: React.FC = () => {
               </div>
               <p className="text-sm md:text-base font-bold leading-relaxed opacity-80 text-[var(--bulletin-text)]">
                 We were UMaT students trying to sell a graphics calculator and a barely-used lab coat.
-                Facebook groups were our only option — and they were a nightmare. Scammers, no-shows,
-                cash-and-dash buyers, and zero accountability. We got burned. Our friends got burned.
+                Spammy WhatsApp buy-and-sell groups were our only option — and they were a nightmare. Constant spam, flooded chats,
+                no search features, scammers, and zero accountability. We got burned. Our friends got burned.
                 Everyone had a horror story.
               </p>
             </div>
@@ -215,7 +215,7 @@ const AboutUsPage: React.FC = () => {
                 The Breaking Point
               </div>
               <p className="text-sm md:text-base font-bold leading-relaxed text-black dark:text-red-100 opacity-90">
-                After one too many sketchy Facebook DMs from anonymous &ldquo;interested buyers,&rdquo; a small
+                After one too many sketchy WhatsApp DMs from anonymous phone numbers claiming to be &ldquo;interested buyers,&rdquo; a small
                 group of us decided: if no one else will fix this for UMaT students, we will.
               </p>
             </div>
@@ -416,7 +416,7 @@ const AboutUsPage: React.FC = () => {
                 <span className="text-[#ff6b6b]">the right way?</span>
               </h2>
               <p className="text-sm md:text-base font-bold leading-relaxed text-white/60 max-w-lg">
-                Stop risking your money on unverified Facebook strangers.
+                Stop risking your money on unverified WhatsApp group strangers.
                 Join QUADS — the only campus marketplace built with your safety in mind.
                 Verified, free, and campus-only.
               </p>
