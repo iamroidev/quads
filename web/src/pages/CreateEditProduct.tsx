@@ -256,7 +256,7 @@ const CreateEditProduct = () => {
 
   if (loadingProduct) {
     return (
-      <BulletinLayout title="Loading..." subtitle={isEdit ? 'Edit' : 'New'} section="14">
+      <BulletinLayout title="Loading..." subtitle={isEdit ? 'Edit' : 'New'} section="14" showFooter={false}>
         <BulletinSection bgColor="bg-[var(--bulletin-bg)]">
           <div className="flex items-center justify-center py-20">
             <div className="animate-spin h-8 w-8 border-b-2 border-[var(--bulletin-border)]" />
@@ -268,7 +268,7 @@ const CreateEditProduct = () => {
 
   if (isUnverifiedSeller) {
     return (
-      <BulletinLayout title="Verification Required" subtitle="Seller" section="14">
+      <BulletinLayout title="Verification Required" subtitle="Seller" section="14" showFooter={false}>
         <BulletinSection bgColor="bg-[var(--bulletin-bg)]">
           <div className="max-w-lg mx-auto text-center py-16">
             <div className="inline-flex items-center justify-center h-16 w-16 border-2 border-[var(--bulletin-border)] bg-[#fce4ec] dark:bg-red-900/20 mb-6">
@@ -299,6 +299,7 @@ const CreateEditProduct = () => {
       subtitle={isEdit ? 'Fixing up your item info...' : 'Post your item for others to buy'}
       section="14"
       hideHero={true}
+      showFooter={false}
     >
       <div className="bg-[var(--bulletin-bg)] min-h-screen pb-20">
         <div className="border-b-4 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] px-6 py-6 sticky top-[42px] z-[50] transition-colors">
