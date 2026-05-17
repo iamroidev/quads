@@ -11,6 +11,7 @@ The platform utilizes a unique **Bulletin Board Design System**, inspired by phy
 - **Rigid Aesthetics**: Sharp borders and hard-offset shadows.
 - **Paper Metaphor**: Polaroid-style product framing with interactive rotation.
 - **Premium Typography**: Monospace and technical font pairings.
+- **Premium Branding**: Custom Neobrutalist QUADS logo and assets fully integrated across both PWA Web and Native Mobile clients.
 
 ## 🚀 Deployment Status (Production)
 The platform is fully deployed and operational across the following stack:
