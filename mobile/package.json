@@ -33,6 +33,7 @@
     "expo-secure-store": "~55.0.13",
     "expo-status-bar": "~55.0.6",
     "expo-web-browser": "~55.0.15",
+    "promise": "^8.3.0",
     "react": "19.2.0",
     "react-native": "0.83.6",
     "react-native-qrcode-svg": "^6.3.21",
