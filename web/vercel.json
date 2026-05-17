@@ -1,5 +1,16 @@
 {
   "rewrites": [
+    {
+      "source": "/products/:id",
+      "has": [
+        {
+          "type": "header",
+          "key": "User-Agent",
+          "value": ".*(facebookexternalhit|WhatsApp|Twitterbot|LinkedInBot|telegrambot|Slackbot).*"
+        }
+      ],
+      "destination": "https://api.quadsmarket.tech/api/products/:id/share"
+    },
     { "source": "/(.*)", "destination": "/index.html" }
   ]
 }

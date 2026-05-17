@@ -4,6 +4,14 @@ import path from 'path';
 // Load .env from project root - handles both src/ and dist/ structures
 dotenv.config(); // Loads from the current working directory (project root)
 dotenv.config({ path: path.join(process.cwd(), '.env') });
+dotenv.config({ path: path.join(process.cwd(), '..', '.env') });
+
+// Load development overrides if in development mode
+// (Forces backend to connect to local MongoDB database in dev environment)
+if (process.env.NODE_ENV !== 'production') {
+  dotenv.config({ path: path.join(process.cwd(), '.env.development'), override: true });
+  dotenv.config({ path: path.join(process.cwd(), '..', '.env.development'), override: true });
+}
 
 interface EnvConfig {
   PORT: number;
@@ -51,7 +59,7 @@ const env: EnvConfig = {
   PAYSTACK_PUBLIC_KEY: process.env.PAYSTACK_PUBLIC_KEY || '',
   GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID || '',
   SUPABASE_URL: process.env.SUPABASE_URL || '',
-  CLIENT_URL: process.env.CLIENT_URL || 'http://localhost:5173',
+  CLIENT_URL: process.env.CLIENT_URL || 'http://localhost:5185',
   AWS_ACCESS_KEY_ID: process.env.AWS_ACCESS_KEY_ID || '',
   AWS_SECRET_ACCESS_KEY: process.env.AWS_SECRET_ACCESS_KEY || '',
   AWS_REGION: process.env.AWS_REGION || 'us-east-1',

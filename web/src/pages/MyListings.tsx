@@ -1,6 +1,7 @@
  import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
-import { Plus, Package, Eye, Edit2, Trash2, MoreVertical, Zap, Upload, Copy, BarChart3, X, Filter, ShieldOff } from 'lucide-react';
+import { Plus, Package, Eye, Edit2, Trash2, MoreVertical, Zap, Upload, Copy, BarChart3, X, Filter, ShieldOff, Printer, QrCode } from 'lucide-react';
+import { QRCodeSVG } from 'qrcode.react';
 import toast from 'react-hot-toast';
 import productService from '../services/product.service';
 import { LoadingSpinner } from '../components/ui';
@@ -56,6 +57,7 @@ const MyListings: React.FC = () => {
   const [bulkTags, setBulkTags] = useState('');
   const [bulkCategory, setBulkCategory] = useState('others');
   const [confirmDelete, setConfirmDelete] = useState<{ mode: 'single' | 'bulk'; productId?: string; count?: number } | null>(null);
+  const [selectedFlyerProduct, setSelectedFlyerProduct] = useState<ProductPopulated | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const statusFilter = searchParams.get('status') || '';
@@ -706,10 +708,20 @@ const MyListings: React.FC = () => {
                                 </button>
                               )}
                               <button
+                                onClick={() => {
+                                  setSelectedFlyerProduct(product);
+                                  setOpenMenu(null);
+                                }}
+                                className="w-full text-left px-3 py-1.5 text-[10px] font-bold uppercase hover:bg-[#fffacd] dark:hover:bg-yellow-900/30 flex items-center gap-1"
+                              >
+                                <QrCode className="h-3.5 w-3.5 mr-0.5" />
+                                Polaroid Flyer
+                              </button>
+                              <button
                                 onClick={() => handleDuplicate(product._id)}
                                 className="w-full text-left px-3 py-1.5 text-[10px] font-bold uppercase hover:bg-[#e0f2f7] dark:hover:bg-sky-900/30 flex items-center gap-1"
                               >
-                                <Copy className="h-3 w-3" />
+                                <Copy className="h-3.5 w-3.5 mr-0.5" />
                                 Copy
                               </button>
                               <div className="border-t border-[var(--bulletin-border)] my-1" />
@@ -755,6 +767,285 @@ const MyListings: React.FC = () => {
                 Next
               </button>
             )}
+          </div>
+        )}
+
+        {/* Polaroid Flyer QR Generator Modal */}
+        {selectedFlyerProduct && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm overflow-y-auto">
+            <div className="border-4 border-black bg-[#faf8f5] dark:bg-[#181818] shadow-[12px_12px_0_0_rgba(0,0,0,1)] dark:shadow-[12px_12px_0_0_rgba(255,255,255,1)] max-w-2xl w-full p-6 relative my-8">
+              {/* Close Button */}
+              <button
+                onClick={() => setSelectedFlyerProduct(null)}
+                className="absolute right-4 top-4 border-2 border-black bg-white dark:bg-black p-1.5 shadow-[3px_3px_0_0_var(--bulletin-shadow)] hover:shadow-[1px_1px_0_0_var(--bulletin-shadow)] transition-all z-10"
+              >
+                <X className="h-4 w-4" />
+              </button>
+
+              <div className="mb-5 border-b-2 border-black pb-3 text-black dark:text-white">
+                <div className="text-[10px] font-black uppercase tracking-widest text-[#ff6b6b]">Marketing growth loops</div>
+                <h3 className="text-xl font-black uppercase mt-0.5 font-mono">Polaroid Flyer Generator</h3>
+                <p className="text-[10px] opacity-70 mt-1 uppercase font-bold">Print this physical flyer and paste it on hostel bulletin boards to drive local traffic!</p>
+              </div>
+
+              {/* Flex columns: Controls (left) & Digital Preview (right) */}
+              <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
+                
+                {/* ── Left side: Controls ── */}
+                <div className="md:col-span-5 space-y-4 font-mono text-black dark:text-white">
+                  <div className="border-2 border-black bg-[#fffacd] p-3 shadow-[4px_4px_0_0_black]">
+                    <div className="text-[10px] font-black uppercase mb-1 text-black">💡 Campus Growth Strategy</div>
+                    <p className="text-[9px] leading-relaxed text-black/80">
+                      Physical bulletin boards inside UMaT hostels are high-traffic hubs. QR flyers create a highly tactile, local bridge directly to your digital shop!
+                    </p>
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black uppercase block">Custom Pickup Hostel Location:</label>
+                    <input 
+                      type="text" 
+                      defaultValue={selectedFlyerProduct.pickupLocation || user?.residenceHall || ''}
+                      id="flyer-pickup-input"
+                      className="w-full border-2 border-black bg-white dark:bg-black p-2 text-xs font-bold uppercase focus:ring-0 focus:outline-none focus:border-[#ff6b6b] text-black dark:text-white"
+                      placeholder="e.g. Gold & Black Hall"
+                      onChange={(e) => {
+                        setSelectedFlyerProduct(prev => prev ? { ...prev, pickupLocation: e.target.value } : null);
+                      }}
+                    />
+                  </div>
+
+                  <button
+                    onClick={() => {
+                      const mainImage = selectedFlyerProduct.images[0]?.url || `https://placehold.co/400x300/f3f5f7/9ba3a7?text=${encodeURIComponent(selectedFlyerProduct.title.slice(0, 15))}`;
+                      
+                      // Find the rendered QR code SVG inside the preview block
+                      const qrElement = document.getElementById(`qr-code-svg-flyer-${selectedFlyerProduct._id}`);
+                      const qrSvgMarkup = qrElement ? qrElement.outerHTML : '';
+
+                      // Open native print dialogue with custom high fidelity print template
+                      const printWindow = window.open('', '_blank', 'width=800,height=1000');
+                      if (!printWindow) {
+                        toast.error('Popup blocked! Please allow popups to download and print the flyer.');
+                        return;
+                      }
+
+                      printWindow.document.write(`
+                        <html>
+                          <head>
+                            <title>Print Polaroid Flyer - ${selectedFlyerProduct.title}</title>
+                            <script src="https://cdn.tailwindcss.com"></script>
+                            <style>
+                              @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@700;800&family=Fraunces:wght@700;900&display=swap');
+                              body {
+                                background-color: #faf8f5;
+                                color: #000000;
+                                font-family: 'JetBrains Mono', monospace;
+                                padding: 40px;
+                                margin: 0;
+                                display: flex;
+                                align-items: center;
+                                justify-content: center;
+                                min-height: 100vh;
+                                -webkit-print-color-adjust: exact;
+                                print-color-adjust: exact;
+                              }
+                              .flyer-card {
+                                border: 8px solid #000000;
+                                background-color: #ffffff;
+                                padding: 35px;
+                                width: 550px;
+                                box-shadow: 16px 16px 0px 0px #000000;
+                                position: relative;
+                              }
+                              .bulletin-badge {
+                                background-color: #ff6b6b;
+                                color: white;
+                                font-weight: 800;
+                                font-size: 11px;
+                                letter-spacing: 0.1em;
+                                text-transform: uppercase;
+                                padding: 5px 12px;
+                                border: 2px solid #000000;
+                                display: inline-block;
+                              }
+                              @media print {
+                                body {
+                                  padding: 0;
+                                  background-color: #ffffff;
+                                }
+                                .flyer-card {
+                                  box-shadow: none;
+                                  border-width: 6px;
+                                  width: 100%;
+                                  max-width: 100%;
+                                  height: 100%;
+                                  margin: 0;
+                                  padding: 30px;
+                                }
+                              }
+                            </style>
+                          </head>
+                          <body>
+                            <div class="flyer-card">
+                              <!-- Top Pin Detail -->
+                              <div style="position: absolute; top: -16px; left: 50%; transform: translateX(-50%); width: 32px; height: 32px; border-radius: 50%; background-color: #ff6b6b; border: 4px solid #000000; box-shadow: inset -4px -4px 0px rgba(0,0,0,0.35);"></div>
+                              
+                              <!-- Header -->
+                              <div class="text-center border-b-4 border-black pb-4 mb-6">
+                                <h1 class="text-4xl font-extrabold tracking-tighter" style="font-family: 'Fraunces', serif;">QUADS</h1>
+                                <p class="text-[11px] font-black uppercase tracking-widest mt-1 text-[#ff6b6b]">UMaT Official Student Marketplace</p>
+                              </div>
+                              
+                              <!-- Polaroid Picture -->
+                              <div class="border-4 border-black overflow-hidden bg-gray-100 aspect-[4/3] mb-6 flex items-center justify-center shadow-[4px_4px_0_0_rgba(0,0,0,0.1)]">
+                                <img src="${mainImage}" style="width: 100%; height: 100%; object-fit: cover;" />
+                              </div>
+                              
+                              <!-- Content details -->
+                              <div class="space-y-4">
+                                <div class="flex justify-between items-start gap-4">
+                                  <h2 class="text-2xl font-extrabold uppercase tracking-tight line-clamp-2" style="font-family: 'JetBrains Mono', monospace;">${selectedFlyerProduct.title}</h2>
+                                  <span class="text-xl font-black bg-[#fffacd] px-3.5 py-1.5 border-2 border-black whitespace-nowrap shadow-[3px_3px_0_0_#000000]">
+                                    GHS ${selectedFlyerProduct.price.toLocaleString('en-GH', { minimumFractionDigits: 2 })}
+                                  </span>
+                                </div>
+                                
+                                <p class="text-[12px] text-gray-700 line-clamp-3 bg-gray-50 border-2 border-black/10 p-3 italic">
+                                  "${selectedFlyerProduct.description}"
+                                </p>
+                                
+                                <div class="grid grid-cols-12 gap-4 border-t-2 border-dashed border-black pt-4">
+                                  <!-- Info List -->
+                                  <div class="col-span-7 space-y-3 text-[11px] font-bold uppercase">
+                                    <div>
+                                      <span class="opacity-50 text-[10px]">Condition rating:</span>
+                                      <div class="border-2 border-black bg-white px-2 py-0.5 mt-0.5 inline-block text-[10px]">${selectedFlyerProduct.condition}</div>
+                                    </div>
+                                    ${selectedFlyerProduct.pickupLocation ? `
+                                    <div>
+                                      <span class="opacity-50 text-[10px]">Campus Pickup Point:</span>
+                                      <div class="border-2 border-black bg-[#e0f2f7] px-2 py-0.5 mt-0.5 inline-block text-[10px] text-sky-950">${selectedFlyerProduct.pickupLocation}</div>
+                                    </div>
+                                    ` : ''}
+                                  </div>
+                                  
+                                  <!-- QR Box -->
+                                  <div class="col-span-5 flex flex-col items-center justify-center text-center">
+                                    <div class="border-4 border-black p-2 bg-white shadow-[3px_3px_0_0_#000000]">
+                                      ${qrSvgMarkup}
+                                    </div>
+                                    <span class="text-[8px] font-black uppercase mt-1 tracking-wider text-black opacity-80">Scan QR Code to Buy</span>
+                                  </div>
+                                </div>
+                                
+                                <!-- Escrow Badge -->
+                                <div class="mt-6 border-t-4 border-black pt-4 text-center">
+                                  <span class="bulletin-badge">🔐 ESCROW PROTECTED TRANSACTION</span>
+                                  <p class="text-[9px] font-bold opacity-60 mt-1.5 uppercase tracking-wider">Payments held securely in escrow until item verification. No scams.</p>
+                                </div>
+                              </div>
+                            </div>
+                            <script>
+                              window.onload = function() {
+                                setTimeout(function() {
+                                  window.print();
+                                }, 500);
+                              };
+                            </script>
+                          </body>
+                        </html>
+                      `);
+                      printWindow.document.close();
+                      toast.success('Print page loaded successfully');
+                    }}
+                    className="w-full border-4 border-black bg-[var(--bulletin-text)] px-4 py-3 text-[11px] font-black uppercase text-[var(--bulletin-bg)] shadow-[4px_4px_0_0_var(--bulletin-shadow)] hover:bg-[var(--bulletin-card)] hover:text-[var(--bulletin-text)] transition-all flex items-center justify-center gap-2"
+                  >
+                    <Printer className="h-4 w-4" />
+                    Print Flyer / PDF
+                  </button>
+                </div>
+
+                {/* ── Right side: Digital Poster Preview ── */}
+                <div className="md:col-span-7 flex justify-center">
+                  <div 
+                    id="printable-flyer-area"
+                    className="border-4 border-black bg-white p-5 w-full max-w-[340px] shadow-[6px_6px_0_0_rgba(0,0,0,1)] relative font-mono text-black text-left"
+                  >
+                    {/* Visual pinned look */}
+                    <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 h-6 w-6 rounded-full bg-[#ff6b6b] border-4 border-black z-10" />
+
+                    {/* Logo Header */}
+                    <div className="text-center border-b-2 border-black pb-2 mb-4">
+                      <h4 className="text-xl font-black tracking-tight" style={{ fontFamily: 'Fraunces, serif' }}>QUADS</h4>
+                      <p className="text-[8px] font-black uppercase tracking-widest text-[#ff6b6b]">UMaT Peer-to-Peer Market</p>
+                    </div>
+
+                    {/* Image box */}
+                    <div className="border-2 border-black aspect-[4/3] overflow-hidden bg-gray-50 mb-3.5">
+                      <img 
+                        src={selectedFlyerProduct.images[0]?.url || `https://placehold.co/400x300/f3f5f7/9ba3a7?text=${encodeURIComponent(selectedFlyerProduct.title.slice(0, 15))}`} 
+                        alt="Product flyer preview" 
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+
+                    {/* Title & Price */}
+                    <div className="space-y-3.5">
+                      <div className="flex justify-between items-start gap-2">
+                        <h5 className="text-[12px] font-black uppercase leading-tight line-clamp-2">{selectedFlyerProduct.title}</h5>
+                        <span className="text-[10px] font-black bg-[#fffacd] px-2 py-0.5 border-2 border-black whitespace-nowrap">
+                          GHS {selectedFlyerProduct.price.toLocaleString()}
+                        </span>
+                      </div>
+
+                      {/* Description snippet */}
+                      <p className="text-[9px] text-gray-600 italic line-clamp-2 bg-gray-50 border border-black/5 p-2">
+                        "{selectedFlyerProduct.description || 'No description provided.'}"
+                      </p>
+
+                      {/* Grid for parameters + QR code */}
+                      <div className="grid grid-cols-12 gap-2 border-t border-dashed border-black pt-3">
+                        <div className="col-span-7 space-y-2 text-[8px] font-black uppercase">
+                          <div>
+                            <span className="opacity-50 block">Condition:</span>
+                            <span className="border border-black px-1 py-0.2 mt-0.5 inline-block bg-white">{selectedFlyerProduct.condition}</span>
+                          </div>
+                          {selectedFlyerProduct.pickupLocation && (
+                            <div>
+                              <span className="opacity-50 block">Hostel Point:</span>
+                              <span className="border border-black px-1 py-0.2 mt-0.5 inline-block bg-[#e0f2f7] truncate max-w-full">{selectedFlyerProduct.pickupLocation}</span>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* QR Code SVG rendering from qrcode.react */}
+                        <div className="col-span-5 flex flex-col items-center justify-center">
+                          <div className="border-2 border-black p-1 bg-white">
+                            <QRCodeSVG 
+                              id={`qr-code-svg-flyer-${selectedFlyerProduct._id}`}
+                              value={`${window.location.origin}/products/${selectedFlyerProduct._id}`}
+                              size={64}
+                              level="H"
+                              includeMargin={false}
+                            />
+                          </div>
+                          <span className="text-[6px] font-black uppercase mt-1 opacity-70">Scan code</span>
+                        </div>
+                      </div>
+
+                      {/* Footer lock */}
+                      <div className="border-t-2 border-black pt-2 text-center">
+                        <span className="bg-[#ff6b6b] text-white text-[7px] font-black uppercase tracking-wider px-2 py-0.5 border border-black inline-block">
+                          🔐 Escrow Safeguarded
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+
+            </div>
           </div>
         )}
       </BulletinSection>

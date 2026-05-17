@@ -583,20 +583,20 @@ const ProductDetail: React.FC = () => {
 
             {/* Discovery: Available Coupons */}
             {sellerCoupons.length > 0 && (
-              <div className="mb-10 p-6 border-4 border-black bg-[#fffacd] dark:bg-yellow-900/20 shadow-[8px_8px_0_0_#000] rotate-[-0.5deg]">
+              <div className="mb-10 p-6 border-4 border-[var(--bulletin-border)] bg-[#fffacd] dark:bg-yellow-950/20 shadow-[8px_8px_0_0_var(--bulletin-shadow)] rotate-[-0.5deg] text-[var(--bulletin-text)]">
                 <div className="flex items-center gap-2 mb-4">
                   <BadgePercent className="h-5 w-5 text-[#ff6b6b]" />
-                  <h3 className="text-[12px] font-black uppercase tracking-[0.2em]">Shop Promos</h3>
+                  <h3 className="text-[12px] font-black uppercase tracking-[0.2em] text-[var(--bulletin-text)]">Shop Promos</h3>
                 </div>
                 <div className="grid gap-3">
                   {sellerCoupons.map((coupon) => (
-                    <div key={coupon._id} className="flex items-center justify-between border-2 border-dashed border-black/30 p-3 bg-white/40 dark:bg-black/40">
+                    <div key={coupon._id} className="flex items-center justify-between border-2 border-dashed border-[var(--bulletin-border)]/30 p-3 bg-white/40 dark:bg-black/40 text-[var(--bulletin-text)]">
                       <div>
                         <div className="text-[14px] font-black">{coupon.type === 'percentage' ? `${coupon.value}% OFF` : `GHS ${coupon.value} OFF`}</div>
                         <div className="text-[9px] font-bold opacity-60 uppercase">Min Order: GHS {coupon.minOrderAmount}</div>
                       </div>
                       <div className="flex flex-col items-end">
-                        <div className="bg-black text-white px-3 py-1 text-[12px] font-mono font-bold select-all cursor-copy">{coupon.code}</div>
+                        <div className="bg-[var(--bulletin-text)] text-[var(--bulletin-bg)] px-3 py-1 text-[12px] font-mono font-bold select-all cursor-copy">{coupon.code}</div>
                         <div className="text-[8px] font-black mt-1 opacity-40">CLICK TO COPY</div>
                       </div>
                     </div>

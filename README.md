@@ -24,6 +24,8 @@ The platform is fully deployed and operational across the following stack:
 - **Growth Tooling**: Campaign scheduling, featured listing boosts, and native coupon/bundle creation.
 - **Trust & Safety**: Institutional verification flow, secure dispute mediation, and profile completion gates.
 - **Real-time Messaging**: Socket-based chat with typing indicators and integrated transaction metadata.
+- **Price Alert System**: Saved items with price tracking and change notifications (>5% triggers alerts).
+- **Social Discovery**: Follow/unfollow system, follower feeds, and new follower notifications.
 
 ## 📂 Project Structure
 - `web/` — React + Vite (The Hardened Bulletin UI).

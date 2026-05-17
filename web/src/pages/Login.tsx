@@ -156,18 +156,18 @@ const LoginPage: React.FC = () => {
 
         {/* Large polaroid-style ID card */}
         <div
-          className="absolute top-[50%] right-[12%] border-4 border-[var(--bulletin-bg)] bg-[var(--bulletin-card)] p-6 shadow-[12px_12px_0_0_rgba(255,255,255,0.15)]"
+          className="absolute top-[50%] right-[12%] border-4 border-white bg-white p-6 shadow-[12px_12px_0_0_rgba(255,255,255,0.15)] text-black"
           style={{ transform: 'rotate(4deg)', width: '220px' }}
         >
-          <div className="border-4 border-[var(--bulletin-bg)]/20 bg-[var(--bulletin-bg)] h-32 flex items-center justify-center mb-4">
-            <div className="h-16 w-16 border-4 border-[var(--bulletin-text)]/30 flex items-center justify-center">
+          <div className="border-4 border-black/10 bg-[#faf8f5] h-32 flex items-center justify-center mb-4">
+            <div className="h-16 w-16 border-4 border-black/20 flex items-center justify-center">
               <span className="text-4xl opacity-50">👤</span>
             </div>
           </div>
-            <div className="flex flex-col items-center">
-              <BrandMark className="h-16 w-16 mb-2" />
-              <div className="text-lg font-black uppercase tracking-tight text-[var(--bulletin-text)] mt-1">QUADS</div>
-            </div>
+          <div className="flex flex-col items-center">
+            <BrandMark className="h-16 w-16 mb-2 text-black" />
+            <div className="text-lg font-black uppercase tracking-tight text-black mt-1">QUADS</div>
+          </div>
           {/* Tape effect */}
           <div className="absolute -top-4 left-1/2 -translate-x-1/2 h-8 w-24 bg-[#ffd700]/50 rotate-[-2deg]" />
         </div>
@@ -180,9 +180,9 @@ const LoginPage: React.FC = () => {
 
         {/* Bottom brand */}
         <div className="absolute bottom-8 left-8">
-          <div className="inline-flex items-center gap-3 border-4 border-[var(--bulletin-bg)]/20 px-4 py-2">
-            <BrandMark className="h-6 w-6 text-[var(--bulletin-bg)]" />
-            <span className="text-[12px] font-black uppercase tracking-[0.3em] text-[var(--bulletin-bg)]">QUADS</span>
+          <div className="inline-flex items-center gap-3 border-4 border-[#faf8f5]/20 px-4 py-2">
+            <BrandMark className="h-6 w-6 text-[#faf8f5]" />
+            <span className="text-[12px] font-black uppercase tracking-[0.3em] text-[#faf8f5]">QUADS</span>
           </div>
         </div>
 
@@ -253,7 +253,7 @@ const LoginPage: React.FC = () => {
                         onChange={(e) => setProtocolAccepted(e.target.checked)}
                         required
                       />
-                      <Pin className="h-4 w-4 opacity-20 peer-checked:text-[var(--bulletin-accent)] peer-checked:rotate-45 transition-all text-[var(--bulletin-text)]" />
+                      <Pin className="h-4 w-4 text-[var(--bulletin-text)] opacity-35 peer-checked:text-[#ff6b6b] peer-checked:fill-[#ff6b6b] peer-checked:opacity-100 peer-checked:rotate-45 transition-all" />
                     </label>
                     <div className="flex-1">
                       <p className="text-[10px] font-black uppercase tracking-tight text-[var(--bulletin-text)] leading-tight">

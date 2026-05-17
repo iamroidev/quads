@@ -4,6 +4,7 @@ import {
   getSavedItems,
   isSaved,
   getSavedItemIds,
+  getSavedItemsWithPriceChanges,
 } from '../controllers/savedItem.controller';
 import { authenticate } from '../middleware/auth';
 
@@ -14,6 +15,9 @@ router.use(authenticate);
 
 // GET /api/saved — get saved products
 router.get('/', getSavedItems);
+
+// GET /api/saved/price-changes — get saved products with price change alerts
+router.get('/price-changes', getSavedItemsWithPriceChanges);
 
 // GET /api/saved/ids — get saved product IDs
 router.get('/ids', getSavedItemIds);

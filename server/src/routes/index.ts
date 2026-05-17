@@ -17,6 +17,7 @@ import autoPayoutRoutes from './autoPayout.routes';
 import supportRoutes from './support.routes';
 import feedRoutes from './feed.routes';
 import offerRoutes from './offer.routes';
+import userRoutes from './user.routes';
 
 const router = Router();
 
@@ -48,5 +49,6 @@ router.use('/auto-payouts', autoPayoutRoutes);
 router.use('/support', supportRoutes);
 router.use('/feed', feedRoutes);
 router.use('/offers', offerRoutes);
+router.use('/users', userRoutes); // Added user routes
 
 export default router;

@@ -32,13 +32,18 @@ export interface User {
     identitySubmittedAt?: string;
     completedAt?: string;
   };
-  savedItems: string[];
+  savedItems: {
+    productId: string;
+    savedAt: string; // ISO date string
+    priceWhenSaved: number;
+  }[];
   notificationPrefs?: {
     orderUpdates: boolean;
     messages: boolean;
     reviews: boolean;
     promotions: boolean;
     systemAlerts: boolean;
+    priceAlerts: boolean; // New preference for price change alerts
   };
   privacyPrefs?: {
     showPhone: boolean;
@@ -381,7 +386,9 @@ export type NotificationType =
   | 'new_review'
   | 'review_reply'
   | 'product_sold'
-  | 'system';
+  | 'system'
+  | 'price_drop'
+  | 'price_increase';
 
 export interface NotificationItem {
   _id: string;
@@ -408,6 +415,8 @@ export const NOTIFICATION_TYPE_LABELS: Record<NotificationType, string> = {
   review_reply: 'Review Reply',
   product_sold: 'Product Sold',
   system: 'System',
+  price_drop: 'Price Drop Alert',
+  price_increase: 'Price Increase Alert',
 };
 
 // Pulse / Activity types
