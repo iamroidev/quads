@@ -59,7 +59,7 @@ const env: EnvConfig = {
   PAYSTACK_PUBLIC_KEY: process.env.PAYSTACK_PUBLIC_KEY || '',
   GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID || '',
   SUPABASE_URL: process.env.SUPABASE_URL || '',
-  CLIENT_URL: process.env.CLIENT_URL || 'http://localhost:5100',
+  CLIENT_URL: process.env.CLIENT_URL || 'http://localhost:5200',
   AWS_ACCESS_KEY_ID: process.env.AWS_ACCESS_KEY_ID || '',
   AWS_SECRET_ACCESS_KEY: process.env.AWS_SECRET_ACCESS_KEY || '',
   AWS_REGION: process.env.AWS_REGION || 'us-east-1',

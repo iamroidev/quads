@@ -617,8 +617,8 @@ const FAQPage: React.FC = () => {
   return (
     <BulletinLayout title="FAQ" subtitle="Frequently Asked Questions" section="08">
 
-      {/* ── Hero Banner ────────────────────────────────────────────────────── */}
-      <div className="border-b-4 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] px-6 py-10 md:py-16 relative overflow-hidden">
+      {/* ── Hero Banner ────────────────────────────────────────────────────────────────── */}
+      <div className="border-b-4 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] px-4 py-10 md:px-12 md:py-16 relative overflow-hidden">
         {/* Large watermark */}
         <div className="absolute -right-6 top-1/2 -translate-y-1/2 select-none text-[12rem] md:text-[18rem] font-black leading-none opacity-[0.04] text-[var(--bulletin-text)] pointer-events-none">
           FAQ
@@ -631,11 +631,10 @@ const FAQPage: React.FC = () => {
           <p className="text-[10px] font-black uppercase tracking-[0.35em] text-[var(--bulletin-text)] opacity-40 mb-3">
             QUADS — UMaT Campus Marketplace
           </p>
-          <h1 className="text-xl md:text-3xl font-black uppercase tracking-tighter text-[var(--bulletin-text)] mb-4 leading-none">
-            Got Questions?
-            <br />
-            <span className="inline-block bg-[#ff6b6b] text-white px-3 mt-2 shadow-[4px_4px_0_0_var(--bulletin-shadow)] rotate-[-0.5deg]">
-              We've Got Answers.
+          <h1 className="text-2xl md:text-4xl lg:text-5xl font-black uppercase tracking-tighter text-[var(--bulletin-text)] mb-4 leading-none">
+            Got Questions?<br />
+            <span className="inline-block bg-[#ff6b6b] text-white px-3 mt-2 shadow-[4px_4px_0_0_var(--bulletin-shadow)]" style={{ transform: 'rotate(-0.5deg)' }}>
+              We&rsquo;ve Got Answers.
             </span>
           </h1>
           <p className="text-sm md:text-base font-bold opacity-60 text-[var(--bulletin-text)] max-w-xl leading-relaxed mt-4">
@@ -663,7 +662,7 @@ const FAQPage: React.FC = () => {
                   setOpenId(null);
                 }}
                 placeholder="Search questions... (e.g. payment, seller, register)"
-                className="flex-1 bg-transparent text-[13px] md:text-[14px] font-bold text-[var(--bulletin-text)] placeholder:text-[var(--bulletin-text)] placeholder:opacity-30 focus:outline-none uppercase tracking-wide"
+                className="flex-1 bg-transparent text-[13px] md:text-[14px] font-bold text-[var(--bulletin-text)] placeholder:text-[var(--bulletin-text)] placeholder:opacity-30 focus:outline-none"
               />
               {searchQuery && (
                 <button
