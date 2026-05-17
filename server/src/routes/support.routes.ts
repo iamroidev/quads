@@ -15,7 +15,7 @@ const router = Router();
 router.get('/ai-user', async (req, res, next) => {
   try {
     const AI_EMAIL = 'support@quadsmarket.tech';
-    const AI_AVATAR = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none"><rect width="100" height="100" rx="12" fill="%23ffd700"/><circle cx="50" cy="50" r="30" fill="%23000000"/><circle cx="40" cy="45" r="5" fill="%23ff6b6b"/><circle cx="60" cy="45" r="5" fill="%23ff6b6b"/><rect x="42" y="65" width="16" height="4" fill="%23ffffff"/><path d="M50 10v10" stroke="%23000000" stroke-width="4"/><circle cx="50" cy="8" r="4" fill="%23ff6b6b"/></svg>';
+    const AI_AVATAR = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHZpZXdCb3g9JzAgMCAxMDAgMTAwJyBmaWxsPSdub25lJz48cmVjdCB3aWR0aD0nMTAwJyBoZWlnaHQ9JzEwMCcgcng9JzEyJyBmaWxsPScjZmZkNzAwJy8+PGNpcmNsZSBjeD0nNTAnIGN5PSc1MCcgcj0nMzAnIGZpbGw9JyMwMDAwMDAnLz48Y2lyY2xlIGN4PSc0MCcgY3k9JzQ1JyByPSc1JyBmaWxsPScjZmY2YjZiJy8+PGNpcmNsZSBjeD0nNjAnIGN5PSc0NScgcj0nNScgZmlsbD0nI2ZmNmI2YicvPjxyZWN0IHg9JzQyJyB5PSc2NScgd2lkdGg9JzE2JyBoZWlnaHQ9JzQnIGZpbGw9JyNmZmZmZmYnLz48cGF0aCBkPSdNNTAgMTB2MTAnIHN0cm9rZT0nIzAwMDAwMCcgc3Ryb2tlLXdpZHRoPSc0Jy8+PGNpcmNsZSBjeD0nNTAnIGN5PSc4JyByPSc0JyBmaWxsPScjZmY2YjZiJy8+PC9zdmc+';
     let aiUser = await User.findOne({ email: AI_EMAIL });
     
     if (!aiUser) {
@@ -28,7 +28,7 @@ router.get('/ai-user', async (req, res, next) => {
         phone: '+233000000000',
         avatar: AI_AVATAR
       });
-    } else if (!aiUser.avatar) {
+    } else if (!aiUser.avatar || aiUser.avatar.includes('utf8')) {
       aiUser.avatar = AI_AVATAR;
       await aiUser.save();
     }
