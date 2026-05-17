@@ -48,7 +48,10 @@ class EmailService {
       <body>
         <div class="container">
           <div class="header">
-            <h1>QUA<span>DS</span></h1>
+            <!-- Brand Neobrutalist Logo Container -->
+            <div style="display: inline-block; transform: rotate(-3deg); border: 4px solid #ffffff; border-radius: 16px; padding: 8px 32px; background: #000000; margin: 10px 0;">
+              <span style="font-family: 'Arial', sans-serif; font-weight: 900; font-style: italic; font-size: 32px; color: #ff6b6b; letter-spacing: -1.5px; text-transform: uppercase;">QUADS</span>
+            </div>
           </div>
           <div class="content">
             ${body}
@@ -110,37 +113,45 @@ class EmailService {
     
     const roleContent = isSeller 
       ? `
-        <div class="role-badge">SELLER ACCOUNT ACTIVATED</div>
-        <h2>Start your campus empire, ${name}!</h2>
-        <p>Your seller profile is now live. You can now list items, track sales, and grow your brand within the UMaT community.</p>
+        <div class="role-badge">💼 CAMPUS MERCHANT ACTIVATED</div>
+        <h2>Start Your Student Business Empire, ${name}!</h2>
+        <p>Your seller store is officially active. You are now fully unlocked to list products, accept secure campus payments, and reach thousands of potential UMaT student buyers immediately.</p>
         
         <div style="background: #fffacd; padding: 20px; border: 2px solid #000; margin: 24px 0;">
-          <p style="margin: 0; font-weight: 700;">NEXT STEPS:</p>
-          <ul style="margin: 12px 0 0 0; padding-left: 20px;">
-            <li>Complete your <strong>Payout Setup</strong> in the dashboard</li>
-            <li>List your first item with clear photos</li>
-            <li>Share your shop link with friends</li>
+          <p style="margin: 0; font-weight: 900; text-transform: uppercase; font-size: 14px; letter-spacing: 0.5px;">🚀 GETTING STARTED:</p>
+          <ul style="margin: 12px 0 0 0; padding-left: 20px; font-size: 14px; line-height: 1.8;">
+            <li><strong>Configure Payouts:</strong> Enter your Mobile Money details in your profile to receive funds directly.</li>
+            <li><strong>List with Care:</strong> Take clear photos in good lighting and set competitive student-friendly prices.</li>
+            <li><strong>Boost Conversions:</strong> Generate custom seller coupons or bundles to attract buyers to your listings.</li>
           </ul>
         </div>
       `
       : `
-        <div class="role-badge">BUYER ACCOUNT ACTIVATED</div>
-        <h2>Welcome to the Market, ${name}!</h2>
-        <p>You now have access to hundreds of verified listings from students across campus.</p>
-        <p>From electronics to textbooks, find what you need securely.</p>
+        <div class="role-badge">🎉 CAMPUS ACCESS GRANTED</div>
+        <h2>Welcome to UMaT's Official Marketplace, ${name}!</h2>
+        <p>Your student credentials have been verified. You're now unlocked to browse, buy, and trade directly with fellow peers on campus. No shipping fees, no off-campus meetups, just pure convenience.</p>
+        
+        <div style="background: #fffacd; padding: 20px; border: 2px solid #000; margin: 24px 0;">
+          <p style="margin: 0; font-weight: 900; text-transform: uppercase; font-size: 14px; letter-spacing: 0.5px;">🔍 SHOPPING TIPS:</p>
+          <ul style="margin: 12px 0 0 0; padding-left: 20px; font-size: 14px; line-height: 1.8;">
+            <li><strong>Find Deals:</strong> Filter by categories to find textbook deals, tech gear, or dorm essentials.</li>
+            <li><strong>Escrow Protection:</strong> Pay securely via Mobile Money (MTN, Telecel, AirtelTigo). Funds are held safely in escrow until you verify the item!</li>
+            <li><strong>Handoff Safe:</strong> Meet the seller in broad daylight at popular campus spots like the library or campus cafeterias.</li>
+          </ul>
+        </div>
       `;
 
     const body = `
       ${roleContent}
       
       <div style="text-align: center;">
-        <a href="${process.env.CLIENT_URL || 'https://quadsmarket.tech'}/dashboard" class="btn btn-primary">Enter Dashboard</a>
+        <a href="${process.env.CLIENT_URL || 'https://quadsmarket.tech'}/dashboard" class="btn btn-primary" style="display: inline-block; background: #ff6b6b; color: #ffffff !important; text-decoration: none; padding: 16px 32px; font-weight: 900; text-transform: uppercase; font-size: 13px; letter-spacing: 1px; margin: 24px 0; border: 2px solid #000; box-shadow: 4px 4px 0 0 #000000;">Enter Dashboard</a>
       </div>
       
       <div class="divider"></div>
       
       <p style="font-size: 13px; color: #666;">
-        <strong>Safety First:</strong> Always meet in public spaces like the library or campus cafeterias for item handovers.
+        <strong>Safety First:</strong> Never share sensitive personal info. Keep all coordination inside the campus platform for your peace of mind and protection.
       </p>
     `;
     
