@@ -24,6 +24,7 @@ const Messages: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [convToDelete, setConvToDelete] = useState<string | null>(null);
 
   const fetchConversations = useCallback(async () => {
     try {
@@ -75,20 +76,10 @@ const Messages: React.FC = () => {
     return unsub;
   }, [onConversationUpdated]);
 
-  const handleDelete = async (e: React.MouseEvent, conversationId: string) => {
+  const handleDeleteClick = (e: React.MouseEvent, conversationId: string) => {
     e.preventDefault();
     e.stopPropagation();
-    if (!confirm('Delete this conversation? This cannot be undone.')) return;
-    setDeletingId(conversationId);
-    try {
-      await chatService.deleteConversation(conversationId);
-      setConversations((prev) => prev.filter((c) => c._id !== conversationId));
-      toast.success('Conversation deleted');
-    } catch {
-      toast.error('Failed to delete conversation');
-    } finally {
-      setDeletingId(null);
-    }
+    setConvToDelete(conversationId);
   };
 
   const getOtherParticipant = (conv: Conversation) =>
@@ -232,9 +223,9 @@ const Messages: React.FC = () => {
                         </span>
                       )}
                       <button
-                        onClick={(e) => handleDelete(e, conv._id)}
+                        onClick={(e) => handleDeleteClick(e, conv._id)}
                         disabled={deletingId === conv._id}
-                        className="border border-[var(--bulletin-border)] bg-[var(--bulletin-card)] p-1 text-[9px] font-bold uppercase shadow-[1px_1px_0_0_var(--bulletin-shadow)] opacity-0 group-hover:opacity-100 hover:bg-[#fce4ec] dark:hover:bg-red-900/20 transition-all"
+                        className="border border-[var(--bulletin-border)] bg-[var(--bulletin-card)] p-1 text-[9px] font-bold uppercase shadow-[1px_1px_0_0_var(--bulletin-shadow)] opacity-100 md:opacity-0 md:group-hover:opacity-100 hover:bg-[#fce4ec] dark:hover:bg-red-900/20 transition-all"
                         title="Delete"
                       >
                         <Trash2 className="h-3 w-3" />
@@ -248,6 +239,44 @@ const Messages: React.FC = () => {
           </div>
         )}
       </BulletinSection>
+      {/* ── CUSTOM CONFIRM MODAL ── */}
+      {convToDelete && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+          <div className="border-4 border-black dark:border-[var(--bulletin-border)] bg-[var(--bulletin-card)] shadow-[16px_16px_0_0_var(--bulletin-shadow)] max-w-sm w-full p-8 animate-in zoom-in-95 duration-200">
+            <h3 className="text-xl font-black uppercase tracking-tight text-[var(--bulletin-text)] mb-3">Delete Chat?</h3>
+            <p className="text-xs font-bold text-[var(--bulletin-text)] opacity-60 mb-6 font-mono leading-relaxed">
+              Are you sure you want to permanently delete this conversation? This action cannot be undone.
+            </p>
+            <div className="flex gap-4">
+              <button
+                className="flex-1 border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] py-3 text-[10px] font-black uppercase tracking-widest shadow-[4px_4px_0_0_var(--bulletin-shadow)] hover:translate-y-0.5 hover:shadow-none transition-all text-[var(--bulletin-text)]"
+                onClick={() => setConvToDelete(null)}
+              >
+                Discard
+              </button>
+              <button
+                className="flex-1 border-2 border-black dark:border-white bg-[#ff6b6b] text-white py-3 text-[10px] font-black uppercase tracking-widest shadow-[4px_4px_0_0_var(--bulletin-shadow)] hover:translate-y-0.5 hover:shadow-none transition-all"
+                onClick={async () => {
+                  const id = convToDelete;
+                  setConvToDelete(null);
+                  setDeletingId(id);
+                  try {
+                    await chatService.deleteConversation(id);
+                    setConversations((prev) => prev.filter((c) => c._id !== id));
+                    toast.success('Conversation deleted');
+                  } catch {
+                    toast.error('Failed to delete conversation');
+                  } finally {
+                    setDeletingId(null);
+                  }
+                }}
+              >
+                Yes, Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </BulletinLayout>
   );
 };
