@@ -13,7 +13,7 @@ import RegisterPage from './pages/Register';
 import ProfilePage from './pages/Profile';
 import NotFoundPage from './pages/NotFound';
 const ProductsPage = lazy(() => import('./pages/Products'));
-const ProductsBulletinPage = lazy(() => import('./pages/ProductsBulletin'));
+const FollowingFeedPage = lazy(() => import('./pages/FollowingFeed'));
 const ProductDetailPage = lazy(() => import('./pages/ProductDetail'));
 import CreateEditProductPage from './pages/CreateEditProduct';
 import MyListingsPage from './pages/MyListings';
@@ -45,7 +45,6 @@ import MaintenancePage from './pages/Maintenance';
 import SellersPage from './pages/Sellers';
 import GrowthToolsPage from './pages/GrowthTools';
 import PulsePage from './pages/Pulse';
-import DisputeCenterPage from './pages/DisputeCenter';
 import PrivacyPolicyPage from './pages/PrivacyPolicy';
 
 const LostFoundPage = lazy(() => import('./pages/LostFound'));
@@ -111,7 +110,7 @@ const App: React.FC = () => {
 
         {/* Product routes */}
         <Route path="/products" element={<ProductsPage />} />
-        <Route path="/bulletin" element={<ProductsBulletinPage />} />
+        <Route path="/following" element={<ProtectedRoute><FollowingFeedPage /></ProtectedRoute>} />
         <Route path="/products/:id" element={<ProductDetailPage />} />
         <Route
           path="/sell"
@@ -246,7 +245,6 @@ const App: React.FC = () => {
         <Route path="/pulse" element={<PulsePage />} />
         <Route path="/categories" element={<CategoriesPage />} />
         <Route path="/collections/:slug" element={<CollectionDetailPage />} />
-        <Route path="/dispute-center" element={<ProtectedRoute><DisputeCenterPage /></ProtectedRoute>} />
         <Route path="/lost-found" element={<LostFoundPage />} />
 
         <Route
