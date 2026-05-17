@@ -62,3 +62,4 @@ mobile/ios/
 .env.test
 .env.test.local
 .env*.local
+.gitignore
