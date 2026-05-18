@@ -1,13 +1,35 @@
-export const colors = {
-  bg: "#f8f7f4", // Primary board background
-  surface: "#fffdf8", // Standard paper card
-  text: "#000000", // Identity color
+import { Appearance } from 'react-native';
+
+export const lightColors = {
+  bg: "#f8f7f4",       // Parchment board background
+  surface: "#fffdf8",  // Clean paper card
+  text: "#000000",     // Pitch black identity text
   muted: "#666666",
-  border: "#000000", // Hard black borders
-  accent: "#ff6b6b", // Red highlight
-  accentAlt: "#fffacd", // Yellow notice
+  border: "#000000",   // Hard black neobrutalist borders
+  accent: "#ff6b6b",   // Soft red highlight
+  accentAlt: "#fffacd",// Canary yellow notice card background
   danger: "#ff6b6b",
 };
+
+export const darkColors = {
+  bg: "#0f0f11",       // Obsidian dark board background
+  surface: "#18181c",  // Deep slate card surface
+  text: "#f8f7f4",     // Crisp off-white text
+  muted: "#a0a0a0",
+  border: "#ffffff",   // Bold off-white neobrutalist borders in dark mode!
+  accent: "#ff8282",   // High-contrast pink-red highlights
+  accentAlt: "#2c281e",// Deep amber notice background
+  danger: "#ff8282",
+};
+
+// High-performance dynamic ES6 Proxy to automatically return the active theme palette
+export const colors = new Proxy({} as typeof lightColors, {
+  get(_, prop: keyof typeof lightColors) {
+    const isDark = Appearance.getColorScheme() === 'dark';
+    const activePalette = isDark ? darkColors : lightColors;
+    return activePalette[prop];
+  }
+});
 
 export const shadows = {
   bulletin: {
