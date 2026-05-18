@@ -24,6 +24,7 @@ import { useAuth } from '../../context/AuthContext';
 import { useCart } from '../../context/CartContext';
 import { BulletinMarquee } from '../ui/BulletinMarquee';
 import BrandMark from './BrandMark';
+import Footer from './Footer';
 
 interface BulletinLayoutProps {
   children: React.ReactNode;
@@ -405,133 +406,8 @@ export const BulletinLayout: React.FC<BulletinLayoutProps> = ({
           {children}
         </div>
 
-        {/* ── RESTYLED BULLETIN FOOTER ── */}
-        {showFooter && (
-        <footer className="bg-[#0a0a0a] text-white">
-          {/* Coral accent stripe */}
-          <div className="h-2 bg-[#ff6b6b] w-full" />
-
-          <div className="mx-auto max-w-[1400px] px-4 py-10 md:px-12 md:py-16">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 lg:gap-16 mb-12">
-
-              {/* Institutional Branding */}
-              <div className="flex flex-col gap-5 sm:col-span-2 lg:col-span-1">
-                <div className="flex items-center gap-3">
-                  <div className="border-2 border-white/20 bg-white/5 p-2.5 rotate-[-2deg]">
-                    <BrandMark className="h-8 w-8 text-white" />
-                  </div>
-                  <div>
-                    <h2 className="text-lg font-black uppercase tracking-tighter text-white">QUADS</h2>
-                    <p className="text-[8px] font-black uppercase tracking-[0.2em] text-white/30">Student Marketplace</p>
-                  </div>
-                </div>
-                <p className="text-[11px] font-bold text-white/50 leading-relaxed max-w-[220px]">
-                  An independent UMaT student marketplace. Engineered for the community, powered by the community.
-                </p>
-                {/* Social icons */}
-                <div className="flex items-center gap-3 mt-1">
-                  <a href="mailto:support@quadsmarket.tech" title="Email Support"
-                    className="border-2 border-white/20 p-2 text-white/60 hover:border-[#ff6b6b] hover:text-[#ff6b6b] transition-all">
-                    <Mail className="h-4 w-4" />
-                  </a>
-                  <a href="https://wa.me/233551500736" target="_blank" rel="noopener noreferrer" title="WhatsApp Support"
-                    className="border-2 border-white/20 p-2 text-white/60 hover:border-[#25D366] hover:text-[#25D366] transition-all">
-                    <MessageCircle className="h-4 w-4" />
-                  </a>
-                  <a href="https://twitter.com/quadsmarket" target="_blank" rel="noopener noreferrer" title="Follow on X"
-                    className="border-2 border-white/20 p-2 text-white/60 hover:border-[#1DA1F2] hover:text-[#1DA1F2] transition-all">
-                    <Twitter className="h-4 w-4" />
-                  </a>
-                </div>
-              </div>
-
-              {/* Marketplace Column */}
-              <div className="flex flex-col gap-3">
-                <p className="text-[9px] font-black uppercase tracking-[0.3em] text-[#ff6b6b] mb-1">Marketplace</p>
-                {(user?.viewMode === 'seller' ? [
-                  { to: '/dashboard', label: 'My Shop' },
-                  { to: '/seller/analytics', label: 'My Stats' },
-                  { to: '/my-listings', label: 'My Items' },
-                  { to: '/sell', label: 'Sell Something' },
-                ] : [
-                  { to: '/products', label: 'All Items' },
-                  { to: '/categories', label: 'Categories' },
-                  { to: '/lost-found', label: 'Lost & Found' },
-                  { to: '/sellers', label: 'Sellers' },
-                  { to: '/pulse', label: 'Activity' },
-                ]).map(({ to, label }) => (
-                  <Link key={to} to={to}
-                    className="text-[13px] font-black uppercase tracking-widest text-white/60 hover:text-white hover:underline decoration-[#ff6b6b] underline-offset-4 transition-all">
-                    {label}
-                  </Link>
-                ))}
-              </div>
-
-              {/* Company Column */}
-              <div className="flex flex-col gap-3">
-                <p className="text-[9px] font-black uppercase tracking-[0.3em] text-[#ff6b6b] mb-1">Company</p>
-                {[
-                  { to: '/about', label: 'About' },
-                  { to: '/faq', label: 'FAQ' },
-                  { to: '/support', label: 'Help Center' },
-                  { to: '/contact', label: 'Contact Us' },
-                  { to: '/terms', label: 'User Policy' },
-                ].map(({ to, label }) => (
-                  <Link key={to} to={to}
-                    className="text-[13px] font-black uppercase tracking-widest text-white/60 hover:text-white hover:underline decoration-[#ff6b6b] underline-offset-4 transition-all">
-                    {label}
-                  </Link>
-                ))}
-              </div>
-
-              {/* Account Column */}
-              <div className="flex flex-col gap-3">
-                <p className="text-[9px] font-black uppercase tracking-[0.3em] text-[#ff6b6b] mb-1">Account</p>
-                {(isAuthenticated ? [
-                  { to: user?.viewMode === 'seller' ? '/seller/orders' : '/orders', label: user?.viewMode === 'seller' ? 'Incoming Orders' : 'My Orders' },
-                  { to: '/messages', label: 'Messages' },
-                  { to: '/saved', label: 'Saved Items' },
-                  { to: '/settings', label: 'Settings' },
-                ] : [
-                  { to: '/login', label: 'Sign In' },
-                  { to: '/register', label: 'Register' },
-                  { to: '/seller/onboarding', label: 'Start Selling' },
-                ]).map(({ to, label }) => (
-                  <Link key={to} to={to}
-                    className="text-[13px] font-black uppercase tracking-widest text-white/60 hover:text-white hover:underline decoration-[#ff6b6b] underline-offset-4 transition-all">
-                    {label}
-                  </Link>
-                ))}
-              </div>
-            </div>
-
-            {/* Bottom Bar */}
-            <div className="border-t border-white/10 pt-8 flex flex-col sm:flex-row items-center justify-between gap-6">
-              <div className="flex flex-wrap items-center justify-center sm:justify-start gap-x-3 gap-y-2">
-                <Link to="/privacy" className="text-[9px] font-black uppercase tracking-[0.3em] text-white/30 hover:text-[#ff6b6b] transition-all">Privacy Policy</Link>
-                <span className="text-white/15">·</span>
-                <Link to="/terms" className="text-[9px] font-black uppercase tracking-[0.3em] text-white/30 hover:text-[#ff6b6b] transition-all">Terms of Service</Link>
-                <span className="text-white/15">·</span>
-                <span className="text-[9px] font-black uppercase tracking-[0.3em] text-white/20">&copy; {new Date().getFullYear()} QUADS</span>
-              </div>
-              <div className="flex items-center gap-3">
-                <div className="border-2 border-white/10 bg-white/5 px-4 py-1.5">
-                  <div className="text-[9px] font-black uppercase tracking-tighter flex items-center gap-2 text-white/40">
-                    <div className="h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse" />
-                    TARKWA-HQ-01
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="mt-4 text-center">
-              <p className="text-[8px] font-black uppercase tracking-[0.4em] text-white/15">
-                UMaT, Tarkwa 🇬🇭 &nbsp;·&nbsp; Engineered by an independent student developer
-              </p>
-            </div>
-          </div>
-        </footer>
-        )}
+        {/* Render our highly stylized, catchy neobrutalist footer */}
+        {showFooter && <Footer />}
       </div>
     </div>
   );
