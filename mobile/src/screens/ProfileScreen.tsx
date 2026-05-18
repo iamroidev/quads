@@ -163,13 +163,13 @@ const ProfileScreen = ({ navigation }: any) => {
         </View>
       </View>
 
-      {/* Mode Switcher Banner for Sellers */}
-      {isSeller && (
+      {/* Mode Switcher Banner / Onboarding Trigger */}
+      {isSeller ? (
         <TouchableOpacity 
           style={styles.modeBanner} 
           onPress={() => setViewMode(viewMode === 'seller' ? 'buyer' : 'seller')}
         >
-          <View>
+          <View style={{ flex: 1 }}>
             <Text style={styles.modeBannerTitle}>
               {viewMode === 'seller' ? 'Switch to Marketplace View' : 'Switch to Seller Hub'}
             </Text>
@@ -178,6 +178,21 @@ const ProfileScreen = ({ navigation }: any) => {
             </Text>
           </View>
           <Text style={styles.modeBannerAction}>GO →</Text>
+        </TouchableOpacity>
+      ) : (
+        <TouchableOpacity 
+          style={[styles.modeBanner, { backgroundColor: '#fef3c7', borderColor: '#d97706' }]} 
+          onPress={() => navigation.navigate('SellerOnboarding')}
+        >
+          <View style={{ flex: 1 }}>
+            <Text style={[styles.modeBannerTitle, { color: '#92400e' }]}>
+              Start Selling on QUADS 🚀
+            </Text>
+            <Text style={[styles.modeBannerSub, { color: '#b45309' }]}>
+              Complete your seller onboarding to post items and services.
+            </Text>
+          </View>
+          <Text style={[styles.modeBannerAction, { color: '#92400e' }]}>START →</Text>
         </TouchableOpacity>
       )}
 
