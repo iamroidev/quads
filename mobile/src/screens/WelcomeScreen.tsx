@@ -438,14 +438,14 @@ const WelcomeScreen = ({ navigation }: any) => {
               </View>
               <TouchableOpacity style={styles.nextBtn} onPress={handleNextSlide}>
                 <Text style={styles.nextBtnText}>NEXT</Text>
-                <Ionicons name="arrow-forward-outline" size={14} color="#000" />
+                <Ionicons name="arrow-forward-outline" size={14} color={colors.text} />
               </TouchableOpacity>
             </View>
           </Animated.View>
 
           {/* Catchy Statistics / Parity Badges - Staggered Slide In */}
           <Animated.View style={[styles.metricsGrid, { transform: [{ translateY: metricsY }] }]}>
-            <View style={[styles.metricBox, { backgroundColor: '#fffacd', transform: [{ rotate: '-1.5deg' }] }]}>
+            <View style={[styles.metricBox, { backgroundColor: colors.accentAlt, transform: [{ rotate: '-1.5deg' }] }]}>
               {/* 🩹 Masking tape detailed overlay */}
               {renderMaskingTape('-12deg')}
               <Text style={styles.metricVal}>🔥 0% FEES</Text>
