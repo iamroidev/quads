@@ -56,8 +56,8 @@ class OrderService {
       if (!product) throw ApiError.notFound(`Product ${item.productId} not found`);
       if (product.status !== 'active') throw ApiError.badRequest(`Product ${product.title} is no longer available`);
       
-      const sId = product.seller._id.toString();
-      const ownerId = (product.seller as any).ownerId.toString();
+      const sId = product.seller?._id?.toString() || '';
+      const ownerId = (product.seller as any)?.ownerId?.toString() || '';
       if (ownerId === buyerId) throw ApiError.badRequest('You cannot buy your own products');
       
       if (!sellerGroups[sId]) sellerGroups[sId] = [];
@@ -214,7 +214,7 @@ class OrderService {
 
     // Notify seller
     const populatedOrder = await order.populate('seller');
-    const ownerId = (populatedOrder.seller as any).ownerId.toString();
+    const ownerId = (populatedOrder.seller as any)?.ownerId?.toString() || '';
 
     // Notify seller owner
     await notificationService.create(
@@ -249,7 +249,7 @@ class OrderService {
 
     // Verify access
     const populatedOrder = await order.populate('seller');
-    const sellerOwnerId = (populatedOrder.seller as any).ownerId.toString();
+    const sellerOwnerId = (populatedOrder.seller as any)?.ownerId?.toString() || '';
 
     if (
       !isAdmin &&
@@ -351,7 +351,7 @@ class OrderService {
     if (!order) throw ApiError.notFound('Order not found');
 
     const populatedOrder = await order.populate('seller');
-    const sellerOwnerId = (populatedOrder.seller as any).ownerId.toString();
+    const sellerOwnerId = (populatedOrder.seller as any)?.ownerId?.toString() || '';
 
     // Only seller or admin can update status
     if (!isAdmin && sellerOwnerId !== userId) {
@@ -426,7 +426,7 @@ class OrderService {
     if (!order) throw ApiError.notFound('Order not found');
 
     const populatedOrder = await order.populate('seller');
-    const sellerOwnerId = (populatedOrder.seller as any).ownerId.toString();
+    const sellerOwnerId = (populatedOrder.seller as any)?.ownerId?.toString() || '';
 
     const isBuyer = order.buyer.toString() === userId;
     const isSeller = sellerOwnerId === userId;
