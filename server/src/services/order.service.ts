@@ -475,11 +475,19 @@ class OrderService {
       { $group: { _id: '$status', count: { $sum: 1 }, total: { $sum: '$totalAmount' } } },
     ]);
 
+    // Sum views across all seller's products
+    const viewsData = await Product.aggregate([
+      { $match: { seller: new mongoose.Types.ObjectId(sellerId) } },
+      { $group: { _id: null, totalViews: { $sum: '$views' } } },
+    ]);
+    const totalViews = viewsData.length > 0 ? viewsData[0].totalViews : 0;
+
     const result: Record<string, number> = {
       totalOrders: 0,
       totalRevenue: 0,
       pendingOrders: 0,
       completedOrders: 0,
+      totalViews,
     };
 
     stats.forEach((s) => {
