@@ -12,6 +12,8 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import api from '../services/api';
+import { useAuth } from '../context/AuthContext';
 import orderService from '../services/order.service';
 import { colors, shadows } from '../theme';
 import ScreenHeader from '../components/ScreenHeader';
@@ -24,7 +26,36 @@ const CheckoutScreen = ({ route, navigation }: any) => {
   const [note, setNote] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const total = product.price;
+  const [couponCode, setCouponCode] = useState('');
+  const [appliedCoupon, setAppliedCoupon] = useState<{ code: string; discount: number } | null>(null);
+  const [validatingCoupon, setValidatingCoupon] = useState(false);
+
+  const discount = appliedCoupon ? appliedCoupon.discount : 0;
+  const total = Math.max(0, product.price - discount);
+
+  const handleApplyCoupon = async () => {
+    if (!couponCode.trim()) return;
+    setValidatingCoupon(true);
+    try {
+      const sellerId = product.seller._id || product.seller;
+      const res = await api.get('/orders/validate-coupon', {
+        params: {
+          code: couponCode.trim().toUpperCase(),
+          sellerId,
+          subtotal: product.price,
+        },
+      });
+      if (res.data.success) {
+        setAppliedCoupon(res.data.data);
+        Alert.alert('Success', `Coupon Applied: GHS ${res.data.data.discount.toFixed(2)} off`);
+      }
+    } catch (err: any) {
+      Alert.alert('Invalid Coupon', err?.response?.data?.message || 'Could not validate coupon.');
+      setAppliedCoupon(null);
+    } finally {
+      setValidatingCoupon(false);
+    }
+  };
 
   const handlePlaceOrder = async () => {
     if (deliveryMethod === 'delivery' && !deliveryAddress.trim()) {
@@ -40,6 +71,7 @@ const CheckoutScreen = ({ route, navigation }: any) => {
         pickupLocation: deliveryMethod === 'pickup' ? pickupLocation || product.pickupLocation : undefined,
         deliveryAddress: deliveryMethod === 'delivery' ? deliveryAddress.trim() : undefined,
         note: note.trim() || undefined,
+        couponCode: appliedCoupon ? appliedCoupon.code : undefined,
       });
       if (res.success) {
         Alert.alert(
@@ -76,6 +108,14 @@ const CheckoutScreen = ({ route, navigation }: any) => {
                 GHS {product.price.toLocaleString('en-GH', { minimumFractionDigits: 2 })}
               </Text>
             </View>
+            {appliedCoupon && (
+              <View style={styles.summaryRow}>
+                <Text style={styles.summaryKey}>Promo Code ({appliedCoupon.code})</Text>
+                <Text style={[styles.summaryValue, { color: '#ff6b6b' }]}>
+                  -GHS {appliedCoupon.discount.toLocaleString('en-GH', { minimumFractionDigits: 2 })}
+                </Text>
+              </View>
+            )}
             <View style={[styles.summaryRow, styles.totalRow]}>
               <Text style={styles.totalLabel}>Total</Text>
               <Text style={styles.totalAmount}>
@@ -126,6 +166,36 @@ const CheckoutScreen = ({ route, navigation }: any) => {
                   numberOfLines={3}
                 />
               </View>
+            )}
+          </View>
+
+          {/* Promo Coupon */}
+          <View style={styles.section}>
+            <Text style={styles.sectionLabel}>Promo Coupon</Text>
+            <View style={{ flexDirection: 'row', gap: 8 }}>
+              <TextInput
+                style={[styles.input, { flex: 1, textTransform: 'uppercase' }]}
+                placeholder="ENTER PROMO CODE"
+                placeholderTextColor="#9a8e7f"
+                autoCapitalize="characters"
+                value={couponCode}
+                onChangeText={setCouponCode}
+                editable={!appliedCoupon}
+              />
+              <TouchableOpacity
+                style={[styles.applyBtn, (!couponCode.trim() || validatingCoupon) && { opacity: 0.5 }]}
+                onPress={appliedCoupon ? () => { setAppliedCoupon(null); setCouponCode(''); } : handleApplyCoupon}
+                disabled={validatingCoupon || !couponCode.trim()}
+              >
+                <Text style={styles.applyBtnText}>
+                  {validatingCoupon ? '...' : appliedCoupon ? 'Remove' : 'Apply'}
+                </Text>
+              </TouchableOpacity>
+            </View>
+            {appliedCoupon && (
+              <Text style={styles.couponStatus}>
+                Applied promo code: {appliedCoupon.code} (-GHS {appliedCoupon.discount.toFixed(2)})
+              </Text>
             )}
           </View>
 
@@ -189,6 +259,10 @@ const styles = StyleSheet.create({
     borderRadius: 0, paddingHorizontal: 14, paddingVertical: 12, fontSize: 14, color: colors.text,
   },
   textarea: { minHeight: 80, textAlignVertical: 'top' },
+
+  applyBtn: { backgroundColor: '#1f1a14', paddingHorizontal: 16, justifyContent: 'center', borderWidth: 1, borderColor: '#1f1a14' },
+  applyBtnText: { color: '#fff', fontSize: 11, fontWeight: '800', textTransform: 'uppercase', letterSpacing: 1 },
+  couponStatus: { fontSize: 11, fontWeight: '700', color: colors.accent, marginTop: 8 },
 
   ctaBtn: { backgroundColor: '#1f1a14', paddingVertical: 16, alignItems: 'center', borderWidth: 1, borderColor: '#1f1a14', ...shadows.bulletin },
   ctaBtnText: { color: '#fff', fontSize: 14, fontWeight: '900', textTransform: 'uppercase', letterSpacing: 1.2 },

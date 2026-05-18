@@ -69,6 +69,7 @@ const orderService = {
     pickupLocation?: string;
     deliveryAddress?: string;
     note?: string;
+    couponCode?: string;
   }): Promise<{ success: boolean; data: { order: Order } }> => {
     const response = await api.post('/orders', body);
     return response.data;
