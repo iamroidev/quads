@@ -41,7 +41,9 @@
     "plugins": [
       "expo-secure-store",
       "expo-web-browser",
-      "expo-camera"
+      "expo-camera",
+      "expo-font",
+      "@sentry/react-native"
     ],
     "owner": "richieroidev"
   }
