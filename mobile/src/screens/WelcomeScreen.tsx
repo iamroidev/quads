@@ -220,7 +220,7 @@ const WelcomeScreen = ({ navigation }: any) => {
               style={styles.logInBtn}
               onPress={() => navigation.navigate('Login')}
             >
-              <Text style={styles.logInBtnText}>👤 LOG IN TO MY PORTAL</Text>
+              <Text style={styles.logInBtnText}>🔑 ALREADY A MEMBER? LOG IN</Text>
             </TouchableOpacity>
           </View>
 
