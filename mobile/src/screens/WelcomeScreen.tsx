@@ -210,13 +210,13 @@ const styles = StyleSheet.create({
   },
   logoBadgeText: {
     fontSize: 8,
-    fontWeight: '950',
+    fontWeight: '900',
     letterSpacing: 1.4,
     color: '#000',
   },
   logoTitle: {
     fontSize: 50,
-    fontWeight: '950',
+    fontWeight: '900',
     letterSpacing: -1.5,
     color: '#000',
     textShadowColor: '#ff6b6b',
@@ -340,7 +340,7 @@ const styles = StyleSheet.create({
   },
   metricVal: {
     fontSize: 12,
-    fontWeight: '950',
+    fontWeight: '900',
     letterSpacing: 0.5,
     textAlign: 'center',
   },
@@ -369,7 +369,7 @@ const styles = StyleSheet.create({
   signUpBtnText: {
     color: '#fff',
     fontSize: 13,
-    fontWeight: '950',
+    fontWeight: '900',
     letterSpacing: 0.8,
   },
   logInBtn: {
@@ -384,7 +384,7 @@ const styles = StyleSheet.create({
   logInBtnText: {
     color: '#000',
     fontSize: 12,
-    fontWeight: '950',
+    fontWeight: '900',
     letterSpacing: 0.8,
   },
   credits: {
