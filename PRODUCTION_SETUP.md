@@ -132,11 +132,11 @@ EXPO_PUBLIC_SOCKET_URL=https://your-aws-ec2-ip.amazonaws.com
 
 #### C. API Keys
 
-You already have LIVE keys in `.env`:
-- `sk_live_656286ea49abdbb8863e88615d751af259409210`
-- `pk_live_0c8e7462ecc0e441daddb93e2d27829220b31f6e`
+Your live keys are stored in `.env` (never commit them):
+- `PAYSTACK_SECRET_KEY=sk_live_<your-paystack-secret-key>`
+- `PAYSTACK_PUBLIC_KEY=pk_live_<your-paystack-public-key>`
 
-✅ These are already in production mode. Keep them.
+✅ If they are already set in `.env`, keep them. Find them in your [Paystack dashboard](https://dashboard.paystack.com/#/settings/developers).
 
 ---
 
@@ -145,7 +145,7 @@ You already have LIVE keys in `.env`:
 **Login**: [console.cloud.google.com](https://console.cloud.google.com)
 
 1. Go to **APIs & Services** → **Credentials**
-2. Find your OAuth 2.0 Client ID: `904520092449-gnrmhr6h0ltvf74uqdh0s3pcflalljji`
+2. Find your OAuth 2.0 Client ID (stored as `GOOGLE_CLIENT_ID` in `.env`)
 3. Click **Edit** (pencil icon)
 4. Under **Authorized JavaScript origins**, ADD:
    ```
@@ -180,20 +180,20 @@ You already have LIVE keys in `.env`:
 
 ### 3.5 Cloudinary (Image Storage)
 
-You already have credentials in `.env`:
-- `CLOUDINARY_CLOUD_NAME=quads`
-- `CLOUDINARY_API_KEY=157298192926796`
-- `CLOUDINARY_API_SECRET=r2uhOj-Rp6hKhLCwHW9sDFB77Lw`
+Your credentials are stored in `.env` (never commit them):
+- `CLOUDINARY_CLOUD_NAME=<your-cloud-name>`
+- `CLOUDINARY_API_KEY=<your-api-key>`
+- `CLOUDINARY_API_SECRET=<your-api-secret>`
 
-✅ These should work as-is. Just make sure your Cloudinary account is active.
+✅ If they are already set in `.env`, keep them. Find them in your [Cloudinary console](https://console.cloudinary.com/). Make sure your Cloudinary account is active.
 
 ---
 
 ### 3.6 Supabase
 
-You already have a Supabase project in `.env`:
-- `SUPABASE_URL=https://dbxeaqwjihgppffdcbdd.supabase.co`
-- `SUPABASE_SERVICE_KEY=sb_secret_KXLcK-wM8itf3Pf3l8lOSA_U6ZIlVEQ`
+Your Supabase project credentials are stored in `.env` (never commit them):
+- `SUPABASE_URL=<your-supabase-project-url>`
+- `SUPABASE_SERVICE_KEY=<your-supabase-service-key>`
 
 **Do you need to change this?**
 
