@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import { useColorScheme } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider } from './src/context/AuthContext';
@@ -19,6 +20,8 @@ const queryClient = new QueryClient({
 });
 
 export default function App() {
+  const colorScheme = useColorScheme(); // Listens to system light/dark scheme switches dynamically
+
   useEffect(() => {
     const cleanup = initPushRuntime();
     handleInitialNotificationOpen();
