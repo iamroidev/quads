@@ -415,32 +415,32 @@ const WelcomeScreen = ({ navigation }: any) => {
         <Animated.View style={[styles.introContainer, { transform: [{ translateY: introY }] }]}>
           <View style={styles.introInner}>
             
-            {/* Animated Brand Letters with Integrated Large Vector Q-Logo */}
-            <View style={styles.letterRow}>
+            {/* Animated Brand Letters with Integrated Large Vector Q-Logo & Subscript UADS */}
+            <View style={[styles.letterRow, { alignItems: 'flex-end', gap: 5 }]}>
               
-              {/* 🚀 First Letter is the Official Vector Q-Logo! Slightly larger (58x58) */}
+              {/* 🚀 First Letter is the Massive Vector Q-Logo! (86x86) */}
               <Animated.View
                 style={[
                   styles.letterCard,
                   {
-                    width: 58,
-                    height: 58,
-                    borderWidth: 3.5,
+                    width: 86,
+                    height: 86,
+                    borderWidth: 4.5,
                     borderColor: '#000',
-                    marginRight: 2,
                     alignItems: 'center',
                     justifyContent: 'center',
                     transform: [{ scale: letterQ }],
                     opacity: letterQ,
                     position: 'relative',
+                    ...shadows.bulletinHeavy,
                   },
                 ]}
               >
                 {/* Bold Stencil Q (Inner Ring) */}
                 <View style={{
-                  width: 26,
-                  height: 26,
-                  borderWidth: 6,
+                  width: 42,
+                  height: 42,
+                  borderWidth: 9,
                   borderColor: '#000',
                   backgroundColor: 'transparent',
                 }} />
@@ -448,10 +448,10 @@ const WelcomeScreen = ({ navigation }: any) => {
                 {/* Bold Stencil Q (Rotated Tail) */}
                 <View style={{
                   position: 'absolute',
-                  bottom: 9,
-                  right: 9,
-                  width: 10,
-                  height: 5,
+                  bottom: 14,
+                  right: 14,
+                  width: 16,
+                  height: 8,
                   backgroundColor: '#000',
                   transform: [{ rotate: '45deg' }],
                 }} />
@@ -459,18 +459,18 @@ const WelcomeScreen = ({ navigation }: any) => {
                 {/* Red Thumbtack detail (Top Right) */}
                 <View style={{
                   position: 'absolute',
-                  top: 4,
-                  right: 4,
-                  width: 8,
-                  height: 8,
-                  borderRadius: 4,
+                  top: 7,
+                  right: 7,
+                  width: 13,
+                  height: 13,
+                  borderRadius: 6.5,
                   backgroundColor: '#ff6b6b',
-                  borderWidth: 1.5,
+                  borderWidth: 2,
                   borderColor: '#000',
                 }} />
               </Animated.View>
 
-              {/* Remaining brand letters: U A D S (Standard size 48x48) */}
+              {/* Remaining brand letters as subscripts: U A D S (Tiny size 32x32) */}
               {[
                 { letter: 'U', anim: letterU },
                 { letter: 'A', anim: letterA },
@@ -482,16 +482,20 @@ const WelcomeScreen = ({ navigation }: any) => {
                   style={[
                     styles.letterCard,
                     {
-                      width: 48,
-                      height: 48,
+                      width: 32,
+                      height: 32,
+                      borderWidth: 2,
+                      borderColor: '#000',
                       transform: [{ scale: item.anim }],
                       opacity: item.anim,
                       justifyContent: 'center',
                       alignItems: 'center',
+                      marginBottom: 2,
+                      ...shadows.bulletin,
                     },
                   ]}
                 >
-                  <Text style={[styles.letterText, { fontSize: 24 }]}>{item.letter}</Text>
+                  <Text style={[styles.letterText, { fontSize: 16, fontWeight: '900' }]}>{item.letter}</Text>
                 </Animated.View>
               ))}
             </View>
