@@ -22,7 +22,7 @@ const SLIDES = [
     title: '📍 Campus Swaps',
     highlight: '🔥 0% COMMISSION ALWAYS',
     color: '#ff6b6b',
-    desc: 'Selling your old mini-fridge, late-night noodles, or textbook gear? Post it in 10 seconds. Keep 100% of your money. Zero commission. Always.',
+    desc: 'Selling your old mini-fridge, engineering calculator, or textbook gear? Post it in 10 seconds. Keep 100% of your money. Zero commission. Always.',
   },
   {
     icon: 'shield-checkmark-outline',
