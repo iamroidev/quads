@@ -401,6 +401,59 @@ const WelcomeScreen = ({ navigation }: any) => {
       {showIntro && (
         <Animated.View style={[styles.introContainer, { transform: [{ translateY: introY }] }]}>
           <View style={styles.introInner}>
+            {/* Giant Centered Vector Logo */}
+            <Animated.View style={{
+              width: 86,
+              height: 86,
+              borderWidth: 4.5,
+              borderColor: '#000',
+              backgroundColor: colors.surface,
+              alignItems: 'center',
+              justifyContent: 'center',
+              shadowColor: '#000',
+              shadowOffset: { width: 5, height: 5 },
+              shadowOpacity: 1,
+              shadowRadius: 0,
+              elevation: 5,
+              position: 'relative',
+              marginBottom: 10,
+              transform: [{ scale: letterQ }],
+              opacity: letterQ,
+            }}>
+              {/* Bold Stencil Q (Outer Frame) */}
+              <View style={{
+                width: 40,
+                height: 40,
+                borderWidth: 8,
+                borderColor: '#000',
+                backgroundColor: 'transparent',
+              }} />
+              
+              {/* Bold Stencil Q (Rotated Tail) */}
+              <View style={{
+                position: 'absolute',
+                bottom: 14,
+                right: 14,
+                width: 15,
+                height: 7.5,
+                backgroundColor: '#000',
+                transform: [{ rotate: '45deg' }],
+              }} />
+
+              {/* Red Thumbtack detail (Top Right) */}
+              <View style={{
+                position: 'absolute',
+                top: 7,
+                right: 7,
+                width: 14,
+                height: 14,
+                borderRadius: 7,
+                backgroundColor: '#ff6b6b',
+                borderWidth: 2.5,
+                borderColor: '#000',
+              }} />
+            </Animated.View>
+
             {/* Animated Brand Letters */}
             <View style={styles.letterRow}>
               {[
