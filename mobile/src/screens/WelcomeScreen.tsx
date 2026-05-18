@@ -439,6 +439,26 @@ const WelcomeScreen = ({ navigation }: any) => {
             </TouchableOpacity>
           </Animated.View>
 
+          {/* Elegant Neobrutalist Footer */}
+          <View style={styles.footerContainer}>
+            <Text style={styles.footerText}>
+              © 2026 QUADS. Powered by UMaT Scholars.
+            </Text>
+            <View style={styles.footerLinksRow}>
+              <TouchableOpacity onPress={() => {}}>
+                <Text style={styles.footerLinkText}>TERMS</Text>
+              </TouchableOpacity>
+              <Text style={styles.footerLinkDivider}>•</Text>
+              <TouchableOpacity onPress={() => {}}>
+                <Text style={styles.footerLinkText}>PRIVACY</Text>
+              </TouchableOpacity>
+              <Text style={styles.footerLinkDivider}>•</Text>
+              <TouchableOpacity onPress={() => {}}>
+                <Text style={styles.footerLinkText}>SUPPORT</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+
         </ScrollView>
       </Animated.View>
 
@@ -865,6 +885,39 @@ const styles = StyleSheet.create({
   loadFill: {
     height: '100%',
     backgroundColor: colors.accent,
+  },
+  footerContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 28,
+    marginBottom: 8,
+    gap: 8,
+  },
+  footerText: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: colors.text,
+    opacity: 0.5,
+    letterSpacing: 0.2,
+  },
+  footerLinksRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  footerLinkText: {
+    fontSize: 9.5,
+    fontWeight: '900',
+    color: colors.text,
+    opacity: 0.7,
+    letterSpacing: 0.8,
+    textDecorationLine: 'underline',
+  },
+  footerLinkDivider: {
+    fontSize: 10,
+    fontWeight: '900',
+    color: colors.text,
+    opacity: 0.3,
   },
 });
 
