@@ -108,23 +108,28 @@ const HomePage: React.FC = () => {
                 </Link>
               </div>
             )}
-          </div>
-
-          <div className="relative lg:absolute lg:top-20 lg:right-20 flex flex-col sm:flex-row lg:flex-col gap-4 lg:gap-8 z-10 px-4 md:px-8 pb-8 lg:pb-0 lg:max-w-[280px]">
-            <div className="border-4 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] p-4 md:p-6 shadow-[4px_4px_0_0_#ff6b6b] md:shadow-[8px_8px_0_0_#ff6b6b] lg:ml-auto w-full sm:w-1/3 lg:w-full" style={{ transform: 'rotate(1.2deg)' }}>
-              <div className="text-2xl md:text-4xl font-black text-[#ff6b6b] mb-1">0%</div>
-              <div className="text-[8px] md:text-[10px] font-black uppercase tracking-widest opacity-60 dark:opacity-85 text-[var(--bulletin-text)]">Trading Fees</div>
-              <div className="text-[10px] md:text-[12px] font-bold text-[var(--bulletin-text)] mt-1">Free for every student.</div>
-            </div>
-            <div className="border-4 border-[var(--bulletin-border)] bg-[var(--bulletin-metric1-bg)] p-4 md:p-6 shadow-[4px_4px_0_0_var(--bulletin-shadow)] md:shadow-[8px_8px_0_0_var(--bulletin-shadow)] w-full sm:w-1/3 lg:w-full" style={{ transform: 'rotate(-2.5deg)' }}>
-              <div className="text-2xl md:text-4xl font-black text-[var(--bulletin-metric1-text)] mb-1">{totalProducts || '...'}</div>
-              <div className="text-[8px] md:text-[10px] font-black uppercase tracking-widest opacity-60 dark:opacity-85 text-[var(--bulletin-metric1-text)]">Items</div>
-              <div className="text-[10px] md:text-[12px] font-bold text-[var(--bulletin-metric1-text)] mt-1">Live campus inventory.</div>
-            </div>
-            <div className="border-4 border-[var(--bulletin-border)] bg-[var(--bulletin-metric2-bg)] p-4 md:p-6 shadow-[4px_4px_0_0_var(--bulletin-shadow)] md:shadow-[8px_8px_0_0_var(--bulletin-shadow)] w-full sm:w-1/3 lg:w-full" style={{ transform: 'rotate(0.5deg)' }}>
-              <div className="text-2xl md:text-4xl font-black text-[var(--bulletin-metric2-text)] mb-1">{totalSellers || '...'}</div>
-              <div className="text-[8px] md:text-[10px] font-black uppercase tracking-widest opacity-60 dark:opacity-85 text-[var(--bulletin-metric2-text)]">Sellers</div>
-              <div className="text-[10px] md:text-[12px] font-bold text-[var(--bulletin-metric2-text)] mt-1">Verified UMaT students.</div>
+            {/* Stats Cards Container (Nested within z-20 parent to guarantee top layering and z-index immunity on all viewports) */}
+            <div className="relative lg:absolute lg:top-20 lg:right-20 flex flex-col sm:flex-row lg:flex-col gap-4 lg:gap-8 z-10 px-4 md:px-8 pb-8 lg:pb-0 lg:max-w-[280px]">
+              {/* Card 1: Trading Fees */}
+              <div className="border-4 border-white bg-[#181818] p-4 md:p-6 shadow-[6px_6px_0_0_#ff6b6b] md:shadow-[8px_8px_0_0_#ff6b6b] lg:ml-auto w-full sm:w-1/3 lg:w-full transition-all duration-200 hover:-translate-y-0.5" style={{ transform: 'rotate(1.2deg)' }}>
+                <div className="text-2xl md:text-4xl font-black text-[#ff6b6b] mb-1">0%</div>
+                <div className="text-[10px] md:text-[11px] font-black uppercase tracking-widest text-white opacity-90">Trading Fees</div>
+                <div className="text-[11px] md:text-[12px] font-bold text-white/60 mt-1">Free for every student.</div>
+              </div>
+              
+              {/* Card 2: Items */}
+              <div className="border-4 border-white bg-[#181818] p-4 md:p-6 shadow-[6px_6px_0_0_#00e5ff] md:shadow-[8px_8px_0_0_#00e5ff] w-full sm:w-1/3 lg:w-full transition-all duration-200 hover:-translate-y-0.5" style={{ transform: 'rotate(-2.5deg)' }}>
+                <div className="text-2xl md:text-4xl font-black text-[#00e5ff] mb-1">{totalProducts || '...'}</div>
+                <div className="text-[10px] md:text-[11px] font-black uppercase tracking-widest text-white opacity-90">Items</div>
+                <div className="text-[11px] md:text-[12px] font-bold text-white/60 mt-1">Live campus inventory.</div>
+              </div>
+              
+              {/* Card 3: Sellers */}
+              <div className="border-4 border-white bg-[#181818] p-4 md:p-6 shadow-[6px_6px_0_0_#00e676] md:shadow-[8px_8px_0_0_#00e676] w-full sm:w-1/3 lg:w-full transition-all duration-200 hover:-translate-y-0.5" style={{ transform: 'rotate(0.5deg)' }}>
+                <div className="text-2xl md:text-4xl font-black text-[#00e676] mb-1">{totalSellers || '...'}</div>
+                <div className="text-[10px] md:text-[11px] font-black uppercase tracking-widest text-white opacity-90">Sellers</div>
+                <div className="text-[11px] md:text-[12px] font-bold text-white/60 mt-1">Verified UMaT students.</div>
+              </div>
             </div>
           </div>
         </div>
