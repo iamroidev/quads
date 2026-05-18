@@ -75,13 +75,12 @@ const CheckoutScreen = ({ route, navigation }: any) => {
       });
       if (res.success) {
         Alert.alert(
-          'Order placed!',
-          `Order #${res.data.order.orderNumber} is pending payment.`,
+          'Order Placed!',
+          `Order #${res.data.order.orderNumber} has been successfully created.`,
           [{ 
-            text: 'View My Orders', 
+            text: 'Pay Now 💳', 
             onPress: () => {
-              navigation.popToTop(); // Reset the product browse stack
-              navigation.getParent()?.navigate('ProfileTab', { screen: 'Orders' });
+              navigation.replace('OrderDetail', { orderId: res.data.order._id });
             } 
           }]
         );

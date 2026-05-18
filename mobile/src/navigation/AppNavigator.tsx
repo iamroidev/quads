@@ -89,6 +89,11 @@ const ProductsStackScreen = () => (
       component={CheckoutScreen}
       options={{ ...defaultStackHeader, title: 'Checkout' }}
     />
+    <ProductsStack.Screen
+      name="OrderDetail"
+      component={OrderDetailScreen}
+      options={{ ...defaultStackHeader, title: 'Order Details' }}
+    />
   </ProductsStack.Navigator>
 );
 
@@ -146,6 +151,11 @@ const ProfileStack = createNativeStackNavigator();
 const ProfileStackScreen = () => (
   <ProfileStack.Navigator screenOptions={{ headerShown: false }}>
     <ProfileStack.Screen name="ProfileHome" component={ProfileScreen} />
+    <ProfileStack.Screen
+      name="ProductDetail"
+      component={ProductDetailScreen}
+      options={{ ...defaultStackHeader, title: 'Product Details' }}
+    />
     <ProfileStack.Screen
       name="ProfileEdit"
       component={ProfileEditScreen}
