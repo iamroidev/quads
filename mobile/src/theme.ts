@@ -1,25 +1,41 @@
 import { Appearance } from 'react-native';
 
 export const lightColors = {
-  bg: "#f8f7f4",       // Parchment board background
-  surface: "#fffdf8",  // Clean paper card
+  bg: "#faf8f5",       // Clean Ivory paper (Matching --bulletin-bg)
+  surface: "#ffffff",  // Pure white card (Matching --bulletin-card)
   text: "#000000",     // Pitch black identity text
-  muted: "#666666",
+  muted: "rgba(0, 0, 0, 0.4)",
   border: "#000000",   // Hard black neobrutalist borders
   accent: "#ff6b6b",   // Soft red highlight
   accentAlt: "#fffacd",// Canary yellow notice card background
   danger: "#ff6b6b",
+  
+  // Custom Card Theming (Matching web index.css)
+  noticeBg: "#fffacd",
+  noticeText: "#000000",
+  metric1Bg: "#e0f2f7",
+  metric1Text: "#004d40",
+  metric2Bg: "#fce4ec",
+  metric2Text: "#880e4f",
 };
 
 export const darkColors = {
-  bg: "#0f0f11",       // Obsidian dark board background
-  surface: "#18181c",  // Deep slate card surface
-  text: "#f8f7f4",     // Crisp off-white text
-  muted: "#a0a0a0",
+  bg: "#0a0a0a",       // Obsidian dark board background (Matching --bulletin-bg)
+  surface: "#121212",  // Deep slate card surface (Matching --bulletin-card)
+  text: "#ffffff",     // Crisp white text
+  muted: "rgba(255, 255, 255, 0.4)",
   border: "#ffffff",   // Bold off-white neobrutalist borders in dark mode!
-  accent: "#ff8282",   // High-contrast pink-red highlights
-  accentAlt: "#2c281e",// Deep amber notice background
-  danger: "#ff8282",
+  accent: "#ff6b6b",   // High-contrast pink-red highlights
+  accentAlt: "#2c2203",// Deep amber notice background
+  danger: "#ff6b6b",
+
+  // Custom Card Theming (Matching web index.css)
+  noticeBg: "#2c2203",
+  noticeText: "#ffd700",
+  metric1Bg: "#05262e",
+  metric1Text: "#80deea",
+  metric2Bg: "#2d0816",
+  metric2Text: "#f48fb1",
 };
 
 // High-performance dynamic ES6 Proxy to automatically return the active theme palette
