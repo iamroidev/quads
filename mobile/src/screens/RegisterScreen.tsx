@@ -310,7 +310,7 @@ const RegisterScreen = ({ navigation }: any) => {
         >
           <View style={styles.heroWrap}>
             <Text style={styles.eyebrow}>Create account</Text>
-            <Text style={styles.title}>Join QUADS</Text>
+            <Text style={styles.title}>Join BULLETIN</Text>
             <Text style={styles.subtitle}>
               {step === 1 && "Step 1: choose your role."}
               {step === 2 && "Step 2: add your details."}
