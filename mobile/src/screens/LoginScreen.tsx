@@ -211,7 +211,7 @@ const LoginScreen = ({ navigation }: any) => {
           keyboardShouldPersistTaps="handled"
         >
           <View style={styles.heroWrap}>
-            <Text style={styles.eyebrow}>QUADS</Text>
+            <Text style={styles.eyebrow}>BULLETIN</Text>
             <Text style={styles.title}>Welcome Back</Text>
             <Text style={styles.subtitle}>
               Sign in to continue buying and selling on campus.
