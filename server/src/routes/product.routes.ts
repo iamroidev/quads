@@ -33,6 +33,7 @@ import { authenticate, ensureProfileComplete } from '../middleware/auth';
 import { isSeller, isAdmin } from '../middleware/roleCheck';
 import { upload } from '../utils/imageUpload';
 import { csvUpload } from '../utils/csvUpload';
+import { uploadLimiter } from '../middleware/rateLimit';
 
 const router = Router();
 
@@ -94,6 +95,7 @@ router.post(
   '/bulk/csv',
   authenticate,
   isSeller,
+  uploadLimiter,
   csvUpload.single('csvFile'),
   importProductsCSV
 );
@@ -103,6 +105,7 @@ router.post(
   '/bulk/csv/preview',
   authenticate,
   isSeller,
+  uploadLimiter,
   csvUpload.single('csvFile'),
   previewProductsCSV
 );
@@ -117,7 +120,7 @@ router.patch('/bulk/details', authenticate, isSeller, bulkUpdateProductDetails);
 router.get('/bulk/csv/errors-sample', authenticate, isSeller, downloadImportErrorTemplate);
 
 // POST /api/products/:id/duplicate — duplicate a product
-router.post('/:id/duplicate', authenticate, isSeller, duplicateProduct);
+router.post('/:id/duplicate', authenticate, isSeller, uploadLimiter, duplicateProduct);
 
 // POST /api/products — create product (seller/admin)
 router.post(
@@ -125,6 +128,7 @@ router.post(
   authenticate,
   ensureProfileComplete({ forSelling: true }),
   isSeller,
+  uploadLimiter,
   upload.array('images', 5),
   createProduct
 );
@@ -136,6 +140,7 @@ router.get('/my/listings', authenticate, isSeller, getMyListings);
 router.put(
   '/:id',
   authenticate,
+  uploadLimiter,
   upload.array('images', 5),
   updateProduct
 );

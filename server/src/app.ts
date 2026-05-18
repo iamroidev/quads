@@ -155,9 +155,6 @@ app.use('/api', apiLimiter);
 // Payment routes — protect against payment abuse
 app.use('/api/payments', paymentLimiter);
 
-// Upload routes — protect storage abuse
-app.use('/api/products', uploadLimiter); // product creation has image uploads
-
 // ========================
 // Routes
 // ========================
