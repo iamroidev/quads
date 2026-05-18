@@ -126,7 +126,7 @@ const ProfileScreen = ({ navigation }: any) => {
         {(user?.storeName || user?.brandName) ? <Text style={styles.storeName}>{user?.name}</Text> : null}
         <Text style={styles.email}>{user?.email}</Text>
         <View style={styles.roleBadge}>
-          <Text style={styles.roleText}>{user?.role?.toUpperCase()}</Text>
+          <Text style={styles.roleText}>{(viewMode || user?.role)?.toUpperCase()}</Text>
         </View>
       </View>
 
