@@ -8,6 +8,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAuth } from '../context/AuthContext';
 
 import {
+   WelcomeScreen,
    LoginScreen,
    RegisterScreen,
    HomeScreen,
@@ -519,6 +520,7 @@ const AppNavigator = () => {
           />
         ) : (
           <>
+            <Stack.Screen name="Welcome" component={WelcomeScreen} />
             <Stack.Screen name="Login" component={LoginScreen} />
             <Stack.Screen name="Register" component={RegisterScreen} />
             <Stack.Screen
