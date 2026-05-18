@@ -159,25 +159,25 @@ const SellerAnalyticsScreen = ({ navigation }: any) => {
         <View style={styles.section}>
           <TouchableOpacity 
             style={styles.primaryBtn} 
-            onPress={() => navigation.getParent()?.navigate('ProfileTab', { screen: 'Orders' })}
+            onPress={() => navigation.navigate('SellerOrdersTab')}
           >
             <Text style={styles.primaryBtnText}>Manage Sales & Orders →</Text>
           </TouchableOpacity>
           <TouchableOpacity 
             style={styles.secondaryBtn} 
-            onPress={() => navigation.navigate('MyListings')}
+            onPress={() => navigation.navigate('InventoryTab', { screen: 'MyListings' })}
           >
             <Text style={styles.secondaryBtnText}>Edit My Inventory</Text>
           </TouchableOpacity>
           <TouchableOpacity 
             style={styles.secondaryBtn} 
-            onPress={() => navigation.getParent()?.navigate('ProfileTab', { screen: 'SellerPayouts' })}
+            onPress={() => navigation.navigate('ProfileTab', { screen: 'SellerPayouts' })}
           >
             <Text style={styles.secondaryBtnText}>View Earnings & Payouts</Text>
           </TouchableOpacity>
           <TouchableOpacity 
             style={styles.secondaryBtn} 
-            onPress={() => navigation.getParent()?.navigate('ProfileTab', { screen: 'DisputeCenter' })}
+            onPress={() => navigation.navigate('ProfileTab', { screen: 'DisputeCenter' })}
           >
             <Text style={styles.secondaryBtnText}>Dispute Center</Text>
           </TouchableOpacity>

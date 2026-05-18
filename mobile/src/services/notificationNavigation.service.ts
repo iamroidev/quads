@@ -1,5 +1,22 @@
-import * as Notifications from 'expo-notifications';
+import Constants from 'expo-constants';
 import { navigationRef } from '../navigation/navigationRef';
+
+const isExpoGo = Constants.appOwnership === 'expo';
+
+let Notifications: any = null;
+if (!isExpoGo) {
+  try {
+    Notifications = require('expo-notifications');
+  } catch (e) {
+    console.warn("Failed to load expo-notifications:", e);
+  }
+}
+
+if (!Notifications) {
+  Notifications = {
+    getLastNotificationResponseAsync: async () => null,
+  };
+}
 
 const getIdFromUrl = (url: string | undefined, resource: string): string | null => {
   if (!url) return null;
@@ -22,7 +39,7 @@ const routeFromData = (data: any): { type: 'product' | 'order' | 'chat' | 'none'
   return { type: 'none' };
 };
 
-export const openNotificationTarget = (response: Notifications.NotificationResponse) => {
+export const openNotificationTarget = (response: any) => {
   const data = response.notification.request.content.data || {};
   const target = routeFromData(data);
 
