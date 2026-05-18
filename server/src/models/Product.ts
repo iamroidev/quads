@@ -12,18 +12,19 @@ export interface IProductVideo {
 
 export interface IProductDocument extends Document {
   _id: mongoose.Types.ObjectId;
+  version: number;
   title: string;
   description: string;
-    price: number;
-    originalPrice?: number;
-    category: mongoose.Types.ObjectId;
-    seller: mongoose.Types.ObjectId; // References Store
-    images: IProductImage[];
-    video?: IProductVideo;
-    condition: 'new' | 'like-new' | 'good' | 'fair' | 'poor';
-    status: 'active' | 'sold' | 'reserved' | 'draft' | 'removed';
-    deliveryOption: 'pickup' | 'delivery' | 'both';
-    pickupLocation: string;
+  price: number;
+  originalPrice?: number;
+  category: mongoose.Types.ObjectId;
+  seller: mongoose.Types.ObjectId; // References Store
+  images: IProductImage[];
+  video?: IProductVideo;
+  condition: 'new' | 'like-new' | 'good' | 'fair' | 'poor';
+  status: 'active' | 'sold' | 'reserved' | 'draft' | 'removed';
+  deliveryOption: 'pickup' | 'delivery' | 'both';
+  pickupLocation: string;
   tags: string[];
   stock: number;
   availableFrom?: Date;
@@ -36,6 +37,7 @@ export interface IProductDocument extends Document {
   flagReason: string;
   createdAt: Date;
   updatedAt: Date;
+  __v?: number;
 }
 
 const productImageSchema = new Schema(
@@ -165,9 +167,11 @@ const productSchema = new Schema<IProductDocument>(
   },
   {
     timestamps: true,
+    autoCreate: true,
     toJSON: {
       transform(_doc, ret: Record<string, any>) {
         delete ret.__v;
+        delete ret.version;
         return ret;
       },
     },
@@ -181,6 +185,17 @@ productSchema.index({ seller: 1, status: 1 });
 productSchema.index({ price: 1 });
 productSchema.index({ createdAt: -1 });
 productSchema.index({ status: 1, isFeatured: -1, createdAt: -1 });
+
+// Index for optimistic locking
+productSchema.index({ version: 1 });
+
+// Increment version on update
+productSchema.pre('save', function (next) {
+  if (this.isModified()) {
+    this.version += 1;
+  }
+  next();
+});
 
 const Product = mongoose.model<IProductDocument>('Product', productSchema);
 
