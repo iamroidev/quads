@@ -56,6 +56,12 @@ const Checkout: React.FC = () => {
   const [validatingCoupon, setValidatingCoupon] = useState(false);
 
   useEffect(() => {
+    if (!user) {
+      toast.error('Please log in to continue to checkout');
+      navigate('/login', { state: { from: { pathname: id ? `/checkout/${id}` : '/checkout' } } });
+      return;
+    }
+
     const fetchProduct = async () => {
       try {
         if (id) {
@@ -89,7 +95,7 @@ const Checkout: React.FC = () => {
       }
     };
     fetchProduct();
-  }, [id, navigate, cartItems]);
+  }, [id, navigate, cartItems, user]);
 
   const handleSubmit = async () => {
     if (products.length === 0 || !user) {

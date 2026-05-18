@@ -108,7 +108,7 @@ export const LostFound: React.FC = () => {
   const handleInitiateChat = async (item: PolaroidItem) => {
     if (!isAuthenticated || !user) {
       toast.error('Please log in to initiate chat');
-      navigate('/login');
+      navigate('/login', { state: { from: window.location.pathname + window.location.search } });
       return;
     }
 
@@ -322,7 +322,7 @@ export const LostFound: React.FC = () => {
               soundEffects.playPinClick();
               if (!isAuthenticated) {
                 toast.error('Please log in to pin a Polaroid');
-                navigate('/login');
+                navigate('/login', { state: { from: window.location.pathname + window.location.search } });
                 return;
               }
               setShowAddModal(true);

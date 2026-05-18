@@ -19,6 +19,7 @@ const PaymentVerification: React.FC = () => {
   const [verifying, setVerifying] = useState(true);
   const [verified, setVerified] = useState(false);
   const [order, setOrder] = useState<OrderPopulated | null>(null);
+  const [orders, setOrders] = useState<OrderPopulated[]>([]);
   const [error, setError] = useState('');
 
   useEffect(() => {
@@ -35,6 +36,7 @@ const PaymentVerification: React.FC = () => {
         if (res.success && res.data.verified) {
           setVerified(true);
           setOrder(res.data.order);
+          setOrders(res.data.orders || (res.data.order ? [res.data.order] : []));
         } else {
           setVerified(false);
           setError('Payment could not be verified. Please try again or contact support.');
@@ -117,36 +119,47 @@ const PaymentVerification: React.FC = () => {
         </div>
 
         {/* Order details */}
-        {order && (
+        {orders.length > 0 && (
           <div className="max-w-lg mx-auto mb-8 relative">
-            <div className="absolute -top-3 left-6 bg-[var(--bulletin-text)] text-[var(--bulletin-bg)] text-[9px] font-black px-2 py-0.5 z-10">
-              LEDGER ENTRY
+            <div className="absolute -top-3 left-6 bg-[var(--bulletin-text)] text-[var(--bulletin-bg)] text-[9px] font-black px-2 py-0.5 z-10 select-none">
+              LEDGER ENTRY {orders.length > 1 ? `(${orders.length} ORDERS)` : ''}
             </div>
             <div className="border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] p-6 shadow-[4px_4px_0_0_var(--bulletin-shadow)]">
-              <div className="space-y-4 text-[12px]">
-                <div className="flex justify-between items-center">
-                  <span className="font-black uppercase opacity-40 text-[10px] tracking-widest">Serial Number</span>
-                  <span className="font-black font-mono">#{order.orderNumber}</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="font-black uppercase opacity-40 text-[10px] tracking-widest">State</span>
-                  <span className="border-2 border-[var(--bulletin-border)] px-3 py-1 text-[10px] font-black uppercase bg-[#fffacd] dark:bg-yellow-900/30 shadow-[2px_2px_0_0_var(--bulletin-shadow)]">
-                    {ORDER_STATUS_LABELS[order.status] || order.status}
-                  </span>
-                </div>
-                {order.items[0] && (
-                  <div className="flex justify-between items-center">
-                    <span className="font-black uppercase opacity-40 text-[10px] tracking-widest">Description</span>
-                    <span className="font-black uppercase truncate max-w-[200px]">{order.items[0].title}</span>
+              <div className="space-y-6 text-[12px]">
+                {orders.map((o, idx) => (
+                  <div key={o._id} className={idx > 0 ? 'pt-4 border-t-2 border-dashed border-[var(--bulletin-border)]/20' : ''}>
+                    <div className="flex justify-between items-center mb-2">
+                      <span className="font-black uppercase opacity-40 text-[10px] tracking-widest">Serial Number</span>
+                      <span className="font-black font-mono">#{o.orderNumber}</span>
+                    </div>
+                    <div className="flex justify-between items-center mb-2">
+                      <span className="font-black uppercase opacity-40 text-[10px] tracking-widest">State</span>
+                      <span className="border-2 border-[var(--bulletin-border)] px-3 py-1 text-[10px] font-black uppercase bg-[#fffacd] dark:bg-yellow-900/30 shadow-[2px_2px_0_0_var(--bulletin-shadow)]">
+                        {ORDER_STATUS_LABELS[o.status] || o.status}
+                      </span>
+                    </div>
+                    {o.items.map((item, itemIdx) => (
+                      <div key={itemIdx} className="flex justify-between items-center mb-1">
+                        <span className="font-black uppercase opacity-40 text-[10px] tracking-widest">Item {o.items.length > 1 ? `#${itemIdx + 1}` : ''}</span>
+                        <span className="font-black uppercase truncate max-w-[200px]">{item.title} x{item.quantity}</span>
+                      </div>
+                    ))}
+                    <div className="flex justify-between items-center mb-2">
+                      <span className="font-black uppercase opacity-40 text-[10px] tracking-widest">Logistics</span>
+                      <span className="font-black uppercase">{o.deliveryMethod}</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="font-black uppercase opacity-40 text-[10px] tracking-widest">Subtotal</span>
+                      <span className="font-bold">GHS {o.totalAmount.toLocaleString('en-GH', { minimumFractionDigits: 2 })}</span>
+                    </div>
                   </div>
-                )}
-                <div className="flex justify-between items-center">
-                  <span className="font-black uppercase opacity-40 text-[10px] tracking-widest">Logistics</span>
-                  <span className="font-black uppercase">{order.deliveryMethod}</span>
-                </div>
+                ))}
+                
                 <div className="border-t-2 border-dashed border-[var(--bulletin-border)] pt-4 flex justify-between items-baseline">
-                  <span className="font-black uppercase text-sm">Settlement</span>
-                  <span className="font-black text-2xl tracking-tighter">GHS {order.totalAmount.toLocaleString('en-GH', { minimumFractionDigits: 2 })}</span>
+                  <span className="font-black uppercase text-sm">Total Settlement</span>
+                  <span className="font-black text-2xl tracking-tighter">
+                    GHS {orders.reduce((sum, o) => sum + o.totalAmount, 0).toLocaleString('en-GH', { minimumFractionDigits: 2 })}
+                  </span>
                 </div>
               </div>
             </div>
@@ -162,9 +175,9 @@ const PaymentVerification: React.FC = () => {
           </div>
           <div className="grid gap-4">
             {[
-              { label: 'Validation', desc: 'Seller confirms item availability' },
+              { label: 'Preparation', desc: 'Seller prepares item & schedules handoff' },
               { label: 'Execution', desc: `Item released for ${order?.deliveryMethod === 'delivery' ? 'courier' : 'campus pickup'}` },
-              { label: 'Settlement', desc: 'Confirm receipt to release funds' },
+              { label: 'Settlement', desc: 'Verify handoff to release escrow funds to seller' },
             ].map((step, i) => (
               <div key={i} className="flex items-center gap-4 bg-[var(--bulletin-card)] border border-[var(--bulletin-border)] p-4 shadow-[3px_3px_0_0_var(--bulletin-shadow)]">
                 <div className="flex-shrink-0 w-8 h-8 border-2 border-[var(--bulletin-border)] text-[12px] font-black flex items-center justify-center bg-[#e0f2f7] dark:bg-sky-900/30">
@@ -181,13 +194,13 @@ const PaymentVerification: React.FC = () => {
 
         {/* Actions */}
         <div className="flex gap-3 justify-center">
-          {order && (
+          {orders.length > 0 && (
             <Link
-              to={`/orders/${order._id}`}
+              to={orders.length === 1 ? `/orders/${orders[0]._id}` : '/orders'}
               className="border border-[var(--bulletin-border)] bg-[var(--bulletin-text)] px-4 py-2 text-[10px] font-bold uppercase text-[var(--bulletin-bg)] shadow-[3px_3px_0_0_var(--bulletin-shadow)] hover:bg-[var(--bulletin-card)] hover:text-[var(--bulletin-text)] transition-all"
             >
               <Package className="inline-block h-4 w-4 mr-1" />
-              View Order
+              {orders.length === 1 ? 'View Order' : 'View All Orders'}
             </Link>
           )}
           <Link
