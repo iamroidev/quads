@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Dimensions,
   SafeAreaView,
@@ -9,47 +9,65 @@ import {
   View,
   StatusBar,
   Animated,
+  Easing,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, shadows } from '../theme';
 
-const { width } = Dimensions.get('window');
+const { width, height } = Dimensions.get('window');
 
 const SLIDES = [
   {
-    icon: 'basket-outline',
-    title: '📍 Campus Trading',
-    highlight: '0% FEES FOR SCHOLARS',
+    icon: 'swap-horizontal-outline',
+    title: '📍 Campus Swaps',
+    highlight: '🔥 0% COMMISSION ALWAYS',
     color: '#ff6b6b',
-    desc: 'Trade textbooks, dorm gear, electronics, or food instantly. Deal directly with verified UMaT students with zero commission fees.',
+    desc: 'Selling your old mini-fridge, late-night noodles, or textbook gear? Post it in 10 seconds. Keep 100% of your money. Zero commission. Always.',
   },
   {
-    icon: 'wallet-outline',
-    title: '💳 Escrow Payments',
-    highlight: 'SECURE MOBILE MONEY',
+    icon: 'shield-checkmark-outline',
+    title: '💳 Paystack Escrow',
+    highlight: '🛡️ NO MORE SCAMS',
     color: '#3d307c',
-    desc: 'Pay securely inside the app using Momo or cards via Paystack. Funds are kept safe in escrow until you verify the item in person.',
+    desc: 'Pay with Momo inside the app. We hold the cash securely in escrow. The seller doesn\'t get a single pesewa until you verify the item in person.',
   },
   {
     icon: 'qr-code-outline',
-    title: '🛡️ Scanner Handoff',
-    highlight: 'ANTI-SCAM VERIFICATION',
+    title: '🚀 QR Scanner Handoff',
+    highlight: '⚡ INSTANT RELEASE',
     color: '#10b981',
-    desc: 'Complete pickups with confidence. The seller displays a 6-digit code or QR code, and you scan it to release payments instantly.',
+    desc: 'Meet safely at the Library or Main Gate. Scan the seller\'s automatically generated QR code on your phone to instantly release escrow funds.',
   },
 ];
 
 const WelcomeScreen = ({ navigation }: any) => {
   const [activeSlide, setActiveSlide] = useState(0);
-  const [tickerOffset] = useState(new Animated.Value(0));
+  const [showIntro, setShowIntro] = useState(true);
 
-  // Ticker animation
+  // Ticker offsets
+  const tickerOffset = useRef(new Animated.Value(0)).current;
+
+  // Intro animations
+  const introY = useRef(new Animated.Value(0)).current;
+  const letterQ = useRef(new Animated.Value(0)).current;
+  const letterU = useRef(new Animated.Value(0)).current;
+  const letterA = useRef(new Animated.Value(0)).current;
+  const letterD = useRef(new Animated.Value(0)).current;
+  const letterS = useRef(new Animated.Value(0)).current;
+  const introSub = useRef(new Animated.Value(0)).current;
+  const loadBar = useRef(new Animated.Value(0)).current;
+
+  // Content fade
+  const contentFade = useRef(new Animated.Value(0)).current;
+
   useEffect(() => {
+    // 1. Ticker Loop
     Animated.loop(
       Animated.sequence([
         Animated.timing(tickerOffset, {
-          toValue: -200,
-          duration: 10000,
+          toValue: -250,
+          duration: 12000,
+          easing: Easing.linear,
           useNativeDriver: true,
         }),
         Animated.timing(tickerOffset, {
@@ -59,6 +77,55 @@ const WelcomeScreen = ({ navigation }: any) => {
         }),
       ])
     ).start();
+
+    // 2. Play Staggered Brand Letter Springs
+    const springConfig = (val: Animated.Value) =>
+      Animated.spring(val, {
+        toValue: 1,
+        tension: 50,
+        friction: 4,
+        useNativeDriver: true,
+      });
+
+    Animated.sequence([
+      Animated.delay(200),
+      Animated.parallel([
+        springConfig(letterQ),
+        Animated.sequence([Animated.delay(100), springConfig(letterU)]),
+        Animated.sequence([Animated.delay(200), springConfig(letterA)]),
+        Animated.sequence([Animated.delay(300), springConfig(letterD)]),
+        Animated.sequence([Animated.delay(400), springConfig(letterS)]),
+      ]),
+      Animated.parallel([
+        Animated.timing(introSub, {
+          toValue: 1,
+          duration: 400,
+          useNativeDriver: true,
+        }),
+        Animated.timing(loadBar, {
+          toValue: 1,
+          duration: 1000,
+          easing: Easing.out(Easing.ease),
+          useNativeDriver: false, // width animation doesn't support native driver
+        }),
+      ]),
+      Animated.delay(600),
+      // 3. Slide intro up out of screen
+      Animated.timing(introY, {
+        toValue: -height,
+        duration: 800,
+        easing: Easing.bezier(0.77, 0, 0.175, 1),
+        useNativeDriver: true,
+      }),
+      // 4. Fade main content in
+      Animated.timing(contentFade, {
+        toValue: 1,
+        duration: 600,
+        useNativeDriver: true,
+      }),
+    ]).start(() => {
+      setShowIntro(false);
+    });
   }, []);
 
   const handleNextSlide = () => {
@@ -69,100 +136,145 @@ const WelcomeScreen = ({ navigation }: any) => {
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor={colors.bg} />
 
-      {/* Campus Ticker Header */}
-      <View style={styles.tickerHeader}>
-        <Animated.View style={[styles.tickerWrapper, { transform: [{ translateX: tickerOffset }] }]}>
-          <Text style={styles.tickerText}>
-            ⚡ UMaT CAMPUS MARKETPLACE &bull; TARKWA, GHANA 🇬🇭 &bull; 0% SELLER FEES &bull; SECURE ESCROW &bull; verified scholars &bull; ⚡
-          </Text>
-        </Animated.View>
-      </View>
-
-      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+      {/* Main Catchy Content (fades in after intro) */}
+      <Animated.View style={[styles.mainLayout, { opacity: showIntro ? 0 : contentFade }]}>
         
-        {/* Brand Hero logo banner */}
-        <View style={styles.heroSection}>
-          <View style={styles.logoBadge}>
-            <Text style={styles.logoBadgeText}>VERIFIED APP</Text>
-          </View>
-          <Text style={styles.logoTitle}>QUADS</Text>
-          <View style={styles.subtitleWrapper}>
-            <Text style={styles.logoSubtitle}>STUDENT P2P COMMERCE PLATFORM</Text>
-          </View>
+        {/* Dynamic Campus Ticker Header - ACCENT COLOR BACKGROUND */}
+        <View style={styles.tickerHeader}>
+          <Animated.View style={[styles.tickerWrapper, { transform: [{ translateX: tickerOffset }] }]}>
+            <Text style={styles.tickerText}>
+              ⚡ TRADING LIVE ON CAMPUS ⚡ DITCH THE SLOP ⚡ NO COMMISSION FEES ⚡ SMOOTHIES, TEXTBOOKS & GEAR ⚡ SAFETY ESCROW SCANNERS ⚡
+            </Text>
+          </Animated.View>
         </View>
 
-        {/* Catchy Carousel Visual Slides */}
-        <View style={styles.slideCard}>
-          <View style={[styles.slideBadge, { backgroundColor: SLIDES[activeSlide].color + '15', borderColor: SLIDES[activeSlide].color }]}>
-            <Text style={[styles.slideBadgeText, { color: SLIDES[activeSlide].color }]}>
-              {SLIDES[activeSlide].highlight}
-            </Text>
+        <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+          
+          {/* Brand Hero logo banner */}
+          <View style={styles.heroSection}>
+            <Text style={styles.logoTitle}>QUADS</Text>
+            <View style={styles.subtitleWrapper}>
+              <Text style={styles.logoSubtitle}>DITCH THE SLOP &bull; CAMPUS SWAPS</Text>
+            </View>
           </View>
 
-          <View style={styles.slideHeader}>
-            <View style={[styles.iconBox, { backgroundColor: SLIDES[activeSlide].color }]}>
-              <Ionicons name={SLIDES[activeSlide].icon as any} size={28} color="#fff" />
+          {/* Catchy Carousel Visual Slides */}
+          <View style={styles.slideCard}>
+            <View style={[styles.slideBadge, { backgroundColor: SLIDES[activeSlide].color + '15', borderColor: SLIDES[activeSlide].color }]}>
+              <Text style={[styles.slideBadgeText, { color: SLIDES[activeSlide].color }]}>
+                {SLIDES[activeSlide].highlight}
+              </Text>
             </View>
-            <Text style={styles.slideTitle}>{SLIDES[activeSlide].title}</Text>
+
+            <View style={styles.slideHeader}>
+              <View style={[styles.iconBox, { backgroundColor: SLIDES[activeSlide].color }]}>
+                <Ionicons name={SLIDES[activeSlide].icon as any} size={28} color="#fff" />
+              </View>
+              <Text style={styles.slideTitle}>{SLIDES[activeSlide].title}</Text>
+            </View>
+
+            <Text style={styles.slideDesc}>{SLIDES[activeSlide].desc}</Text>
+
+            {/* Dots Indicator + Next Arrow */}
+            <View style={styles.slideFooter}>
+              <View style={styles.dotsRow}>
+                {SLIDES.map((_, i) => (
+                  <TouchableOpacity key={i} onPress={() => setActiveSlide(i)}>
+                    <View style={[styles.dot, activeSlide === i && styles.dotActive]} />
+                  </TouchableOpacity>
+                ))}
+              </View>
+              <TouchableOpacity style={styles.nextBtn} onPress={handleNextSlide}>
+                <Text style={styles.nextBtnText}>NEXT</Text>
+                <Ionicons name="arrow-forward-outline" size={14} color="#000" />
+              </TouchableOpacity>
+            </View>
           </View>
 
-          <Text style={styles.slideDesc}>{SLIDES[activeSlide].desc}</Text>
-
-          {/* Dots Indicator + Next Arrow */}
-          <View style={styles.slideFooter}>
-            <View style={styles.dotsRow}>
-              {SLIDES.map((_, i) => (
-                <TouchableOpacity key={i} onPress={() => setActiveSlide(i)}>
-                  <View style={[styles.dot, activeSlide === i && styles.dotActive]} />
-                </TouchableOpacity>
-              ))}
+          {/* Catchy Statistics / Parity Badges */}
+          <View style={styles.metricsGrid}>
+            <View style={[styles.metricBox, { backgroundColor: '#fffacd', transform: [{ rotate: '-1.5deg' }] }]}>
+              <Text style={styles.metricVal}>🔥 0% FEES</Text>
+              <Text style={styles.metricLabel}>Zero slop swaps</Text>
             </View>
-            <TouchableOpacity style={styles.nextBtn} onPress={handleNextSlide}>
-              <Text style={styles.nextBtnText}>NEXT</Text>
-              <Ionicons name="arrow-forward-outline" size={14} color="#000" />
+            <View style={[styles.metricBox, { backgroundColor: '#ff6b6b', transform: [{ rotate: '1.2deg' }] }]}>
+              <Text style={[styles.metricVal, { color: '#fff' }]}>🛡️ ESCROW</Text>
+              <Text style={[styles.metricLabel, { color: '#fff' }]}>Anti-scam shield</Text>
+            </View>
+            <View style={[styles.metricBox, { backgroundColor: '#10b981', transform: [{ rotate: '-0.8deg' }] }]}>
+              <Text style={[styles.metricVal, { color: '#fff' }]}>🎓 UMaT ONLY</Text>
+              <Text style={[styles.metricLabel, { color: '#fff' }]}>Verified scholars</Text>
+            </View>
+          </View>
+
+          {/* Strong Chunky Call-to-Actions */}
+          <View style={styles.actions}>
+            <TouchableOpacity
+              style={styles.signUpBtn}
+              onPress={() => navigation.navigate('Register')}
+            >
+              <Text style={styles.signUpBtnText}>🚀 LETS GO / SIGN UP</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.logInBtn}
+              onPress={() => navigation.navigate('Login')}
+            >
+              <Text style={styles.logInBtnText}>👤 LOG IN TO MY PORTAL</Text>
             </TouchableOpacity>
           </View>
-        </View>
 
-        {/* Catchy Statistics / Parity Badges */}
-        <View style={styles.metricsGrid}>
-          <View style={[styles.metricBox, { backgroundColor: '#fffacd', transform: [{ rotate: '-1.5deg' }] }]}>
-            <Text style={styles.metricVal}>0%</Text>
-            <Text style={styles.metricLabel}>Trading Fees</Text>
+        </ScrollView>
+      </Animated.View>
+
+      {/* 🚀 Brand Intro Anim Container Overlay */}
+      {showIntro && (
+        <Animated.View style={[styles.introContainer, { transform: [{ translateY: introY }] }]}>
+          <View style={styles.introInner}>
+            {/* Animated Brand Letters */}
+            <View style={styles.letterRow}>
+              {[
+                { letter: 'Q', anim: letterQ },
+                { letter: 'U', anim: letterU },
+                { letter: 'A', anim: letterA },
+                { letter: 'D', anim: letterD },
+                { letter: 'S', anim: letterS },
+              ].map((item, index) => (
+                <Animated.View
+                  key={index}
+                  style={[
+                    styles.letterCard,
+                    {
+                      transform: [{ scale: item.anim }],
+                      opacity: item.anim,
+                    },
+                  ]}
+                >
+                  <Text style={styles.letterText}>{item.letter}</Text>
+                </Animated.View>
+              ))}
+            </View>
+
+            {/* Intro Subtitle + Animated Loadbar */}
+            <Animated.View style={[styles.introSubWrapper, { opacity: introSub }]}>
+              <Text style={styles.introSubText}>TARKWA'S FINEST CAMPUS ESCROW</Text>
+              <View style={styles.loadTrack}>
+                <Animated.View
+                  style={[
+                    styles.loadFill,
+                    {
+                      width: loadBar.interpolate({
+                        inputRange: [0, 1],
+                        outputRange: ['0%', '100%'],
+                      }),
+                    },
+                  ]}
+                />
+              </View>
+            </Animated.View>
           </View>
-          <View style={[styles.metricBox, { backgroundColor: '#ff6b6b', transform: [{ rotate: '1.2deg' }] }]}>
-            <Text style={[styles.metricVal, { color: '#fff' }]}>VERIFIED</Text>
-            <Text style={[styles.metricLabel, { color: '#fff' }]}>UMaT Students</Text>
-          </View>
-          <View style={[styles.metricBox, { backgroundColor: '#10b981', transform: [{ rotate: '-0.8deg' }] }]}>
-            <Text style={[styles.metricVal, { color: '#fff' }]}>ESCROW</Text>
-            <Text style={[styles.metricLabel, { color: '#fff' }]}>Paystack Protection</Text>
-          </View>
-        </View>
-
-        {/* Strong Chunky Call-to-Actions */}
-        <View style={styles.actions}>
-          <TouchableOpacity
-            style={styles.signUpBtn}
-            onPress={() => navigation.navigate('Register')}
-          >
-            <Text style={styles.signUpBtnText}>🎯 GET STARTED / SIGN UP</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.logInBtn}
-            onPress={() => navigation.navigate('Login')}
-          >
-            <Text style={styles.logInBtnText}>👤 LOG IN TO MY PORTAL</Text>
-          </TouchableOpacity>
-        </View>
-
-        {/* Footer Credit */}
-        <Text style={styles.credits}>
-          UMaT Student Commerce Engine &bull; Tarkwa, Western Region 🇬🇭
-        </Text>
-
-      </ScrollView>
+        </Animated.View>
+      )}
     </SafeAreaView>
   );
 };
@@ -172,20 +284,23 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.bg,
   },
+  mainLayout: {
+    flex: 1,
+  },
   tickerHeader: {
-    backgroundColor: '#000',
-    paddingVertical: 6,
-    borderBottomWidth: 2,
+    backgroundColor: colors.accent, // ACCENT COLOR BACKGROUND
+    paddingVertical: 8,
+    borderBottomWidth: 3,
     borderColor: '#000',
     overflow: 'hidden',
   },
   tickerWrapper: {
     flexDirection: 'row',
-    width: 600,
+    width: 800,
   },
   tickerText: {
-    color: '#fff',
-    fontSize: 9,
+    color: '#000', // BOLD BLACK TEXT FOR HIGH CONTRAST
+    fontSize: 10,
     fontWeight: '900',
     textTransform: 'uppercase',
     letterSpacing: 1.2,
@@ -197,46 +312,32 @@ const styles = StyleSheet.create({
   },
   heroSection: {
     alignItems: 'center',
-    marginTop: 10,
-    gap: 4,
-  },
-  logoBadge: {
-    borderWidth: 1.5,
-    borderColor: '#000',
-    backgroundColor: '#fffacd',
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    transform: [{ rotate: '-2deg' }],
-  },
-  logoBadgeText: {
-    fontSize: 8,
-    fontWeight: '900',
-    letterSpacing: 1.4,
-    color: '#000',
+    marginTop: 15,
+    gap: 2,
   },
   logoTitle: {
-    fontSize: 50,
+    fontSize: 54,
     fontWeight: '900',
-    letterSpacing: -1.5,
+    letterSpacing: -2,
     color: '#000',
-    textShadowColor: '#ff6b6b',
-    textShadowOffset: { width: 3, height: 3 },
+    textShadowColor: colors.accent,
+    textShadowOffset: { width: 4, height: 4 },
     textShadowRadius: 0,
     marginVertical: 4,
   },
   subtitleWrapper: {
-    borderBottomWidth: 2,
+    borderBottomWidth: 2.5,
     borderBottomColor: '#000',
     paddingBottom: 2,
   },
   logoSubtitle: {
-    fontSize: 10,
-    fontWeight: '800',
+    fontSize: 11,
+    fontWeight: '900',
     letterSpacing: 1.2,
     color: '#000',
   },
   
-  // Interactive Onboarding Card
+  // Carousel Card
   slideCard: {
     borderWidth: 3,
     borderColor: '#000',
@@ -253,7 +354,7 @@ const styles = StyleSheet.create({
     paddingVertical: 3,
   },
   slideBadgeText: {
-    fontSize: 8,
+    fontSize: 9,
     fontWeight: '900',
     letterSpacing: 1,
   },
@@ -278,8 +379,8 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase',
   },
   slideDesc: {
-    fontSize: 12,
-    lineHeight: 18,
+    fontSize: 13,
+    lineHeight: 19,
     fontWeight: '700',
     color: '#555',
   },
@@ -312,17 +413,17 @@ const styles = StyleSheet.create({
     borderWidth: 1.5,
     borderColor: '#000',
     backgroundColor: '#fffacd',
-    paddingHorizontal: 10,
-    paddingVertical: 5,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
     gap: 4,
   },
   nextBtnText: {
-    fontSize: 9,
+    fontSize: 10,
     fontWeight: '900',
     letterSpacing: 0.8,
   },
 
-  // Grid metrics panel
+  // Metrics Grid
   metricsGrid: {
     flexDirection: 'row',
     gap: 10,
@@ -332,16 +433,16 @@ const styles = StyleSheet.create({
     flex: 1,
     borderWidth: 2,
     borderColor: '#000',
-    paddingVertical: 10,
+    paddingVertical: 12,
     paddingHorizontal: 6,
     alignItems: 'center',
     justifyContent: 'center',
     ...shadows.bulletin,
   },
   metricVal: {
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: '900',
-    letterSpacing: 0.5,
+    letterSpacing: 0.2,
     textAlign: 'center',
   },
   metricLabel: {
@@ -352,13 +453,13 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase',
   },
 
-  // Chunky buttons
+  // CTA Buttons
   actions: {
     gap: 12,
     marginTop: 10,
   },
   signUpBtn: {
-    backgroundColor: '#ff6b6b',
+    backgroundColor: colors.accent,
     borderWidth: 3,
     borderColor: '#000',
     paddingVertical: 16,
@@ -368,7 +469,7 @@ const styles = StyleSheet.create({
   },
   signUpBtnText: {
     color: '#fff',
-    fontSize: 13,
+    fontSize: 14,
     fontWeight: '900',
     letterSpacing: 0.8,
   },
@@ -383,17 +484,69 @@ const styles = StyleSheet.create({
   },
   logInBtnText: {
     color: '#000',
-    fontSize: 12,
+    fontSize: 13,
     fontWeight: '900',
     letterSpacing: 0.8,
   },
-  credits: {
+
+  // 🚀 Brand Intro Animations Overlay Styles
+  introContainer: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: colors.bg,
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 10000,
+  },
+  introInner: {
+    alignItems: 'center',
+    gap: 24,
+  },
+  letterRow: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  letterCard: {
+    width: 52,
+    height: 52,
+    borderWidth: 3,
+    borderColor: '#000',
+    backgroundColor: colors.surface,
+    alignItems: 'center',
+    justifyContent: 'center',
+    ...shadows.bulletinHeavy,
+  },
+  letterText: {
+    fontSize: 26,
+    fontWeight: '900',
+    color: '#000',
+  },
+  introSubWrapper: {
+    alignItems: 'center',
+    gap: 12,
+  },
+  introSubText: {
     fontSize: 9,
-    fontWeight: '800',
-    color: '#8f8373',
-    textAlign: 'center',
-    letterSpacing: 0.5,
-    marginTop: 10,
+    fontWeight: '900',
+    letterSpacing: 1.4,
+    color: '#7c6f60',
+    textTransform: 'uppercase',
+  },
+  loadTrack: {
+    width: 200,
+    height: 6,
+    borderWidth: 2,
+    borderColor: '#000',
+    backgroundColor: '#fff',
+    borderRadius: 3,
+    overflow: 'hidden',
+  },
+  loadFill: {
+    height: '100%',
+    backgroundColor: colors.accent,
   },
 });
 
