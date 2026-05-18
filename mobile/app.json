@@ -30,8 +30,8 @@
     },
     "scheme": "quads",
     "extra": {
-      "apiUrl": "http://172.20.10.10:5000/api",
-      "socketUrl": "http://172.20.10.10:5000",
+      "apiUrl": "https://api.quadsmarket.tech/api",
+      "socketUrl": "https://api.quadsmarket.tech",
       "supabaseUrl": "https://dbxeaqwjihgppffdcbdd.supabase.co",
       "supabaseKey": "sb_publishable_J-MSyIozalEGlIPvevfLow_FwN682H6",
       "eas": {
