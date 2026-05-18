@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import QRCode from 'react-native-qrcode-svg';
 import { Ionicons } from '@expo/vector-icons';
+import * as WebBrowser from 'expo-web-browser';
 import orderService, { Order } from '../services/order.service';
 import api from '../services/api';
 import { useAuth } from '../context/AuthContext';
@@ -43,6 +44,7 @@ const OrderDetailScreen = ({ route, navigation }: any) => {
   const [order, setOrder] = useState<Order | null>(null);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
+  const [paying, setPaying] = useState(false);
 
   const fetchOrder = useCallback(async () => {
     setLoading(true);
@@ -157,6 +159,47 @@ const OrderDetailScreen = ({ route, navigation }: any) => {
       Alert.alert('Error', err?.response?.data?.message || 'Verification failed.');
     } finally {
       setActionLoading(false);
+    }
+  };
+
+  const handlePayNow = async () => {
+    setPaying(true);
+    try {
+      // 1. Initialize payment session on server
+      const initRes = await api.post('/payments/initiate', {
+        orderId: order?._id,
+        paymentMethod: 'momo',
+        callbackUrl: 'https://quadsmarket.tech/payment/verify',
+      });
+
+      if (initRes.data.success) {
+        const { authorizationUrl, reference } = initRes.data.data;
+
+        // 2. Open Paystack payment interface in in-app web browser
+        await WebBrowser.openBrowserAsync(authorizationUrl);
+
+        // 3. Automatically request backend verification upon return
+        setActionLoading(true);
+        try {
+          const verifyRes = await api.get(`/payments/verify/${reference}`);
+          if (verifyRes.data.success) {
+            Alert.alert('Payment Successful!', 'Your payment was successfully validated.');
+            // Refresh order
+            const freshRes = await orderService.getOrderById(orderId);
+            if (freshRes.success) setOrder(freshRes.data.order);
+          } else {
+            Alert.alert('Payment Pending', 'Verification pending. If you just completed the payment, please refresh in a moment.');
+          }
+        } catch {
+          Alert.alert('Payment Completed?', 'Please refresh your order list to verify the payment receipt.');
+        } finally {
+          setActionLoading(false);
+        }
+      }
+    } catch (err: any) {
+      Alert.alert('Payment Failed', err?.response?.data?.message || 'Could not initiate Paystack payment. Try again.');
+    } finally {
+      setPaying(false);
     }
   };
 
@@ -343,6 +386,19 @@ const OrderDetailScreen = ({ route, navigation }: any) => {
               }
             </TouchableOpacity>
           )}
+          {!isSeller && order.status === 'pending' && (
+            <TouchableOpacity
+              style={[styles.payBtn, (actionLoading || paying) && styles.btnDisabled]}
+              onPress={handlePayNow}
+              disabled={actionLoading || paying}
+            >
+              {paying ? (
+                <ActivityIndicator size="small" color="#fff" />
+              ) : (
+                <Text style={styles.payBtnText}>💳 Pay Now (Paystack)</Text>
+              )}
+            </TouchableOpacity>
+          )}
           {order.status === 'pending' && (
             <TouchableOpacity
               style={[styles.cancelBtn, actionLoading && styles.btnDisabled]}
@@ -430,6 +486,8 @@ const styles = StyleSheet.create({
   actions: { gap: 8 },
   actionBtn: { backgroundColor: '#1f1a14', paddingVertical: 14, alignItems: 'center', borderWidth: 1, borderColor: '#1f1a14', ...shadows.bulletin },
   actionBtnText: { color: '#fff', fontWeight: '800', fontSize: 13, textTransform: 'uppercase', letterSpacing: 1 },
+  payBtn: { backgroundColor: '#10b981', paddingVertical: 14, alignItems: 'center', borderWidth: 1, borderColor: '#10b981', ...shadows.bulletin },
+  payBtnText: { color: '#fff', fontWeight: '900', fontSize: 13, textTransform: 'uppercase', letterSpacing: 1 },
   cancelBtn: { borderWidth: 1, borderColor: '#d6b8b4', backgroundColor: '#fde8e6', paddingVertical: 12, alignItems: 'center' },
   cancelBtnText: { color: '#9f3d34', fontWeight: '800', fontSize: 12, textTransform: 'uppercase', letterSpacing: 1 },
   reviewBtn: { borderWidth: 1, borderColor: '#c8b48c', backgroundColor: '#fffacd', paddingVertical: 12, alignItems: 'center' },
