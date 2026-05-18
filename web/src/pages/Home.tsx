@@ -223,15 +223,18 @@ const HomePage: React.FC = () => {
               <h2 className="text-2xl font-black uppercase tracking-tighter text-black dark:text-[#f9d0db]">Top Sellers</h2>
             </div>
             <div className="space-y-4">
-              {topSellers.length > 0 ? topSellers.slice(0, 4).map((s: any, j: number) => (
-                <div key={j} className="flex items-center gap-4 border-2 border-black/10 dark:border-[#ff6b6b]/20 bg-white/40 dark:bg-black/40 p-3 hover:translate-x-1 transition-transform">
-                  <div className="h-10 w-10 border-2 border-black dark:border-[#ff6b6b] bg-white dark:bg-[#111] flex items-center justify-center font-black text-[14px] text-black dark:text-[#ff6b6b]">{s.name[0]}</div>
-                  <div>
-                    <div className="text-[12px] font-black uppercase tracking-tight text-black dark:text-[#f9d0db]">{s.name}</div>
-                    <div className="text-[9px] opacity-60 uppercase font-black tracking-widest text-black dark:text-[#f9d0db] mt-0.5">{s.listingCount} items</div>
+              {topSellers.length > 0 ? topSellers.slice(0, 4).map((s: any, j: number) => {
+                const sellerName = s.seller?.name || 'Seller';
+                return (
+                  <div key={j} className="flex items-center gap-4 border-2 border-black/10 dark:border-[#ff6b6b]/20 bg-white/40 dark:bg-black/40 p-3 hover:translate-x-1 transition-transform">
+                    <div className="h-10 w-10 border-2 border-black dark:border-[#ff6b6b] bg-white dark:bg-[#111] flex items-center justify-center font-black text-[14px] text-black dark:text-[#ff6b6b]">{sellerName[0]}</div>
+                    <div>
+                      <div className="text-[12px] font-black uppercase tracking-tight text-black dark:text-[#f9d0db]">{sellerName}</div>
+                      <div className="text-[9px] opacity-60 uppercase font-black tracking-widest text-black dark:text-[#f9d0db] mt-0.5">{s.totalSales || 0} sales</div>
+                    </div>
                   </div>
-                </div>
-              )) : (
+                );
+              }) : (
                 <div className="text-[11px] font-black opacity-30 uppercase tracking-widest mt-10">Finding top sellers...</div>
               )}
             </div>

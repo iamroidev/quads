@@ -2,6 +2,7 @@ import React from 'react';
 import { Alert, ScrollView, StyleSheet, Switch, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 import api from '../services/api';
 import { supabase } from '../services/supabase';
 import { colors, shadows } from '../theme';
@@ -9,6 +10,7 @@ import ScreenHeader from '../components/ScreenHeader';
 
 const SettingsScreen = () => {
   const { user, refreshUser, logout } = useAuth();
+  const { theme, setTheme } = useTheme();
   const [notifPrefs, setNotifPrefs] = React.useState({
     orderUpdates: true, messages: true, reviews: true, promotions: false, systemAlerts: true,
   });
@@ -86,7 +88,34 @@ const SettingsScreen = () => {
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       <ScreenHeader eyebrow="Account" title="Settings" subtitle={user?.email} />
-      <ScrollView contentContainerStyle={{ paddingBottom: 30 }}>
+      <ScrollView contentContainerStyle={{ paddingBottom: 40 }} showsVerticalScrollIndicator={false}>
+
+      <Text style={styles.sectionLabel}>App theme</Text>
+      <View style={styles.themeSelectorContainer}>
+        {(['light', 'dark', 'system'] as const).map((t) => {
+          const isActive = theme === t;
+          return (
+            <TouchableOpacity
+              key={t}
+              style={[
+                styles.themeBtn,
+                isActive && { backgroundColor: colors.accent, borderColor: colors.border },
+              ]}
+              onPress={() => setTheme(t)}
+              activeOpacity={0.8}
+            >
+              <Text
+                style={[
+                  styles.themeBtnText,
+                  isActive && { color: '#ffffff', fontWeight: '900' },
+                ]}
+              >
+                {t}
+              </Text>
+            </TouchableOpacity>
+          );
+        })}
+      </View>
 
       <Text style={styles.sectionLabel}>Notification settings</Text>
 
@@ -108,6 +137,7 @@ const SettingsScreen = () => {
                 value={notifPrefs[key as keyof typeof notifPrefs]}
                 onValueChange={(v) => saveNotification(key as keyof typeof notifPrefs, v)}
                 disabled={savingNotif}
+                trackColor={{ false: '#767577', true: colors.accent }}
               />
             </View>
             {idx < 4 ? <View style={styles.sep} /> : null}
@@ -134,6 +164,7 @@ const SettingsScreen = () => {
                 value={privacyPrefs[key as keyof typeof privacyPrefs]}
                 onValueChange={(v) => savePrivacy(key as keyof typeof privacyPrefs, v)}
                 disabled={savingPrivacy}
+                trackColor={{ false: '#767577', true: colors.accent }}
               />
             </View>
             {idx < 3 ? <View style={styles.sep} /> : null}
@@ -141,7 +172,7 @@ const SettingsScreen = () => {
         ))}
       </View>
 
-      <TouchableOpacity style={styles.secondaryBtn} onPress={handleRefresh} disabled={loading}>
+      <TouchableOpacity style={styles.secondaryBtn} onPress={handleRefresh} disabled={loading} activeOpacity={0.8}>
         <Text style={styles.secondaryBtnText}>{loading ? 'Refreshing...' : 'Refresh account data'}</Text>
       </TouchableOpacity>
 
@@ -152,7 +183,7 @@ const SettingsScreen = () => {
             <TextInput
               style={styles.pwInput}
               placeholder="New password"
-              placeholderTextColor="#9a8e7f"
+              placeholderTextColor="rgba(0,0,0,0.3)"
               secureTextEntry
               value={newPw}
               onChangeText={setNewPw}
@@ -160,7 +191,7 @@ const SettingsScreen = () => {
             <TextInput
               style={styles.pwInput}
               placeholder="Confirm new password"
-              placeholderTextColor="#9a8e7f"
+              placeholderTextColor="rgba(0,0,0,0.3)"
               secureTextEntry
               value={confirmPw}
               onChangeText={setConfirmPw}
@@ -169,6 +200,7 @@ const SettingsScreen = () => {
               style={[styles.pwBtn, changingPw && { opacity: 0.5 }]}
               onPress={handleChangePassword}
               disabled={changingPw}
+              activeOpacity={0.8}
             >
               <Text style={styles.pwBtnText}>{changingPw ? 'Updating...' : 'Update Password'}</Text>
             </TouchableOpacity>
@@ -176,7 +208,7 @@ const SettingsScreen = () => {
         </View>
       </View>
 
-      <TouchableOpacity style={styles.logoutBtn} onPress={logout}>
+      <TouchableOpacity style={styles.logoutBtn} onPress={logout} activeOpacity={0.8}>
         <Text style={styles.logoutText}>Sign out</Text>
       </TouchableOpacity>
       </ScrollView>
@@ -190,26 +222,122 @@ const styles = StyleSheet.create({
     marginTop: 16,
     marginBottom: 8,
     fontSize: 10,
-    fontWeight: '800',
-    color: '#7c6f60',
+    fontWeight: '900',
+    color: colors.text,
+    opacity: 0.6,
     letterSpacing: 1.6,
     textTransform: 'uppercase',
   },
-  card: { marginTop: 14, backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border, ...shadows.bulletin },
-  row: { paddingHorizontal: 14, paddingVertical: 14, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  sep: { height: 1, backgroundColor: '#efe5d6' },
-  rowTitle: { fontSize: 13, fontWeight: '800', color: '#1f1a14', textTransform: 'uppercase', letterSpacing: 1 },
-  rowNote: { marginTop: 2, color: '#8b7f72', fontSize: 12 },
-  secondaryBtn: { marginTop: 16, borderWidth: 1, borderColor: colors.border, paddingVertical: 12, alignItems: 'center', backgroundColor: '#fff', ...shadows.bulletin },
-  secondaryBtnText: { fontSize: 11, color: '#3d352b', textTransform: 'uppercase', fontWeight: '800', letterSpacing: 1.1 },
-  logoutBtn: { marginTop: 12, borderWidth: 1, borderColor: '#d6b8b4', paddingVertical: 12, alignItems: 'center', backgroundColor: colors.surface },
-  logoutText: { fontSize: 11, color: '#9f3d34', textTransform: 'uppercase', fontWeight: '800', letterSpacing: 1.1 },
-  pwInput: {
-    borderWidth: 1, borderColor: colors.border, backgroundColor: '#fff',
-    borderRadius: 0, paddingHorizontal: 12, paddingVertical: 10, fontSize: 14, color: colors.text,
+  themeSelectorContainer: {
+    flexDirection: 'row',
+    gap: 8,
+    marginTop: 6,
   },
-  pwBtn: { backgroundColor: '#1f1a14', paddingVertical: 12, alignItems: 'center', marginBottom: 14, ...shadows.bulletin },
-  pwBtnText: { color: '#fff', fontSize: 11, fontWeight: '800', textTransform: 'uppercase', letterSpacing: 1.1 },
+  themeBtn: {
+    flex: 1,
+    borderWidth: 2,
+    borderColor: colors.border,
+    paddingVertical: 10,
+    alignItems: 'center',
+    backgroundColor: colors.surface,
+    ...shadows.bulletin,
+  },
+  themeBtnText: {
+    fontSize: 11,
+    fontWeight: '700',
+    textTransform: 'uppercase',
+    color: colors.text,
+    letterSpacing: 1,
+  },
+  card: { 
+    marginTop: 10, 
+    backgroundColor: colors.surface, 
+    borderWidth: 2.5, 
+    borderColor: colors.border, 
+    ...shadows.bulletin 
+  },
+  row: { 
+    paddingHorizontal: 14, 
+    paddingVertical: 14, 
+    flexDirection: 'row', 
+    justifyContent: 'space-between', 
+    alignItems: 'center' 
+  },
+  sep: { 
+    height: 1.5, 
+    backgroundColor: colors.border,
+    opacity: 0.1,
+  },
+  rowTitle: { 
+    fontSize: 12, 
+    fontWeight: '900', 
+    color: colors.text, 
+    textTransform: 'uppercase', 
+    letterSpacing: 0.5 
+  },
+  rowNote: { 
+    marginTop: 2, 
+    color: colors.text,
+    opacity: 0.5, 
+    fontSize: 11,
+    fontWeight: '500',
+  },
+  secondaryBtn: { 
+    marginTop: 16, 
+    borderWidth: 2.5, 
+    borderColor: colors.border, 
+    paddingVertical: 12, 
+    alignItems: 'center', 
+    backgroundColor: colors.surface, 
+    ...shadows.bulletin 
+  },
+  secondaryBtnText: { 
+    fontSize: 11, 
+    color: colors.text, 
+    textTransform: 'uppercase', 
+    fontWeight: '900', 
+    letterSpacing: 1.1 
+  },
+  logoutBtn: { 
+    marginTop: 16, 
+    borderWidth: 2.5, 
+    borderColor: '#d6b8b4', 
+    paddingVertical: 12, 
+    alignItems: 'center', 
+    backgroundColor: colors.surface 
+  },
+  logoutText: { 
+    fontSize: 11, 
+    color: '#9f3d34', 
+    textTransform: 'uppercase', 
+    fontWeight: '900', 
+    letterSpacing: 1.1 
+  },
+  pwInput: {
+    borderWidth: 2.5, 
+    borderColor: colors.border, 
+    backgroundColor: colors.surface,
+    paddingHorizontal: 12, 
+    paddingVertical: 10, 
+    fontSize: 14, 
+    color: colors.text,
+  },
+  pwBtn: { 
+    backgroundColor: colors.accent, 
+    borderWidth: 2.5,
+    borderColor: colors.border,
+    paddingVertical: 12, 
+    alignItems: 'center', 
+    marginBottom: 14, 
+    ...shadows.bulletin 
+  },
+  pwBtnText: { 
+    color: '#fff', 
+    fontSize: 11, 
+    fontWeight: '900', 
+    textTransform: 'uppercase', 
+    letterSpacing: 1.1 
+  },
 });
 
 export default SettingsScreen;

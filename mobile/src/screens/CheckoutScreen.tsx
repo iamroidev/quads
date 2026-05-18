@@ -14,14 +14,29 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import api from '../services/api';
 import { useAuth } from '../context/AuthContext';
+import { useCart } from '../context/CartContext';
 import orderService from '../services/order.service';
 import { colors, shadows } from '../theme';
 import ScreenHeader from '../components/ScreenHeader';
 
 const CheckoutScreen = ({ route, navigation }: any) => {
-  const { product } = route.params;
+  const { product, cartItems } = route.params || {};
+  const { clearCart } = useCart();
+  
+  const checkoutItems = cartItems || (product ? [{ 
+    productId: product._id, 
+    title: product.title, 
+    price: product.price, 
+    quantity: 1, 
+    seller: product.seller,
+    pickupLocation: product.pickupLocation
+  }] : []);
+
+  const firstItem = checkoutItems[0] || {};
+  const subtotal = checkoutItems.reduce((acc: number, item: any) => acc + item.price * (item.quantity || 1), 0);
+
   const [deliveryMethod, setDeliveryMethod] = useState<'pickup' | 'delivery'>('pickup');
-  const [pickupLocation, setPickupLocation] = useState(product.pickupLocation || '');
+  const [pickupLocation, setPickupLocation] = useState(firstItem.pickupLocation || '');
   const [deliveryAddress, setDeliveryAddress] = useState('');
   const [note, setNote] = useState('');
   const [loading, setLoading] = useState(false);
@@ -31,18 +46,18 @@ const CheckoutScreen = ({ route, navigation }: any) => {
   const [validatingCoupon, setValidatingCoupon] = useState(false);
 
   const discount = appliedCoupon ? appliedCoupon.discount : 0;
-  const total = Math.max(0, product.price - discount);
+  const total = Math.max(0, subtotal - discount);
 
   const handleApplyCoupon = async () => {
     if (!couponCode.trim()) return;
     setValidatingCoupon(true);
     try {
-      const sellerId = product.seller._id || product.seller;
+      const sellerId = firstItem.seller?._id || firstItem.seller;
       const res = await api.get('/orders/validate-coupon', {
         params: {
           code: couponCode.trim().toUpperCase(),
           sellerId,
-          subtotal: product.price,
+          subtotal,
         },
       });
       if (res.data.success) {
@@ -65,25 +80,50 @@ const CheckoutScreen = ({ route, navigation }: any) => {
     setLoading(true);
     try {
       const res = await orderService.createOrder({
-        productId: product._id,
-        quantity: 1,
+        items: checkoutItems.map((item: any) => ({
+          productId: item.productId,
+          quantity: item.quantity || 1,
+        })),
         deliveryMethod,
-        pickupLocation: deliveryMethod === 'pickup' ? pickupLocation || product.pickupLocation : undefined,
+        pickupLocation: deliveryMethod === 'pickup' ? pickupLocation || firstItem.pickupLocation : undefined,
         deliveryAddress: deliveryMethod === 'delivery' ? deliveryAddress.trim() : undefined,
         note: note.trim() || undefined,
         couponCode: appliedCoupon ? appliedCoupon.code : undefined,
       });
+
       if (res.success) {
-        Alert.alert(
-          'Order Placed!',
-          `Order #${res.data.order.orderNumber} has been successfully created.`,
-          [{ 
-            text: 'Pay Now 💳', 
-            onPress: () => {
-              navigation.replace('OrderDetail', { orderId: res.data.order._id });
-            } 
-          }]
-        );
+        if (cartItems && cartItems.length > 0) {
+          await clearCart();
+        }
+
+        const data = res.data as any;
+        const orderId = data.order?._id || (data.orders && data.orders[0]?._id);
+
+        if (data.orders && data.orders.length > 1) {
+          Alert.alert(
+            'Orders Placed! 🚀',
+            `Created ${data.orders.length} separate orders (one for each seller).`,
+            [{ 
+              text: 'View My Orders', 
+              onPress: () => {
+                navigation.replace('Orders');
+              } 
+            }]
+          );
+        } else if (orderId) {
+          Alert.alert(
+            'Order Placed!',
+            `Order has been successfully created.`,
+            [{ 
+              text: 'Pay Now 💳', 
+              onPress: () => {
+                navigation.replace('OrderDetail', { orderId });
+              } 
+            }]
+          );
+        } else {
+          navigation.replace('Orders');
+        }
       }
     } catch (err: any) {
       Alert.alert('Failed', err?.response?.data?.message || 'Could not place order. Try again.');
@@ -95,18 +135,26 @@ const CheckoutScreen = ({ route, navigation }: any) => {
   return (
     <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <SafeAreaView style={styles.container} edges={['top']}>
-        <ScreenHeader eyebrow="Purchase" title="Checkout" subtitle={`Buying: ${product.title}`} />
+        <ScreenHeader 
+          eyebrow="Purchase" 
+          title="Checkout" 
+          subtitle={checkoutItems.length > 1 ? `Buying ${checkoutItems.length} items` : `Buying: ${firstItem.title || ''}`} 
+        />
         <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
 
           {/* Summary */}
           <View style={styles.section}>
             <Text style={styles.sectionLabel}>Order summary</Text>
-            <View style={styles.summaryRow}>
-              <Text style={styles.summaryKey}>{product.title}</Text>
-              <Text style={styles.summaryValue}>
-                GHS {product.price.toLocaleString('en-GH', { minimumFractionDigits: 2 })}
-              </Text>
-            </View>
+            {checkoutItems.map((item: any, idx: number) => (
+              <View style={styles.summaryRow} key={`${item.productId}-${idx}`}>
+                <Text style={styles.summaryKey} numberOfLines={1}>
+                  {item.title} {item.quantity > 1 ? `x${item.quantity}` : ''}
+                </Text>
+                <Text style={styles.summaryValue}>
+                  GHS {(item.price * (item.quantity || 1)).toLocaleString('en-GH', { minimumFractionDigits: 2 })}
+                </Text>
+              </View>
+            ))}
             {appliedCoupon && (
               <View style={styles.summaryRow}>
                 <Text style={styles.summaryKey}>Promo Code ({appliedCoupon.code})</Text>

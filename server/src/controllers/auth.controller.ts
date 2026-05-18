@@ -420,10 +420,6 @@ export const deleteAccount = async (
 ): Promise<void> => {
   try {
     const { password } = req.body;
-    if (!password) {
-      res.status(400).json({ success: false, message: 'Password is required to delete your account.' });
-      return;
-    }
 
     // Load user with password field
     const user = await User.findById(req.user!._id).select('+password');
@@ -432,10 +428,19 @@ export const deleteAccount = async (
       return;
     }
 
-    const isMatch = await user.comparePassword(password);
-    if (!isMatch) {
-      res.status(401).json({ success: false, message: 'Incorrect password.' });
-      return;
+    // Standard password-based users must confirm deletion with their password.
+    // OAuth (Google/Supabase) users who don't have a local password bypass this check.
+    if (!user.supabaseId) {
+      if (!password) {
+        res.status(400).json({ success: false, message: 'Password is required to delete your account.' });
+        return;
+      }
+
+      const isMatch = await user.comparePassword(password);
+      if (!isMatch) {
+        res.status(401).json({ success: false, message: 'Incorrect password.' });
+        return;
+      }
     }
 
     await User.findByIdAndDelete(req.user!._id);

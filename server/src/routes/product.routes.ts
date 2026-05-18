@@ -61,6 +61,7 @@ router.get('/social/sold-feed', getSoldFeed);
 
 // GET /api/products/social/top-sellers — top sellers leaderboard
 router.get('/social/top-sellers', getTopSellers);
+router.get('/top-sellers', getTopSellers);
 
 // GET /api/products/content/category-spotlights — generated spotlights
 router.get('/content/category-spotlights', getCategorySpotlights);

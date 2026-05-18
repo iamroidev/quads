@@ -130,7 +130,11 @@ const OrderDetailScreen = ({ route, navigation }: any) => {
   };
 
   const handleCancel = () => {
-    Alert.alert('Cancel Order', 'Are you sure you want to cancel this order?', [
+    const isPaid = order?.status === 'paid';
+    const warningMsg = isPaid 
+      ? 'Are you sure you want to cancel this order? Since you have already paid, your escrow refund will be processed.' 
+      : 'Are you sure you want to cancel this order?';
+    Alert.alert('Cancel Order', warningMsg, [
       { text: 'No', style: 'cancel' },
       {
         text: 'Yes, Cancel', style: 'destructive',
@@ -166,10 +170,11 @@ const OrderDetailScreen = ({ route, navigation }: any) => {
     setPaying(true);
     try {
       // 1. Initialize payment session on server
+      const callbackUrl = `${api.defaults.baseURL}/payments/verify-success`;
       const initRes = await api.post('/payments/initiate', {
         orderId: order?._id,
         paymentMethod: 'momo',
-        callbackUrl: 'https://quadsmarket.tech/payment/verify',
+        callbackUrl,
       });
 
       if (initRes.data.success) {
@@ -399,7 +404,7 @@ const OrderDetailScreen = ({ route, navigation }: any) => {
               )}
             </TouchableOpacity>
           )}
-          {order.status === 'pending' && (
+          {['pending', 'paid'].includes(order.status) && (
             <TouchableOpacity
               style={[styles.cancelBtn, actionLoading && styles.btnDisabled]}
               onPress={handleCancel}

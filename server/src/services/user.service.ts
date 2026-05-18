@@ -134,23 +134,25 @@ class UserService {
     const Order = mongoose.model('Order');
     const Review = mongoose.model('Review');
     const Notification = mongoose.model('Notification');
+    const Store = mongoose.model('Store');
 
-    // 1. Active Listings (seller is userId, status is 'active')
-    const activeListings = await Product.countDocuments({ 
-      seller: userId, 
-      status: 'active' 
-    });
+    // Find the user's store
+    const store = await Store.findOne({ ownerId: userId });
+
+    // 1. Active Listings (seller is store._id, status is 'active')
+    const activeListings = store
+      ? await Product.countDocuments({ seller: store._id, status: 'active' })
+      : 0;
 
     // 2. Total Orders (buyer is userId)
     const totalOrders = await Order.countDocuments({ 
       buyer: userId 
     });
 
-    // 3. Total Sales (seller is userId, status is 'completed')
-    const totalSales = await Order.countDocuments({ 
-      seller: userId, 
-      status: 'completed' 
-    });
+    // 3. Total Sales (seller is store._id, status is 'completed')
+    const totalSales = store
+      ? await Order.countDocuments({ seller: store._id, status: 'completed' })
+      : 0;
 
     // 4. Rating & Reviews
     const userReviews = await Review.find({ seller: userId });

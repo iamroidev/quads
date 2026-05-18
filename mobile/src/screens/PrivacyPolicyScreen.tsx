@@ -117,7 +117,7 @@ const styles = StyleSheet.create({
     padding: 20,
     borderWidth: 2,
     borderColor: colors.border,
-    backgroundColor: '#fffacd',
+    backgroundColor: colors.noticeBg,
     ...shadows.bulletin,
   },
   headerCardTitle: {
@@ -130,13 +130,13 @@ const styles = StyleSheet.create({
   headerCardText: {
     fontSize: 13,
     fontWeight: '700',
-    color: 'rgba(0,0,0,0.7)',
+    color: colors.text,
     lineHeight: 18,
   },
   lastUpdated: {
     fontSize: 9,
     fontWeight: '900',
-    color: 'rgba(0,0,0,0.3)',
+    color: colors.muted,
     marginTop: 14,
     letterSpacing: 1,
   },
@@ -147,7 +147,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 12,
     fontWeight: '900',
-    color: '#ff6b6b',
+    color: colors.accent,
     letterSpacing: 1.5,
     marginBottom: 8,
     textTransform: 'uppercase',
@@ -190,15 +190,15 @@ const styles = StyleSheet.create({
   alertBox: {
     marginTop: 12,
     padding: 10,
-    backgroundColor: '#e0f2f7',
-    borderWidth: 1,
-    borderColor: '#0284c7',
+    backgroundColor: colors.metric1Bg,
+    borderWidth: 1.5,
+    borderColor: colors.accent,
     borderStyle: 'dashed',
   },
   alertText: {
     fontSize: 11,
     fontWeight: '900',
-    color: '#0369a1',
+    color: colors.metric1Text,
     textAlign: 'center',
   },
   contactCard: {
@@ -229,13 +229,13 @@ const styles = StyleSheet.create({
     backgroundColor: colors.text,
     paddingHorizontal: 12,
     paddingVertical: 6,
-    borderWidth: 1,
+    borderWidth: 1.5,
     borderColor: colors.border,
   },
   badgeText: {
     fontSize: 11,
     fontWeight: '900',
-    color: '#fff',
+    color: colors.surface,
     letterSpacing: 0.5,
   },
 });

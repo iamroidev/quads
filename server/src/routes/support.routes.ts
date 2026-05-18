@@ -22,6 +22,7 @@ router.get('/ai-user', async (req, res, next) => {
       aiUser = await User.create({
         name: 'QUADS AI Support',
         email: AI_EMAIL,
+        password: 'ai-assistant-default-secure-pass-10293!',
         role: 'admin',
         isVerified: true,
         emailVerified: true,

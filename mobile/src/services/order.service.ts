@@ -63,14 +63,15 @@ const orderService = {
   },
 
   createOrder: async (body: {
-    productId: string;
+    productId?: string;
     quantity?: number;
+    items?: Array<{ productId: string; quantity: number }>;
     deliveryMethod: 'pickup' | 'delivery';
     pickupLocation?: string;
     deliveryAddress?: string;
     note?: string;
     couponCode?: string;
-  }): Promise<{ success: boolean; data: { order: Order } }> => {
+  }): Promise<{ success: boolean; data: { order?: Order; orders?: Order[] } }> => {
     const response = await api.post('/orders', body);
     return response.data;
   },

@@ -6,6 +6,7 @@ import User from '../models/User';
 import ApiError from '../utils/ApiError';
 import aiService from './ai.service';
 import { emailService } from './email.service';
+import notificationService from './notification.service';
 
 interface PaginatedMessages {
   messages: IMessageDocument[];
@@ -26,18 +27,28 @@ class ChatService extends EventEmitter {
     otherUserId: string,
     productId?: string
   ): Promise<IConversationDocument> {
-    if (userId === otherUserId) {
-      throw ApiError.badRequest('Cannot start a conversation with yourself');
+    // Verify other user exists or resolve from Store ID
+    let otherUser = await User.findById(otherUserId);
+    if (!otherUser) {
+      const Store = mongoose.model('Store');
+      const store = await Store.findById(otherUserId);
+      if (store) {
+        otherUser = await User.findById(store.ownerId);
+      }
     }
 
-    // Verify other user exists
-    const otherUser = await User.findById(otherUserId);
     if (!otherUser) {
       throw ApiError.notFound('User not found');
     }
 
+    const resolvedOtherUserId = otherUser._id.toString();
+
+    if (userId === resolvedOtherUserId) {
+      throw ApiError.badRequest('Cannot start a conversation with yourself');
+    }
+
     // Sort participant IDs for consistent lookup
-    const participants = [userId, otherUserId].sort();
+    const participants = [userId, resolvedOtherUserId].sort();
 
     // Build query
     const query: Record<string, any> = {
@@ -211,6 +222,28 @@ class ChatService extends EventEmitter {
 
     // Emit event for real-time handlers
     this.emit('message', populatedMessage);
+
+    // Notify receiver of the new message via Push Notification
+    if (type !== 'system') {
+      const receiverId = conversation.participants.find(
+        (p) => p.toString() !== senderId.toString()
+      );
+      if (receiverId) {
+        User.findById(senderId).select('name').then(sender => {
+          const senderName = sender ? sender.name : 'Someone';
+          notificationService.create(
+            receiverId.toString(),
+            'new_message',
+            `New Message from ${senderName}`,
+            content.length > 80 ? `${content.substring(0, 80)}...` : content,
+            `/chat/${conversationId}`,
+            { conversationId, senderId, senderName }
+          ).catch(err => {
+            console.error('Failed to trigger message push notification:', err);
+          });
+        });
+      }
+    }
 
     // Trigger AI response if the recipient is the AI Support user
     this.handleAiResponse(conversationId, senderId, content.trim()).catch(err => {
