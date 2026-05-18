@@ -113,8 +113,15 @@ export const getMySales = async (
 ): Promise<void> => {
   try {
     const { status, page, limit } = req.query;
+    if (!req.user?.activeStore) {
+      res.status(200).json({
+        success: true,
+        data: { orders: [] },
+      });
+      return;
+    }
     const result = await orderService.getSellerOrders(
-      req.user!.activeStore!._id.toString(),
+      req.user.activeStore._id.toString(),
       status as string | undefined,
       parseInt(page as string) || 1,
       parseInt(limit as string) || 20
@@ -197,7 +204,14 @@ export const getSellerStats = async (
   next: NextFunction
 ): Promise<void> => {
   try {
-    const stats = await orderService.getSellerStats(req.user!.activeStore!._id.toString());
+    const storeId = req.user?.activeStore ? req.user.activeStore._id.toString() : null;
+    const stats = storeId ? await orderService.getSellerStats(storeId) : {
+      totalOrders: 0,
+      totalRevenue: 0,
+      pendingOrders: 0,
+      completedOrders: 0,
+      totalViews: 0,
+    };
 
     res.status(200).json({
       success: true,
@@ -229,7 +243,11 @@ export const createCoupon = async (
   next: NextFunction
 ): Promise<void> => {
   try {
-    const coupon = await orderService.createCoupon(req.user!.activeStore!._id.toString(), req.body);
+    if (!req.user?.activeStore) {
+      res.status(400).json({ success: false, message: 'Active store not found. Please complete onboarding first.' });
+      return;
+    }
+    const coupon = await orderService.createCoupon(req.user.activeStore._id.toString(), req.body);
     res.status(201).json({ success: true, message: 'Coupon created', data: { coupon } });
   } catch (error) {
     next(error);
@@ -242,7 +260,11 @@ export const getSellerCoupons = async (
   next: NextFunction
 ): Promise<void> => {
   try {
-    const coupons = await orderService.getSellerCoupons(req.user!.activeStore!._id.toString());
+    if (!req.user?.activeStore) {
+      res.status(200).json({ success: true, data: { coupons: [] } });
+      return;
+    }
+    const coupons = await orderService.getSellerCoupons(req.user.activeStore._id.toString());
     res.status(200).json({ success: true, data: { coupons } });
   } catch (error) {
     next(error);
@@ -290,7 +312,11 @@ export const createBundle = async (
   next: NextFunction
 ): Promise<void> => {
   try {
-    const bundle = await orderService.createBundle(req.user!.activeStore!._id.toString(), req.body);
+    if (!req.user?.activeStore) {
+      res.status(400).json({ success: false, message: 'Active store not found. Please complete onboarding first.' });
+      return;
+    }
+    const bundle = await orderService.createBundle(req.user.activeStore._id.toString(), req.body);
     res.status(201).json({ success: true, message: 'Bundle created', data: { bundle } });
   } catch (error) {
     next(error);
@@ -303,7 +329,11 @@ export const getSellerBundles = async (
   next: NextFunction
 ): Promise<void> => {
   try {
-    const bundles = await orderService.getSellerBundles(req.user!.activeStore!._id.toString());
+    if (!req.user?.activeStore) {
+      res.status(200).json({ success: true, data: { bundles: [] } });
+      return;
+    }
+    const bundles = await orderService.getSellerBundles(req.user.activeStore._id.toString());
     res.status(200).json({ success: true, data: { bundles } });
   } catch (error) {
     next(error);

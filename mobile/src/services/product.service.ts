@@ -39,6 +39,7 @@ interface SellerStatsResponse {
       totalRevenue: number;
       pendingOrders: number;
       completedOrders: number;
+      totalViews: number;
     };
   };
 }
