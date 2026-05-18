@@ -18,22 +18,22 @@ const { width, height } = Dimensions.get('window');
 
 const SLIDES = [
   {
-    icon: 'swap-horizontal-outline',
-    title: '📍 Campus Swaps',
+    icon: 'storefront-outline',
+    title: 'Campus Swaps',
     highlight: '🔥 0% COMMISSION ALWAYS',
     color: '#ff6b6b',
     desc: 'Selling your old mini-fridge, engineering calculator, or textbook gear? Post it in 10 seconds. Keep 100% of your money. Zero commission. Always.',
   },
   {
-    icon: 'shield-checkmark-outline',
-    title: '💳 Paystack Escrow',
+    icon: 'lock-closed-outline',
+    title: 'Paystack Escrow',
     highlight: '🛡️ NO MORE SCAMS',
     color: '#3d307c',
     desc: 'Pay with Momo inside the app. We hold the cash securely in escrow. The seller doesn\'t get a single pesewa until you verify the item in person.',
   },
   {
-    icon: 'qr-code-outline',
-    title: '🚀 QR Scanner Handoff',
+    icon: 'scan-outline',
+    title: 'QR Scanner Handoff',
     highlight: '⚡ INSTANT RELEASE',
     color: '#10b981',
     desc: 'Meet safely at the Library or Main Gate. Scan the seller\'s automatically generated QR code on your phone to instantly release escrow funds.',
