@@ -211,7 +211,82 @@ const LoginScreen = ({ navigation }: any) => {
           keyboardShouldPersistTaps="handled"
         >
           <View style={styles.heroWrap}>
-            <Text style={styles.eyebrow}>BULLETIN</Text>
+            {/* Branded Subscript Logo Lockup (Matches the brand identity 100%!) */}
+            <View style={[styles.letterRow, { alignItems: 'flex-end', gap: 5, marginBottom: 12 }]}>
+              
+              {/* Massive Vector Q-Logo (Scaled to 54x54 for login page header balance) */}
+              <View
+                style={[
+                  styles.letterCard,
+                  {
+                    width: 54,
+                    height: 54,
+                    borderWidth: 3,
+                    borderColor: colors.border,
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    position: 'relative',
+                    ...shadows.bulletin,
+                  },
+                ]}
+              >
+                {/* Bold Stencil Q (Inner Ring) */}
+                <View style={{
+                  width: 24,
+                  height: 24,
+                  borderWidth: 5.5,
+                  borderColor: colors.border,
+                  backgroundColor: 'transparent',
+                }} />
+                
+                {/* Bold Stencil Q (Rotated Tail) */}
+                <View style={{
+                  position: 'absolute',
+                  bottom: 8,
+                  right: 8,
+                  width: 10,
+                  height: 5,
+                  backgroundColor: colors.border,
+                  transform: [{ rotate: '45deg' }],
+                }} />
+
+                {/* Red Thumbtack detail (Top Right) */}
+                <View style={{
+                  position: 'absolute',
+                  top: 4,
+                  right: 4,
+                  width: 8,
+                  height: 8,
+                  borderRadius: 4,
+                  backgroundColor: '#ff6b6b',
+                  borderWidth: 1.2,
+                  borderColor: colors.border,
+                }} />
+              </View>
+
+              {/* Subscript letters: U A D S (Compact 22x22 for clean header proportions) */}
+              {['U', 'A', 'D', 'S'].map((char, idx) => (
+                <View
+                  key={idx}
+                  style={[
+                    styles.letterCard,
+                    {
+                      width: 22,
+                      height: 22,
+                      borderWidth: 1.5,
+                      borderColor: colors.border,
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                      marginBottom: 1,
+                      ...shadows.bulletin,
+                    },
+                  ]}
+                >
+                  <Text style={[styles.letterText, { fontSize: 11, fontWeight: '900' }]}>{char}</Text>
+                </View>
+              ))}
+            </View>
+
             <Text style={styles.title}>Welcome Back</Text>
             <Text style={styles.subtitle}>
               Sign in to continue buying and selling on campus.
@@ -515,6 +590,22 @@ const styles = StyleSheet.create({
     fontWeight: "900",
     textTransform: "uppercase",
     letterSpacing: 1,
+  },
+  letterRow: {
+    flexDirection: "row",
+    alignItems: "flex-end",
+    gap: 5,
+    marginBottom: 8,
+  },
+  letterCard: {
+    backgroundColor: colors.surface,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  letterText: {
+    color: colors.text,
+    fontFamily: Platform.OS === "ios" ? "Courier New" : "monospace",
+    fontWeight: "900",
   },
 });
 
