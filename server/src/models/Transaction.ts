@@ -41,7 +41,7 @@ const transactionSchema = new Schema<ITransactionDocument>(
     },
     paymentMethod: {
       type: String,
-      enum: ['momo_mtn', 'momo_vodafone', 'momo_airteltigo', 'card', 'bank_transfer'],
+      enum: ['momo', 'momo_mtn', 'momo_vodafone', 'momo_airteltigo', 'card', 'bank_transfer'],
       required: true,
     },
     status: {

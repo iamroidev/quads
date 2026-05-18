@@ -126,6 +126,7 @@ export const getPaystackChannels = (
   paymentMethod: string
 ): string[] | undefined => {
   switch (paymentMethod) {
+    case 'momo':
     case 'momo_mtn':
     case 'momo_vodafone':
     case 'momo_airteltigo':

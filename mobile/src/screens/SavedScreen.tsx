@@ -62,10 +62,7 @@ const SavedScreen = ({ navigation }: any) => {
           <TouchableOpacity
             style={styles.card}
             onPress={() =>
-              navigation.getParent()?.navigate("ProductsTab", {
-                screen: "ProductDetail",
-                params: { productId: item._id },
-              })
+              navigation.navigate("ProductDetail", { productId: item._id })
             }
           >
             <Image

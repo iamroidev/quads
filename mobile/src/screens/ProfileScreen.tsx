@@ -8,10 +8,17 @@ import ScreenHeader from '../components/ScreenHeader';
 const ProfileScreen = ({ navigation }: any) => {
   const { user, logout, viewMode, setViewMode } = useAuth();
 
+  const sellerOnboardingDone = !!(user as any)?.sellerOnboarding?.completed;
   const isSellerMode = (user?.role === 'seller' || user?.role === 'admin') && viewMode === 'seller';
 
   const menuItems = isSellerMode
     ? [
+        ...(!sellerOnboardingDone ? [
+          {
+            label: 'Complete Onboarding ⚠️',
+            onPress: () => navigation.navigate('SellerOnboarding'),
+          }
+        ] : []),
         {
           label: 'Edit Profile',
           onPress: () => navigation.navigate('ProfileEdit'),
@@ -37,12 +44,40 @@ const ProfileScreen = ({ navigation }: any) => {
           onPress: () => navigation.navigate('DisputeCenter'),
         },
         {
+          label: 'Lost & Found',
+          onPress: () => navigation.navigate('LostFound'),
+        },
+        {
+          label: 'Support Desk',
+          onPress: () => navigation.navigate('Support'),
+        },
+        {
+          label: 'Contact Support',
+          onPress: () => navigation.navigate('Contact'),
+        },
+        {
+          label: 'Campus Pulse',
+          onPress: () => navigation.navigate('PulseTab'),
+        },
+        {
+          label: 'Following Feed',
+          onPress: () => navigation.navigate('FollowingFeed'),
+        },
+        {
           label: 'Frequently Asked Questions',
           onPress: () => navigation.navigate('FAQ'),
         },
         {
           label: 'About QUADS',
           onPress: () => navigation.navigate('AboutUs'),
+        },
+        {
+          label: 'Terms of Service',
+          onPress: () => navigation.navigate('Terms'),
+        },
+        {
+          label: 'Privacy Policy',
+          onPress: () => navigation.navigate('PrivacyPolicy'),
         },
       ]
     : [
@@ -107,8 +142,6 @@ const ProfileScreen = ({ navigation }: any) => {
           onPress: () => navigation.navigate('PrivacyPolicy'),
         },
       ];
-
-  const sellerOnboardingDone = !!(user as any)?.sellerOnboarding?.completed;
 
   const identityName = user?.storeName || user?.brandName || user?.name;
   const isSeller = user?.role === 'seller' || user?.role === 'admin';
