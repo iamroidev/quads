@@ -18,7 +18,10 @@ const SellersScreen = ({ navigation }: any) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    api.get('/products/top-sellers').then(r => setSellers(r.data.data || [])).finally(() => setLoading(false));
+    api.get('/products/top-sellers')
+      .then(r => setSellers(r.data.data || []))
+      .catch(() => {})
+      .finally(() => setLoading(false));
   }, []);
 
   if (loading) {

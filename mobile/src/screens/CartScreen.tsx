@@ -11,7 +11,10 @@ const CartScreen = ({ navigation }: any) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    api.get('/cart').then(r => setItems(r.data.data?.items || [])).finally(() => setLoading(false));
+    api.get('/cart')
+      .then(r => setItems(r.data.data?.items || []))
+      .catch(() => {})
+      .finally(() => setLoading(false));
   }, []);
 
   if (loading) {
