@@ -12,3 +12,9 @@ Thumbs.db
 
 coverage/
 server/coverage/
+
+# Expo / Mobile specific generated directories
+mobile/.expo/
+mobile/android/
+mobile/ios/
+mobile/web-build/

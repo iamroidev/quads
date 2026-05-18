@@ -14,6 +14,7 @@ const SellerAnalyticsScreen = ({ navigation }: any) => {
     totalRevenue: number;
     pendingOrders: number;
     completedOrders: number;
+    totalViews: number;
   } | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -30,6 +31,68 @@ const SellerAnalyticsScreen = ({ navigation }: any) => {
       <View style={styles.centered}>
         <ActivityIndicator size="large" color="#000" />
       </View>
+    );
+  }
+
+  const onboardingCompleted = !!user?.sellerOnboarding?.completed;
+
+  if (!onboardingCompleted) {
+    return (
+      <SafeAreaView style={styles.container} edges={['top']}>
+        <ScrollView contentContainerStyle={styles.onboardingContainer}>
+          <View style={styles.onboardingHeader}>
+            <View style={styles.badge}>
+              <Text style={styles.badgeText}>New Merchant</Text>
+            </View>
+            <Text style={styles.onboardingTitle}>Welcome to the Quads Seller Hub!</Text>
+            <Text style={styles.onboardingSubtitle}>
+              You're just one step away from listing your first product and reaching thousands of students on campus.
+            </Text>
+          </View>
+
+          <View style={styles.cardFrame}>
+            <Text style={styles.cardHeader}>ONBOARDING CHECKLIST</Text>
+            
+            <View style={styles.checkItem}>
+              <Ionicons name="shield-checkmark" size={20} color="#ff6b6b" />
+              <View style={styles.checkTextContainer}>
+                <Text style={styles.checkTitle}>Account Creation</Text>
+                <Text style={styles.checkSub}>Google authentication verified successfully.</Text>
+              </View>
+            </View>
+
+            <View style={styles.checkItem}>
+              <Ionicons name="ellipse-outline" size={20} color="#7c6f60" />
+              <View style={styles.checkTextContainer}>
+                <Text style={styles.checkTitle}>Store & Brand Setup</Text>
+                <Text style={styles.checkSub}>Set up your store name, logo, and average customer response time.</Text>
+              </View>
+            </View>
+
+            <View style={styles.checkItem}>
+              <Ionicons name="ellipse-outline" size={20} color="#7c6f60" />
+              <View style={styles.checkTextContainer}>
+                <Text style={styles.checkTitle}>Payout Settings</Text>
+                <Text style={styles.checkSub}>Configure Mobile Money (MTN, Telecel, AT) or bank transfer info for earnings.</Text>
+              </View>
+            </View>
+          </View>
+
+          <TouchableOpacity 
+            style={styles.onboardingBtn} 
+            onPress={() => navigation.getParent()?.navigate('ProfileTab', { screen: 'SellerOnboarding' })}
+          >
+            <Text style={styles.onboardingBtnText}>Complete Setup Wizard →</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity 
+            style={styles.switchBackBtn} 
+            onPress={() => setViewMode('buyer')}
+          >
+            <Text style={styles.switchBackBtnText}>Switch to Buyer Marketplace</Text>
+          </TouchableOpacity>
+        </ScrollView>
+      </SafeAreaView>
     );
   }
 
@@ -62,7 +125,13 @@ const SellerAnalyticsScreen = ({ navigation }: any) => {
             </View>
             <View style={styles.statCard}>
               <Text style={styles.statLabel}>Views</Text>
-              <Text style={styles.statValue}>1.2k</Text>
+              <Text style={styles.statValue}>
+                {stats?.totalViews !== undefined
+                  ? stats.totalViews >= 1000
+                    ? `${(stats.totalViews / 1000).toFixed(1)}k`
+                    : stats.totalViews
+                  : 0}
+              </Text>
             </View>
           </View>
         </View>
@@ -193,6 +262,22 @@ const styles = StyleSheet.create({
   modeBannerTitle: { color: '#fff', fontSize: 13, fontWeight: '900', textTransform: 'uppercase', letterSpacing: 1 },
   modeBannerSub: { color: 'rgba(255,255,255,0.6)', fontSize: 11, marginTop: 2 },
   modeBannerAction: { color: '#fff', fontSize: 12, fontWeight: '900' },
+  onboardingContainer: { padding: 20, justifyContent: 'center', minHeight: '85%' },
+  onboardingHeader: { marginBottom: 28 },
+  badge: { backgroundColor: '#ff6b6b', alignSelf: 'flex-start', paddingHorizontal: 8, paddingVertical: 3, borderWidth: 1, borderColor: '#000', marginBottom: 12 },
+  badgeText: { color: '#fff', fontSize: 10, fontWeight: '900', textTransform: 'uppercase', letterSpacing: 1 },
+  onboardingTitle: { fontSize: 26, fontWeight: '900', color: colors.text, textTransform: 'uppercase', lineHeight: 32 },
+  onboardingSubtitle: { fontSize: 13, color: colors.muted, marginTop: 8, lineHeight: 18 },
+  cardFrame: { backgroundColor: colors.surface, borderWidth: 2, borderColor: colors.border, padding: 18, marginBottom: 24, ...shadows.bulletin },
+  cardHeader: { fontSize: 10, fontWeight: '900', color: colors.muted, textTransform: 'uppercase', letterSpacing: 1.5, marginBottom: 16 },
+  checkItem: { flexDirection: 'row', gap: 14, marginBottom: 18, alignItems: 'flex-start' },
+  checkTextContainer: { flex: 1 },
+  checkTitle: { fontSize: 13, fontWeight: '900', textTransform: 'uppercase', color: colors.text },
+  checkSub: { fontSize: 11, color: colors.muted, marginTop: 2 },
+  onboardingBtn: { backgroundColor: colors.text, paddingVertical: 18, alignItems: 'center', borderWidth: 2, borderColor: colors.border, marginBottom: 12, ...shadows.bulletin },
+  onboardingBtnText: { color: '#fff', fontWeight: '900', textTransform: 'uppercase', fontSize: 12, letterSpacing: 1 },
+  switchBackBtn: { backgroundColor: '#fff', paddingVertical: 16, alignItems: 'center', borderWidth: 1, borderColor: colors.border },
+  switchBackBtnText: { color: colors.text, fontWeight: '800', textTransform: 'uppercase', fontSize: 11, letterSpacing: 1 },
 });
 
 export default SellerAnalyticsScreen;
