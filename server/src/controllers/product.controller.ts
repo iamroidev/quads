@@ -6,6 +6,33 @@ import ApiError from '../utils/ApiError';
 import { uploadToCloudinary } from '../utils/imageUpload';
 import growthService from '../services/growth.service';
 import feedService from '../services/feed.service';
+import Store from '../models/Store';
+
+const resolveSellerStoreId = async (req: Request): Promise<string> => {
+  if (!req.user) {
+    throw ApiError.unauthorized('Authentication required.');
+  }
+
+  const activeStore = req.user.activeStore as any;
+  if (activeStore?._id) {
+    return activeStore._id.toString();
+  }
+  if (typeof activeStore === 'string') {
+    return activeStore;
+  }
+  if (activeStore?.toString) {
+    return activeStore.toString();
+  }
+
+  const recoveredStore = await Store.findOne({ ownerId: req.user._id }).select('_id');
+  if (recoveredStore) {
+    req.user.activeStore = recoveredStore._id as any;
+    await req.user.save();
+    return recoveredStore._id.toString();
+  }
+
+  throw ApiError.badRequest('Complete your profile first: your store hasn\'t been initialized.');
+};
 
 /**
  * @route   POST /api/products
@@ -18,6 +45,8 @@ export const createProduct = async (
   next: NextFunction
 ): Promise<void> => {
   try {
+    const sellerStoreId = await resolveSellerStoreId(req);
+
     // Check seller is verified before listing
     if (!req.user!.isVerified && !req.user!.emailVerified && !req.user!.phoneVerified) {
       res.status(403).json({
@@ -36,7 +65,7 @@ export const createProduct = async (
     }
 
     const product = await productService.createProduct(
-      req.user!.activeStore!._id.toString(),
+      sellerStoreId,
       {
         title: req.body.title,
         description: req.body.description,
@@ -182,8 +211,10 @@ export const getMyListings = async (
   next: NextFunction
 ): Promise<void> => {
   try {
+    const sellerStoreId = await resolveSellerStoreId(req);
+
     const result = await productService.getSellerProducts(
-      req.user!.activeStore!._id.toString(),
+      sellerStoreId,
       {
         status: req.query.status as string,
         sort: req.query.sort as string,
@@ -479,6 +510,8 @@ export const importProductsCSV = async (
   next: NextFunction
 ): Promise<void> => {
   try {
+    const sellerStoreId = await resolveSellerStoreId(req);
+
     if (!req.file) {
       throw ApiError.badRequest('No CSV file uploaded');
     }
@@ -650,7 +683,7 @@ export const importProductsCSV = async (
             }
           }
 
-          await productService.createProduct(req.user!.activeStore!._id.toString(), {
+          await productService.createProduct(sellerStoreId, {
             title,
             description,
             price,
@@ -715,7 +748,7 @@ export const importProductsCSV = async (
             }
           }
 
-          await productService.createProduct(req.user!.activeStore!._id.toString(), {
+          await productService.createProduct(sellerStoreId, {
             title,
             description,
             price: priceValue,
