@@ -1,10 +1,35 @@
 import { Platform } from 'react-native';
-import * as Notifications from 'expo-notifications';
 import * as Device from 'expo-device';
 import Constants from 'expo-constants';
 import * as SecureStore from 'expo-secure-store';
 import notificationService from './notification.service';
 import { openNotificationTarget } from './notificationNavigation.service';
+
+const isExpoGo = Constants.appOwnership === 'expo';
+
+// Safe dynamic resolver for Notifications to completely avoid loading it in Expo Go
+let Notifications: any = null;
+if (!isExpoGo) {
+  try {
+    Notifications = require('expo-notifications');
+  } catch (e) {
+    console.warn("Failed to load expo-notifications:", e);
+  }
+}
+
+// Fallback stub for Expo Go
+if (!Notifications) {
+  Notifications = {
+    setNotificationHandler: () => {},
+    getPermissionsAsync: async () => ({ status: 'undetermined' }),
+    requestPermissionsAsync: async () => ({ status: 'undetermined' }),
+    getExpoPushTokenAsync: async () => ({ data: '' }),
+    setNotificationChannelAsync: async () => {},
+    addNotificationReceivedListener: () => ({ remove: () => {} }),
+    addNotificationResponseReceivedListener: () => ({ remove: () => {} }),
+    AndroidImportance: { MAX: 4 },
+  };
+}
 
 const PUSH_TOKEN_KEY = 'expo_push_token';
 
@@ -95,7 +120,7 @@ export const removePushSubscription = async (): Promise<void> => {
 
 export const initPushRuntime = () => {
   const receivedSub = Notifications.addNotificationReceivedListener(() => {});
-  const responseSub = Notifications.addNotificationResponseReceivedListener((response) => {
+  const responseSub = Notifications.addNotificationResponseReceivedListener((response: any) => {
     openNotificationTarget(response);
   });
 
