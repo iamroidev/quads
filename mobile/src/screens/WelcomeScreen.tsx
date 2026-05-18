@@ -313,7 +313,82 @@ const WelcomeScreen = ({ navigation }: any) => {
           
           {/* Brand Hero logo banner - Staggered Slide In */}
           <Animated.View style={[styles.heroSection, { transform: [{ translateY: heroY }] }]}>
-            <Text style={styles.logoTitle}>QUADS</Text>
+            {/* Branded Subscript Logo Lockup (Matches the brand identity 100%!) */}
+            <View style={[styles.letterRow, { alignItems: 'flex-end', gap: 5, marginBottom: 8 }]}>
+              
+              {/* Massive Vector Q-Logo (Scaled to 64x64 for page header balance) */}
+              <View
+                style={[
+                  styles.letterCard,
+                  {
+                    width: 64,
+                    height: 64,
+                    borderWidth: 3.5,
+                    borderColor: '#000',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    position: 'relative',
+                    ...shadows.bulletin,
+                  },
+                ]}
+              >
+                {/* Bold Stencil Q (Inner Ring) */}
+                <View style={{
+                  width: 30,
+                  height: 30,
+                  borderWidth: 7,
+                  borderColor: '#000',
+                  backgroundColor: 'transparent',
+                }} />
+                
+                {/* Bold Stencil Q (Rotated Tail) */}
+                <View style={{
+                  position: 'absolute',
+                  bottom: 10,
+                  right: 10,
+                  width: 12,
+                  height: 6,
+                  backgroundColor: '#000',
+                  transform: [{ rotate: '45deg' }],
+                }} />
+
+                {/* Red Thumbtack detail (Top Right) */}
+                <View style={{
+                  position: 'absolute',
+                  top: 5,
+                  right: 5,
+                  width: 10,
+                  height: 10,
+                  borderRadius: 5,
+                  backgroundColor: '#ff6b6b',
+                  borderWidth: 1.5,
+                  borderColor: '#000',
+                }} />
+              </View>
+
+              {/* Subscript letters: U A D S (Compact 26x26 for clean header proportions) */}
+              {['U', 'A', 'D', 'S'].map((char, idx) => (
+                <View
+                  key={idx}
+                  style={[
+                    styles.letterCard,
+                    {
+                      width: 26,
+                      height: 26,
+                      borderWidth: 1.5,
+                      borderColor: '#000',
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                      marginBottom: 1,
+                      ...shadows.bulletin,
+                    },
+                  ]}
+                >
+                  <Text style={[styles.letterText, { fontSize: 13, fontWeight: '900' }]}>{char}</Text>
+                </View>
+              ))}
+            </View>
+
             <View style={styles.subtitleWrapper}>
               <Text style={styles.logoSubtitle}>THE OFFICIAL INSTITUTIONAL MARKETPLACE</Text>
             </View>
