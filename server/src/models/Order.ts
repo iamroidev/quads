@@ -1,6 +1,8 @@
 import mongoose, { Document, Schema } from 'mongoose';
 
 export interface IOrderDocument extends Document {
+  _id: mongoose.Types.ObjectId;
+  version: number;
   orderNumber: string;
   buyer: mongoose.Types.ObjectId;
   seller: mongoose.Types.ObjectId;
@@ -28,6 +30,7 @@ export interface IOrderDocument extends Document {
   completedAt?: Date;
   createdAt: Date;
   updatedAt: Date;
+  __v?: number;
 }
 
 const orderItemSchema = new Schema(
@@ -133,13 +136,15 @@ const orderSchema = new Schema<IOrderDocument>(
   },
   {
     timestamps: true,
+    autoCreate: true,
   }
 );
 
-// Indexes
+// Indexes for optimistic locking
 orderSchema.index({ buyer: 1, createdAt: -1 });
 orderSchema.index({ seller: 1, createdAt: -1 });
 orderSchema.index({ status: 1 });
+orderSchema.index({ orderNumber: 1, unique: true });
 
 // Generate order number before saving
 orderSchema.pre('validate', function (next) {
@@ -147,6 +152,14 @@ orderSchema.pre('validate', function (next) {
     const timestamp = Date.now().toString(36).toUpperCase();
     const random = Math.random().toString(36).substring(2, 6).toUpperCase();
     this.orderNumber = `CM-${timestamp}-${random}`;
+  }
+  next();
+});
+
+// Increment version on update for optimistic locking
+orderSchema.pre('save', function (next) {
+  if (this.isModified()) {
+    this.version += 1;
   }
   next();
 });
