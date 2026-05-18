@@ -232,7 +232,7 @@ const OrderDetailScreen = ({ route, navigation }: any) => {
     );
   }
 
-  const sc = STATUS_COLORS[order.status] ?? { border: colors.border, bg: '#fffdf8', text: '#6f6559' };
+  const sc = STATUS_COLORS[order.status] ?? { border: colors.border, bg: colors.surface, text: '#6f6559' };
   const currentStepIdx = STATUS_STEPS.indexOf(order.status as any);
   const isCancelledOrDisputed = ['cancelled', 'disputed'].includes(order.status);
   const nextStatusMap: Record<string, string> = { paid: 'confirmed', confirmed: 'ready', ready: 'completed' };
@@ -456,7 +456,7 @@ const styles = StyleSheet.create({
   // Timeline
   timelineRow: { flexDirection: 'row', minHeight: 40 },
   timelineLeft: { width: 22, alignItems: 'center' },
-  dot: { width: 10, height: 10, borderWidth: 2, borderColor: colors.border, backgroundColor: '#fffdf8' },
+  dot: { width: 10, height: 10, borderWidth: 2, borderColor: colors.border, backgroundColor: colors.surface },
   dotDone: { borderColor: colors.accent, backgroundColor: colors.accent },
   dotCurrent: { borderColor: colors.accent, backgroundColor: '#fff', borderWidth: 3, width: 12, height: 12 },
   connector: { flex: 1, width: 2, backgroundColor: colors.border, marginTop: 2 },

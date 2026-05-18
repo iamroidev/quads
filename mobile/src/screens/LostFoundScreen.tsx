@@ -330,7 +330,7 @@ const styles = StyleSheet.create({
   toolbar: {
     flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
     paddingHorizontal: 12, paddingVertical: 10,
-    borderBottomWidth: 1, borderBottomColor: colors.border, backgroundColor: '#fffdf8',
+    borderBottomWidth: 1, borderBottomColor: colors.border, backgroundColor: colors.surface,
   },
   filterRow: { flexDirection: 'row', gap: 8 },
   filterChip: { borderWidth: 1, borderColor: colors.border, paddingHorizontal: 12, paddingVertical: 7, backgroundColor: '#fff' },
@@ -342,7 +342,7 @@ const styles = StyleSheet.create({
   listContent: { padding: 10, paddingBottom: 20 },
   grid: { gap: 10, marginBottom: 10 },
   card: {
-    flex: 1, backgroundColor: '#fffdf8', borderWidth: 1, borderColor: colors.border,
+    flex: 1, backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border,
     padding: 12, ...shadows.bulletin,
   },
   typeBadge: { alignSelf: 'flex-start', paddingHorizontal: 8, paddingVertical: 3, borderWidth: 1, marginBottom: 8 },
@@ -361,7 +361,7 @@ const styles = StyleSheet.create({
 
   // Detail modal
   backdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'center', padding: 20 },
-  detailCard: { backgroundColor: '#fffdf8', borderWidth: 2, borderColor: '#000', padding: 20, ...shadows.bulletin },
+  detailCard: { backgroundColor: colors.surface, borderWidth: 2, borderColor: '#000', padding: 20, ...shadows.bulletin },
   detailTitle: { fontSize: 18, fontWeight: '900', color: colors.text, textTransform: 'uppercase', marginTop: 4 },
   detailMeta: { fontSize: 12, color: '#7b6f61', marginTop: 4 },
   detailDivider: { height: 1, backgroundColor: colors.border, marginVertical: 12 },
@@ -376,7 +376,7 @@ const styles = StyleSheet.create({
   closeBtnText: { color: '#463d31', fontSize: 11, fontWeight: '800', letterSpacing: 1.2 },
 
   // Add form modal
-  formCard: { backgroundColor: '#fffdf8', borderWidth: 2, borderColor: '#000', padding: 20, maxHeight: '85%', ...shadows.bulletin },
+  formCard: { backgroundColor: colors.surface, borderWidth: 2, borderColor: '#000', padding: 20, maxHeight: '85%', ...shadows.bulletin },
   formTitle: { fontSize: 16, fontWeight: '900', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 16 },
   typeRow: { flexDirection: 'row', gap: 10, marginBottom: 16 },
   typeBtn: { flex: 1, borderWidth: 1, borderColor: colors.border, paddingVertical: 12, alignItems: 'center', backgroundColor: '#fff' },

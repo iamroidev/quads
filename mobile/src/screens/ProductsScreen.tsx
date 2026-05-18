@@ -341,7 +341,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingTop: 10,
     paddingBottom: 10,
-    backgroundColor: "#fffdf8",
+    backgroundColor: colors.surface,
     borderBottomWidth: 1,
     borderBottomColor: colors.border,
   },
@@ -379,7 +379,7 @@ const styles = StyleSheet.create({
   grid: { gap: 10, marginBottom: 10 },
   card: {
     flex: 1,
-    backgroundColor: "#fffdf8",
+    backgroundColor: colors.surface,
     borderRadius: 0,
     borderWidth: 1,
     borderColor: colors.border,

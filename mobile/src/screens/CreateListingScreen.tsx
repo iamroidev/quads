@@ -500,7 +500,7 @@ const styles = StyleSheet.create({
     marginBottom: 6,
   },
   input: {
-    backgroundColor: "#fffdf8",
+    backgroundColor: colors.surface,
     borderWidth: 1,
     borderColor: colors.border,
     borderRadius: 0,
@@ -527,7 +527,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     paddingVertical: 7,
     borderRadius: 0,
-    backgroundColor: "#fffdf8",
+    backgroundColor: colors.surface,
     borderWidth: 1,
     borderColor: colors.border,
     marginRight: 8,
@@ -539,7 +539,7 @@ const styles = StyleSheet.create({
   imagePickerBtn: {
     borderWidth: 1,
     borderColor: colors.border,
-    backgroundColor: "#fffdf8",
+    backgroundColor: colors.surface,
     paddingVertical: 12,
     alignItems: "center",
   },

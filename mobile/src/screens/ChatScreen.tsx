@@ -394,7 +394,7 @@ const styles = StyleSheet.create({
   bubbleWrapThem: { alignItems: 'flex-start' },
   bubble: { maxWidth: '80%', paddingHorizontal: 12, paddingVertical: 10, borderRadius: 0 },
   bubbleMe: { backgroundColor: '#1f1a14', borderBottomRightRadius: 2 },
-  bubbleThem: { backgroundColor: '#fffdf8', borderWidth: 1, borderColor: colors.border, borderBottomLeftRadius: 2 },
+  bubbleThem: { backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border, borderBottomLeftRadius: 2 },
   bubbleText: { fontSize: 14, lineHeight: 20 },
   bubbleTextMe: { color: '#fff' },
   bubbleTextThem: { color: '#221d16' },
@@ -428,14 +428,14 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff', paddingHorizontal: 10, paddingVertical: 8, fontSize: 12, borderRadius: 0,
   },
   offerCounterBtn: {
-    borderWidth: 1, borderColor: colors.border, backgroundColor: '#fffdf8',
+    borderWidth: 1, borderColor: colors.border, backgroundColor: colors.surface,
     justifyContent: 'center', paddingHorizontal: 12,
   },
 
   // Input area
   inputRow: {
     paddingHorizontal: 12, paddingVertical: 8, paddingBottom: 8,
-    backgroundColor: '#fffdf8', borderTopWidth: 1, borderTopColor: colors.border,
+    backgroundColor: colors.surface, borderTopWidth: 1, borderTopColor: colors.border,
     gap: 8,
   },
   quickReplyRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
