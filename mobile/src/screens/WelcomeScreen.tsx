@@ -143,7 +143,7 @@ const WelcomeScreen = ({ navigation }: any) => {
         <View style={styles.tickerHeader}>
           <Animated.View style={[styles.tickerWrapper, { transform: [{ translateX: tickerOffset }] }]}>
             <Text style={styles.tickerText}>
-              ⚡ TRADING LIVE ON CAMPUS ⚡ DITCH THE SLOP ⚡ NO COMMISSION FEES ⚡ SMOOTHIES, TEXTBOOKS & GEAR ⚡ SAFETY ESCROW SCANNERS ⚡
+              ⚡ GET YOUR SMOOTHIES ⚡ AVOID HOSTEL SCAMS ⚡ DORM GEAR FOR CHEAP ⚡ TEXTBOOKS ON DEMAND ⚡ MEET AT THE MAIN GATE ⚡ SECURE ESCROW PROTECTION ⚡
             </Text>
           </Animated.View>
         </View>
