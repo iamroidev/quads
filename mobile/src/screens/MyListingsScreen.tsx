@@ -39,8 +39,14 @@ const MyListingsScreen = ({ navigation }: any) => {
       if (response.success) {
         setProducts((prev) => (append ? [...prev, ...response.data] : response.data));
         setPage(targetPage);
-        setHasMore((response.pagination?.pages || 1) > targetPage);
+        const fetchedLength = response.data?.length || 0;
+        const totalPages = response.pagination?.pages || 1;
+        setHasMore(totalPages > targetPage && fetchedLength >= 20);
+      } else {
+        setHasMore(false);
       }
+    } catch (err) {
+      setHasMore(false);
     } finally {
       setLoading(false);
       setLoadingMore(false);

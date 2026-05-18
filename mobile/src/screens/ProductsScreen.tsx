@@ -66,13 +66,18 @@ const ProductsScreen = ({ navigation, route }: any) => {
         const nextProducts = append ? [...products, ...res.data] : res.data;
         setProducts(nextProducts);
         setPage(targetPage);
-        setHasMore((res.pagination?.pages || 1) > targetPage);
+        const fetchedLength = res.data?.length || 0;
+        const totalPages = res.pagination?.pages || 1;
+        setHasMore(totalPages > targetPage && fetchedLength >= 20);
         await AsyncStorage.setItem(
           PRODUCTS_CACHE_KEY,
           JSON.stringify(nextProducts),
         );
+      } else {
+        setHasMore(false);
       }
     } catch {
+      setHasMore(false);
       const cached = await AsyncStorage.getItem(PRODUCTS_CACHE_KEY);
       if (cached) setProducts(JSON.parse(cached));
     } finally {
