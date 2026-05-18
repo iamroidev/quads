@@ -154,7 +154,7 @@ const WelcomeScreen = ({ navigation }: any) => {
           <View style={styles.heroSection}>
             <Text style={styles.logoTitle}>QUADS</Text>
             <View style={styles.subtitleWrapper}>
-              <Text style={styles.logoSubtitle}>DITCH THE SLOP &bull; CAMPUS SWAPS</Text>
+              <Text style={styles.logoSubtitle}>THE OFFICIAL INSTITUTIONAL MARKETPLACE</Text>
             </View>
           </View>
 
