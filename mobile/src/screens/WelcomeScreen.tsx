@@ -181,7 +181,7 @@ const WelcomeScreen = ({ navigation }: any) => {
               left: 0,
               right: 0,
               height: 1,
-              backgroundColor: 'rgba(0, 0, 0, 0.035)',
+              backgroundColor: 'rgba(0, 0, 0, 0.08)',
             }}
           />
         ))}
@@ -195,7 +195,7 @@ const WelcomeScreen = ({ navigation }: any) => {
               top: 0,
               bottom: 0,
               width: 1,
-              backgroundColor: 'rgba(0, 0, 0, 0.035)',
+              backgroundColor: 'rgba(0, 0, 0, 0.08)',
             }}
           />
         ))}
@@ -208,9 +208,9 @@ const WelcomeScreen = ({ navigation }: any) => {
           width: 130,
           height: 130,
           borderRadius: 65,
-          backgroundColor: colors.accent + '06',
+          backgroundColor: colors.accent + '15',
           borderWidth: 2,
-          borderColor: colors.accent + '12',
+          borderColor: colors.accent + '35',
         }} />
 
         {/* Floating Neobrutalist Shape 2: rotated square in mid left */}
@@ -220,17 +220,17 @@ const WelcomeScreen = ({ navigation }: any) => {
           left: -40,
           width: 90,
           height: 90,
-          backgroundColor: '#fffacd06',
+          backgroundColor: '#fffacd15',
           borderWidth: 2,
-          borderColor: '#fffacd12',
+          borderColor: '#fffacd35',
           transform: [{ rotate: '28deg' }],
         }} />
 
         {/* Tiny Retro crossmarks (+) floating around for depth */}
-        <Text style={{ position: 'absolute', top: 120, left: 35, fontSize: 26, fontWeight: '300', color: 'rgba(0,0,0,0.06)' }}>+</Text>
-        <Text style={{ position: 'absolute', top: 290, right: 45, fontSize: 22, fontWeight: '300', color: 'rgba(0,0,0,0.06)' }}>+</Text>
-        <Text style={{ position: 'absolute', top: 540, left: 45, fontSize: 24, fontWeight: '300', color: 'rgba(0,0,0,0.06)' }}>+</Text>
-        <Text style={{ position: 'absolute', top: 760, right: 35, fontSize: 28, fontWeight: '300', color: 'rgba(0,0,0,0.06)' }}>+</Text>
+        <Text style={{ position: 'absolute', top: 120, left: 35, fontSize: 26, fontWeight: '400', color: 'rgba(0,0,0,0.18)' }}>+</Text>
+        <Text style={{ position: 'absolute', top: 290, right: 45, fontSize: 22, fontWeight: '400', color: 'rgba(0,0,0,0.18)' }}>+</Text>
+        <Text style={{ position: 'absolute', top: 540, left: 45, fontSize: 24, fontWeight: '400', color: 'rgba(0,0,0,0.18)' }}>+</Text>
+        <Text style={{ position: 'absolute', top: 760, right: 35, fontSize: 28, fontWeight: '400', color: 'rgba(0,0,0,0.18)' }}>+</Text>
       </View>
     );
   };
