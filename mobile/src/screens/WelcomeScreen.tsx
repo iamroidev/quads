@@ -108,12 +108,12 @@ const WelcomeScreen = ({ navigation }: any) => {
         }),
         Animated.timing(loadBar, {
           toValue: 1,
-          duration: 1800, // Make the progress bar load slower and feel premium
+          duration: 1800,
           easing: Easing.out(Easing.ease),
           useNativeDriver: false,
         }),
       ]),
-      Animated.delay(1200), // Extended delay so the brand marks sink in dramatically
+      Animated.delay(1200),
       // 3. Slower elegant slide up
       Animated.timing(introY, {
         toValue: -height,
@@ -164,6 +164,77 @@ const WelcomeScreen = ({ navigation }: any) => {
     setActiveSlide((prev) => (prev + 1) % SLIDES.length);
   };
 
+  // Render highly-visual engineering graph grid background with floating shapes
+  const renderBackgroundGrid = () => {
+    const horizontalLines = Array.from({ length: 28 });
+    const verticalLines = Array.from({ length: 12 });
+    
+    return (
+      <View style={StyleSheet.absoluteFillObject} pointerEvents="none">
+        {/* Horizontal grid lines */}
+        {horizontalLines.map((_, index) => (
+          <View
+            key={`h-${index}`}
+            style={{
+              position: 'absolute',
+              top: index * 36,
+              left: 0,
+              right: 0,
+              height: 1,
+              backgroundColor: 'rgba(0, 0, 0, 0.035)',
+            }}
+          />
+        ))}
+        {/* Vertical grid lines */}
+        {verticalLines.map((_, index) => (
+          <View
+            key={`v-${index}`}
+            style={{
+              position: 'absolute',
+              left: index * 36,
+              top: 0,
+              bottom: 0,
+              width: 1,
+              backgroundColor: 'rgba(0, 0, 0, 0.035)',
+            }}
+          />
+        ))}
+        
+        {/* Floating Neobrutalist Shape 1: Accent Circle in Top Right */}
+        <View style={{
+          position: 'absolute',
+          top: 90,
+          right: -40,
+          width: 130,
+          height: 130,
+          borderRadius: 65,
+          backgroundColor: colors.accent + '06',
+          borderWidth: 2,
+          borderColor: colors.accent + '12',
+        }} />
+
+        {/* Floating Neobrutalist Shape 2: rotated square in mid left */}
+        <View style={{
+          position: 'absolute',
+          top: 420,
+          left: -40,
+          width: 90,
+          height: 90,
+          backgroundColor: '#fffacd06',
+          borderWidth: 2,
+          borderColor: '#fffacd12',
+          transform: [{ rotate: '28deg' }],
+        }} />
+
+        {/* Tiny Retro crossmarks (+) floating around for depth */}
+        <Text style={{ position: 'absolute', top: 120, left: 35, fontSize: 26, fontWeight: '300', color: 'rgba(0,0,0,0.06)' }}>+</Text>
+        <Text style={{ position: 'absolute', top: 290, right: 45, fontSize: 22, fontWeight: '300', color: 'rgba(0,0,0,0.06)' }}>+</Text>
+        <Text style={{ position: 'absolute', top: 540, left: 45, fontSize: 24, fontWeight: '300', color: 'rgba(0,0,0,0.06)' }}>+</Text>
+        <Text style={{ position: 'absolute', top: 760, right: 35, fontSize: 28, fontWeight: '300', color: 'rgba(0,0,0,0.06)' }}>+</Text>
+      </View>
+    );
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor={colors.bg} />
@@ -171,7 +242,7 @@ const WelcomeScreen = ({ navigation }: any) => {
       {/* Main Catchy Content (fades in staggered after intro) */}
       <Animated.View style={[styles.mainLayout, { opacity: showIntro ? 0 : contentFade }]}>
         
-        {/* Dynamic Campus Ticker Header - ACCENT COLOR BACKGROUND */}
+        {/* Dynamic Campus Ticker Header */}
         <View style={styles.tickerHeader}>
           <Animated.View style={[styles.tickerWrapper, { transform: [{ translateX: tickerOffset }] }]}>
             <Text style={styles.tickerText}>
@@ -179,6 +250,9 @@ const WelcomeScreen = ({ navigation }: any) => {
             </Text>
           </Animated.View>
         </View>
+
+        {/* Grid & Floating Shapes Canvas Background */}
+        {renderBackgroundGrid()}
 
         <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
           
@@ -324,6 +398,7 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     borderBottomWidth: 3,
     borderColor: '#000',
+    zIndex: 10,
     overflow: 'hidden',
   },
   tickerWrapper: {
@@ -341,6 +416,7 @@ const styles = StyleSheet.create({
     padding: 20,
     paddingBottom: 40,
     gap: 20,
+    zIndex: 5,
   },
   heroSection: {
     alignItems: 'center',
@@ -469,6 +545,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 6,
     alignItems: 'center',
     justifyContent: 'center',
+    backgroundColor: colors.surface,
     ...shadows.bulletin,
   },
   metricVal: {
