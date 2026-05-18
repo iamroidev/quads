@@ -10,6 +10,7 @@ import {
   StatusBar,
   Animated,
   Easing,
+  Linking,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, shadows } from '../theme';
@@ -442,18 +443,18 @@ const WelcomeScreen = ({ navigation }: any) => {
           {/* Elegant Neobrutalist Footer */}
           <View style={styles.footerContainer}>
             <Text style={styles.footerText}>
-              © 2026 QUADS. Powered by UMaT Scholars.
+              © 2026 QUADS. All Rights Reserved.
             </Text>
             <View style={styles.footerLinksRow}>
-              <TouchableOpacity onPress={() => {}}>
+              <TouchableOpacity onPress={() => Linking.openURL('https://quadsmarket.tech/terms')}>
                 <Text style={styles.footerLinkText}>TERMS</Text>
               </TouchableOpacity>
               <Text style={styles.footerLinkDivider}>•</Text>
-              <TouchableOpacity onPress={() => {}}>
+              <TouchableOpacity onPress={() => Linking.openURL('https://quadsmarket.tech/privacy')}>
                 <Text style={styles.footerLinkText}>PRIVACY</Text>
               </TouchableOpacity>
               <Text style={styles.footerLinkDivider}>•</Text>
-              <TouchableOpacity onPress={() => {}}>
+              <TouchableOpacity onPress={() => Linking.openURL('mailto:support@quadsmarket.tech')}>
                 <Text style={styles.footerLinkText}>SUPPORT</Text>
               </TouchableOpacity>
             </View>
