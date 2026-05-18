@@ -73,11 +73,7 @@ const LoginScreen = ({ navigation }: any) => {
   const handleGooglePress = async () => {
     setIsLoading(true);
     try {
-      const isExpoGo = Constants.appOwnership === "expo";
-      const redirectTo = makeRedirectUri({
-        scheme: isExpoGo ? undefined : "quads",
-        path: "auth/callback",
-      });
+      const redirectTo = Linking.createURL("auth/callback");
 
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: "google",
