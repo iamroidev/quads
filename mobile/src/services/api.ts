@@ -1,10 +1,35 @@
 import axios from 'axios';
 import * as SecureStore from 'expo-secure-store';
+import Constants from 'expo-constants';
+
+const extras = (Constants.expoConfig?.extra || {}) as {
+  apiUrl?: string;
+};
+
+const REMOTE_API_URL = 'https://api.quadsmarket.tech/api';
+
+const normalizeApiUrl = (rawUrl?: string) => {
+  if (!rawUrl) return '';
+  const trimmedUrl = rawUrl.trim();
+  if (!trimmedUrl) return '';
+
+  try {
+    const parsed = new URL(trimmedUrl);
+    const isLocalhost = ['localhost', '127.0.0.1', '::1'].includes(parsed.hostname);
+    if (isLocalhost && Constants.appOwnership === 'expo') {
+      return '';
+    }
+  } catch {
+    // Keep non-standard URLs as-is after trimming.
+  }
+
+  return trimmedUrl.replace(/\/+$/, '');
+};
 
 const API_URL =
-  process.env.EXPO_PUBLIC_API_URL && !process.env.EXPO_PUBLIC_API_URL.includes('localhost')
-    ? process.env.EXPO_PUBLIC_API_URL
-    : 'http://172.20.10.10:5000/api';
+  normalizeApiUrl(process.env.EXPO_PUBLIC_API_URL) ||
+  normalizeApiUrl(extras.apiUrl) ||
+  REMOTE_API_URL;
 
 const api = axios.create({
   baseURL: API_URL,
