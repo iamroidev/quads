@@ -53,7 +53,7 @@ import {
    FollowingFeedScreen,
  } from '../screens';
 import { navigationRef } from './navigationRef';
-import { colors } from '../theme';
+import { colors, shadows } from '../theme';
 
 const defaultStackHeader = {
   headerShown: true,
@@ -504,8 +504,72 @@ const AppNavigator = () => {
 
   if (isLoading) {
     return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#f9fafb' }}>
-        <ActivityIndicator size="large" color="#2563eb" />
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: colors.bg }}>
+        {/* Stunning, Stylized Neobrutalist Splash Loading Screen */}
+        <View style={{ alignItems: 'center', gap: 20 }}>
+          {/* Centered Brand Mark box */}
+          <View style={{
+            width: 72,
+            height: 72,
+            borderWidth: 4,
+            borderColor: '#000',
+            backgroundColor: '#fffdf8',
+            alignItems: 'center',
+            justifyContent: 'center',
+            shadowColor: '#000',
+            shadowOffset: { width: 5, height: 5 },
+            shadowOpacity: 1,
+            shadowRadius: 0,
+            elevation: 5,
+          }}>
+            <Text style={{ fontSize: 32, fontWeight: '900', color: '#000' }}>Q</Text>
+          </View>
+
+          {/* Large Stylized Brand Title */}
+          <Text style={{
+            fontSize: 48,
+            fontWeight: '900',
+            letterSpacing: -2,
+            color: '#000',
+            textShadowColor: colors.accent,
+            textShadowOffset: { width: 3, height: 3 },
+            textShadowRadius: 0,
+          }}>
+            QUADS
+          </Text>
+
+          {/* Official Tagline */}
+          <Text style={{
+            fontSize: 9,
+            fontWeight: '900',
+            letterSpacing: 1.2,
+            color: '#7c6f60',
+            textTransform: 'uppercase',
+            borderTopWidth: 2,
+            borderColor: '#000',
+            paddingTop: 8,
+            marginTop: 4,
+          }}>
+            THE OFFICIAL INSTITUTIONAL MARKETPLACE
+          </Text>
+
+          {/* High contrast loading progress indicator */}
+          <View style={{
+            marginTop: 15,
+            width: 140,
+            height: 6,
+            borderWidth: 2,
+            borderColor: '#000',
+            backgroundColor: '#fff',
+            overflow: 'hidden',
+          }}>
+            <View style={{
+              width: '60%',
+              height: '100%',
+              backgroundColor: colors.accent,
+            }} />
+          </View>
+        </View>
       </View>
     );
   }
