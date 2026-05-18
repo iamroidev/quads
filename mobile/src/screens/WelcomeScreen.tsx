@@ -319,6 +319,19 @@ const WelcomeScreen = ({ navigation }: any) => {
             </View>
           </Animated.View>
 
+          {/* 📢 Pinned Safety Memo Canary Yellow Sticky Note */}
+          <Animated.View style={[
+            styles.stickyNotice,
+            { transform: [{ translateY: heroY }, { rotate: '-1.2deg' }] }
+          ]}>
+            {/* 📌 Red Thumbtack Pinned onto yellow sticky */}
+            {renderThumbtack()}
+            <Text style={styles.stickyTitle}>📢 CAMPUS SAFETY MEMO</Text>
+            <Text style={styles.stickyBody}>
+              Always perform exchange handoffs at public squares (Library, Hall Cafes, or Main Gates). Scan the seller's QR code on-site to release escrow instantly. Safe swaps only!
+            </Text>
+          </Animated.View>
+
           {/* Catchy Carousel Visual Slides - Staggered Slide In */}
           <Animated.View style={[styles.slideCard, { transform: [{ translateY: carouselY }] }]}>
             {/* 📌 Red Thumbtack detail pinned at the top-center */}
@@ -401,63 +414,64 @@ const WelcomeScreen = ({ navigation }: any) => {
       {showIntro && (
         <Animated.View style={[styles.introContainer, { transform: [{ translateY: introY }] }]}>
           <View style={styles.introInner}>
-            {/* Giant Centered Vector Logo */}
-            <Animated.View style={{
-              width: 86,
-              height: 86,
-              borderWidth: 4.5,
-              borderColor: '#000',
-              backgroundColor: colors.surface,
-              alignItems: 'center',
-              justifyContent: 'center',
-              shadowColor: '#000',
-              shadowOffset: { width: 5, height: 5 },
-              shadowOpacity: 1,
-              shadowRadius: 0,
-              elevation: 5,
-              position: 'relative',
-              marginBottom: 10,
-              transform: [{ scale: letterQ }],
-              opacity: letterQ,
-            }}>
-              {/* Bold Stencil Q (Outer Frame) */}
-              <View style={{
-                width: 40,
-                height: 40,
-                borderWidth: 8,
-                borderColor: '#000',
-                backgroundColor: 'transparent',
-              }} />
-              
-              {/* Bold Stencil Q (Rotated Tail) */}
-              <View style={{
-                position: 'absolute',
-                bottom: 14,
-                right: 14,
-                width: 15,
-                height: 7.5,
-                backgroundColor: '#000',
-                transform: [{ rotate: '45deg' }],
-              }} />
-
-              {/* Red Thumbtack detail (Top Right) */}
-              <View style={{
-                position: 'absolute',
-                top: 7,
-                right: 7,
-                width: 14,
-                height: 14,
-                borderRadius: 7,
-                backgroundColor: '#ff6b6b',
-                borderWidth: 2.5,
-                borderColor: '#000',
-              }} />
-            </Animated.View>
-
-            {/* Animated Brand Letters */}
+            
+            {/* Animated Brand Letters with Integrated Large Vector Q-Logo */}
             <View style={styles.letterRow}>
+              
+              {/* 🚀 First Letter is the Official Vector Q-Logo! Slightly larger (58x58) */}
+              <Animated.View
+                style={[
+                  styles.letterCard,
+                  {
+                    width: 58,
+                    height: 58,
+                    borderWidth: 3.5,
+                    borderColor: '#000',
+                    marginRight: 2,
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    transform: [{ scale: letterQ }],
+                    opacity: letterQ,
+                    position: 'relative',
+                  },
+                ]}
+              >
+                {/* Bold Stencil Q (Inner Ring) */}
+                <View style={{
+                  width: 26,
+                  height: 26,
+                  borderWidth: 6,
+                  borderColor: '#000',
+                  backgroundColor: 'transparent',
+                }} />
+                
+                {/* Bold Stencil Q (Rotated Tail) */}
+                <View style={{
+                  position: 'absolute',
+                  bottom: 9,
+                  right: 9,
+                  width: 10,
+                  height: 5,
+                  backgroundColor: '#000',
+                  transform: [{ rotate: '45deg' }],
+                }} />
+
+                {/* Red Thumbtack detail (Top Right) */}
+                <View style={{
+                  position: 'absolute',
+                  top: 4,
+                  right: 4,
+                  width: 8,
+                  height: 8,
+                  borderRadius: 4,
+                  backgroundColor: '#ff6b6b',
+                  borderWidth: 1.5,
+                  borderColor: '#000',
+                }} />
+              </Animated.View>
+
+              {/* Remaining brand letters: U A D S (Standard size 48x48) */}
               {[
-                { letter: 'Q', anim: letterQ },
                 { letter: 'U', anim: letterU },
                 { letter: 'A', anim: letterA },
                 { letter: 'D', anim: letterD },
@@ -468,12 +482,16 @@ const WelcomeScreen = ({ navigation }: any) => {
                   style={[
                     styles.letterCard,
                     {
+                      width: 48,
+                      height: 48,
                       transform: [{ scale: item.anim }],
                       opacity: item.anim,
+                      justifyContent: 'center',
+                      alignItems: 'center',
                     },
                   ]}
                 >
-                  <Text style={styles.letterText}>{item.letter}</Text>
+                  <Text style={[styles.letterText, { fontSize: 24 }]}>{item.letter}</Text>
                 </Animated.View>
               ))}
             </View>
@@ -560,6 +578,34 @@ const styles = StyleSheet.create({
     fontWeight: '900',
     letterSpacing: 1.2,
     color: '#000',
+  },
+
+  // Canary Yellow Pinned Safety Memo Note
+  stickyNotice: {
+    position: 'relative',
+    backgroundColor: '#fffacd',
+    borderWidth: 2.5,
+    borderColor: '#000',
+    padding: 14,
+    marginTop: 6,
+    marginHorizontal: 2,
+    ...shadows.bulletin,
+  },
+  stickyTitle: {
+    fontSize: 10,
+    fontWeight: '900',
+    letterSpacing: 1.2,
+    color: '#000',
+    textTransform: 'uppercase',
+    marginBottom: 5,
+    textAlign: 'center',
+  },
+  stickyBody: {
+    fontSize: 10.5,
+    fontWeight: '700',
+    color: '#333',
+    lineHeight: 15,
+    textAlign: 'center',
   },
   
   // Carousel Card
@@ -739,11 +785,10 @@ const styles = StyleSheet.create({
   },
   letterRow: {
     flexDirection: 'row',
+    alignItems: 'center',
     gap: 8,
   },
   letterCard: {
-    width: 52,
-    height: 52,
     borderWidth: 3,
     borderColor: '#000',
     backgroundColor: colors.surface,
