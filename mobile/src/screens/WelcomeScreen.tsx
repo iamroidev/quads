@@ -57,8 +57,12 @@ const WelcomeScreen = ({ navigation }: any) => {
   const introSub = useRef(new Animated.Value(0)).current;
   const loadBar = useRef(new Animated.Value(0)).current;
 
-  // Content fade
+  // Staggered main layout entrances
   const contentFade = useRef(new Animated.Value(0)).current;
+  const heroY = useRef(new Animated.Value(50)).current;
+  const carouselY = useRef(new Animated.Value(75)).current;
+  const metricsY = useRef(new Animated.Value(100)).current;
+  const actionsY = useRef(new Animated.Value(125)).current;
 
   useEffect(() => {
     // 1. Ticker Loop
@@ -104,25 +108,53 @@ const WelcomeScreen = ({ navigation }: any) => {
         }),
         Animated.timing(loadBar, {
           toValue: 1,
-          duration: 1000,
+          duration: 1800, // Make the progress bar load slower and feel premium
           easing: Easing.out(Easing.ease),
-          useNativeDriver: false, // width animation doesn't support native driver
+          useNativeDriver: false,
         }),
       ]),
-      Animated.delay(600),
-      // 3. Slide intro up out of screen
+      Animated.delay(1200), // Extended delay so the brand marks sink in dramatically
+      // 3. Slower elegant slide up
       Animated.timing(introY, {
         toValue: -height,
-        duration: 800,
+        duration: 900,
         easing: Easing.bezier(0.77, 0, 0.175, 1),
         useNativeDriver: true,
       }),
-      // 4. Fade main content in
-      Animated.timing(contentFade, {
-        toValue: 1,
-        duration: 600,
-        useNativeDriver: true,
-      }),
+      // 4. Play highly dramatic staggered springs for welcome components
+      Animated.parallel([
+        Animated.timing(contentFade, {
+          toValue: 1,
+          duration: 800,
+          useNativeDriver: true,
+        }),
+        Animated.stagger(150, [
+          Animated.spring(heroY, {
+            toValue: 0,
+            tension: 30,
+            friction: 5.5,
+            useNativeDriver: true,
+          }),
+          Animated.spring(carouselY, {
+            toValue: 0,
+            tension: 30,
+            friction: 5.5,
+            useNativeDriver: true,
+          }),
+          Animated.spring(metricsY, {
+            toValue: 0,
+            tension: 30,
+            friction: 5.5,
+            useNativeDriver: true,
+          }),
+          Animated.spring(actionsY, {
+            toValue: 0,
+            tension: 30,
+            friction: 5.5,
+            useNativeDriver: true,
+          }),
+        ]),
+      ]),
     ]).start(() => {
       setShowIntro(false);
     });
@@ -136,7 +168,7 @@ const WelcomeScreen = ({ navigation }: any) => {
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor={colors.bg} />
 
-      {/* Main Catchy Content (fades in after intro) */}
+      {/* Main Catchy Content (fades in staggered after intro) */}
       <Animated.View style={[styles.mainLayout, { opacity: showIntro ? 0 : contentFade }]}>
         
         {/* Dynamic Campus Ticker Header - ACCENT COLOR BACKGROUND */}
@@ -150,16 +182,16 @@ const WelcomeScreen = ({ navigation }: any) => {
 
         <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
           
-          {/* Brand Hero logo banner */}
-          <View style={styles.heroSection}>
+          {/* Brand Hero logo banner - Staggered Slide In */}
+          <Animated.View style={[styles.heroSection, { transform: [{ translateY: heroY }] }]}>
             <Text style={styles.logoTitle}>QUADS</Text>
             <View style={styles.subtitleWrapper}>
               <Text style={styles.logoSubtitle}>THE OFFICIAL INSTITUTIONAL MARKETPLACE</Text>
             </View>
-          </View>
+          </Animated.View>
 
-          {/* Catchy Carousel Visual Slides */}
-          <View style={styles.slideCard}>
+          {/* Catchy Carousel Visual Slides - Staggered Slide In */}
+          <Animated.View style={[styles.slideCard, { transform: [{ translateY: carouselY }] }]}>
             <View style={[styles.slideBadge, { backgroundColor: SLIDES[activeSlide].color + '15', borderColor: SLIDES[activeSlide].color }]}>
               <Text style={[styles.slideBadgeText, { color: SLIDES[activeSlide].color }]}>
                 {SLIDES[activeSlide].highlight}
@@ -189,10 +221,10 @@ const WelcomeScreen = ({ navigation }: any) => {
                 <Ionicons name="arrow-forward-outline" size={14} color="#000" />
               </TouchableOpacity>
             </View>
-          </View>
+          </Animated.View>
 
-          {/* Catchy Statistics / Parity Badges */}
-          <View style={styles.metricsGrid}>
+          {/* Catchy Statistics / Parity Badges - Staggered Slide In */}
+          <Animated.View style={[styles.metricsGrid, { transform: [{ translateY: metricsY }] }]}>
             <View style={[styles.metricBox, { backgroundColor: '#fffacd', transform: [{ rotate: '-1.5deg' }] }]}>
               <Text style={styles.metricVal}>🔥 0% FEES</Text>
               <Text style={styles.metricLabel}>Zero slop swaps</Text>
@@ -205,10 +237,10 @@ const WelcomeScreen = ({ navigation }: any) => {
               <Text style={[styles.metricVal, { color: '#fff' }]}>🎓 UMaT ONLY</Text>
               <Text style={[styles.metricLabel, { color: '#fff' }]}>Verified scholars</Text>
             </View>
-          </View>
+          </Animated.View>
 
-          {/* Strong Chunky Call-to-Actions */}
-          <View style={styles.actions}>
+          {/* Strong Chunky Call-to-Actions - Staggered Slide In */}
+          <Animated.View style={[styles.actions, { transform: [{ translateY: actionsY }] }]}>
             <TouchableOpacity
               style={styles.signUpBtn}
               onPress={() => navigation.navigate('Register')}
@@ -222,7 +254,7 @@ const WelcomeScreen = ({ navigation }: any) => {
             >
               <Text style={styles.logInBtnText}>🔑 ALREADY A MEMBER? LOG IN</Text>
             </TouchableOpacity>
-          </View>
+          </Animated.View>
 
         </ScrollView>
       </Animated.View>
@@ -257,7 +289,7 @@ const WelcomeScreen = ({ navigation }: any) => {
 
             {/* Intro Subtitle + Animated Loadbar */}
             <Animated.View style={[styles.introSubWrapper, { opacity: introSub }]}>
-              <Text style={styles.introSubText}>TARKWA'S FINEST CAMPUS ESCROW</Text>
+              <Text style={styles.introSubText}>THE OFFICIAL INSTITUTIONAL MARKETPLACE</Text>
               <View style={styles.loadTrack}>
                 <Animated.View
                   style={[
@@ -288,7 +320,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   tickerHeader: {
-    backgroundColor: colors.accent, // ACCENT COLOR BACKGROUND
+    backgroundColor: colors.accent,
     paddingVertical: 8,
     borderBottomWidth: 3,
     borderColor: '#000',
@@ -299,7 +331,7 @@ const styles = StyleSheet.create({
     width: 800,
   },
   tickerText: {
-    color: '#000', // BOLD BLACK TEXT FOR HIGH CONTRAST
+    color: '#000',
     fontSize: 10,
     fontWeight: '900',
     textTransform: 'uppercase',
