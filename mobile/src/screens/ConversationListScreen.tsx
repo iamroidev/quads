@@ -160,7 +160,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 16,
     paddingVertical: 12,
-    backgroundColor: '#fffdf8',
+    backgroundColor: colors.surface,
   },
   avatarWrap: { marginRight: 12 },
   avatar: { width: 48, height: 48, borderRadius: 24 },

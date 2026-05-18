@@ -162,7 +162,7 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.bg },
   tabs: {
     flexDirection: 'row',
-    backgroundColor: '#fffdf8',
+    backgroundColor: colors.surface,
     borderBottomWidth: 1,
     borderBottomColor: colors.border,
   },
@@ -176,7 +176,7 @@ const styles = StyleSheet.create({
   tabActive: { borderBottomColor: '#1f1a14' },
   tabText: { fontSize: 11, fontWeight: '800', color: '#7b6f61', textTransform: 'uppercase', letterSpacing: 1.1 },
   tabTextActive: { color: '#1f1a14', fontWeight: '900' },
-  statusRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, paddingHorizontal: 12, paddingVertical: 10, backgroundColor: '#fffdf8', borderBottomWidth: 1, borderBottomColor: colors.border },
+  statusRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, paddingHorizontal: 12, paddingVertical: 10, backgroundColor: colors.surface, borderBottomWidth: 1, borderBottomColor: colors.border },
   statusChip: { borderWidth: 1, borderColor: colors.border, paddingHorizontal: 10, paddingVertical: 6, backgroundColor: '#fff' },
   statusChipActive: { backgroundColor: colors.text, borderColor: colors.text },
   statusChipText: { fontSize: 10, fontWeight: '800', color: '#6f6559', textTransform: 'uppercase', letterSpacing: 1 },
@@ -184,7 +184,7 @@ const styles = StyleSheet.create({
   centered: { flex: 1, justifyContent: 'center', alignItems: 'center' },
   list: { padding: 12, gap: 10 },
   card: {
-    backgroundColor: '#fffdf8',
+    backgroundColor: colors.surface,
     borderWidth: 1,
     borderColor: colors.border,
     borderRadius: 0,
