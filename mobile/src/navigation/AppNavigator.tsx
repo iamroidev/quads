@@ -421,6 +421,12 @@ const BuyerTabs = () => {
           tabBarIcon: tabIcon('person-outline'),
           tabBarBadge: unreadNotificationsCount > 0 ? unreadNotificationsCount : undefined,
         }}
+        listeners={({ navigation }) => ({
+          tabPress: (e) => {
+            e.preventDefault();
+            navigation.navigate('ProfileTab', { screen: 'ProfileHome' });
+          },
+        })}
       />
     </Tab.Navigator>
   );
@@ -497,6 +503,12 @@ const SellerTabs = () => {
           tabBarIcon: tabIcon('person-outline'),
           tabBarBadge: unreadNotificationsCount > 0 ? unreadNotificationsCount : undefined,
         }}
+        listeners={({ navigation }) => ({
+          tabPress: (e) => {
+            e.preventDefault();
+            navigation.navigate('ProfileTab', { screen: 'ProfileHome' });
+          },
+        })}
       />
     </Tab.Navigator>
   );
