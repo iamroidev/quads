@@ -66,7 +66,7 @@ const defaultStackHeader = {
     color: '#1f1a14',
   },
   headerStyle: {
-    backgroundColor: '#fffdf8',
+    backgroundColor: colors.surface,
   },
   headerTintColor: '#1f1a14',
 };
@@ -341,7 +341,7 @@ const BuyerTabs = () => {
     tabBarInactiveTintColor: '#9f9382',
     tabBarStyle: {
       borderTopColor: colors.border,
-      backgroundColor: '#fffdf8',
+      backgroundColor: colors.surface,
       height: 62 + (Platform.OS === 'ios' ? insets.bottom : 0),
       paddingTop: 8,
       paddingBottom: Math.max(insets.bottom, 8),
@@ -426,7 +426,7 @@ const SellerTabs = () => {
     tabBarInactiveTintColor: '#9f9382',
     tabBarStyle: {
       borderTopColor: colors.border,
-      backgroundColor: '#fffdf8',
+      backgroundColor: colors.surface,
       height: 62 + (Platform.OS === 'ios' ? insets.bottom : 0),
       paddingTop: 8,
       paddingBottom: Math.max(insets.bottom, 8),
@@ -513,7 +513,7 @@ const AppNavigator = () => {
             height: 76,
             borderWidth: 4,
             borderColor: '#000',
-            backgroundColor: '#fffdf8',
+            backgroundColor: colors.surface,
             alignItems: 'center',
             justifyContent: 'center',
             shadowColor: '#000',

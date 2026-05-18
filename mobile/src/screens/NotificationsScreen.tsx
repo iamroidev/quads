@@ -181,7 +181,7 @@ const styles = StyleSheet.create({
   unreadLabel: { fontSize: 12, color: '#6b7280', marginTop: 2 },
   markAllBtn: { paddingBottom: 2 },
   markAllText: { fontSize: 11, color: '#2f5d4f', fontWeight: '800', textTransform: 'uppercase', letterSpacing: 1 },
-  pushTestWrap: { paddingHorizontal: 16, paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: colors.border, backgroundColor: '#fffdf8' },
+  pushTestWrap: { paddingHorizontal: 16, paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: colors.border, backgroundColor: colors.surface },
   pushTestBtn: { borderWidth: 1, borderColor: colors.border, paddingVertical: 11, alignItems: 'center', ...shadows.bulletin },
   pushTestBtnText: { fontSize: 11, fontWeight: '800', color: '#463d31', textTransform: 'uppercase', letterSpacing: 1.2 },
   centered: { flex: 1, justifyContent: 'center', alignItems: 'center' },

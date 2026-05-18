@@ -365,7 +365,7 @@ const styles = StyleSheet.create({
   },
   imageDotActive: { backgroundColor: "#fff", width: 16 },
   sheet: {
-    backgroundColor: "#fffdf8",
+    backgroundColor: colors.surface,
     borderTopWidth: 1,
     borderTopColor: colors.border,
     padding: 16,

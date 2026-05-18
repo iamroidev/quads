@@ -199,7 +199,7 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingVertical: 10,
     alignItems: 'center',
-    backgroundColor: '#fffdf8',
+    backgroundColor: colors.surface,
   },
   filterBtnActive: {
     backgroundColor: colors.text,
@@ -218,7 +218,7 @@ const styles = StyleSheet.create({
     padding: 32,
     borderWidth: 2,
     borderColor: colors.border,
-    backgroundColor: '#fffdf8',
+    backgroundColor: colors.surface,
     alignItems: 'center',
     ...shadows.bulletin,
   },
@@ -255,7 +255,7 @@ const styles = StyleSheet.create({
   card: {
     borderWidth: 2,
     borderColor: colors.border,
-    backgroundColor: '#fffdf8',
+    backgroundColor: colors.surface,
     padding: 16,
     marginBottom: 14,
     ...shadows.bulletin,

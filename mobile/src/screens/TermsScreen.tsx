@@ -93,7 +93,7 @@ const styles = StyleSheet.create({
   card: {
     borderWidth: 2,
     borderColor: colors.border,
-    backgroundColor: '#fffdf8',
+    backgroundColor: colors.surface,
     padding: 16,
     ...shadows.bulletin,
   },

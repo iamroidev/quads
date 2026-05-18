@@ -225,7 +225,7 @@ const styles = StyleSheet.create({
   },
   roleText: { fontSize: 10, fontWeight: '700', color: '#6b5f4f', letterSpacing: 1.2 },
   card: {
-    backgroundColor: '#fffdf8',
+    backgroundColor: colors.surface,
     borderWidth: 1,
     borderColor: colors.border,
     borderRadius: 0,
@@ -266,7 +266,7 @@ const styles = StyleSheet.create({
   verifyBadgeTextVerified: { color: colors.accent },
   verifyBadgeTextPending: { color: '#7b5e1a' },
   menu: {
-    backgroundColor: '#fffdf8',
+    backgroundColor: colors.surface,
     borderWidth: 1,
     borderColor: colors.border,
     borderRadius: 0,
@@ -286,7 +286,7 @@ const styles = StyleSheet.create({
   menuItemText: { fontSize: 13, color: '#1f1a14', fontWeight: '700', textTransform: 'uppercase', letterSpacing: 1.1 },
   chevron: { fontSize: 20, color: '#d1d5db', lineHeight: 22 },
   logoutBtn: {
-    backgroundColor: '#fffdf8',
+    backgroundColor: colors.surface,
     borderWidth: 1,
     borderColor: '#d6b8b4',
     borderRadius: 0,
@@ -311,7 +311,7 @@ const styles = StyleSheet.create({
   sellerOutlineBtn: {
     borderWidth: 1,
     borderColor: colors.border,
-    backgroundColor: '#fffdf8',
+    backgroundColor: colors.surface,
     alignItems: 'center',
     paddingVertical: 11,
     marginBottom: 8,
@@ -325,7 +325,7 @@ const styles = StyleSheet.create({
     flex: 1,
     borderWidth: 1,
     borderColor: colors.border,
-    backgroundColor: '#fffdf8',
+    backgroundColor: colors.surface,
     alignItems: 'center',
     paddingVertical: 10,
   },

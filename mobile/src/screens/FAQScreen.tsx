@@ -200,7 +200,7 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   searchInput: {
-    backgroundColor: '#fffdf8',
+    backgroundColor: colors.surface,
     borderWidth: 2,
     borderColor: colors.border,
     paddingHorizontal: 16,
@@ -222,7 +222,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderWidth: 2,
     borderColor: colors.border,
-    backgroundColor: '#fffdf8',
+    backgroundColor: colors.surface,
     ...shadows.bulletin,
   },
   tabText: {
@@ -242,7 +242,7 @@ const styles = StyleSheet.create({
   faqCard: {
     borderWidth: 2,
     borderColor: colors.border,
-    backgroundColor: '#fffdf8',
+    backgroundColor: colors.surface,
     ...shadows.bulletin,
   },
   headerRow: {
@@ -299,7 +299,7 @@ const styles = StyleSheet.create({
     padding: 32,
     borderWidth: 2,
     borderColor: colors.border,
-    backgroundColor: '#fffdf8',
+    backgroundColor: colors.surface,
     alignItems: 'center',
     ...shadows.bulletin,
   },

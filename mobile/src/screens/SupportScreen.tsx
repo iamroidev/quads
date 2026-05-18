@@ -259,7 +259,7 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   searchInput: {
-    backgroundColor: '#fffdf8',
+    backgroundColor: colors.surface,
     borderWidth: 2,
     borderColor: colors.border,
     paddingHorizontal: 16,
@@ -283,7 +283,7 @@ const styles = StyleSheet.create({
   accordionCard: {
     borderWidth: 2,
     borderColor: colors.border,
-    backgroundColor: '#fffdf8',
+    backgroundColor: colors.surface,
     ...shadows.bulletin,
   },
   accordionHeader: {
@@ -318,7 +318,7 @@ const styles = StyleSheet.create({
     padding: 32,
     borderWidth: 2,
     borderColor: colors.border,
-    backgroundColor: '#fffdf8',
+    backgroundColor: colors.surface,
     alignItems: 'center',
     ...shadows.bulletin,
   },

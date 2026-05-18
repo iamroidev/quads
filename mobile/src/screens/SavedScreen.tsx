@@ -107,7 +107,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.bg,
   },
   card: {
-    backgroundColor: "#fffdf8",
+    backgroundColor: colors.surface,
     borderRadius: 0,
     borderWidth: 1,
     borderColor: colors.border,
