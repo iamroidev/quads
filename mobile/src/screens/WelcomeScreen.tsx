@@ -235,6 +235,61 @@ const WelcomeScreen = ({ navigation }: any) => {
     );
   };
 
+  // Render a visual Red Thumbtack to simulate pinning on a board
+  const renderThumbtack = () => (
+    <View style={{
+      position: 'absolute',
+      top: -12,
+      left: '50%',
+      marginLeft: -10,
+      width: 20,
+      height: 20,
+      borderRadius: 10,
+      backgroundColor: '#ff6b6b',
+      borderWidth: 2.5,
+      borderColor: '#000',
+      zIndex: 100,
+      shadowColor: '#000',
+      shadowOffset: { width: 1.5, height: 1.5 },
+      shadowOpacity: 0.4,
+      shadowRadius: 0,
+      elevation: 4,
+    }}>
+      {/* Shine Reflection */}
+      <View style={{
+        position: 'absolute',
+        top: 2,
+        left: 2,
+        width: 4,
+        height: 4,
+        borderRadius: 2,
+        backgroundColor: 'rgba(255, 255, 255, 0.7)',
+      }} />
+    </View>
+  );
+
+  // Render a beige masking tape block to simulate bulletin notes taped down
+  const renderMaskingTape = (rotation: string) => (
+    <View style={{
+      position: 'absolute',
+      top: -8,
+      alignSelf: 'center',
+      width: 48,
+      height: 13,
+      backgroundColor: '#f5e7cd',
+      borderWidth: 1.5,
+      borderColor: '#000',
+      transform: [{ rotate: rotation }],
+      zIndex: 10,
+      opacity: 0.95,
+      shadowColor: '#000',
+      shadowOffset: { width: 1, height: 1 },
+      shadowOpacity: 0.15,
+      shadowRadius: 0,
+      elevation: 1,
+    }} />
+  );
+
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor={colors.bg} />
@@ -266,6 +321,9 @@ const WelcomeScreen = ({ navigation }: any) => {
 
           {/* Catchy Carousel Visual Slides - Staggered Slide In */}
           <Animated.View style={[styles.slideCard, { transform: [{ translateY: carouselY }] }]}>
+            {/* 📌 Red Thumbtack detail pinned at the top-center */}
+            {renderThumbtack()}
+
             <View style={[styles.slideBadge, { backgroundColor: SLIDES[activeSlide].color + '15', borderColor: SLIDES[activeSlide].color }]}>
               <Text style={[styles.slideBadgeText, { color: SLIDES[activeSlide].color }]}>
                 {SLIDES[activeSlide].highlight}
@@ -300,14 +358,20 @@ const WelcomeScreen = ({ navigation }: any) => {
           {/* Catchy Statistics / Parity Badges - Staggered Slide In */}
           <Animated.View style={[styles.metricsGrid, { transform: [{ translateY: metricsY }] }]}>
             <View style={[styles.metricBox, { backgroundColor: '#fffacd', transform: [{ rotate: '-1.5deg' }] }]}>
+              {/* 🩹 Masking tape detailed overlay */}
+              {renderMaskingTape('-12deg')}
               <Text style={styles.metricVal}>🔥 0% FEES</Text>
               <Text style={styles.metricLabel}>Zero slop swaps</Text>
             </View>
             <View style={[styles.metricBox, { backgroundColor: '#ff6b6b', transform: [{ rotate: '1.2deg' }] }]}>
+              {/* 🩹 Masking tape detailed overlay */}
+              {renderMaskingTape('8deg')}
               <Text style={[styles.metricVal, { color: '#fff' }]}>🛡️ ESCROW</Text>
               <Text style={[styles.metricLabel, { color: '#fff' }]}>Anti-scam shield</Text>
             </View>
             <View style={[styles.metricBox, { backgroundColor: '#10b981', transform: [{ rotate: '-0.8deg' }] }]}>
+              {/* 🩹 Masking tape detailed overlay */}
+              {renderMaskingTape('-5deg')}
               <Text style={[styles.metricVal, { color: '#fff' }]}>🎓 UMaT ONLY</Text>
               <Text style={[styles.metricLabel, { color: '#fff' }]}>Verified scholars</Text>
             </View>
@@ -415,7 +479,7 @@ const styles = StyleSheet.create({
   scrollContent: {
     padding: 20,
     paddingBottom: 40,
-    gap: 20,
+    gap: 24,
     zIndex: 5,
   },
   heroSection: {
@@ -447,10 +511,12 @@ const styles = StyleSheet.create({
   
   // Carousel Card
   slideCard: {
+    position: 'relative',
     borderWidth: 3,
     borderColor: '#000',
     backgroundColor: colors.surface,
-    padding: 16,
+    padding: 18,
+    marginTop: 6,
     ...shadows.bulletinHeavy,
     gap: 12,
   },
@@ -460,6 +526,7 @@ const styles = StyleSheet.create({
     borderColor: '#000',
     paddingHorizontal: 8,
     paddingVertical: 3,
+    marginTop: 4,
   },
   slideBadgeText: {
     fontSize: 9,
@@ -534,14 +601,16 @@ const styles = StyleSheet.create({
   // Metrics Grid
   metricsGrid: {
     flexDirection: 'row',
-    gap: 10,
+    gap: 12,
     justifyContent: 'space-between',
+    marginTop: 4,
   },
   metricBox: {
+    position: 'relative',
     flex: 1,
     borderWidth: 2,
     borderColor: '#000',
-    paddingVertical: 12,
+    paddingVertical: 16,
     paddingHorizontal: 6,
     alignItems: 'center',
     justifyContent: 'center',
@@ -553,12 +622,13 @@ const styles = StyleSheet.create({
     fontWeight: '900',
     letterSpacing: 0.2,
     textAlign: 'center',
+    marginTop: 2,
   },
   metricLabel: {
     fontSize: 8,
     fontWeight: '800',
     textAlign: 'center',
-    marginTop: 2,
+    marginTop: 3,
     textTransform: 'uppercase',
   },
 
