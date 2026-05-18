@@ -509,8 +509,8 @@ const AppNavigator = () => {
         <View style={{ alignItems: 'center', gap: 20 }}>
           {/* Centered Brand Mark box */}
           <View style={{
-            width: 72,
-            height: 72,
+            width: 76,
+            height: 76,
             borderWidth: 4,
             borderColor: '#000',
             backgroundColor: '#fffdf8',
@@ -521,8 +521,40 @@ const AppNavigator = () => {
             shadowOpacity: 1,
             shadowRadius: 0,
             elevation: 5,
+            position: 'relative',
           }}>
-            <Text style={{ fontSize: 32, fontWeight: '900', color: '#000' }}>Q</Text>
+            {/* Bold Stencil Q (Outer Frame) */}
+            <View style={{
+              width: 36,
+              height: 36,
+              borderWidth: 8,
+              borderColor: '#000',
+              backgroundColor: 'transparent',
+            }} />
+            
+            {/* Bold Stencil Q (Rotated Tail) */}
+            <View style={{
+              position: 'absolute',
+              bottom: 12,
+              right: 12,
+              width: 14,
+              height: 7,
+              backgroundColor: '#000',
+              transform: [{ rotate: '45deg' }],
+            }} />
+
+            {/* Red Thumbtack detail (Top Right) */}
+            <View style={{
+              position: 'absolute',
+              top: 6,
+              right: 6,
+              width: 12,
+              height: 12,
+              borderRadius: 6,
+              backgroundColor: '#ff6b6b',
+              borderWidth: 2,
+              borderColor: '#000',
+            }} />
           </View>
 
           {/* Large Stylized Brand Title */}
