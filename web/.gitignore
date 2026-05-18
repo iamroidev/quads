@@ -8,3 +8,5 @@
 /dist
 /node_modules
 .env*.local
+*.tsbuildinfo
+vite.config.d.ts
