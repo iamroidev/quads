@@ -96,7 +96,7 @@ const Footer: React.FC = () => {
       <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
         
         {/* Top Part: Vertical Link Columns with Individual Brand Accent Divider Lines */}
-        <div className="grid grid-cols-2 gap-8 md:grid-cols-5">
+        <div className="group/footerlinks grid grid-cols-2 gap-8 md:grid-cols-5">
           
           {/* Column 1: Marketplace (Accent: Coral Red) */}
           <div className="border-l-2 border-[#ff6b6b]/40 pl-4 space-y-4">
@@ -112,7 +112,7 @@ const Footer: React.FC = () => {
                 <li key={to}>
                   <Link
                     to={to}
-                    className="text-sm text-white/70 hover:text-[#ff6b6b] transition-colors"
+                    className="text-sm text-white/70 transition-all duration-200 group-hover/footerlinks:text-white/30 hover:!text-[#ff6b6b]"
                   >
                     {label}
                   </Link>
@@ -129,14 +129,14 @@ const Footer: React.FC = () => {
             <ul className="space-y-3">
               {isAuthenticated ? (
                 <>
-                  <li><Link to="/profile" className="text-sm text-white/70 hover:text-[#ffd700] transition-colors">Profile</Link></li>
-                  <li><Link to="/orders" className="text-sm text-white/70 hover:text-[#ffd700] transition-colors">My Orders</Link></li>
-                  <li><Link to="/saved" className="text-sm text-white/70 hover:text-[#ffd700] transition-colors">Saved Items</Link></li>
+                  <li><Link to="/profile" className="text-sm text-white/70 transition-all duration-200 group-hover/footerlinks:text-white/30 hover:!text-[#ffd700]">Profile</Link></li>
+                  <li><Link to="/orders" className="text-sm text-white/70 transition-all duration-200 group-hover/footerlinks:text-white/30 hover:!text-[#ffd700]">My Orders</Link></li>
+                  <li><Link to="/saved" className="text-sm text-white/70 transition-all duration-200 group-hover/footerlinks:text-white/30 hover:!text-[#ffd700]">Saved Items</Link></li>
                 </>
               ) : (
                 <>
-                  <li><Link to="/login" className="text-sm text-white/70 hover:text-[#ffd700] transition-colors">Sign In</Link></li>
-                  <li><Link to="/register" className="text-sm text-white/70 hover:text-[#ffd700] transition-colors">Register</Link></li>
+                  <li><Link to="/login" className="text-sm text-white/70 transition-all duration-200 group-hover/footerlinks:text-white/30 hover:!text-[#ffd700]">Sign In</Link></li>
+                  <li><Link to="/register" className="text-sm text-white/70 transition-all duration-200 group-hover/footerlinks:text-white/30 hover:!text-[#ffd700]">Register</Link></li>
                 </>
               )}
             </ul>
@@ -156,7 +156,7 @@ const Footer: React.FC = () => {
                 <li key={to}>
                   <Link
                     to={to}
-                    className="text-sm text-white/70 hover:text-[#10b981] transition-colors"
+                    className="text-sm text-white/70 transition-all duration-200 group-hover/footerlinks:text-white/30 hover:!text-[#10b981]"
                   >
                     {label}
                   </Link>
@@ -179,7 +179,7 @@ const Footer: React.FC = () => {
                 <li key={to}>
                   <Link
                     to={to}
-                    className="text-sm text-white/70 hover:text-[#00e5ff] transition-colors"
+                    className="text-sm text-white/70 transition-all duration-200 group-hover/footerlinks:text-white/30 hover:!text-[#00e5ff]"
                   >
                     {label}
                   </Link>
