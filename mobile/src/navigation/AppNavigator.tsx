@@ -54,6 +54,7 @@ import {
  } from '../screens';
 import { navigationRef } from './navigationRef';
 import { colors, shadows } from '../theme';
+import FloatingCart from '../components/FloatingCart';
 
 const defaultStackHeader = {
   headerShown: true,
@@ -69,6 +70,8 @@ const defaultStackHeader = {
     backgroundColor: colors.surface,
   },
   headerTintColor: '#1f1a14',
+  gestureEnabled: true,
+  gestureDirection: 'horizontal' as const,
 };
 
 const Stack = createNativeStackNavigator();
@@ -630,30 +633,33 @@ const AppNavigator = () => {
 
   return (
     <NavigationContainer ref={navigationRef}>
-      <Stack.Navigator screenOptions={{ headerShown: false }}>
-        {isAuthenticated ? (
-          <Stack.Screen 
-            name="Main" 
-            component={MainTabsWrapper} 
-          />
-        ) : (
-          <>
-            <Stack.Screen name="Welcome" component={WelcomeScreen} />
-            <Stack.Screen name="Login" component={LoginScreen} />
-            <Stack.Screen name="Register" component={RegisterScreen} />
-            <Stack.Screen
-              name="ForgotPassword"
-              component={ForgotPasswordScreen}
-              options={{ ...defaultStackHeader, title: 'Reset Password', headerShown: true }}
+      <View style={{ flex: 1 }}>
+        <Stack.Navigator screenOptions={{ headerShown: false }}>
+          {isAuthenticated ? (
+            <Stack.Screen 
+              name="Main" 
+              component={MainTabsWrapper} 
             />
-            <Stack.Screen
-              name="ResetPassword"
-              component={ResetPasswordScreen}
-              options={{ ...defaultStackHeader, title: 'New Password', headerShown: true }}
-            />
-          </>
-        )}
-      </Stack.Navigator>
+          ) : (
+            <>
+              <Stack.Screen name="Welcome" component={WelcomeScreen} />
+              <Stack.Screen name="Login" component={LoginScreen} />
+              <Stack.Screen name="Register" component={RegisterScreen} />
+              <Stack.Screen
+                name="ForgotPassword"
+                component={ForgotPasswordScreen}
+                options={{ ...defaultStackHeader, title: 'Reset Password', headerShown: true }}
+              />
+              <Stack.Screen
+                name="ResetPassword"
+                component={ResetPasswordScreen}
+                options={{ ...defaultStackHeader, title: 'New Password', headerShown: true }}
+              />
+            </>
+          )}
+        </Stack.Navigator>
+        {isAuthenticated && <FloatingCart />}
+      </View>
     </NavigationContainer>
   );
 };

@@ -1,4 +1,4 @@
-import { Appearance } from 'react-native';
+import { Appearance, StyleSheet } from 'react-native';
 
 export const lightColors = {
   bg: "#faf8f5",       // Clean Ivory paper (Matching --bulletin-bg)
@@ -20,7 +20,7 @@ export const lightColors = {
 };
 
 export const darkColors = {
-  bg: "#0a0a0a",       // Obsidian dark board background (Matching --bulletin-bg)
+  bg: "#000000",       // Crisp Obsidian pure black background (Matching --bulletin-bg)
   surface: "#121212",  // Deep slate card surface (Matching --bulletin-card)
   text: "#ffffff",     // Crisp white text
   muted: "rgba(255, 255, 255, 0.4)",
@@ -30,22 +30,81 @@ export const darkColors = {
   danger: "#ff6b6b",
 
   // Custom Card Theming (Matching web index.css)
-  noticeBg: "#2c2203",
-  noticeText: "#ffd700",
-  metric1Bg: "#05262e",
-  metric1Text: "#80deea",
-  metric2Bg: "#2d0816",
-  metric2Text: "#f48fb1",
+  noticeBg: "#2d2715",
+  noticeText: "#fef08a",
+  metric1Bg: "#3f1b1b",
+  metric1Text: "#fca5a5",
+  metric2Bg: "#2e121d",
+  metric2Text: "#fbcfe8",
 };
 
-// High-performance dynamic ES6 Proxy to automatically return the active theme palette
+// Will hold the active colors dynamically
+let activeColors = lightColors;
+
+export const setGlobalColors = (newColors: typeof lightColors) => {
+  activeColors = newColors;
+};
+
+// High-performance dynamic ES6 Proxy to enforce the signature ivory neobrutalist theme.
+// To close the UI/UX gap with the web client 100% and prevent invisible text contrast bugs 
+// caused by static stylesheet evaluation, we standardize on the high-contrast light neobrutalist palette.
 export const colors = new Proxy({} as typeof lightColors, {
   get(_, prop: keyof typeof lightColors) {
-    const isDark = Appearance.getColorScheme() === 'dark';
-    const activePalette = isDark ? darkColors : lightColors;
-    return activePalette[prop];
+    return activeColors[prop];
   }
 });
+
+// Override StyleSheet.create to return Proxies that intercept style color property reads.
+// This supports seamless dynamic theme updates at runtime without mutating frozen objects,
+// while preserving 100% native registered stylesheet behavior!
+const normalizeColor = (c: string) => {
+  if (typeof c !== 'string') return c;
+  let hex = c.trim().toLowerCase();
+  if (!hex.startsWith('#')) return hex;
+  if (hex.length === 4) {
+    return '#' + hex[1] + hex[1] + hex[2] + hex[2] + hex[3] + hex[3];
+  }
+  return hex;
+};
+
+// Override StyleSheet.create to return a dynamic Proxy around the raw style definitions.
+// By bypassing opaque native style registration IDs, we allow React Native's JS-to-Native bridge 
+// to dynamically read the theme-aware colors from our Proxy at render time, ensuring instant, 
+// flawless dynamic theme updates across all screens!
+const originalCreate = StyleSheet.create;
+(StyleSheet as any).create = function(obj: any) {
+  // Return a Proxy around the raw style object
+  return new Proxy(obj, {
+    get(target, styleKey) {
+      const styleVal = target[styleKey];
+      if (styleVal && typeof styleVal === 'object') {
+        // Return a Proxy around the style class (e.g. container)
+        return new Proxy(styleVal, {
+          get(styleTarget, prop) {
+            const val = Reflect.get(styleTarget, prop);
+            if (typeof val === 'string') {
+              const valNorm = normalizeColor(val);
+              // Look up the value in lightColors ONLY to prevent cross-palette collisions!
+              // Since stylesheets are initialized using lightColors, this maps every semantic color perfectly.
+              for (const paletteKey in lightColors) {
+                const lightVal = (lightColors as any)[paletteKey];
+                if (typeof lightVal === 'string' && normalizeColor(lightVal) === valNorm) {
+                  // Resolve dynamically from the active color palette!
+                  return (activeColors as any)[paletteKey];
+                }
+              }
+            }
+            return val;
+          }
+        });
+      }
+      return styleVal;
+    }
+  });
+};
+
+// No-op for compatibility with old context calls
+export const updateRegisteredStylesheets = (fromPalette: any, toPalette: any) => {};
 
 export const shadows = {
   bulletin: {

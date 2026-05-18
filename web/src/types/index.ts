@@ -1,5 +1,6 @@
 export interface User {
   _id: string;
+  supabaseId?: string;
   name: string;
   storeName?: string;
   brandName?: string;

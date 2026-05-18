@@ -30,7 +30,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, _setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [viewMode, setViewMode] = useState<'buyer' | 'seller'>('buyer');
+  const [viewMode, setViewModeState] = useState<'buyer' | 'seller'>('buyer');
+
+  const setViewMode = async (mode: 'buyer' | 'seller') => {
+    setViewModeState(mode);
+    await SecureStore.setItemAsync('viewMode', mode);
+  };
 
   const normalizeUser = (u: any): User | null => {
     if (!u) return null;
@@ -44,29 +49,27 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const isAuthenticated = !!user && !!token;
 
-  // Sync viewMode with role on initial load/login
-  useEffect(() => {
-    if (user) {
-      setViewMode(user.role === 'seller' || user.role === 'admin' ? 'seller' : 'buyer');
-    }
-  }, [user?._id, user?.role]);
-
   // Load stored auth on mount
   useEffect(() => {
     const loadAuth = async () => {
       try {
         const storedToken = await SecureStore.getItemAsync('token');
+        const storedViewMode = await SecureStore.getItemAsync('viewMode');
         if (storedToken) {
           setToken(storedToken);
           const response = await authService.getMe();
           const newUser = response.data.user;
           const normalized = normalizeUser(newUser);
           setUser(newUser);
-          if (normalized) {
-            setViewMode(normalized.role === 'seller' || normalized.role === 'admin' ? 'seller' : 'buyer');
+          if (storedViewMode === 'buyer' || storedViewMode === 'seller') {
+            setViewModeState(storedViewMode);
+          } else if (normalized) {
+            const defaultMode = normalized.role === 'seller' || normalized.role === 'admin' ? 'seller' : 'buyer';
+            await setViewMode(defaultMode);
           }
         }
       } catch {
+        // Do not clear viewMode preference on transient backend/fetch errors
         await SecureStore.deleteItemAsync('token');
         await SecureStore.deleteItemAsync('user');
       } finally {
@@ -93,8 +96,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     await SecureStore.setItemAsync('user', JSON.stringify(newUser));
     setToken(newToken);
     setUser(newUser);
-    if (normalized) {
-      setViewMode(normalized.role === 'seller' || normalized.role === 'admin' ? 'seller' : 'buyer');
+    
+    const storedViewMode = await SecureStore.getItemAsync('viewMode');
+    if (storedViewMode === 'buyer' || storedViewMode === 'seller') {
+      setViewModeState(storedViewMode);
+    } else if (normalized) {
+      const defaultMode = normalized.role === 'seller' || normalized.role === 'admin' ? 'seller' : 'buyer';
+      await setViewMode(defaultMode);
     }
     await syncPushSubscription();
   }, []);
@@ -107,8 +115,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     await SecureStore.setItemAsync('user', JSON.stringify(newUser));
     setToken(newToken);
     setUser(newUser);
-    if (normalized) {
-      setViewMode(normalized.role === 'seller' || normalized.role === 'admin' ? 'seller' : 'buyer');
+    
+    const storedViewMode = await SecureStore.getItemAsync('viewMode');
+    if (storedViewMode === 'buyer' || storedViewMode === 'seller') {
+      setViewModeState(storedViewMode);
+    } else if (normalized) {
+      const defaultMode = normalized.role === 'seller' || normalized.role === 'admin' ? 'seller' : 'buyer';
+      await setViewMode(defaultMode);
     }
     await syncPushSubscription();
     return {
@@ -147,8 +160,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     await SecureStore.setItemAsync('user', JSON.stringify(newUser));
     setToken(newToken);
     setUser(newUser);
-    if (normalized) {
-      setViewMode(normalized.role === 'seller' || normalized.role === 'admin' ? 'seller' : 'buyer');
+    
+    const storedViewMode = await SecureStore.getItemAsync('viewMode');
+    if (storedViewMode === 'buyer' || storedViewMode === 'seller') {
+      setViewModeState(storedViewMode);
+    } else if (normalized) {
+      const defaultMode = normalized.role === 'seller' || normalized.role === 'admin' ? 'seller' : 'buyer';
+      await setViewMode(defaultMode);
     }
     await syncPushSubscription();
   }, []);
@@ -187,6 +205,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } catch {}
     await SecureStore.deleteItemAsync('token');
     await SecureStore.deleteItemAsync('user');
+    await SecureStore.deleteItemAsync('viewMode');
     await removePushSubscription();
     setToken(null);
     _setUser(null);

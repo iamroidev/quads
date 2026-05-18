@@ -3,6 +3,8 @@ import { useColorScheme } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider } from './src/context/AuthContext';
+import { CartProvider } from './src/context/CartContext';
+import { ThemeProvider, useTheme } from './src/context/ThemeContext';
 import AppNavigator from './src/navigation/AppNavigator';
 import { initPushRuntime } from './src/services/push.service';
 import { handleInitialNotificationOpen } from './src/services/notificationNavigation.service';
@@ -19,6 +21,16 @@ const queryClient = new QueryClient({
   },
 });
 
+function RootApp() {
+  const { isDark, theme } = useTheme();
+  return (
+    <>
+      <StatusBar style={isDark ? "light" : "dark"} />
+      <AppNavigator key={`${theme}-${isDark}`} />
+    </>
+  );
+}
+
 export default function App() {
   const colorScheme = useColorScheme(); // Listens to system light/dark scheme switches dynamically
 
@@ -30,10 +42,13 @@ export default function App() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <StatusBar style="auto" />
-        <AppNavigator />
-      </AuthProvider>
+      <ThemeProvider>
+        <AuthProvider>
+          <CartProvider>
+            <RootApp />
+          </CartProvider>
+        </AuthProvider>
+      </ThemeProvider>
     </QueryClientProvider>
   );
 }

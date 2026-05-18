@@ -7,6 +7,7 @@ import {
   Text,
   TouchableOpacity,
   View,
+  Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import notificationService, { Notification } from '../services/notification.service';
@@ -45,7 +46,6 @@ const NotificationsScreen = () => {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
-  const [testingPush, setTestingPush] = useState(false);
 
   const fetchNotifications = useCallback(async (withLoader = true) => {
     if (withLoader) setLoading(true);
@@ -79,20 +79,15 @@ const NotificationsScreen = () => {
     setUnreadCount((c) => Math.max(0, c - 1));
   };
 
-  const handleTestPush = async () => {
-    setTestingPush(true);
-    try {
-      await notificationService.verifyPushDelivery();
-    } finally {
-      setTestingPush(false);
-    }
-  };
-
   const renderItem = ({ item }: { item: Notification }) => (
     <TouchableOpacity
-      style={[styles.row, !item.isRead && styles.rowUnread]}
+      style={[
+        styles.row, 
+        !item.isRead && styles.rowUnread,
+        { borderLeftColor: !item.isRead ? '#fbbf24' : '#1f1a14', borderLeftWidth: 5 }
+      ]}
       onPress={() => !item.isRead && handleMarkOne(item._id)}
-      activeOpacity={0.7}
+      activeOpacity={0.8}
     >
       <View style={styles.iconWrap}>
         <Text style={styles.icon}>{TYPE_ICONS[item.type] ?? '🔔'}</Text>
@@ -115,8 +110,10 @@ const NotificationsScreen = () => {
       <View style={styles.header}>
         <View>
           <Text style={styles.headerTitle}>Notifications</Text>
-          {unreadCount > 0 && (
-            <Text style={styles.unreadLabel}>{unreadCount} unread</Text>
+          {unreadCount > 0 ? (
+            <Text style={styles.unreadLabel}>{unreadCount} unread update{unreadCount > 1 ? 's' : ''}</Text>
+          ) : (
+            <Text style={styles.unreadLabel}>All caught up</Text>
           )}
         </View>
         {unreadCount > 0 && (
@@ -126,21 +123,16 @@ const NotificationsScreen = () => {
         )}
       </View>
 
-      <View style={styles.pushTestWrap}>
-        <TouchableOpacity style={styles.pushTestBtn} onPress={handleTestPush} disabled={testingPush}>
-          <Text style={styles.pushTestBtnText}>{testingPush ? 'Sending test...' : 'Send Test Push'}</Text>
-        </TouchableOpacity>
-      </View>
-
       {loading ? (
         <View style={styles.centered}>
-          <ActivityIndicator size="large" color="#2563eb" />
+          <ActivityIndicator size="large" color="#1f1a14" />
         </View>
       ) : (
         <FlatList
           data={notifications}
           keyExtractor={(item) => item._id}
           renderItem={renderItem}
+          contentContainerStyle={styles.listContainer}
           refreshControl={
             <RefreshControl
               refreshing={refreshing}
@@ -157,7 +149,6 @@ const NotificationsScreen = () => {
               <Text style={styles.emptySubtext}>No notifications yet.</Text>
             </View>
           }
-          ItemSeparatorComponent={() => <View style={styles.separator} />}
         />
       )}
     </SafeAreaView>
@@ -167,62 +158,92 @@ const NotificationsScreen = () => {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.bg },
   header: {
-    paddingTop: 10,
-    paddingBottom: 12,
+    paddingTop: 14,
+    paddingBottom: 16,
     paddingHorizontal: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
-    backgroundColor: '#f4ecdd',
+    borderBottomWidth: 3,
+    borderBottomColor: '#1f1a14',
+    backgroundColor: '#efe5d6',
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-end',
   },
-  headerTitle: { fontSize: 26, fontWeight: '900', color: '#1f1a14', textTransform: 'uppercase' },
-  unreadLabel: { fontSize: 12, color: '#6b7280', marginTop: 2 },
-  markAllBtn: { paddingBottom: 2 },
-  markAllText: { fontSize: 11, color: '#2f5d4f', fontWeight: '800', textTransform: 'uppercase', letterSpacing: 1 },
-  pushTestWrap: { paddingHorizontal: 16, paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: colors.border, backgroundColor: colors.surface },
-  pushTestBtn: { borderWidth: 1, borderColor: colors.border, paddingVertical: 11, alignItems: 'center', ...shadows.bulletin },
-  pushTestBtnText: { fontSize: 11, fontWeight: '800', color: '#463d31', textTransform: 'uppercase', letterSpacing: 1.2 },
+  headerTitle: { fontSize: 24, fontWeight: '900', color: '#1f1a14', textTransform: 'uppercase', letterSpacing: 0.5 },
+  unreadLabel: { fontSize: 11, color: '#7b6f61', marginTop: 2, fontWeight: '700', textTransform: 'uppercase' },
+  markAllBtn: { 
+    backgroundColor: '#fbbf24', 
+    borderWidth: 1.5, 
+    borderColor: '#1f1a14', 
+    paddingHorizontal: 8, 
+    paddingVertical: 4, 
+    ...Platform.select({
+      ios: {
+        shadowColor: '#1f1a14',
+        shadowOffset: { width: 2, height: 2 },
+        shadowOpacity: 1,
+        shadowRadius: 0,
+      },
+      android: {
+        elevation: 2,
+      },
+    }),
+  },
+  markAllText: { fontSize: 10, color: '#1f1a14', fontWeight: '900', textTransform: 'uppercase', letterSpacing: 0.5 },
   centered: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+  listContainer: {
+    padding: 12,
+  },
   row: {
     flexDirection: 'row',
     alignItems: 'flex-start',
-    paddingHorizontal: 16,
-    paddingVertical: 14,
+    padding: 12,
+    borderWidth: 2,
+    borderColor: '#1f1a14',
+    backgroundColor: '#fff',
+    marginBottom: 10,
+    ...shadows.bulletin,
   },
-  rowUnread: { backgroundColor: '#f5efe5' },
+  rowUnread: { backgroundColor: '#fff8eb' },
   iconWrap: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: '#ece3d2',
+    width: 38,
+    height: 38,
+    borderWidth: 1.5,
+    borderColor: '#1f1a14',
+    backgroundColor: '#efe5d6',
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 12,
-    marginTop: 2,
+    marginRight: 10,
   },
-  icon: { fontSize: 18 },
+  icon: { fontSize: 16 },
   rowContent: { flex: 1 },
   rowTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  title: { fontSize: 14, color: '#374151', flex: 1, marginRight: 8 },
-  titleUnread: { fontWeight: '700', color: '#111827' },
-  time: { fontSize: 11, color: '#9ca3af' },
-  message: { marginTop: 3, fontSize: 13, color: '#6b7280', lineHeight: 18 },
+  title: { fontSize: 13, color: '#374151', flex: 1, marginRight: 8, textTransform: 'uppercase', fontWeight: '700' },
+  titleUnread: { fontWeight: '900', color: '#1f1a14' },
+  time: { fontSize: 10, color: '#7b6f61', fontWeight: '800' },
+  message: { marginTop: 4, fontSize: 12, color: '#4b5563', lineHeight: 16 },
   unreadDot: {
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: '#2f5d4f',
+    backgroundColor: '#ef4444',
+    borderWidth: 1,
+    borderColor: '#1f1a14',
     marginLeft: 8,
     marginTop: 6,
     flexShrink: 0,
   },
-  separator: { height: 1, backgroundColor: '#f9fafb' },
-  emptyWrap: { padding: 40, alignItems: 'center' },
-  emptyIcon: { fontSize: 48, marginBottom: 12 },
-  emptyText: { fontSize: 16, fontWeight: '600', color: '#374151' },
-  emptySubtext: { marginTop: 6, fontSize: 13, color: '#9ca3af' },
+  emptyWrap: { 
+    padding: 40, 
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: '#1f1a14',
+    backgroundColor: '#fff',
+    marginTop: 20,
+    ...shadows.bulletin,
+  },
+  emptyIcon: { fontSize: 44, marginBottom: 12 },
+  emptyText: { fontSize: 14, fontWeight: '900', color: '#1f1a14', textTransform: 'uppercase' },
+  emptySubtext: { marginTop: 4, fontSize: 11, color: '#7b6f61', textTransform: 'uppercase', fontWeight: '600' },
 });
 
 export default NotificationsScreen;

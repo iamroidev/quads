@@ -39,3 +39,12 @@ jest.mock('@react-navigation/native', () => {
     }),
   };
 });
+
+// Mock @expo/vector-icons to bypass expo-font and expo-asset loading in Node/Jest
+jest.mock('@expo/vector-icons', () => {
+  const React = require('react');
+  const { Text } = require('react-native');
+  return {
+    Ionicons: (props) => React.createElement(Text, null, props.name),
+  };
+});

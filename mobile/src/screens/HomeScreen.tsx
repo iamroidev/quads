@@ -11,14 +11,17 @@ import {
   TouchableOpacity,
   View,
   Animated,
+  Platform,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { Ionicons } from "@expo/vector-icons";
 import productService from "../services/product.service";
 import { Product } from "../types";
 import { useAuth } from "../context/AuthContext";
 import { colors, shadows } from "../theme";
 import ScreenHeader from "../components/ScreenHeader";
 import { SkeletonPulse, CardSkeleton } from "../components/SkeletonLoader";
+import FloatingCart from "../components/FloatingCart";
 import categoryService, {
   CategoryWithCount,
 } from "../services/category.service";
@@ -55,32 +58,49 @@ const ProductCard = ({
   onPress: () => void;
 }) => {
   const image = item.images?.[0]?.url;
+  const conditionColor = 
+    item.condition === 'new' ? '#4ade80' : 
+    item.condition === 'like-new' ? '#c084fc' : 
+    item.condition === 'good' ? '#60a5fa' : '#fbbf24';
+
   return (
-    <TouchableOpacity style={styles.card} onPress={onPress}>
-      <Image
-        source={image ? { uri: image } : require("../../assets/icon.png")}
-        style={styles.cardImage}
-      />
-      {item.isFeatured && (
-        <View style={styles.featuredBadge}>
-          <Text style={styles.featuredBadgeText}>FEATURED</Text>
+    <TouchableOpacity style={styles.card} onPress={onPress} activeOpacity={0.85}>
+      <View style={styles.imageContainer}>
+        <Image
+          source={image ? { uri: image } : require("../../assets/icon.png")}
+          style={styles.cardImage}
+          resizeMode="cover"
+        />
+        {item.isFeatured && (
+          <View style={styles.featuredBadge}>
+            <Text style={styles.featuredBadgeText}>⚡ DROP</Text>
+          </View>
+        )}
+        
+        <View style={[styles.conditionTag, { backgroundColor: conditionColor }]}>
+          <Text style={styles.conditionTagText}>{item.condition}</Text>
         </View>
-      )}
-      {(item.status === "sold" || item.status === "reserved") && (
-        <View style={styles.stampOverlay}>
-          <Text style={styles.stampText}>
-            {item.status === "sold" ? "SOLD" : "PENDING"}
-          </Text>
-        </View>
-      )}
+
+        {(item.status === "sold" || item.status === "reserved") && (
+          <View style={styles.stampOverlay}>
+            <Text style={styles.stampText}>
+              {item.status === "sold" ? "SOLD" : "PENDING"}
+            </Text>
+          </View>
+        )}
+      </View>
       <View style={styles.cardBody}>
         <Text style={styles.cardTitle} numberOfLines={2}>
           {item.title}
         </Text>
-        <Text style={styles.cardPrice}>{formatPrice(item.price)}</Text>
-        <Text style={styles.cardMeta} numberOfLines={1}>
-          {item.condition} · {item.pickupLocation || "UMaT"}
-        </Text>
+        <View style={styles.cardPriceRow}>
+          <Text style={styles.cardPrice}>{formatPrice(item.price)}</Text>
+          <View style={styles.locationBadge}>
+            <Text style={styles.locationBadgeText} numberOfLines={1}>
+              📍 {item.pickupLocation || "UMaT"}
+            </Text>
+          </View>
+        </View>
       </View>
     </TouchableOpacity>
   );
@@ -217,41 +237,46 @@ const HomeScreen = ({ navigation }: any) => {
         }
       >
         <ScreenHeader
-          eyebrow="QUADS"
-          title="Home"
-          subtitle="Curated highlights, featured drops, and fresh campus listings."
+          eyebrow="QUADS MARKET"
+          title="Campus Deals"
+          subtitle="Direct student-to-student transactions with escrow protection."
         />
-        {/* Hero / Search */}
-        <Animated.View style={[styles.hero, { opacity: fadeAnim }]}>
-          <Text style={styles.heroGreeting}>
-            {user ? `Hey, ${user.name.split(" ")[0]} 👋` : "QUADS"}
-          </Text>
-          <Text style={styles.heroSubtitle}>Find great deals on campus.</Text>
-          <View style={styles.searchRow}>
+        
+        {/* Premium Neobrutalist Header & Search */}
+        <Animated.View style={[styles.premiumHeader, { opacity: fadeAnim }]}>
+          <View style={styles.headerGreetingBlock}>
+            <Text style={styles.premiumGreeting}>
+              {user ? `Hey, ${user.name.split(" ")[0]} 👋` : "WELCOME TO QUADS"}
+            </Text>
+            <Text style={styles.premiumSubtitle}>Find great deals verified on campus.</Text>
+          </View>
+          
+          <View style={styles.premiumSearchBox}>
             <TextInput
-              style={styles.searchInput}
-              placeholder="Search products..."
+              style={styles.premiumSearchInput}
+              placeholder="Search textbooks, devices, hostel items..."
               placeholderTextColor="#9ca3af"
               value={search}
               onChangeText={setSearch}
               onSubmitEditing={handleSearch}
               returnKeyType="search"
             />
-            <TouchableOpacity style={styles.searchBtn} onPress={handleSearch}>
-              <Text style={styles.searchBtnText}>Go</Text>
+            <TouchableOpacity style={styles.premiumSearchBtn} onPress={handleSearch}>
+              <Text style={styles.premiumSearchBtnText}>GO 🔍</Text>
             </TouchableOpacity>
           </View>
           <TouchableOpacity
             style={styles.secondaryHeroBtn}
             onPress={openBrowse}
           >
-            <Text style={styles.secondaryHeroBtnText}>Browse all listings</Text>
+            <Text style={styles.secondaryHeroBtnText}>Browse All Campus Listings</Text>
           </TouchableOpacity>
         </Animated.View>
 
+        {/* Curated Spotlights */}
         <View style={styles.quickSection}>
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionLabel}>CURATED</Text>
+            <Text style={styles.sectionLabel}>CURATED SELECTIONS</Text>
             <Text style={styles.sectionTitle}>Shop by need</Text>
           </View>
           <ScrollView
@@ -259,50 +284,89 @@ const HomeScreen = ({ navigation }: any) => {
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={styles.hScroll}
           >
-            {CURATED_HERO_CARDS.map((card) => (
-              <TouchableOpacity
-                key={card.id}
-                style={styles.curatedCard}
-                onPress={() =>
-                  navigation.navigate("ProductsTab", {
-                    screen: "ProductsHome",
-                    params: { search: card.filter },
-                  })
-                }
-              >
-                <Text style={styles.curatedCardTitle}>{card.title}</Text>
-                <Text style={styles.curatedCardSubtitle}>{card.subtitle}</Text>
-              </TouchableOpacity>
-            ))}
-          </ScrollView>
-        </View>
-
-        {categories.length > 0 && (
-          <View style={styles.section}>
-            <View style={styles.sectionHeader}>
-              <Text style={styles.sectionLabel}>CATEGORY</Text>
-              <Text style={styles.sectionTitle}>Shop by category</Text>
-            </View>
-            <View style={styles.categoryGrid}>
-              {categories.map((cat) => (
+            {CURATED_HERO_CARDS.map((card) => {
+              const cardIcon = 
+                card.id === 'study' ? 'library-outline' : 
+                card.id === 'hostel' ? 'bed-outline' : 'hardware-chip-outline';
+              
+              return (
                 <TouchableOpacity
-                  key={cat._id}
-                  style={styles.categoryTile}
+                  key={card.id}
+                  style={styles.curatedCard}
                   onPress={() =>
                     navigation.navigate("ProductsTab", {
                       screen: "ProductsHome",
-                      params: { category: cat._id },
+                      params: { search: card.filter },
                     })
                   }
+                  activeOpacity={0.8}
                 >
-                  <Text style={styles.categoryTileTitle} numberOfLines={1}>
-                    {cat.name}
-                  </Text>
-                  <Text style={styles.categoryTileCount}>
-                    {cat.productCount}
-                  </Text>
+                  <View style={styles.curatedTopRow}>
+                    <View style={styles.curatedIconBox}>
+                      <Ionicons name={cardIcon} size={20} color="#ff6b6b" />
+                    </View>
+                    <View style={styles.curatedBadge}>
+                      <Text style={styles.curatedBadgeText}>SPOTLIGHT</Text>
+                    </View>
+                  </View>
+                  <Text style={styles.curatedCardTitle}>{card.title}</Text>
+                  <Text style={styles.curatedCardSubtitle}>{card.subtitle}</Text>
                 </TouchableOpacity>
-              ))}
+              );
+            })}
+          </ScrollView>
+        </View>
+
+        {/* Categories / Departments */}
+        {categories.length > 0 && (
+          <View style={styles.section}>
+            <View style={styles.sectionHeader}>
+              <Text style={styles.sectionLabel}>DEPARTMENTS</Text>
+              <Text style={styles.sectionTitle}>Browse categories</Text>
+            </View>
+            <View style={styles.categoryGrid}>
+              {categories.map((cat) => {
+                const mapSlugToIcon = (slug: string): string => {
+                  const s = slug.toLowerCase();
+                  if (s.includes('book') || s.includes('textbook')) return 'book-outline';
+                  if (s.includes('phone') || s.includes('electro') || s.includes('device') || s.includes('gadget') || s.includes('tech')) return 'laptop-outline';
+                  if (s.includes('food') || s.includes('drink') || s.includes('meal') || s.includes('smooth')) return 'fast-food-outline';
+                  if (s.includes('cloth') || s.includes('fashion') || s.includes('wear')) return 'shirt-outline';
+                  if (s.includes('service')) return 'construct-outline';
+                  if (s.includes('accom') || s.includes('hostel') || s.includes('room') || s.includes('stay')) return 'home-outline';
+                  if (s.includes('station')) return 'pencil-outline';
+                  if (s.includes('sport') || s.includes('gym')) return 'football-outline';
+                  return 'grid-outline';
+                };
+
+                return (
+                  <TouchableOpacity
+                    key={cat._id}
+                    style={styles.categoryTile}
+                    onPress={() =>
+                      navigation.navigate("ProductsTab", {
+                        screen: "ProductsHome",
+                        params: { category: cat._id },
+                      })
+                    }
+                    activeOpacity={0.8}
+                  >
+                    <View style={styles.categoryTileHeader}>
+                      <View style={styles.categoryIconBox}>
+                        <Ionicons name={mapSlugToIcon(cat.slug) as any} size={18} color="#2f5d4f" />
+                      </View>
+                      <View style={styles.categoryBadge}>
+                        <Text style={styles.categoryBadgeText}>
+                          {cat.productCount} {cat.productCount === 1 ? 'item' : 'items'}
+                        </Text>
+                      </View>
+                    </View>
+                    <Text style={styles.categoryTileTitle} numberOfLines={1}>
+                      {cat.name}
+                    </Text>
+                  </TouchableOpacity>
+                );
+              })}
             </View>
           </View>
         )}
@@ -311,8 +375,8 @@ const HomeScreen = ({ navigation }: any) => {
         {featured.length > 0 && (
           <View style={styles.section}>
             <View style={styles.sectionHeader}>
-              <Text style={styles.sectionLabel}>SPOTLIGHT</Text>
-              <Text style={styles.sectionTitle}>Featured Listings</Text>
+              <Text style={styles.sectionLabel}>⚡ SPOTLIGHT</Text>
+              <Text style={styles.sectionTitle}>Featured Drops</Text>
             </View>
             <ScrollView
               horizontal
@@ -324,6 +388,7 @@ const HomeScreen = ({ navigation }: any) => {
                   key={item._id}
                   style={styles.featuredCard}
                   onPress={() => goToProduct(item._id)}
+                  activeOpacity={0.8}
                 >
                   <Image
                     source={
@@ -351,8 +416,8 @@ const HomeScreen = ({ navigation }: any) => {
         {/* Recent */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionLabel}>LATEST</Text>
-            <Text style={styles.sectionTitle}>Recent Listings</Text>
+            <Text style={styles.sectionLabel}>LATEST LISTINGS</Text>
+            <Text style={styles.sectionTitle}>Freshly Posted</Text>
           </View>
           <FlatList
             data={recent}
@@ -374,9 +439,10 @@ const HomeScreen = ({ navigation }: any) => {
                   style={styles.loadMoreBtn}
                   onPress={loadMoreRecent}
                   disabled={loadingMoreRecent}
+                  activeOpacity={0.8}
                 >
                   <Text style={styles.loadMoreBtnText}>
-                    {loadingMoreRecent ? "Loading..." : "Load more"}
+                    {loadingMoreRecent ? "Loading..." : "Load more listings"}
                   </Text>
                 </TouchableOpacity>
               ) : null
@@ -387,7 +453,7 @@ const HomeScreen = ({ navigation }: any) => {
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionLabel}>TRENDING</Text>
-            <Text style={styles.sectionTitle}>Most viewed</Text>
+            <Text style={styles.sectionTitle}>Most Popular</Text>
           </View>
           <FlatList
             data={trending}
@@ -410,22 +476,24 @@ const HomeScreen = ({ navigation }: any) => {
             onPress={() =>
               navigation.navigate("ProfileTab", { screen: "SellerOnboarding" })
             }
+            activeOpacity={0.9}
           >
-            <Text style={styles.buyerCtaTop}>Got something to sell?</Text>
+            <Text style={styles.buyerCtaTop}>Got items to declutter?</Text>
             <Text style={styles.buyerCtaTitle}>Upgrade to seller account</Text>
             <Text style={styles.buyerCtaSub}>
-              Set up your seller profile and start listing campus items.
+              Set up your seller profile and start listing campus items instantly.
             </Text>
           </TouchableOpacity>
         ) : (
           <TouchableOpacity
             style={styles.buyerCta}
             onPress={() => setViewMode("seller")}
+            activeOpacity={0.9}
           >
             <Text style={styles.buyerCtaTop}>Seller workspace</Text>
             <Text style={styles.buyerCtaTitle}>Return to Seller Hub</Text>
             <Text style={styles.buyerCtaSub}>
-              Post new products, manage stock, and track activity.
+              Post new products, manage active listings, and track your campus sales.
             </Text>
           </TouchableOpacity>
         )}
@@ -442,141 +510,238 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: colors.bg,
   },
-  // Hero
-  hero: {
-    backgroundColor: "#1f1a14",
-    paddingTop: 18,
+  // Premium Header
+  premiumHeader: {
+    backgroundColor: "#000000",
+    paddingTop: 24,
     paddingBottom: 28,
     paddingHorizontal: 20,
+    borderBottomWidth: 4,
+    borderBottomColor: "#000000",
   },
-  heroGreeting: {
+  headerGreetingBlock: {
+    marginBottom: 16,
+  },
+  premiumGreeting: {
     fontSize: 26,
-    fontWeight: "800",
-    color: "#fff",
-    marginBottom: 4,
+    fontWeight: "900",
+    color: "#ff6b6b",
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
   },
-  heroSubtitle: {
-    fontSize: 14,
-    color: "rgba(255,255,255,0.55)",
-    marginBottom: 20,
+  premiumSubtitle: {
+    fontSize: 13,
+    color: "rgba(255,255,255,0.75)",
+    marginTop: 4,
+    fontWeight: "600",
   },
-  searchRow: { flexDirection: "row", gap: 8 },
-  searchInput: {
+  premiumSearchBox: {
+    flexDirection: "row",
+    gap: 8,
+    marginTop: 8,
+  },
+  premiumSearchInput: {
     flex: 1,
-    backgroundColor: "rgba(255,255,255,0.08)",
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.18)",
-    borderRadius: 0,
+    backgroundColor: "#fff",
+    borderWidth: 2.5,
+    borderColor: "#000000",
     paddingHorizontal: 14,
-    paddingVertical: 11,
+    paddingVertical: 12,
     fontSize: 14,
-    color: "#fff",
+    color: "#000000",
+    fontWeight: "600",
   },
-  searchBtn: {
+  premiumSearchBtn: {
     backgroundColor: '#ff6b6b',
-    paddingHorizontal: 18,
+    paddingHorizontal: 20,
     justifyContent: 'center',
-    borderWidth: 1,
-    borderColor: colors.border,
+    borderWidth: 2.5,
+    borderColor: '#000000',
     ...shadows.bulletin,
   },
-  searchBtnText: {
+  premiumSearchBtnText: {
     color: "#fff",
-    fontWeight: "800",
+    fontWeight: "900",
+    fontSize: 12,
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
+  },
+  secondaryHeroBtn: {
+    marginTop: 16,
+    backgroundColor: "#ffffff",
+    borderWidth: 2.5,
+    borderColor: "#000000",
+    paddingVertical: 12,
+    alignItems: "center",
+    ...shadows.bulletin,
+  },
+  secondaryHeroBtnText: {
+    color: "#000000",
     fontSize: 11,
+    fontWeight: "900",
     textTransform: "uppercase",
     letterSpacing: 1.2,
   },
-  secondaryHeroBtn: {
-    marginTop: 12,
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.16)",
-    paddingVertical: 12,
-    alignItems: "center",
-    borderRadius: 0,
-  },
-  secondaryHeroBtnText: {
-    color: "rgba(255,255,255,0.72)",
-    fontSize: 12,
-    fontWeight: "700",
-    textTransform: "uppercase",
-    letterSpacing: 1,
-  },
   // Sections
-  section: { paddingTop: 24, paddingBottom: 8 },
-  quickSection: { paddingTop: 20, paddingBottom: 6 },
-  sectionHeader: { paddingHorizontal: 16, marginBottom: 12 },
+  section: { paddingTop: 26, paddingBottom: 10 },
+  quickSection: { paddingTop: 22, paddingBottom: 8 },
+  sectionHeader: { paddingHorizontal: 16, marginBottom: 14 },
   sectionLabel: {
     fontSize: 10,
-    fontWeight: "800",
+    fontWeight: "900",
     color: "#ff6b6b",
-    letterSpacing: 1.8,
+    letterSpacing: 2,
     textTransform: "uppercase",
   },
   sectionTitle: {
     fontSize: 22,
     fontWeight: "900",
-    color: "#1f1a14",
+    color: "#000000",
     marginTop: 2,
     textTransform: "uppercase",
+    letterSpacing: 0.5,
   },
-  // Featured horizontal scroll
+  // Curated horizontal scroll
   hScroll: { paddingHorizontal: 16, gap: 12 },
   curatedCard: {
-    width: 220,
-    borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.surface,
-    padding: 14,
-    ...shadows.bulletin,
+    width: 210,
+    backgroundColor: "#fff",
+    borderWidth: 2.5,
+    borderColor: "#000000",
+    padding: 16,
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000000',
+        shadowOffset: { width: 4, height: 4 },
+        shadowOpacity: 1,
+        shadowRadius: 0,
+      },
+      android: {
+        elevation: 4,
+      },
+    }),
+  },
+  curatedTopRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 16,
+  },
+  curatedIconBox: {
+    width: 32,
+    height: 32,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  curatedBadge: {
+    backgroundColor: "#fff",
+    borderWidth: 1.5,
+    borderColor: "#000000",
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+  },
+  curatedBadgeText: {
+    fontSize: 8,
+    fontWeight: "900",
+    color: "#000000",
+    letterSpacing: 0.8,
   },
   curatedCardTitle: {
     fontSize: 14,
     fontWeight: "900",
-    color: "#1f1a14",
+    color: "#000000",
     textTransform: "uppercase",
-    letterSpacing: 0.7,
+    letterSpacing: 0.5,
   },
   curatedCardSubtitle: {
     marginTop: 6,
-    fontSize: 12,
-    color: "#7b6f61",
-    lineHeight: 17,
+    fontSize: 11,
+    color: "#6b7280",
+    lineHeight: 16,
+    fontWeight: "600",
   },
   categoryGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
     paddingHorizontal: 16,
-    gap: 8,
+    gap: 10,
   },
   categoryTile: {
     width: "48%",
-    borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.surface,
-    paddingVertical: 12,
-    paddingHorizontal: 10,
-    ...shadows.bulletin,
+    backgroundColor: "#fff",
+    borderWidth: 2.5,
+    borderColor: "#000000",
+    paddingVertical: 14,
+    paddingHorizontal: 12,
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000000',
+        shadowOffset: { width: 3, height: 3 },
+        shadowOpacity: 1,
+        shadowRadius: 0,
+      },
+      android: {
+        elevation: 3,
+      },
+    }),
+    justifyContent: "space-between",
+  },
+  categoryTileHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 12,
+  },
+  categoryIconBox: {
+    width: 30,
+    height: 30,
+    justifyContent: "center",
+    alignItems: "center",
   },
   categoryTileTitle: {
     fontSize: 11,
     fontWeight: "900",
-    color: "#1f1a14",
+    color: "#000000",
     textTransform: "uppercase",
-    letterSpacing: 1,
+    letterSpacing: 0.5,
   },
-  categoryTileCount: { marginTop: 4, fontSize: 11, color: "#8d7f6f" },
+  categoryBadge: {
+    backgroundColor: "#fff",
+    borderWidth: 1.5,
+    borderColor: "#000000",
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+  },
+  categoryBadgeText: {
+    fontSize: 8,
+    fontWeight: "900",
+    color: "#ff6b6b",
+    letterSpacing: 0.5,
+  },
+  // Featured list
   featuredCard: {
-    width: 200,
-    height: 150,
-    borderRadius: 0,
+    width: 190,
+    height: 140,
+    borderWidth: 2.5,
+    borderColor: "#000000",
     overflow: "hidden",
     backgroundColor: "#e5e7eb",
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000000',
+        shadowOffset: { width: 3, height: 3 },
+        shadowOpacity: 1,
+        shadowRadius: 0,
+      },
+      android: {
+        elevation: 3,
+      },
+    }),
   },
-  featuredImage: { width: "100%", height: "100%", position: "absolute" },
+  featuredImage: { width: "100%", height: "100%", position: "absolute" } as any,
   featuredOverlay: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(0,0,0,0.45)",
+    backgroundColor: "rgba(0,0,0,0.35)",
   },
   featuredInfo: {
     position: "absolute",
@@ -584,30 +749,52 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     padding: 10,
+    backgroundColor: "rgba(0, 0, 0, 0.85)",
+    borderTopWidth: 1.5,
+    borderTopColor: "#000000",
   },
   featuredTitle: {
-    fontSize: 13,
-    fontWeight: "700",
+    fontSize: 11,
+    fontWeight: "800",
     color: "#fff",
-    lineHeight: 16,
+    lineHeight: 14,
+    textTransform: "uppercase",
   },
   featuredPrice: {
-    marginTop: 3,
-    fontSize: 12,
-    fontWeight: "600",
-    color: "rgba(255,255,255,0.8)",
+    marginTop: 2,
+    fontSize: 11,
+    fontWeight: "900",
+    color: "#ff6b6b",
   },
   // Grid
   grid: { paddingHorizontal: 12, gap: 10, marginBottom: 10 },
   card: {
     flex: 1,
     backgroundColor: colors.surface,
-    borderRadius: 0,
-    borderWidth: 1,
-    borderColor: colors.border,
-    ...shadows.bulletin,
+    borderWidth: 2.5,
+    borderColor: "#000000",
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000000',
+        shadowOffset: { width: 3, height: 3 },
+        shadowOpacity: 1,
+        shadowRadius: 0,
+      },
+      android: {
+        elevation: 3,
+      },
+    }),
+    overflow: "hidden",
   },
-  cardImage: { width: "100%", height: 120, backgroundColor: "#e5e7eb" },
+  imageContainer: {
+    width: "100%",
+    height: 120,
+    backgroundColor: "#f3f4f6",
+    position: "relative",
+    borderBottomWidth: 2.5,
+    borderBottomColor: "#000000",
+  },
+  cardImage: { width: "100%", height: "100%" } as any,
   featuredBadge: {
     position: "absolute",
     top: 6,
@@ -615,29 +802,59 @@ const styles = StyleSheet.create({
     backgroundColor: "#ff6b6b",
     paddingHorizontal: 6,
     paddingVertical: 2,
-    borderWidth: 1,
-    borderColor: '#000',
+    borderWidth: 1.5,
+    borderColor: '#000000',
+    zIndex: 5,
   },
   featuredBadgeText: {
-    fontSize: 9,
-    fontWeight: "800",
+    fontSize: 8,
+    fontWeight: "900",
     color: "#fff",
     letterSpacing: 0.5,
   },
-  cardBody: { padding: 8 },
-  cardTitle: { fontSize: 13, fontWeight: "600", color: "#111827" },
-  cardPrice: {
-    marginTop: 4,
-    fontSize: 14,
-    fontWeight: "800",
-    color: "#2f5d4f",
+  conditionTag: {
+    position: "absolute",
+    bottom: 6,
+    left: 6,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderWidth: 1.5,
+    borderColor: '#000000',
+    zIndex: 5,
   },
-  cardMeta: {
-    marginTop: 2,
-    fontSize: 10,
-    color: "#9a8e7f",
+  conditionTagText: {
+    fontSize: 8,
+    fontWeight: "900",
+    color: "#000000",
     textTransform: "uppercase",
-    letterSpacing: 0.9,
+  },
+  cardBody: { padding: 10 },
+  cardTitle: { fontSize: 13, fontWeight: "900", color: "#000000", textTransform: "uppercase", letterSpacing: 0.2, minHeight: 34 },
+  cardPriceRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginTop: 6,
+    gap: 4,
+  },
+  cardPrice: {
+    fontSize: 13,
+    fontWeight: "900",
+    color: "#000000",
+  },
+  locationBadge: {
+    backgroundColor: "#f3f4f6",
+    borderWidth: 1.5,
+    borderColor: "#000000",
+    paddingHorizontal: 4,
+    paddingVertical: 2,
+    maxWidth: "50%",
+  },
+  locationBadgeText: {
+    fontSize: 8,
+    fontWeight: "800",
+    color: "#000000",
+    textTransform: "uppercase",
   },
   stampOverlay: {
     position: "absolute",
@@ -646,18 +863,18 @@ const styles = StyleSheet.create({
     right: "10%",
     transform: [{ rotate: "-12deg" }],
     backgroundColor: "#dc2626",
-    borderWidth: 2,
-    borderColor: "#000",
+    borderWidth: 2.5,
+    borderColor: "#000000",
     paddingVertical: 4,
     alignItems: "center",
     zIndex: 10,
   },
   stampText: {
     color: "#fff",
-    fontSize: 18,
+    fontSize: 14,
     fontWeight: "900",
     textTransform: "uppercase",
-    letterSpacing: 3,
+    letterSpacing: 2,
   },
   emptyText: {
     textAlign: "center",
@@ -665,25 +882,35 @@ const styles = StyleSheet.create({
     padding: 24,
     textTransform: "uppercase",
     letterSpacing: 1.1,
-    fontWeight: "700",
+    fontWeight: "900",
     fontSize: 11,
   },
   buyerCta: {
-    marginTop: 14,
+    marginTop: 18,
     marginHorizontal: 16,
-    marginBottom: 20,
-    borderWidth: 1,
-    borderColor: "#2f2921",
-    backgroundColor: "#1f1a14",
-    padding: 14,
-    ...shadows.bulletin,
+    marginBottom: 28,
+    borderWidth: 2.5,
+    borderColor: "#000000",
+    backgroundColor: "#000000",
+    padding: 16,
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000000',
+        shadowOffset: { width: 4, height: 4 },
+        shadowOpacity: 1,
+        shadowRadius: 0,
+      },
+      android: {
+        elevation: 4,
+      },
+    }),
   },
   buyerCtaTop: {
     fontSize: 10,
-    color: "rgba(255,255,255,0.5)",
-    fontWeight: "800",
+    color: "#ff6b6b",
+    fontWeight: "900",
     textTransform: "uppercase",
-    letterSpacing: 1.2,
+    letterSpacing: 1.5,
   },
   buyerCtaTitle: {
     marginTop: 6,
@@ -692,23 +919,33 @@ const styles = StyleSheet.create({
     fontWeight: "900",
     textTransform: "uppercase",
   },
-  buyerCtaSub: { marginTop: 4, fontSize: 12, color: "rgba(255,255,255,0.7)" },
+  buyerCtaSub: { marginTop: 6, fontSize: 11, color: "rgba(255,255,255,0.75)", lineHeight: 16 },
   loadMoreBtn: {
-    marginTop: 6,
+    marginTop: 12,
     alignSelf: "center",
-    borderWidth: 1,
-    borderColor: colors.border,
-    paddingHorizontal: 14,
-    paddingVertical: 8,
+    borderWidth: 2.5,
+    borderColor: "#000000",
+    paddingHorizontal: 18,
+    paddingVertical: 10,
     backgroundColor: colors.surface,
-    ...shadows.bulletin,
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000000',
+        shadowOffset: { width: 3, height: 3 },
+        shadowOpacity: 1,
+        shadowRadius: 0,
+      },
+      android: {
+        elevation: 3,
+      },
+    }),
   },
   loadMoreBtnText: {
     fontSize: 10,
-    fontWeight: "800",
-    color: "#6f6559",
+    fontWeight: "900",
+    color: "#000000",
     textTransform: "uppercase",
-    letterSpacing: 1.1,
+    letterSpacing: 1.2,
   },
 });
 

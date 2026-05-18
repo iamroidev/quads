@@ -10,24 +10,28 @@ const seedTestProducts = async () => {
     await connectDB();
     console.log('Successfully connected to database.');
 
-    // 1. Find or create Category
-    let category = await Category.findOne({ slug: 'others' });
-    if (!category) {
-      category = await Category.findOne();
-    }
-    if (!category) {
-      console.log('No category found, creating a default category...');
-      category = await Category.create({
-        name: 'Others',
-        slug: 'others',
-        icon: 'package',
-        description: 'Everything else that doesn\'t fit other categories',
-        isActive: true,
-      });
-      console.log('Category created:', category.name);
-    } else {
-      console.log('Using category:', category.name);
-    }
+    // 1. Find or create Categories
+    const findOrCreateCategory = async (slug: string, name: string, icon: string, desc: string) => {
+      let cat = await Category.findOne({ slug });
+      if (!cat) {
+        cat = await Category.create({
+          name,
+          slug,
+          icon,
+          description: desc,
+          isActive: true,
+        });
+        console.log(`Created category: ${name}`);
+      } else {
+        console.log(`Using existing category: ${name}`);
+      }
+      return cat;
+    };
+
+    const catTextbooks = await findOrCreateCategory('textbooks', 'Textbooks', 'book-open', 'Academic textbooks and study materials');
+    const catElectronics = await findOrCreateCategory('electronics', 'Electronics', 'smartphone', 'Phones, laptops, chargers, and gadgets');
+    const catFoodDrinks = await findOrCreateCategory('food-drinks', 'Food & Drinks', 'utensils', 'Homemade meals, snacks, and beverages');
+    const catOthers = await findOrCreateCategory('others', 'Others', 'package', 'Everything else');
 
     // 2. Find or create Test Seller User
     let sellerUser = await User.findOne({ email: 'test.seller@umat.edu.gh' });
@@ -91,14 +95,14 @@ const seedTestProducts = async () => {
     const deleteResult = await Product.deleteMany({ seller: store._id });
     console.log(`Cleared ${deleteResult.deletedCount} existing test products for a fresh start.`);
 
-    // 5. Create 3 products, costing GHS 1 each
+    // 5. Create 3 products, costing GHS 1 each mapping to correct categories
     const testProducts = [
       {
         title: 'Premium Test Book',
         description: 'An official test handbook for verifying peer-to-peer textbook purchase and GHS 1.00 checkout flow. Clean cover, zero marks.',
         price: 1.00,
         originalPrice: 20.00,
-        category: category._id,
+        category: catTextbooks._id,
         seller: store._id,
         condition: 'like-new' as const,
         status: 'active' as const,
@@ -118,7 +122,7 @@ const seedTestProducts = async () => {
         description: 'A test multi-plug travel adapter for testing fast GHS 1.00 payment processing. Compatible with UK, EU, and US outlets.',
         price: 1.00,
         originalPrice: 15.00,
-        category: category._id,
+        category: catElectronics._id,
         seller: store._id,
         condition: 'good' as const,
         status: 'active' as const,
@@ -138,7 +142,7 @@ const seedTestProducts = async () => {
         description: 'A mock refreshing strawberry banana beverage. Freshly made to test food-drinks checkout categories. Cost price: GHS 1.00.',
         price: 1.00,
         originalPrice: 5.00,
-        category: category._id,
+        category: catFoodDrinks._id,
         seller: store._id,
         condition: 'new' as const,
         status: 'active' as const,

@@ -69,6 +69,7 @@ const SettingsPage: React.FC = () => {
 
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deleteConfirmation, setDeleteConfirmation] = useState('');
+  const [deletePassword, setDeletePassword] = useState('');
   const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
@@ -154,7 +155,7 @@ const SettingsPage: React.FC = () => {
     if (deleteConfirmation !== 'DELETE') return;
     setDeleting(true);
     try {
-      await api.delete('/auth/account');
+      await api.delete('/auth/account', { data: { password: deletePassword } });
       toast.success('Account deleted. Redirecting...');
       setTimeout(() => {
         window.location.href = '/login';
@@ -398,16 +399,40 @@ const SettingsPage: React.FC = () => {
                     placeholder="DELETE"
                     className="w-full border-4 border-red-600 dark:border-red-400 bg-white dark:bg-black p-4 text-[14px] font-black uppercase focus:outline-none focus:ring-0 text-red-600 dark:text-red-400 placeholder:text-red-600/30 dark:placeholder:text-red-400/30"
                   />
+
+                  {!user?.supabaseId ? (
+                    <>
+                      <p className="text-[11px] font-black uppercase tracking-widest text-red-600 dark:text-red-400">Enter your password to confirm</p>
+                      <input
+                        type="password"
+                        value={deletePassword}
+                        onChange={(e) => setDeletePassword(e.target.value)}
+                        placeholder="Your Password"
+                        className="w-full border-4 border-red-600 dark:border-red-400 bg-white dark:bg-black p-4 text-[14px] font-black focus:outline-none focus:ring-0 text-red-600 dark:text-red-400 placeholder:text-red-600/30 dark:placeholder:text-red-400/30"
+                      />
+                    </>
+                  ) : (
+                    <div className="border-2 border-dashed border-red-600/30 dark:border-red-400/30 p-3 bg-red-600/5">
+                      <p className="text-[10px] font-bold uppercase tracking-wider text-red-600 dark:text-red-400 opacity-80">
+                        🛡️ Social Login Connected: No password confirmation needed.
+                      </p>
+                    </div>
+                  )}
+
                   <div className="flex gap-4">
                     <button
-                      onClick={() => { setShowDeleteConfirm(false); setDeleteConfirmation(''); }}
+                      onClick={() => { setShowDeleteConfirm(false); setDeleteConfirmation(''); setDeletePassword(''); }}
                       className="flex-1 border-4 border-red-600 dark:border-red-400 bg-white dark:bg-black px-4 py-4 text-[11px] font-black uppercase tracking-widest text-red-600 dark:text-red-400 hover:bg-red-600/10 transition-colors"
                     >
                       Abort
                     </button>
                     <button
                       onClick={handleDeleteAccount}
-                      disabled={deleteConfirmation !== 'DELETE' || deleting}
+                      disabled={
+                        deleteConfirmation !== 'DELETE' || 
+                        (!user?.supabaseId && !deletePassword) || 
+                        deleting
+                      }
                       className="flex-1 border-4 border-red-600 dark:border-red-400 bg-red-600 dark:bg-red-400 px-4 py-4 text-[11px] font-black uppercase tracking-widest text-white dark:text-black transition-colors hover:bg-red-700 dark:hover:bg-red-300 disabled:opacity-40"
                     >
                       {deleting ? 'Deleting...' : 'Delete Now'}

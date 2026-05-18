@@ -20,16 +20,8 @@ self.addEventListener('fetch', (event) => {
 
   if (request.method !== 'GET') return;
 
-  // Network-first for API calls
-  if (request.url.includes('/api/')) {
-    event.respondWith(
-      fetch(request).catch(() =>
-        new Response(JSON.stringify({ success: false, message: 'You are offline' }), {
-          headers: { 'Content-Type': 'application/json' },
-          status: 503,
-        })
-      )
-    );
+  // Bypass Service Worker completely for API calls to let browser handle cross-origin requests natively
+  if (request.url.includes('/api/') || request.url.includes('api.quadsmarket.tech')) {
     return;
   }
 
