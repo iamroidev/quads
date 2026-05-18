@@ -16,6 +16,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import * as WebBrowser from "expo-web-browser";
 import * as Linking from "expo-linking";
 import { makeRedirectUri } from "expo-auth-session";
+import Constants from "expo-constants";
 import { useAuth } from "../context/AuthContext";
 import AppAlert from "../components/AppAlert";
 import { colors, shadows } from "../theme";
@@ -203,8 +204,9 @@ const RegisterScreen = ({ navigation }: any) => {
         form.role === "seller" ? "seller" : "buyer";
       setIsLoading(true);
       try {
+        const isExpoGo = Constants.appOwnership === "expo";
         const redirectTo = makeRedirectUri({
-          scheme: "quads",
+          scheme: isExpoGo ? undefined : "quads",
           path: "auth/callback",
         });
 
