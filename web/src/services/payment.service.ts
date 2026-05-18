@@ -16,6 +16,7 @@ interface ApiVerifyPaymentResponse {
   data: {
     verified: boolean;
     order: OrderPopulated | null;
+    orders?: OrderPopulated[];
     transaction: Transaction;
   };
 }

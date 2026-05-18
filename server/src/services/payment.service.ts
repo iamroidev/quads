@@ -10,6 +10,7 @@ import {
 } from '../utils/paystack';
 import { emailService } from './email.service';
 import payoutService from './payout.service';
+import notificationService from './notification.service';
 
 class PaymentService {
   /**
@@ -106,12 +107,15 @@ class PaymentService {
 
     // Already verified
     if (transaction.status === 'success') {
-      const order = await Order.findById(transaction.order)
+      const orderIds = transaction.orders && transaction.orders.length > 0 
+        ? transaction.orders 
+        : [transaction.order];
+      const orders = await Order.find({ _id: { $in: orderIds } })
         .populate('buyer', 'name avatar phone email')
-        .populate('seller', 'name avatar phone isVerified')
+        .populate('seller', 'name avatar phone isVerified ownerId')
         .populate('items.product', 'title price images status seller')
         .populate('payment');
-      return { verified: true, order, transaction };
+      return { verified: true, order: orders[0], orders, transaction } as any;
     }
 
     // Verify with Paystack
@@ -146,7 +150,7 @@ class PaymentService {
         // Notify and send receipts for all orders
         const populatedOrders = await Order.find({ _id: { $in: orderIds } })
           .populate('buyer', 'name avatar phone email')
-          .populate('seller', 'name avatar phone isVerified')
+          .populate('seller', 'name avatar phone isVerified ownerId')
           .populate('items.product', 'title price images status seller')
           .populate('payment');
 
@@ -159,6 +163,16 @@ class PaymentService {
             ).catch(console.error);
           }
 
+          // Trigger high-priority Paid notification to the seller user
+          if (order.seller && (order.seller as any).ownerId) {
+            const sellerUserId = (order.seller as any).ownerId.toString();
+            notificationService.notifyOrderPaid(
+              sellerUserId,
+              order.orderNumber,
+              order._id.toString()
+            ).catch((err) => console.error('Failed to send order paid notification:', err));
+          }
+
           // Auto-create payout record for each seller
           payoutService.createPayoutForOrder(
             order._id.toString(),
@@ -166,7 +180,7 @@ class PaymentService {
           ).catch((err) => console.error('Failed to create payout:', err));
         }
 
-        return { verified: true, order: populatedOrders[0], transaction };
+        return { verified: true, order: populatedOrders[0], orders: populatedOrders, transaction } as any;
       } else {
         transaction.status = 'failed';
         await transaction.save();
@@ -206,7 +220,9 @@ class PaymentService {
         { $set: { status: 'paid' } }
       );
 
-      const populatedOrders = await Order.find({ _id: { $in: orderIds } }).populate('buyer', 'email');
+      const populatedOrders = await Order.find({ _id: { $in: orderIds } })
+        .populate('buyer', 'email')
+        .populate('seller', 'ownerId');
       
       for (const order of populatedOrders) {
         if (order.buyer && (order.buyer as any).email) {
@@ -215,6 +231,16 @@ class PaymentService {
             order.orderNumber,
             order.totalAmount
           ).catch(console.error);
+        }
+
+        // Trigger high-priority Paid notification to the seller user
+        if (order.seller && (order.seller as any).ownerId) {
+          const sellerUserId = (order.seller as any).ownerId.toString();
+          notificationService.notifyOrderPaid(
+            sellerUserId,
+            order.orderNumber,
+            order._id.toString()
+          ).catch((err) => console.error('Failed to send order paid notification from webhook:', err));
         }
 
         payoutService.createPayoutForOrder(

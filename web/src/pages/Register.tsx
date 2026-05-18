@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams, useLocation } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -93,7 +93,9 @@ const StringLine: React.FC<{ from: string; to: string }> = ({ from, to }) => {
 const RegisterPage: React.FC = () => {
   const { user, register: registerUser, googleLogin } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [searchParams] = useSearchParams();
+  const from = (location.state as any)?.from || '/';
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -237,7 +239,7 @@ const RegisterPage: React.FC = () => {
         sessionStorage.removeItem('reg_step');
         sessionStorage.removeItem('reg_data');
         sessionStorage.removeItem('reg_protocol');
-        navigate('/');
+        navigate(from, { replace: true });
         return;
       }
 
@@ -246,7 +248,7 @@ const RegisterPage: React.FC = () => {
 
       const { confirmPassword, ...registerData } = data;
       await registerUser(registerData as any);
-      navigate('/');
+      navigate(from, { replace: true });
     } catch (error: any) {
       toast.error(error.response?.data?.message || error.message || 'Registration failed. Please try again.');
     } finally {

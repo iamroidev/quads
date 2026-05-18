@@ -90,7 +90,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onSavedChange }) => 
     e.stopPropagation();
     if (!isAuthenticated) {
       toast.error('Please log in to save items');
-      navigate('/login');
+      navigate('/login', { state: { from: window.location.pathname + window.location.search } });
       return;
     }
     setSaving(true);

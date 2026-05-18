@@ -187,7 +187,7 @@ const ProductDetail: React.FC = () => {
   const handleContactSeller = async () => {
     if (!user) {
       toast.error('Please log in to contact the seller');
-      navigate('/login');
+      navigate('/login', { state: { from: { pathname: `/products/${product?._id}` } } });
       return;
     }
     if (!product) return;
@@ -259,7 +259,7 @@ const ProductDetail: React.FC = () => {
   const handleToggleSaved = async () => {
     if (!user) {
       toast.error('Please log in to save items');
-      navigate('/login');
+      navigate('/login', { state: { from: { pathname: `/products/${product?._id}` } } });
       return;
     }
     if (!product || user._id === product.seller._id) return;
@@ -560,7 +560,12 @@ const ProductDetail: React.FC = () => {
                     onClick={() => {
                       growthService.captureEvent(user?._id, 'buy_now_initiated', { productId: product._id, price: product.price });
                       addItem(product);
-                      navigate('/cart');
+                      if (!user) {
+                        toast.error('Please log in to complete your checkout');
+                        navigate('/login', { state: { from: { pathname: `/checkout/${product._id}` } } });
+                      } else {
+                        navigate(`/checkout/${product._id}`);
+                      }
                     }}
                   >
                     Buy Now
