@@ -5,16 +5,57 @@ import { Layout } from './components/layout';
 import { ProtectedRoute } from './components/auth';
 import { useAuth } from './context/AuthContext';
 
+const lazyWithRetry = (
+  importer: () => Promise<{ default: React.ComponentType }>,
+  moduleId: string
+) =>
+  lazy(async () => {
+    const retryKey = `lazy-retry:${moduleId}`;
+
+    try {
+      const loadedModule = await importer();
+      if (typeof window !== 'undefined') {
+        sessionStorage.removeItem(retryKey);
+      }
+      return loadedModule;
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      const isChunkLoadError = /Failed to fetch dynamically imported module|Importing a module script failed|Loading chunk|ChunkLoadError/i.test(
+        message
+      );
+
+      if (isChunkLoadError && typeof window !== 'undefined') {
+        const hasRetried = sessionStorage.getItem(retryKey) === '1';
+
+        if (!hasRetried) {
+          sessionStorage.setItem(retryKey, '1');
+          if ('serviceWorker' in navigator) {
+            const registrations = await navigator.serviceWorker.getRegistrations().catch(() => []);
+            await Promise.all(
+              registrations.map((registration) => registration.update().catch(() => undefined))
+            );
+          }
+          window.location.reload();
+          return new Promise<never>(() => {});
+        }
+
+        sessionStorage.removeItem(retryKey);
+      }
+
+      throw error;
+    }
+  });
+
 // Pages
-const HomePage = lazy(() => import('./pages/Home'));
-const DashboardPage = lazy(() => import('./pages/Dashboard'));
+const HomePage = lazyWithRetry(() => import('./pages/Home'), 'home');
+const DashboardPage = lazyWithRetry(() => import('./pages/Dashboard'), 'dashboard');
 import LoginPage from './pages/Login';
 import RegisterPage from './pages/Register';
 import ProfilePage from './pages/Profile';
 import NotFoundPage from './pages/NotFound';
-const ProductsPage = lazy(() => import('./pages/Products'));
-const FollowingFeedPage = lazy(() => import('./pages/FollowingFeed'));
-const ProductDetailPage = lazy(() => import('./pages/ProductDetail'));
+const ProductsPage = lazyWithRetry(() => import('./pages/Products'), 'products');
+const FollowingFeedPage = lazyWithRetry(() => import('./pages/FollowingFeed'), 'following');
+const ProductDetailPage = lazyWithRetry(() => import('./pages/ProductDetail'), 'product-detail');
 import CreateEditProductPage from './pages/CreateEditProduct';
 import MyListingsPage from './pages/MyListings';
 import CategoriesPage from './pages/Categories';
@@ -49,7 +90,7 @@ import PrivacyPolicyPage from './pages/PrivacyPolicy';
 import FAQPage from './pages/FAQ';
 import AboutUsPage from './pages/AboutUs';
 
-const LostFoundPage = lazy(() => import('./pages/LostFound'));
+const LostFoundPage = lazyWithRetry(() => import('./pages/LostFound'), 'lost-found');
 
 import { LoadingSpinner } from './components/ui';
 
