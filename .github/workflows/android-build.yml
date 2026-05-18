@@ -1,0 +1,36 @@
+name: Build Android Expo Go
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+    branches: ["**"]
+
+jobs:
+  build-android:
+    name: Build and Verify Android Bundle
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install root dependencies
+        run: npm ci
+
+      - name: Install mobile dependencies
+        working-directory: mobile
+        run: npm ci
+
+      - name: TypeScript Verification
+        working-directory: mobile
+        run: npx tsc --noEmit
+
+      - name: Build Android Expo Go Bundle
+        working-directory: mobile
+        run: npx expo export --platform android --output-dir ./dist
