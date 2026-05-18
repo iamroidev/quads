@@ -324,7 +324,7 @@ const WelcomeScreen = ({ navigation }: any) => {
                     width: 64,
                     height: 64,
                     borderWidth: 3.5,
-                    borderColor: '#000',
+                    borderColor: colors.border,
                     alignItems: 'center',
                     justifyContent: 'center',
                     position: 'relative',
@@ -337,7 +337,7 @@ const WelcomeScreen = ({ navigation }: any) => {
                   width: 30,
                   height: 30,
                   borderWidth: 7,
-                  borderColor: '#000',
+                  borderColor: colors.border,
                   backgroundColor: 'transparent',
                 }} />
                 
@@ -348,7 +348,7 @@ const WelcomeScreen = ({ navigation }: any) => {
                   right: 10,
                   width: 12,
                   height: 6,
-                  backgroundColor: '#000',
+                  backgroundColor: colors.border,
                   transform: [{ rotate: '45deg' }],
                 }} />
 
@@ -362,7 +362,7 @@ const WelcomeScreen = ({ navigation }: any) => {
                   borderRadius: 5,
                   backgroundColor: '#ff6b6b',
                   borderWidth: 1.5,
-                  borderColor: '#000',
+                  borderColor: colors.border,
                 }} />
               </View>
 
@@ -376,7 +376,7 @@ const WelcomeScreen = ({ navigation }: any) => {
                       width: 26,
                       height: 26,
                       borderWidth: 1.5,
-                      borderColor: '#000',
+                      borderColor: colors.border,
                       justifyContent: 'center',
                       alignItems: 'center',
                       marginBottom: 1,
@@ -501,7 +501,7 @@ const WelcomeScreen = ({ navigation }: any) => {
                     width: 86,
                     height: 86,
                     borderWidth: 4.5,
-                    borderColor: '#000',
+                    borderColor: colors.border,
                     alignItems: 'center',
                     justifyContent: 'center',
                     transform: [{ scale: letterQ }],
@@ -516,7 +516,7 @@ const WelcomeScreen = ({ navigation }: any) => {
                   width: 42,
                   height: 42,
                   borderWidth: 9,
-                  borderColor: '#000',
+                  borderColor: colors.border,
                   backgroundColor: 'transparent',
                 }} />
                 
@@ -527,7 +527,7 @@ const WelcomeScreen = ({ navigation }: any) => {
                   right: 14,
                   width: 16,
                   height: 8,
-                  backgroundColor: '#000',
+                  backgroundColor: colors.border,
                   transform: [{ rotate: '45deg' }],
                 }} />
 
@@ -541,7 +541,7 @@ const WelcomeScreen = ({ navigation }: any) => {
                   borderRadius: 6.5,
                   backgroundColor: '#ff6b6b',
                   borderWidth: 2,
-                  borderColor: '#000',
+                  borderColor: colors.border,
                 }} />
               </Animated.View>
 
@@ -560,7 +560,7 @@ const WelcomeScreen = ({ navigation }: any) => {
                       width: 32,
                       height: 32,
                       borderWidth: 2,
-                      borderColor: '#000',
+                      borderColor: colors.border,
                       transform: [{ scale: item.anim }],
                       opacity: item.anim,
                       justifyContent: 'center',
@@ -641,7 +641,7 @@ const styles = StyleSheet.create({
     fontSize: 54,
     fontWeight: '900',
     letterSpacing: -2,
-    color: '#000',
+    color: colors.text,
     textShadowColor: colors.accent,
     textShadowOffset: { width: 4, height: 4 },
     textShadowRadius: 0,
@@ -649,14 +649,14 @@ const styles = StyleSheet.create({
   },
   subtitleWrapper: {
     borderBottomWidth: 2.5,
-    borderBottomColor: '#000',
+    borderBottomColor: colors.border,
     paddingBottom: 2,
   },
   logoSubtitle: {
     fontSize: 11,
     fontWeight: '900',
     letterSpacing: 1.2,
-    color: '#000',
+    color: colors.text,
   },
 
   // Canary Yellow Pinned Safety Memo Note
@@ -664,7 +664,7 @@ const styles = StyleSheet.create({
     position: 'relative',
     backgroundColor: '#fffacd',
     borderWidth: 2.5,
-    borderColor: '#000',
+    borderColor: colors.border,
     padding: 14,
     marginTop: 6,
     marginHorizontal: 2,
@@ -691,7 +691,7 @@ const styles = StyleSheet.create({
   slideCard: {
     position: 'relative',
     borderWidth: 3,
-    borderColor: '#000',
+    borderColor: colors.border,
     backgroundColor: colors.surface,
     padding: 18,
     marginTop: 6,
@@ -701,7 +701,7 @@ const styles = StyleSheet.create({
   slideBadge: {
     alignSelf: 'flex-start',
     borderWidth: 1.5,
-    borderColor: '#000',
+    borderColor: colors.border,
     paddingHorizontal: 8,
     paddingVertical: 3,
     marginTop: 4,
@@ -720,7 +720,7 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderWidth: 2,
-    borderColor: '#000',
+    borderColor: colors.border,
     justifyContent: 'center',
     alignItems: 'center',
     ...shadows.bulletin,
@@ -728,21 +728,22 @@ const styles = StyleSheet.create({
   slideTitle: {
     fontSize: 18,
     fontWeight: '900',
-    color: '#000',
+    color: colors.text,
     textTransform: 'uppercase',
   },
   slideDesc: {
     fontSize: 13,
     lineHeight: 19,
     fontWeight: '700',
-    color: '#555',
+    color: colors.text,
+    opacity: 0.8,
   },
   slideFooter: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     borderTopWidth: 2,
-    borderColor: '#000',
+    borderColor: colors.border,
     paddingTop: 12,
     marginTop: 4,
   },
@@ -754,18 +755,18 @@ const styles = StyleSheet.create({
     width: 8,
     height: 8,
     borderWidth: 1.5,
-    borderColor: '#000',
-    backgroundColor: '#fff',
+    borderColor: colors.border,
+    backgroundColor: colors.surface,
   },
   dotActive: {
-    backgroundColor: '#000',
+    backgroundColor: colors.text,
   },
   nextBtn: {
     flexDirection: 'row',
     alignItems: 'center',
     borderWidth: 1.5,
-    borderColor: '#000',
-    backgroundColor: '#fffacd',
+    borderColor: colors.border,
+    backgroundColor: colors.accentAlt,
     paddingHorizontal: 12,
     paddingVertical: 6,
     gap: 4,
@@ -774,6 +775,7 @@ const styles = StyleSheet.create({
     fontSize: 10,
     fontWeight: '900',
     letterSpacing: 0.8,
+    color: colors.text,
   },
 
   // Metrics Grid
@@ -787,7 +789,7 @@ const styles = StyleSheet.create({
     position: 'relative',
     flex: 1,
     borderWidth: 2,
-    borderColor: '#000',
+    borderColor: colors.border,
     paddingVertical: 16,
     paddingHorizontal: 6,
     alignItems: 'center',
@@ -800,11 +802,14 @@ const styles = StyleSheet.create({
     fontWeight: '900',
     letterSpacing: 0.2,
     textAlign: 'center',
+    color: colors.text,
     marginTop: 2,
   },
   metricLabel: {
     fontSize: 8,
     fontWeight: '800',
+    color: colors.text,
+    opacity: 0.85,
     textAlign: 'center',
     marginTop: 3,
     textTransform: 'uppercase',
@@ -818,7 +823,7 @@ const styles = StyleSheet.create({
   signUpBtn: {
     backgroundColor: colors.accent,
     borderWidth: 3,
-    borderColor: '#000',
+    borderColor: colors.border,
     paddingVertical: 16,
     alignItems: 'center',
     justifyContent: 'center',
@@ -831,16 +836,16 @@ const styles = StyleSheet.create({
     letterSpacing: 0.8,
   },
   logInBtn: {
-    backgroundColor: '#fffdf8',
+    backgroundColor: colors.surface,
     borderWidth: 3,
-    borderColor: '#000',
+    borderColor: colors.border,
     paddingVertical: 14,
     alignItems: 'center',
     justifyContent: 'center',
     ...shadows.bulletinHeavy,
   },
   logInBtnText: {
-    color: '#000',
+    color: colors.text,
     fontSize: 13,
     fontWeight: '900',
     letterSpacing: 0.8,
@@ -869,7 +874,7 @@ const styles = StyleSheet.create({
   },
   letterCard: {
     borderWidth: 3,
-    borderColor: '#000',
+    borderColor: colors.border,
     backgroundColor: colors.surface,
     alignItems: 'center',
     justifyContent: 'center',
@@ -878,7 +883,7 @@ const styles = StyleSheet.create({
   letterText: {
     fontSize: 26,
     fontWeight: '900',
-    color: '#000',
+    color: colors.text,
   },
   introSubWrapper: {
     alignItems: 'center',
@@ -895,8 +900,8 @@ const styles = StyleSheet.create({
     width: 200,
     height: 6,
     borderWidth: 2,
-    borderColor: '#000',
-    backgroundColor: '#fff',
+    borderColor: colors.border,
+    backgroundColor: colors.surface,
     borderRadius: 3,
     overflow: 'hidden',
   },
