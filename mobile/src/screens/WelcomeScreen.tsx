@@ -38,6 +38,13 @@ const SLIDES = [
     color: '#10b981',
     desc: 'Meet safely at the Library or Main Gate. Scan the seller\'s automatically generated QR code on your phone to instantly release escrow funds.',
   },
+  {
+    icon: 'shield-checkmark-outline',
+    title: 'Campus Safety Memo',
+    highlight: '📢 SAFE SWAPS ONLY',
+    color: '#eab308',
+    desc: 'Always perform exchange handoffs at public squares (Library, Hall Cafes, or Main Gates). Scan the seller\'s QR code on-site to release escrow instantly.',
+  },
 ];
 
 const WelcomeScreen = ({ navigation }: any) => {
@@ -268,43 +275,12 @@ const WelcomeScreen = ({ navigation }: any) => {
     </View>
   );
 
-  // Render a beige masking tape block to simulate bulletin notes taped down
-  const renderMaskingTape = (rotation: string) => (
-    <View style={{
-      position: 'absolute',
-      top: -8,
-      alignSelf: 'center',
-      width: 48,
-      height: 13,
-      backgroundColor: '#f5e7cd',
-      borderWidth: 1.5,
-      borderColor: '#000',
-      transform: [{ rotate: rotation }],
-      zIndex: 10,
-      opacity: 0.95,
-      shadowColor: '#000',
-      shadowOffset: { width: 1, height: 1 },
-      shadowOpacity: 0.15,
-      shadowRadius: 0,
-      elevation: 1,
-    }} />
-  );
-
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor={colors.bg} />
 
       {/* Main Catchy Content (fades in staggered after intro) */}
       <Animated.View style={[styles.mainLayout, { opacity: showIntro ? 0 : contentFade }]}>
-        
-        {/* Dynamic Campus Ticker Header */}
-        <View style={styles.tickerHeader}>
-          <Animated.View style={[styles.tickerWrapper, { transform: [{ translateX: tickerOffset }] }]}>
-            <Text style={styles.tickerText}>
-              ⚡ GET YOUR SMOOTHIES ⚡ AVOID HOSTEL SCAMS ⚡ DORM GEAR FOR CHEAP ⚡ TEXTBOOKS ON DEMAND ⚡ MEET AT THE MAIN GATE ⚡ SECURE ESCROW PROTECTION ⚡
-            </Text>
-          </Animated.View>
-        </View>
 
         {/* Grid & Floating Shapes Canvas Background */}
         {renderBackgroundGrid()}
@@ -394,19 +370,6 @@ const WelcomeScreen = ({ navigation }: any) => {
             </View>
           </Animated.View>
 
-          {/* 📢 Pinned Safety Memo Canary Yellow Sticky Note */}
-          <Animated.View style={[
-            styles.stickyNotice,
-            { transform: [{ translateY: heroY }, { rotate: '-1.2deg' }] }
-          ]}>
-            {/* 📌 Red Thumbtack Pinned onto yellow sticky */}
-            {renderThumbtack()}
-            <Text style={styles.stickyTitle}>📢 CAMPUS SAFETY MEMO</Text>
-            <Text style={styles.stickyBody}>
-              Always perform exchange handoffs at public squares (Library, Hall Cafes, or Main Gates). Scan the seller's QR code on-site to release escrow instantly. Safe swaps only!
-            </Text>
-          </Animated.View>
-
           {/* Catchy Carousel Visual Slides - Staggered Slide In */}
           <Animated.View style={[styles.slideCard, { transform: [{ translateY: carouselY }] }]}>
             {/* 📌 Red Thumbtack detail pinned at the top-center */}
@@ -445,23 +408,17 @@ const WelcomeScreen = ({ navigation }: any) => {
 
           {/* Catchy Statistics / Parity Badges - Staggered Slide In */}
           <Animated.View style={[styles.metricsGrid, { transform: [{ translateY: metricsY }] }]}>
-            <View style={[styles.metricBox, { backgroundColor: colors.accentAlt, transform: [{ rotate: '-1.5deg' }] }]}>
-              {/* 🩹 Masking tape detailed overlay */}
-              {renderMaskingTape('-12deg')}
+            <View style={styles.metricBox}>
               <Text style={styles.metricVal}>🔥 0% FEES</Text>
               <Text style={styles.metricLabel}>Zero slop swaps</Text>
             </View>
-            <View style={[styles.metricBox, { backgroundColor: '#ff6b6b', transform: [{ rotate: '1.2deg' }] }]}>
-              {/* 🩹 Masking tape detailed overlay */}
-              {renderMaskingTape('8deg')}
-              <Text style={[styles.metricVal, { color: '#fff' }]}>🛡️ ESCROW</Text>
-              <Text style={[styles.metricLabel, { color: '#fff' }]}>Anti-scam shield</Text>
+            <View style={styles.metricBox}>
+              <Text style={styles.metricVal}>🛡️ ESCROW</Text>
+              <Text style={styles.metricLabel}>Anti-scam shield</Text>
             </View>
-            <View style={[styles.metricBox, { backgroundColor: '#10b981', transform: [{ rotate: '-0.8deg' }] }]}>
-              {/* 🩹 Masking tape detailed overlay */}
-              {renderMaskingTape('-5deg')}
-              <Text style={[styles.metricVal, { color: '#fff' }]}>🎓 UMaT ONLY</Text>
-              <Text style={[styles.metricLabel, { color: '#fff' }]}>Verified scholars</Text>
+            <View style={styles.metricBox}>
+              <Text style={styles.metricVal}>🎓 UMaT ONLY</Text>
+              <Text style={styles.metricLabel}>Verified scholars</Text>
             </View>
           </Animated.View>
 
