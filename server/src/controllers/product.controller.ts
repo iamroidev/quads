@@ -438,8 +438,9 @@ export const getSearchSuggestions = async (
   next: NextFunction
 ): Promise<void> => {
   try {
-    const q = (req.query.q as string) || '';
-    const limit = req.query.limit ? parseInt(req.query.limit as string, 10) : 8;
+    const q = ((req.query.q as string) || '').trim().slice(0, 100);
+    const rawLimit = parseInt((req.query.limit as string) || '8', 10);
+    const limit = Number.isNaN(rawLimit) ? 8 : Math.min(Math.max(rawLimit, 1), 20);
     const suggestions = await productService.getSearchSuggestions(q, limit);
 
     res.status(200).json({
