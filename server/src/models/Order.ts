@@ -144,7 +144,7 @@ const orderSchema = new Schema<IOrderDocument>(
 orderSchema.index({ buyer: 1, createdAt: -1 });
 orderSchema.index({ seller: 1, createdAt: -1 });
 orderSchema.index({ status: 1 });
-orderSchema.index({ orderNumber: 1, unique: true });
+orderSchema.index({ orderNumber: 1 }, { unique: true });
 
 // Generate order number before saving
 orderSchema.pre('validate', function (next) {
