@@ -279,7 +279,7 @@ class EmailService {
       <h2>Identity Verification</h2>
       <p>Hi ${name}, use the security code below to verify your account action:</p>
 
-      <div style="background: #000000; color: #ff6b6b; padding: 32px; text-align: center; margin: 24px 0; font-size: 42px; font-weight: 900; letter-spacing: 10px;">
+      <div style="background: #000000; color: #ff6b6b; padding: 28px 16px; text-align: center; margin: 24px 0; font-size: 36px; font-weight: 900; letter-spacing: 8px; word-spacing: 0; white-space: nowrap; overflow: hidden;">
         ${code}
       </div>
 
