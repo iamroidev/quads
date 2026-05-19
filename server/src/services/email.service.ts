@@ -20,8 +20,8 @@ class EmailService {
       <style>
         body { margin: 0; padding: 0; background: #faf8f5; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
         .container { max-width: 600px; margin: 20px auto; background: #ffffff; border: 4px solid #000000; box-shadow: 12px 12px 0 0 rgba(0,0,0,0.1); }
-        .header { background: #000000; padding: 40px 24px; text-align: center; }
-        .header h1 { color: #ffffff; margin: 0; font-size: 28px; font-weight: 900; letter-spacing: -1px; text-transform: uppercase; }
+        .header { background: #F5ECD7; padding: 40px 24px; text-align: center; border-bottom: 3px solid #1a1a1a; }
+        .header h1 { color: #111111; margin: 0; font-size: 28px; font-weight: 900; letter-spacing: -1px; text-transform: uppercase; }
         .header span { color: #ff6b6b; }
         .content { padding: 40px 32px; color: #1a1a1a; line-height: 1.6; font-size: 16px; }
         .content h2 { color: #000000; font-size: 24px; font-weight: 900; margin-top: 0; text-transform: uppercase; letter-spacing: -0.5px; }
@@ -38,9 +38,14 @@ class EmailService {
 
   private wrapEmail(body: string, headerContent?: string): string {
     const defaultHeader = `
-      <div style="text-align: center; padding: 32px 0 16px;">
-        <div style="display: inline-block; transform: rotate(-3deg); border: 4px solid #ffffff; border-radius: 16px; padding: 8px 32px; background: #000000; margin: 10px 0;">
-          <span style="font-family: 'Arial', sans-serif; font-weight: 900; font-style: italic; font-size: 32px; color: #ff6b6b; letter-spacing: -1.5px; text-transform: uppercase;">QUADS</span>
+      <div style="text-align: center; padding: 32px 0 20px;">
+        <div style="display: inline-flex; align-items: flex-end; gap: 5px;">
+          <div style="position: relative; width: 56px; height: 56px; border: 4px solid #1a1a1a; background: #FFFDF7; display: inline-block; vertical-align: bottom; box-shadow: 4px 4px 0 0 #1a1a1a;">
+            <div style="position: absolute; top: 11px; left: 11px; width: 22px; height: 22px; border: 6px solid #111; background: transparent;"></div>
+            <div style="position: absolute; bottom: 8px; right: 8px; width: 10px; height: 5px; background: #111; transform: rotate(45deg);"></div>
+            <div style="position: absolute; top: 4px; right: 4px; width: 9px; height: 9px; border-radius: 50%; background: #ff6b6b; border: 2px solid #1a1a1a;"></div>
+          </div>
+          ${['U','A','D','S'].map(c => `<div style="width: 20px; height: 20px; border: 2px solid #1a1a1a; background: #FFFDF7; display: inline-flex; align-items: center; justify-content: center; vertical-align: bottom; margin-bottom: 1px;"><span style="color: #111; font-size: 10px; font-weight: 900; font-family: Arial, sans-serif;">${c}</span></div>`).join('')}
         </div>
       </div>
     `;
@@ -122,25 +127,21 @@ class EmailService {
       ? `Your QUADS Seller Account is Active — ${name}`
       : `Welcome to QUADS — Your Campus Marketplace Account is Ready`;
 
-    // Q logo block rendered in email-safe HTML
+    // Q logo block — light mode (cork-board background)
     const qLogo = `
       <div style="text-align: center; padding: 36px 0 24px;">
-        <!-- Q Logo mark -->
         <div style="display: inline-flex; align-items: flex-end; gap: 6px;">
           <!-- Outer Q box -->
-          <div style="position: relative; width: 68px; height: 68px; border: 5px solid #ffffff; background: #000000; display: inline-block; vertical-align: bottom;">
-            <!-- Q circle frame -->
-            <div style="position: absolute; top: 14px; left: 14px; width: 28px; height: 28px; border: 7px solid #ffffff; background: transparent;"></div>
-            <!-- Q tail -->
-            <div style="position: absolute; bottom: 10px; right: 10px; width: 12px; height: 6px; background: #ff6b6b; transform: rotate(45deg);"></div>
-            <!-- Red pin accent -->
-            <div style="position: absolute; top: 5px; right: 5px; width: 10px; height: 10px; border-radius: 50%; background: #ff6b6b; border: 2px solid #ffffff;"></div>
+          <div style="position: relative; width: 68px; height: 68px; border: 4px solid #1a1a1a; background: #FFFDF7; display: inline-block; vertical-align: bottom; box-shadow: 5px 5px 0 0 #1a1a1a;">
+            <div style="position: absolute; top: 14px; left: 14px; width: 28px; height: 28px; border: 7px solid #111111; background: transparent;"></div>
+            <div style="position: absolute; bottom: 10px; right: 10px; width: 12px; height: 6px; background: #111111; transform: rotate(45deg);"></div>
+            <div style="position: absolute; top: 5px; right: 5px; width: 10px; height: 10px; border-radius: 50%; background: #ff6b6b; border: 2px solid #1a1a1a;"></div>
           </div>
           <!-- U A D S tiles -->
-          ${['U','A','D','S'].map(c => `<div style="width: 24px; height: 24px; border: 2px solid #ffffff; background: #000000; display: inline-flex; align-items: center; justify-content: center; vertical-align: bottom; margin-bottom: 2px;"><span style="color: #ffffff; font-size: 12px; font-weight: 900; font-family: Arial, sans-serif;">${c}</span></div>`).join('')}
+          ${['U','A','D','S'].map(c => `<div style="width: 24px; height: 24px; border: 2px solid #1a1a1a; background: #FFFDF7; display: inline-flex; align-items: center; justify-content: center; vertical-align: bottom; margin-bottom: 2px; box-shadow: 2px 2px 0 0 #1a1a1a;"><span style="color: #111111; font-size: 12px; font-weight: 900; font-family: Arial, sans-serif;">${c}</span></div>`).join('')}
         </div>
         <!-- Tagline -->
-        <div style="margin-top: 12px; font-size: 9px; font-weight: 900; letter-spacing: 2px; color: rgba(255,255,255,0.5); text-transform: uppercase; font-family: Arial, sans-serif; border-top: 1px solid rgba(255,255,255,0.15); padding-top: 10px; display: inline-block;">THE OFFICIAL INSTITUTIONAL MARKETPLACE</div>
+        <div style="margin-top: 14px; font-size: 9px; font-weight: 900; letter-spacing: 2px; color: #6B6B6B; text-transform: uppercase; font-family: Arial, sans-serif; border-top: 1px solid rgba(0,0,0,0.15); padding-top: 10px; display: inline-block;">THE OFFICIAL INSTITUTIONAL MARKETPLACE</div>
       </div>
     `;
 
