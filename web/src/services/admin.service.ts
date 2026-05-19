@@ -224,6 +224,41 @@ const adminService = {
     const response = await api.get('/payouts/seller', { params });
     return response.data;
   },
+
+  // Student ID verification
+  getPendingIdVerifications: async (): Promise<{ success: boolean; data: { users: User[] } }> => {
+    const response = await api.get('/admin/users', {
+      params: { idVerificationStatus: 'pending', limit: 50 }
+    });
+    return response.data;
+  },
+
+  updateIdVerification: async (userId: string, status: 'verified' | 'rejected'): Promise<UserResponse> => {
+    const response = await api.patch(`/admin/users/${userId}/id-verification`, { status });
+    return response.data;
+  },
+
+  // Remove / take down a product
+  removeProduct: async (productId: string, reason: string): Promise<ProductResponse> => {
+    const response = await api.patch(`/admin/products/${productId}/moderate`, {
+      status: 'removed',
+      isFlagged: true,
+      flagReason: reason,
+    });
+    return response.data;
+  },
+
+  // Broadcast push notification
+  broadcastPush: async (data: {
+    title: string;
+    message: string;
+    type: 'system' | 'promotion';
+    link?: string;
+    filter?: { role?: string };
+  }): Promise<{ success: boolean; data: { sent: number; total: number }; message: string }> => {
+    const response = await api.post('/notifications/push/broadcast', data);
+    return response.data;
+  },
 };
 
 export default adminService;
