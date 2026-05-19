@@ -445,7 +445,19 @@ export const deleteAccount = async (
       }
     }
 
+    const supabaseId = user.supabaseId;
     await User.findByIdAndDelete(req.user!._id);
+
+    // Also delete from Supabase auth so the email can't receive OTPs or log in again
+    if (supabaseId && process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_KEY) {
+      await fetch(`${process.env.SUPABASE_URL}/auth/v1/admin/users/${supabaseId}`, {
+        method: 'DELETE',
+        headers: {
+          'apikey': process.env.SUPABASE_SERVICE_KEY,
+          'Authorization': `Bearer ${process.env.SUPABASE_SERVICE_KEY}`,
+        },
+      }).catch(err => console.error('[deleteAccount] Supabase user delete failed:', err));
+    }
 
     res.cookie('token', '', { httpOnly: true, expires: new Date(0) });
     res.status(200).json({ success: true, message: 'Account deleted successfully.' });
