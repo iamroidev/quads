@@ -60,6 +60,21 @@ const authService = {
     return response.data;
   },
 
+  sendOtp: async (email: string, purpose: 'login' | 'register'): Promise<any> => {
+    const response = await api.post('/auth/otp/send', { email, purpose });
+    return response.data;
+  },
+
+  verifyOtpLogin: async (email: string, code: string): Promise<any> => {
+    const response = await api.post('/auth/otp/verify/login', { email, code });
+    return response;
+  },
+
+  verifyOtpRegister: async (email: string, code: string, profile: any): Promise<any> => {
+    const response = await api.post('/auth/otp/verify/register', { email, code, profile });
+    return response;
+  },
+
   logout: async (): Promise<void> => {
     await api.post('/auth/logout');
   },

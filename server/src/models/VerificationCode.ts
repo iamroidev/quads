@@ -1,12 +1,12 @@
 import mongoose, { Document, Schema } from 'mongoose';
 
 export interface IVerificationCode extends Document {
-  userId: mongoose.Types.ObjectId;
+  userId?: mongoose.Types.ObjectId;
   email?: string;
   phone?: string;
   code: string;
   type: 'email' | 'phone';
-  purpose: 'verify_email' | 'verify_phone' | 'reset_password';
+  purpose: 'verify_email' | 'verify_phone' | 'reset_password' | 'login' | 'register';
   expiresAt: Date;
   attempts: number;
   maxAttempts: number;
@@ -19,7 +19,7 @@ const verificationCodeSchema = new Schema<IVerificationCode>(
     userId: {
       type: Schema.Types.ObjectId,
       ref: 'User',
-      required: true,
+      required: false,
     },
     email: {
       type: String,
@@ -41,7 +41,7 @@ const verificationCodeSchema = new Schema<IVerificationCode>(
     },
     purpose: {
       type: String,
-      enum: ['verify_email', 'verify_phone', 'reset_password'],
+      enum: ['verify_email', 'verify_phone', 'reset_password', 'login', 'register'],
       required: true,
     },
     expiresAt: {

@@ -288,6 +288,22 @@ class EmailService {
     return this.sendEmail({ to, subject, html: this.wrapEmail(body) });
   }
 
+  async sendOtpEmail(to: string, code: string): Promise<boolean> {
+    const subject = `${code} — Your QUADS verification code`;
+    const body = `
+      <div style="font-size:10px;font-weight:900;color:#ff6b6b;text-transform:uppercase;letter-spacing:2px;margin-bottom:8px;">Your Verification Code</div>
+      <h2 style="margin:0 0 12px;font-size:22px;font-weight:900;text-transform:uppercase;letter-spacing:-0.5px;">Enter this code to continue.</h2>
+      <p style="font-size:14px;line-height:1.7;color:#444;margin:0 0 4px;">Use this 6-digit code in the QUADS app. It expires in <strong>10 minutes</strong>.</p>
+
+      <div style="background:#111111;color:#ff6b6b;font-size:38px;font-weight:900;text-align:center;padding:28px 16px;margin:28px 0;border:2px solid #1a1a1a;box-shadow:5px 5px 0 0 #1a1a1a;letter-spacing:10px;white-space:nowrap;">${code}</div>
+
+      <div style="background:#fff8e1;border:2px solid #1a1a1a;padding:14px 16px;font-size:12px;color:#555;line-height:1.6;">
+        Do not share this code with anyone. QUADS will never ask for your code by phone or message. If you didn't request this, you can safely ignore this email.
+      </div>
+    `;
+    return this.sendEmail({ to, subject, html: this.wrapEmail(body) });
+  }
+
   async sendOrderUpdateEmail(to: string, orderId: string, status: string): Promise<boolean> {
     const statusMessages: Record<string, string> = {
       pending: 'Waiting for seller confirmation.',

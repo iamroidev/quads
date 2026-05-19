@@ -87,15 +87,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return sanitized;
   }, []);
 
-  // ── OTP registration ────────────────────────────────────────────────────────
+  // ── OTP — fully server-side, no Supabase dependency ────────────────────────
 
   const sendRegistrationOtp = useCallback(async (email: string) => {
-    if (!isSupabaseConfigured) throw new Error('Authentication service offline.');
-    const { error } = await supabase.auth.signInWithOtp({
-      email: email.toLowerCase(),
-      options: { shouldCreateUser: true },
-    });
-    if (error) throw new Error(error.message || 'Failed to send verification code.');
+    await authService.sendOtp(email.toLowerCase(), 'register');
   }, []);
 
   const verifyOtpAndRegister = useCallback(async (
@@ -103,55 +98,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     otp: string,
     profile: Omit<RegisterData, 'supabaseAccessToken'>,
   ) => {
-    const { data: { session }, error } = await supabase.auth.verifyOtp({
-      email: email.toLowerCase(),
-      token: otp.trim(),
-      type: 'email',
-    });
-    if (error || !session?.access_token) {
-      throw new Error(error?.message?.includes('expired') || error?.message?.includes('invalid')
-        ? 'Incorrect or expired code. Please check and try again.'
-        : error?.message || 'Verification failed.');
-    }
-    const response = await authService.register({
-      supabaseAccessToken: session.access_token,
-      ...profile,
-    });
+    const response = await authService.verifyOtpRegister(email.toLowerCase(), otp.trim(), profile);
     const { user: newUser, token: newToken } = response.data;
     _persistUser(newUser, newToken);
     trySubscribeWebPush();
   }, [_persistUser]);
 
-  // ── OTP login ───────────────────────────────────────────────────────────────
-
   const sendLoginOtp = useCallback(async (email: string) => {
-    if (!isSupabaseConfigured) throw new Error('Authentication service offline.');
-    // shouldCreateUser: false so we don't accidentally register someone trying to log in
-    const { error } = await supabase.auth.signInWithOtp({
-      email: email.toLowerCase(),
-      options: { shouldCreateUser: false },
-    });
-    if (error) {
-      const msg = error.message?.toLowerCase() || '';
-      if (msg.includes('user not found') || msg.includes('no user')) {
-        throw new Error('No account found with that email address. Please sign up first.');
-      }
-      throw new Error(error.message || 'Failed to send login code.');
-    }
+    await authService.sendOtp(email.toLowerCase(), 'login');
   }, []);
 
   const verifyOtpAndLogin = useCallback(async (email: string, otp: string) => {
-    const { data: { session }, error } = await supabase.auth.verifyOtp({
-      email: email.toLowerCase(),
-      token: otp.trim(),
-      type: 'email',
-    });
-    if (error || !session?.access_token) {
-      throw new Error(error?.message?.includes('expired') || error?.message?.includes('invalid')
-        ? 'Incorrect or expired code. Please check and try again.'
-        : error?.message || 'Verification failed.');
-    }
-    const response = await authService.login({ supabaseAccessToken: session.access_token });
+    const response = await authService.verifyOtpLogin(email.toLowerCase(), otp.trim());
     const { user: newUser, token: newToken } = response.data;
     const sanitized = _persistUser(newUser, newToken);
     toast.success(`Welcome back, ${sanitized.name || newUser.name}!`, { duration: 1200 });

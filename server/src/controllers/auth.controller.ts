@@ -749,3 +749,44 @@ export const updateSellerOnboarding = async (
     next(error);
   }
 };
+
+import otpService from '../services/otp.service';
+
+export const sendOtp = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const { email, purpose } = req.body;
+    if (!email || !['login', 'register'].includes(purpose)) {
+      res.status(400).json({ success: false, message: 'email and purpose (login|register) required.' });
+      return;
+    }
+    await otpService.sendOtp(email, purpose as 'login' | 'register');
+    res.status(200).json({ success: true, message: `Verification code sent to ${email}.` });
+  } catch (error) { next(error); }
+};
+
+export const verifyOtpLogin = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const { email, code } = req.body;
+    if (!email || !code) { res.status(400).json({ success: false, message: 'email and code required.' }); return; }
+    const result = await otpService.verifyOtp(email, code, 'login');
+    res.status(200).json({ success: true, data: { token: result.token, user: result.user } });
+  } catch (error) { next(error); }
+};
+
+export const verifyOtpRegister = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const { email, code, profile } = req.body;
+    if (!email || !code) { res.status(400).json({ success: false, message: 'email and code required.' }); return; }
+
+    if (profile) {
+      // Full register — verify + create account in one call
+      await otpService.verifyOtp(email, code, 'register');
+      const result = await otpService.completeRegistration(email, profile);
+      res.status(201).json({ success: true, data: { token: result.token, user: result.user } });
+    } else {
+      // Just verify the code (two-step flow)
+      await otpService.verifyOtp(email, code, 'register');
+      res.status(200).json({ success: true, message: 'Email verified.' });
+    }
+  } catch (error) { next(error); }
+};

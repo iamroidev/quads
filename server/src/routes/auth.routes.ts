@@ -18,6 +18,9 @@ import {
   getUserStats,
   sendEmailVerification,
   verifyEmail,
+  sendOtp,
+  verifyOtpLogin,
+  verifyOtpRegister,
 } from '../controllers/auth.controller';
 import { authenticate } from '../middleware/auth';
 import { validate } from '../middleware/validate';
@@ -170,5 +173,10 @@ router.post(
   [body('code').trim().notEmpty().withMessage('Verification code is required'), validate],
   verifyEmail
 );
+
+// OTP — our own system, no Supabase dependency
+router.post('/otp/send',            authLimiter, sendOtp);
+router.post('/otp/verify/login',    authLimiter, verifyOtpLogin);
+router.post('/otp/verify/register', authLimiter, verifyOtpRegister);
 
 export default router;
