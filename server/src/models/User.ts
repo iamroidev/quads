@@ -21,7 +21,6 @@ export interface IUserDocument extends Document {
   emailVerificationToken?: string;
   emailVerificationExpires?: Date;
   phoneVerified: boolean;
-  isInstitutional: boolean;
   isBanned: boolean;
   location: string;
   bio: string;
@@ -171,10 +170,6 @@ const userSchema = new Schema<IUserDocument>(
       type: Date,
     },
     phoneVerified: {
-      type: Boolean,
-      default: false,
-    },
-    isInstitutional: {
       type: Boolean,
       default: false,
     },

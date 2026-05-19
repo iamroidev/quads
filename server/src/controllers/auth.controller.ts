@@ -11,10 +11,6 @@ import path from 'path';
 import growthService from '../services/growth.service';
 import userService from '../services/user.service';
 
-const STUDENT_EMAIL_DOMAIN = 'st.umat.edu.gh';
-
-const isStudentEmail = (email: string): boolean =>
-  email.toLowerCase().endsWith(`@${STUDENT_EMAIL_DOMAIN}`);
 
 /**
  * @route   POST /api/auth/register
@@ -596,12 +592,10 @@ export const sendEmailVerification = async (
 
     await emailService.sendVerificationEmail(user.email, user.name, code);
 
-    const isStudent = isStudentEmail(user.email);
-
     res.status(200).json({
       success: true,
       message: `Verification code sent to ${user.email}.`,
-      data: { isStudentEmail: isStudent },
+      data: {},
     });
   } catch (error) {
     next(error);
@@ -653,7 +647,6 @@ export const verifyEmail = async (
     }
 
     user.emailVerified = true;
-    user.isInstitutional = isStudentEmail(user.email);
     user.emailVerificationToken = '';
     user.emailVerificationExpires = undefined;
     await user.save();
@@ -661,7 +654,7 @@ export const verifyEmail = async (
     res.status(200).json({
       success: true,
       message: 'Email verified successfully.',
-      data: { emailVerified: true, isInstitutional: user.isInstitutional },
+      data: { emailVerified: true },
     });
   } catch (error) {
     next(error);
