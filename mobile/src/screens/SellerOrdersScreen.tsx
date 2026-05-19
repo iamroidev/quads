@@ -130,7 +130,7 @@ const SellerOrdersScreen = ({ navigation }: any) => {
                 : `No orders matching status filter: "${activeFilter}".`}
             </Text>
             {activeFilter === 'all' && (
-              <TouchableOpacity style={styles.actionBtn} onPress={() => navigation.navigate('InventoryTab', { screen: 'CreateListing' })}>
+              <TouchableOpacity style={styles.actionBtn} onPress={() => navigation.getParent()?.navigate('InventoryTab', { screen: 'CreateListing' })}>
                 <Text style={styles.actionBtnText}>List New Product</Text>
               </TouchableOpacity>
             )}

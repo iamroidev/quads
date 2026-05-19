@@ -179,11 +179,16 @@ const PulseStackScreen = () => (
 );
 
 const SellerOrdersStack = createNativeStackNavigator();
-const SellerOrdersStackScreen = () => (
-  <SellerOrdersStack.Navigator screenOptions={{ headerShown: false }}>
-    <SellerOrdersStack.Screen name="SellerOrdersHome" component={SellerOrdersScreen} />
-  </SellerOrdersStack.Navigator>
-);
+const SellerOrdersStackScreen = () => {
+  const colors = useColors();
+  const dsh = makeStackHeader(colors);
+  return (
+    <SellerOrdersStack.Navigator screenOptions={{ headerShown: false }}>
+      <SellerOrdersStack.Screen name="SellerOrdersHome" component={SellerOrdersScreen} />
+      <SellerOrdersStack.Screen name="OrderDetail" component={OrderDetailScreen} options={{ ...dsh, title: 'Order Details' }} />
+    </SellerOrdersStack.Navigator>
+  );
+};
 
 const GrowthToolsStack = createNativeStackNavigator();
 const GrowthToolsStackScreen = () => (
