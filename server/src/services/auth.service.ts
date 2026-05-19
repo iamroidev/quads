@@ -6,8 +6,6 @@ import { verifySupabaseToken } from '../utils/supabaseJwt';
 import { emailService } from './email.service';
 import env from '../config/env';
 
-const INSTITUTIONAL_DOMAINS = env.INSTITUTIONAL_DOMAINS.split(',').map(d => d.trim().toLowerCase());
-
 interface RegisterData {
   supabaseAccessToken: string;
   name: string;
@@ -67,12 +65,7 @@ class AuthService {
     return `${Math.random().toString(36).slice(-10)}${Math.random().toString(36).slice(-10)}`;
   }
 
-  private isInstitutionalEmail(email: string): boolean {
-    const domain = email.split('@')[1]?.toLowerCase();
-    return INSTITUTIONAL_DOMAINS.includes(domain);
-  }
-
-  /**
+/**
    * Register a new user
    */
   async register(data: RegisterData): Promise<AuthResult> {
@@ -105,7 +98,6 @@ class AuthService {
       isVerified: false,
       emailVerified: false,
       phoneVerified: false,
-      isInstitutional: this.isInstitutionalEmail(email),
       avatar: metadataAvatar,
       password: this.randomPassword(),
     });
@@ -311,7 +303,6 @@ class AuthService {
       department: profileData?.department || '',
       currentLevel: profileData?.currentLevel || '',
       location: profileData?.location || '',
-      isInstitutional: this.isInstitutionalEmail(email),
       password: this.randomPassword(),
     });
     isNewUser = true;
