@@ -6,7 +6,6 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../theme/ThemeContext';
 import api from '../services/api';
-import { supabase } from '../services/supabase';
 import ScreenHeader from '../components/ScreenHeader';
 import { BulletinCard } from '../components/BulletinCard';
 
@@ -73,12 +72,12 @@ const SettingsScreen = () => {
     if (newPw !== confirmPw) { Alert.alert('Mismatch', 'Passwords do not match.'); return; }
     setChangingPw(true);
     try {
-      const { error } = await supabase.auth.updateUser({ password: newPw });
-      if (error) throw error;
-      Alert.alert('Done', 'Password updated successfully.');
+      // Use forgot-password OTP reset flow since most users have a system-generated password
+      await api.post('/auth/forgot-password', { email: user?.email });
+      Alert.alert('Check your email', 'A reset code has been sent to your email. Use the Reset Password screen to set your new password.');
       setNewPw(''); setConfirmPw('');
     } catch (err: any) {
-      Alert.alert('Error', err.message || 'Failed to update password.');
+      Alert.alert('Error', err.response?.data?.message || err.message || 'Failed to send reset code.');
     } finally { setChangingPw(false); }
   };
 

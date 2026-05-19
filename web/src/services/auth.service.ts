@@ -1,7 +1,6 @@
 import api from './api';
 
 export interface RegisterData {
-  supabaseAccessToken: string;
   name: string;
   phone: string;
   roles: ('buyer' | 'seller' | 'admin')[];
@@ -10,10 +9,6 @@ export interface RegisterData {
   residenceHall?: string;
   currentLevel?: string;
   location?: string;
-}
-
-export interface LoginData {
-  supabaseAccessToken: string;
 }
 
 export interface UpdateProfileData {
@@ -64,16 +59,6 @@ const authService = {
     return response.data;
   },
 
-  login: async (data: LoginData) => {
-    const response = await api.post('/auth/login', data);
-    return response.data;
-  },
-
-  googleLogin: async (credential: string, role?: 'buyer' | 'seller', profileData?: any) => {
-    const response = await api.post('/auth/google', { credential, role, profileData });
-    return response.data;
-  },
-
   getMe: async () => {
     const response = await api.get('/auth/me');
     return response.data;
@@ -114,6 +99,16 @@ const authService = {
   verifyEmail: async (code: string) => {
     const response = await api.post('/auth/verify-email', { code });
     return response.data;
+  },
+
+  login: async (email: string, password: string) => {
+    const response = await api.post('/auth/login', { email, password });
+    return response;
+  },
+
+  googleLogin: async (idToken: string, role?: string, profileData?: any) => {
+    const response = await api.post('/auth/google', { credential: idToken, role, profileData });
+    return response;
   },
 
   sendOtp: async (email: string, purpose: 'login' | 'register') => {

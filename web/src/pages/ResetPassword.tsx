@@ -1,220 +1,187 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Eye, EyeOff, Lock, Check, ArrowLeft } from 'lucide-react';
-import { supabase } from '../services/supabase';
 import toast from 'react-hot-toast';
+import api from '../services/api';
 
-const schema = z
-  .object({
-    password: z.string().min(6, 'Password must be at least 6 characters').max(72),
-    confirm: z.string().min(1, 'Please confirm your password'),
-  })
-  .refine((d) => d.password === d.confirm, {
-    message: "Passwords don't match",
-    path: ['confirm'],
-  });
+const schema = z.object({
+  email:    z.string().email('Enter a valid email'),
+  password: z.string().min(6, 'Password must be at least 6 characters').max(72),
+  confirm:  z.string().min(1, 'Please confirm your password'),
+}).refine(d => d.password === d.confirm, { message: "Passwords don't match", path: ['confirm'] });
 
 type FormData = z.infer<typeof schema>;
 
-const ResetPasswordPage: React.FC = () => {
-  const navigate = useNavigate();
-  const [sessionReady, setSessionReady] = useState(false);
-  const [done, setDone] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
-  const [showPw, setShowPw] = useState(false);
-  const [showConfirm, setShowConfirm] = useState(false);
+const fieldBase = 'w-full border-4 border-black bg-[var(--bulletin-bg)] px-5 py-5 text-[16px] font-black focus:outline-none focus:ring-0 text-[var(--bulletin-text)] placeholder:text-[var(--bulletin-text)] placeholder:opacity-20 shadow-[6px_6px_0_0_var(--bulletin-shadow)]';
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<FormData>({ resolver: zodResolver(schema) });
+export default function ResetPasswordPage() {
+  const navigate = useNavigate();
+  const [otp, setOtp]               = useState('');
+  const [otpError, setOtpError]     = useState('');
+  const [submitting, setSubmitting] = useState(false);
+  const [done, setDone]             = useState(false);
+  const [showPw, setShowPw]         = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [resendCountdown, setResendCountdown] = useState(0);
+  const otpRefs = useRef<(HTMLInputElement | null)[]>([]);
+
+  const { register, handleSubmit, watch, formState: { errors } } = useForm<FormData>({ resolver: zodResolver(schema) });
+  const emailValue = watch('email') || '';
 
   useEffect(() => {
-    const { data: listener } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === 'PASSWORD_RECOVERY' || (event === 'SIGNED_IN' && session)) {
-        setSessionReady(true);
-      }
-    });
-    supabase.auth.getSession().then(({ data }) => {
-      if (data.session) setSessionReady(true);
-    });
-    return () => listener.subscription.unsubscribe();
-  }, []);
+    if (resendCountdown <= 0) return;
+    const t = setTimeout(() => setResendCountdown(c => c - 1), 1000);
+    return () => clearTimeout(t);
+  }, [resendCountdown]);
 
   const onSubmit = async (data: FormData) => {
-    if (!sessionReady) {
-      toast.error('No valid reset session. Please request a new reset link.');
-      return;
-    }
+    if (otp.length !== 6) { setOtpError('Enter the 6-digit code from your email.'); return; }
     setSubmitting(true);
     try {
-      const { error } = await supabase.auth.updateUser({ password: data.password });
-      if (error) throw error;
+      await api.post('/auth/reset-password', { email: data.email.toLowerCase(), code: otp, password: data.password });
       setDone(true);
       toast.success('Password updated!');
       setTimeout(() => navigate('/login'), 2500);
     } catch (err: any) {
-      toast.error(err.message || 'Failed to update password. The link may have expired.');
+      const msg = err.response?.data?.message || err.message || 'Failed to reset password.';
+      if (msg.toLowerCase().includes('code') || msg.toLowerCase().includes('expired')) {
+        setOtpError(msg);
+      } else {
+        toast.error(msg);
+      }
     } finally {
       setSubmitting(false);
     }
   };
 
-  return (
-    <div className="min-h-screen w-full bg-[var(--bulletin-bg)] flex flex-col items-center justify-center p-6 font-sans selection:bg-black selection:text-white">
-      {/* ── Background Branding ── */}
-      <div className="fixed top-12 left-12 opacity-5 pointer-events-none select-none hidden lg:block">
-        <h1 className="text-[200px] font-black uppercase leading-none tracking-tighter">QUADS</h1>
-      </div>
+  const handleResend = async () => {
+    if (!emailValue || resendCountdown > 0) return;
+    try {
+      await api.post('/auth/forgot-password', { email: emailValue.toLowerCase() });
+      setResendCountdown(60);
+      toast.success('New code sent.');
+    } catch { toast.error('Failed to resend.'); }
+  };
 
-      {/* ── Independent Back Button ── */}
-      <Link 
-        to="/login" 
-        className="fixed top-8 left-8 flex items-center gap-2 border-4 border-black bg-white px-5 py-3 text-[11px] font-black uppercase tracking-widest shadow-[6px_6px_0_0_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all z-50 group"
-      >
-        <ArrowLeft className="h-4 w-4 group-hover:-translate-x-1 transition-transform" />
-        Return to Login
+  if (done) {
+    return (
+      <div className="min-h-screen bg-[var(--bulletin-bg)] flex items-center justify-center p-6">
+        <div className="border-4 border-black bg-[var(--bulletin-card)] p-12 shadow-[8px_8px_0_0_var(--bulletin-shadow)] text-center max-w-sm">
+          <div className="w-16 h-16 border-4 border-black bg-black flex items-center justify-center mx-auto mb-6">
+            <Check className="h-8 w-8 text-white" />
+          </div>
+          <h2 className="text-2xl font-black uppercase tracking-tighter text-[var(--bulletin-text)] mb-3">Password Updated</h2>
+          <p className="text-sm text-[var(--bulletin-text)] opacity-60">Redirecting to login...</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-[var(--bulletin-bg)] flex flex-col items-center justify-center p-6 font-sans">
+      <Link to="/login" className="fixed top-8 left-8 flex items-center gap-2 border-4 border-black bg-white px-5 py-3 text-[11px] font-black uppercase tracking-widest shadow-[6px_6px_0_0_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all z-50">
+        <ArrowLeft className="h-4 w-4" /> Return to Login
       </Link>
 
-      <div className="max-w-md w-full relative">
-        {/* Decorative Tape */}
-        <div className="absolute -top-4 left-1/2 -translate-x-1/2 h-8 w-40 bg-[#ffd700]/60 rotate-[-1deg] z-10 shadow-sm" />
-        
-        {done ? (
-          /* ── SUCCESS CARD ── */
-          <div 
-            className="border-4 border-black bg-[#e0f2f7] dark:bg-sky-900/40 p-12 shadow-[16px_16px_0_0_var(--bulletin-shadow)] text-center relative overflow-hidden"
-            style={{ transform: 'rotate(-0.8deg)' }}
-          >
-            <div className="absolute top-0 right-0 h-24 w-24 bg-white/10 rotate-45 translate-x-12 -translate-y-12" />
-            <div className="mb-8 flex justify-center">
-              <div className="h-20 w-20 rounded-full border-4 border-black bg-white flex items-center justify-center shadow-[4px_4px_0_0_black]">
-                <Check className="h-10 w-10 text-green-600" />
-              </div>
-            </div>
-            <h2 className="text-4xl font-black uppercase tracking-tighter text-black mb-4">Verified.</h2>
-            <p className="text-[14px] font-bold opacity-60 text-black mb-10 leading-relaxed">
-              Security update successful. <br />The board will now redirect you to the entrance.
-            </p>
-            <Link
-              to="/login"
-              className="inline-block w-full border-4 border-black bg-black px-10 py-5 text-[12px] font-black uppercase tracking-widest text-white shadow-[6px_6px_0_0_rgba(0,0,0,0.2)] hover:bg-[#fffacd] hover:text-black transition-all"
-            >
-              Proceed Now →
-            </Link>
+      <div className="w-full max-w-md border-4 border-black bg-[var(--bulletin-card)] shadow-[8px_8px_0_0_var(--bulletin-shadow)] p-8">
+        <div className="flex items-center gap-3 mb-8">
+          <div className="w-10 h-10 border-4 border-black bg-black flex items-center justify-center">
+            <Lock className="h-5 w-5 text-white" />
           </div>
-        ) : (
-          /* ── RESET FORM CARD ── */
-          <div 
-            className="border-4 border-black bg-[var(--bulletin-card)] p-10 md:p-14 shadow-[20px_20px_0_0_var(--bulletin-shadow)] relative"
-            style={{ transform: 'rotate(0.5deg)' }}
-          >
-            {/* Thumbtack */}
-            <div className="absolute top-4 right-4 h-6 w-6 rounded-full bg-red-600 border-2 border-black shadow-inner">
-               <div className="absolute top-1 left-1 h-1.5 w-1.5 rounded-full bg-white/40" />
-            </div>
+          <div>
+            <p className="text-[10px] font-black uppercase tracking-[0.2em] opacity-40 text-[var(--bulletin-text)]">Account Recovery</p>
+            <h1 className="text-2xl font-black uppercase tracking-tighter text-[var(--bulletin-text)] leading-none">Reset Password</h1>
+          </div>
+        </div>
 
-            <div className="mb-10">
-              <div className="inline-block border-2 border-black px-3 py-1 text-[9px] font-black uppercase tracking-[0.2em] mb-4 text-[var(--bulletin-text)]">
-                Security Protocol
-              </div>
-              <h1 className="text-4xl font-black uppercase tracking-tighter text-[var(--bulletin-text)] leading-none">New Secret.</h1>
-              <p className="mt-4 text-[14px] font-bold opacity-60 text-[var(--bulletin-text)] leading-tight">
-                Authorize a new security key to regain access to the QUADS network.
-              </p>
-            </div>
+        <p className="text-sm text-[var(--bulletin-text)] opacity-60 mb-8">
+          Enter your email, the 6-digit code we sent you, and your new password.
+        </p>
 
-            {!sessionReady && (
-              <div className="mb-8 border-4 border-black bg-[#fffacd] dark:bg-yellow-900/20 px-4 py-3 text-[11px] font-black uppercase tracking-tight text-black dark:text-yellow-200 animate-pulse">
-                ⏳ Waiting for auth session...
-              </div>
-            )}
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+          {/* Email */}
+          <div>
+            <label className="block text-[11px] font-black uppercase tracking-[0.2em] opacity-40 mb-3 text-[var(--bulletin-text)]">Email</label>
+            <input type="email" placeholder="you@email.com" autoComplete="email" className={fieldBase} {...register('email')} />
+            {errors.email && <p className="mt-2 text-[12px] text-red-600 font-black uppercase tracking-widest">{errors.email.message}</p>}
+          </div>
 
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
-              {/* New Password */}
-              <div className="group">
-                <label className="block text-[10px] font-black uppercase tracking-widest opacity-40 mb-3 text-[var(--bulletin-text)]">
-                  New Security Key
-                </label>
-                <div className="relative flex items-center">
-                  <Lock className="absolute left-4 h-5 w-5 opacity-30 group-focus-within:opacity-100 transition-opacity text-[var(--bulletin-text)]" />
-                  <input
-                    type={showPw ? 'text' : 'password'}
-                    placeholder="Min. 6 characters"
-                    className="w-full border-4 border-black bg-[var(--bulletin-bg)] p-5 pl-14 pr-14 text-[15px] font-black focus:outline-none focus:ring-0 placeholder:opacity-20 text-[var(--bulletin-text)]"
-                    {...register('password')}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPw((p) => !p)}
-                    className="absolute right-5 text-[var(--bulletin-text)] opacity-40 hover:opacity-100"
-                  >
-                    {showPw ? <EyeOff size={20} /> : <Eye size={20} />}
-                  </button>
-                </div>
-                {errors.password && (
-                  <div className="mt-3 border-2 border-black bg-[#ff6b6b] text-white px-4 py-2 text-[10px] font-black uppercase tracking-tight">
-                    {errors.password.message}
-                  </div>
-                )}
-              </div>
-
-              {/* Confirm Password */}
-              <div className="group">
-                <label className="block text-[10px] font-black uppercase tracking-widest opacity-40 mb-3 text-[var(--bulletin-text)]">
-                  Confirm Key
-                </label>
-                <div className="relative flex items-center">
-                  <Lock className="absolute left-4 h-5 w-5 opacity-30 group-focus-within:opacity-100 transition-opacity text-[var(--bulletin-text)]" />
-                  <input
-                    type={showConfirm ? 'text' : 'password'}
-                    placeholder="Repeat key"
-                    className="w-full border-4 border-black bg-[var(--bulletin-bg)] p-5 pl-14 pr-14 text-[15px] font-black focus:outline-none focus:ring-0 placeholder:opacity-20 text-[var(--bulletin-text)]"
-                    {...register('confirm')}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowConfirm((p) => !p)}
-                    className="absolute right-5 text-[var(--bulletin-text)] opacity-40 hover:opacity-100"
-                  >
-                    {showConfirm ? <EyeOff size={20} /> : <Eye size={20} />}
-                  </button>
-                </div>
-                {errors.confirm && (
-                  <div className="mt-3 border-2 border-black bg-[#ff6b6b] text-white px-4 py-2 text-[10px] font-black uppercase tracking-tight">
-                    {errors.confirm.message}
-                  </div>
-                )}
-              </div>
-
-              <button
-                type="submit"
-                disabled={submitting || !sessionReady}
-                className="w-full border-4 border-black bg-black px-10 py-6 text-[13px] font-black uppercase tracking-[0.2em] text-white shadow-[8px_8px_0_0_rgba(255,107,107,0.5)] hover:bg-[#ff6b6b] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all disabled:opacity-10 disabled:grayscale"
-              >
-                {submitting ? 'Updating Core...' : 'Authorize Reset'}
+          {/* OTP */}
+          <div>
+            <div className="flex justify-between items-center mb-3">
+              <label className="text-[11px] font-black uppercase tracking-[0.2em] opacity-40 text-[var(--bulletin-text)]">Verification Code</label>
+              <button type="button" onClick={handleResend} disabled={resendCountdown > 0 || !emailValue}
+                className="text-[11px] font-black uppercase tracking-widest underline disabled:opacity-40 text-[var(--bulletin-text)]">
+                {resendCountdown > 0 ? `Resend in ${resendCountdown}s` : 'Send Code'}
               </button>
-            </form>
-
-            <div className="mt-12 pt-8 border-t-4 border-black/5 text-center">
-               <p className="text-[11px] font-bold opacity-40 text-[var(--bulletin-text)]">
-                 Need assistance? Contact <a href="mailto:support@quads.edu.gh" className="underline font-black hover:opacity-100 transition-opacity">Network Ops</a>
-               </p>
             </div>
+            <div className="flex gap-2 justify-center">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <input
+                  key={i}
+                  ref={r => { otpRefs.current[i] = r; }}
+                  type="text"
+                  inputMode="numeric"
+                  autoComplete={i === 0 ? 'one-time-code' : 'off'}
+                  maxLength={1}
+                  value={otp[i] || ''}
+                  className={`w-11 text-center text-[20px] font-black border-4 border-[var(--bulletin-border)] bg-[var(--bulletin-bg)] text-[var(--bulletin-text)] shadow-[3px_3px_0_0_var(--bulletin-shadow)] focus:outline-none focus:ring-2 focus:ring-[var(--bulletin-text)] ${otpError ? 'border-red-500' : ''}`}
+                  style={{ height: '52px' }}
+                  onChange={e => {
+                    const val = e.target.value.replace(/\D/g, '');
+                    const arr = otp.split('');
+                    arr[i] = val.slice(-1);
+                    const joined = arr.join('').slice(0, 6);
+                    setOtp(joined); setOtpError('');
+                    if (val && i < 5) otpRefs.current[i + 1]?.focus();
+                  }}
+                  onKeyDown={e => {
+                    if (e.key === 'Backspace' && !otp[i] && i > 0) otpRefs.current[i - 1]?.focus();
+                  }}
+                  onPaste={e => {
+                    const p = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 6);
+                    if (p) { setOtp(p); setOtpError(''); e.preventDefault(); otpRefs.current[Math.min(p.length, 5)]?.focus(); }
+                  }}
+                />
+              ))}
+            </div>
+            {otpError && <p className="mt-2 text-[12px] text-red-600 font-black uppercase tracking-widest text-center">{otpError}</p>}
           </div>
-        )}
-      </div>
 
-      {/* ── Footer Branding ── */}
-      <div className="fixed bottom-8 text-[10px] font-black uppercase tracking-[0.5em] opacity-20 pointer-events-none">
-        QUADS SECURITY SUBSYSTEM · VER 4.0.2
+          {/* New password */}
+          <div>
+            <label className="block text-[11px] font-black uppercase tracking-[0.2em] opacity-40 mb-3 text-[var(--bulletin-text)]">New Password</label>
+            <div className="relative flex items-center">
+              <input type={showPw ? 'text' : 'password'} placeholder="At least 6 characters" autoComplete="new-password"
+                className={`${fieldBase} pr-16`} {...register('password')} />
+              <button type="button" onClick={() => setShowPw(p => !p)} className="absolute right-4 opacity-40 hover:opacity-100 text-[var(--bulletin-text)]">
+                {showPw ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+              </button>
+            </div>
+            {errors.password && <p className="mt-2 text-[12px] text-red-600 font-black uppercase tracking-widest">{errors.password.message}</p>}
+          </div>
+
+          <div>
+            <label className="block text-[11px] font-black uppercase tracking-[0.2em] opacity-40 mb-3 text-[var(--bulletin-text)]">Confirm Password</label>
+            <div className="relative flex items-center">
+              <input type={showConfirm ? 'text' : 'password'} placeholder="Re-enter password" autoComplete="new-password"
+                className={`${fieldBase} pr-16`} {...register('confirm')} />
+              <button type="button" onClick={() => setShowConfirm(p => !p)} className="absolute right-4 opacity-40 hover:opacity-100 text-[var(--bulletin-text)]">
+                {showConfirm ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+              </button>
+            </div>
+            {errors.confirm && <p className="mt-2 text-[12px] text-red-600 font-black uppercase tracking-widest">{errors.confirm.message}</p>}
+          </div>
+
+          <button type="submit" disabled={submitting}
+            className="w-full border-4 border-black bg-black px-6 py-5 text-[14px] font-black uppercase tracking-widest text-white shadow-[6px_6px_0_0_rgba(0,0,0,1)] hover:translate-y-1 hover:shadow-[4px_4px_0_0_rgba(0,0,0,1)] disabled:opacity-40 transition-all">
+            {submitting ? 'Updating...' : 'Set New Password'}
+          </button>
+        </form>
       </div>
     </div>
   );
-};
-
-export default ResetPasswordPage;
+}

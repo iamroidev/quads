@@ -13,7 +13,7 @@ import {
   Dimensions,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { supabase } from '../services/supabase';
+import api from '../services/api';
 import { shadows } from '../theme';
 import { useColors } from '../theme/ThemeContext';
 import ScreenHeader from '../components/ScreenHeader';
@@ -67,8 +67,7 @@ const ForgotPasswordScreen = ({ navigation }: any) => {
     }
     setSending(true);
     try {
-      const { error } = await supabase.auth.resetPasswordForEmail(trimmed);
-      if (error) throw error;
+      await api.post('/auth/forgot-password', { email: trimmed });
       setSent(true);
     } catch (err: any) {
       Alert.alert('Error', err.message || 'Failed to send reset email. Try again.');

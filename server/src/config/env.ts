@@ -26,7 +26,7 @@ interface EnvConfig {
   PAYSTACK_SECRET_KEY: string;
   PAYSTACK_PUBLIC_KEY: string;
   GOOGLE_CLIENT_ID: string;
-  SUPABASE_URL: string;
+  GOOGLE_CLIENT_IDS: string;
   CLIENT_URL: string;
   AWS_ACCESS_KEY_ID: string;
   AWS_SECRET_ACCESS_KEY: string;
@@ -58,7 +58,7 @@ const env: EnvConfig = {
   PAYSTACK_SECRET_KEY: process.env.PAYSTACK_SECRET_KEY || '',
   PAYSTACK_PUBLIC_KEY: process.env.PAYSTACK_PUBLIC_KEY || '',
   GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID || '',
-  SUPABASE_URL: process.env.SUPABASE_URL || '',
+  GOOGLE_CLIENT_IDS: process.env.GOOGLE_CLIENT_IDS || process.env.GOOGLE_CLIENT_ID || '',
   CLIENT_URL: process.env.CLIENT_URL || 'http://localhost:5200',
   AWS_ACCESS_KEY_ID: process.env.AWS_ACCESS_KEY_ID || '',
   AWS_SECRET_ACCESS_KEY: process.env.AWS_SECRET_ACCESS_KEY || '',
