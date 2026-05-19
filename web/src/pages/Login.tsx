@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -63,12 +63,24 @@ const PinnedNote: React.FC<{
 );
 
 const LoginPage: React.FC = () => {
-  const { login, googleLogin } = useAuth();
+  const { login, sendLoginOtp, verifyOtpAndLogin, googleLogin } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [protocolAccepted, setProtocolAccepted] = useState(false);
+  const [useOtp, setUseOtp] = useState(true);
+  const [otpSent, setOtpSent] = useState(false);
+  const [otpEmail, setOtpEmail] = useState('');
+  const [otpCode, setOtpCode] = useState('');
+  const [otpError, setOtpError] = useState('');
+  const [resendCountdown, setResendCountdown] = useState(0);
+
+  useEffect(() => {
+    if (resendCountdown <= 0) return;
+    const t = setTimeout(() => setResendCountdown(c => c - 1), 1000);
+    return () => clearTimeout(t);
+  }, [resendCountdown]);
 
   const from = (location.state as any)?.from || '/';
 
@@ -89,6 +101,49 @@ const LoginPage: React.FC = () => {
       toast.error(error.response?.data?.message || error.message || 'Login failed. Please try again.');
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleSendOtp = async () => {
+    if (!otpEmail.trim() || !/\S+@\S+\.\S+/.test(otpEmail)) {
+      setOtpError('Enter a valid email address.');
+      return;
+    }
+    setOtpError('');
+    setIsSubmitting(true);
+    try {
+      await sendLoginOtp(otpEmail.toLowerCase());
+      setOtpSent(true);
+      setResendCountdown(60);
+    } catch (err: any) {
+      setOtpError(err.message || 'Failed to send code.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleVerifyLoginOtp = async () => {
+    if (otpCode.length !== 6) { setOtpError('Enter the 6-digit code.'); return; }
+    setOtpError('');
+    setIsSubmitting(true);
+    try {
+      await verifyOtpAndLogin(otpEmail, otpCode);
+      navigate(from, { replace: true });
+    } catch (err: any) {
+      setOtpError(err.message || 'Incorrect code. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleResendLoginOtp = async () => {
+    if (resendCountdown > 0) return;
+    try {
+      await sendLoginOtp(otpEmail);
+      setResendCountdown(60);
+      toast.success('New code sent.', { duration: 3000 });
+    } catch {
+      toast.error('Failed to resend. Please try again.');
     }
   };
 
@@ -217,57 +272,132 @@ const LoginPage: React.FC = () => {
               <p className="text-[10px] md:text-[12px] font-bold opacity-60 mt-2 md:mt-4 text-[var(--bulletin-text)] uppercase tracking-widest">Sign in to your account.</p>
             </div>
 
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
-              <div>
-                <label className="block text-[11px] font-black uppercase tracking-[0.2em] opacity-40 mb-3 text-[var(--bulletin-text)]">Email</label>
-                <input type="email" placeholder="you@example.com" autoComplete="email" className={fieldBase} {...register('email')} />
-                {errors.email && <p className="mt-2 text-[12px] text-red-600 font-black uppercase tracking-widest">{errors.email.message}</p>}
+            {/* OTP Login (default) */}
+            {useOtp && !otpSent && (
+              <div className="space-y-8">
+                <div>
+                  <label className="block text-[11px] font-black uppercase tracking-[0.2em] opacity-40 mb-3 text-[var(--bulletin-text)]">Email</label>
+                  <input
+                    type="email"
+                    placeholder="you@example.com"
+                    autoComplete="email"
+                    className={fieldBase}
+                    value={otpEmail}
+                    onChange={e => { setOtpEmail(e.target.value); setOtpError(''); }}
+                    onKeyDown={e => e.key === 'Enter' && handleSendOtp()}
+                  />
+                  {otpError && <p className="mt-2 text-[12px] text-red-600 font-black uppercase tracking-widest">{otpError}</p>}
+                </div>
+                <button
+                  type="button"
+                  onClick={handleSendOtp}
+                  disabled={isSubmitting}
+                  className="w-full border-4 border-[var(--bulletin-border)] bg-[var(--bulletin-text)] px-6 py-4 text-[14px] font-black uppercase tracking-widest text-[var(--bulletin-bg)] shadow-[6px_6px_0_0_var(--bulletin-shadow)] hover:translate-y-1 hover:shadow-[4px_4px_0_0_var(--bulletin-shadow)] disabled:opacity-40 transition-all"
+                >
+                  {isSubmitting ? 'Sending...' : 'Send Login Code'}
+                </button>
+                <p className="text-center text-[11px] font-black uppercase tracking-widest opacity-50 text-[var(--bulletin-text)]">
+                  Use password instead?{' '}
+                  <button type="button" onClick={() => setUseOtp(false)} className="underline decoration-2 underline-offset-4 opacity-100 hover:text-[#ff6b6b]">
+                    Sign in with password
+                  </button>
+                </p>
               </div>
-              <div>
-                <label className="block text-[11px] font-black uppercase tracking-[0.2em] opacity-40 mb-3 text-[var(--bulletin-text)]">Password</label>
-                <div className="relative flex items-center">
-                  <input type={showPassword ? 'text' : 'password'} placeholder="Your password" autoComplete="current-password" className={`flex-1 pr-16 ${fieldBase}`} {...register('password')} />
-                  <button type="button" onClick={() => setShowPassword((p) => !p)} className="absolute right-4 text-[var(--bulletin-text)] opacity-40 hover:opacity-100 transition-colors">
-                    {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+            )}
+
+            {useOtp && otpSent && (
+              <div className="space-y-6">
+                <div>
+                  <p className="text-[11px] font-black uppercase tracking-[0.2em] text-[#ff6b6b] mb-3">Verify Identity</p>
+                  <h2 className="text-2xl font-black uppercase tracking-tighter text-[var(--bulletin-text)]">Enter the code.</h2>
+                  <p className="text-[13px] font-bold opacity-60 mt-2 text-[var(--bulletin-text)]">
+                    6-digit code sent to <span className="opacity-100 underline decoration-2">{otpEmail}</span>
+                  </p>
+                </div>
+                <div className="flex gap-3 justify-center my-4">
+                  {Array.from({ length: 6 }).map((_, i) => (
+                    <input
+                      key={i}
+                      id={`login-otp-${i}`}
+                      type="text"
+                      inputMode="numeric"
+                      autoComplete={i === 0 ? 'one-time-code' : 'off'}
+                      maxLength={1}
+                      value={otpCode[i] || ''}
+                      className={`w-12 h-14 text-center text-[22px] font-black border-4 border-[var(--bulletin-border)] bg-[var(--bulletin-bg)] text-[var(--bulletin-text)] shadow-[4px_4px_0_0_var(--bulletin-shadow)] focus:outline-none focus:ring-2 focus:ring-[var(--bulletin-text)] ${otpError ? 'border-red-500' : ''}`}
+                      onChange={e => {
+                        const val = e.target.value.replace(/\D/g, '');
+                        const next = otpCode.split('');
+                        next[i] = val.slice(-1);
+                        const joined = next.join('').slice(0, 6);
+                        setOtpCode(joined);
+                        setOtpError('');
+                        if (val && i < 5) document.getElementById(`login-otp-${i + 1}`)?.focus();
+                      }}
+                      onKeyDown={e => {
+                        if (e.key === 'Backspace' && !otpCode[i] && i > 0) document.getElementById(`login-otp-${i - 1}`)?.focus();
+                        if (e.key === 'Enter' && otpCode.length === 6) handleVerifyLoginOtp();
+                      }}
+                      onPaste={e => {
+                        const pasted = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 6);
+                        if (pasted) { setOtpCode(pasted); setOtpError(''); e.preventDefault(); document.getElementById(`login-otp-${Math.min(pasted.length, 5)}`)?.focus(); }
+                      }}
+                    />
+                  ))}
+                </div>
+                {otpError && <p className="text-[12px] text-red-600 font-black uppercase tracking-widest text-center">{otpError}</p>}
+                <button
+                  type="button"
+                  onClick={handleVerifyLoginOtp}
+                  disabled={isSubmitting || otpCode.length !== 6}
+                  className="w-full border-4 border-[var(--bulletin-border)] bg-[var(--bulletin-text)] px-6 py-4 text-[14px] font-black uppercase tracking-widest text-[var(--bulletin-bg)] shadow-[6px_6px_0_0_var(--bulletin-shadow)] hover:translate-y-1 hover:shadow-[4px_4px_0_0_var(--bulletin-shadow)] disabled:opacity-40 transition-all"
+                >
+                  {isSubmitting ? 'Verifying...' : 'Sign In'}
+                </button>
+                <div className="flex items-center justify-between">
+                  <button type="button" onClick={() => { setOtpSent(false); setOtpCode(''); setOtpError(''); }} className="text-[12px] font-black uppercase tracking-widest underline decoration-2 underline-offset-4 opacity-60 hover:opacity-100 text-[var(--bulletin-text)]">← Back</button>
+                  <button type="button" onClick={handleResendLoginOtp} disabled={resendCountdown > 0} className="text-[12px] font-black uppercase tracking-widest underline decoration-2 underline-offset-4 disabled:opacity-40 text-[var(--bulletin-text)]">
+                    {resendCountdown > 0 ? `Resend in ${resendCountdown}s` : 'Resend Code'}
                   </button>
                 </div>
-                {errors.password && <p className="mt-2 text-[12px] text-red-600 font-black uppercase tracking-widest">{errors.password.message}</p>}
-                <div className="mt-2 md:mt-4 flex justify-end">
-                  <Link
-                    to="/forgot-password"
-                    className="text-[11px] font-black uppercase tracking-widest text-[var(--bulletin-text)] opacity-60 hover:opacity-100 underline decoration-2 underline-offset-4 transition-all"
-                  >
-                    Forgot password?
-                  </Link>
-                </div>
-                <div className="mt-4 md:mt-8 p-3 md:p-5 border-2 border-dashed border-[var(--bulletin-border)] bg-[var(--bulletin-bg)] relative">
-                  <div className="absolute -top-3 left-4 bg-red-500 text-white text-[9px] font-black px-2 py-0.5 shadow-[2px_2px_0_0_rgba(0,0,0,1)]">
-                    SESSION PROTOCOL
-                  </div>
-                  <div className="flex items-start gap-2 md:gap-4">
-                <label className="relative flex h-6 w-6 md:h-8 md:w-8 flex-shrink-0 cursor-pointer items-center justify-center border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] shadow-[2px_2px_0_0_var(--bulletin-shadow)] md:shadow-[3px_3px_0_0_var(--bulletin-shadow)] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-none transition-all">
-                      <input
-                        type="checkbox"
-                        className="peer sr-only"
-                        checked={protocolAccepted}
-                        onChange={(e) => setProtocolAccepted(e.target.checked)}
-                        required
-                      />
-                      <Pin className="h-4 w-4 text-[var(--bulletin-text)] opacity-35 peer-checked:text-[#ff6b6b] peer-checked:fill-[#ff6b6b] peer-checked:opacity-100 peer-checked:rotate-45 transition-all" />
-                    </label>
-                    <div className="flex-1">
-                      <p className="text-[10px] font-black uppercase tracking-tight text-[var(--bulletin-text)] leading-tight">
-                        I acknowledge the <Link to="/terms" className="underline decoration-2 underline-offset-2">Honor Code</Link> & <Link to="/terms#privacy" className="underline decoration-2 underline-offset-2">Safety Protocols</Link> for this session.
-                      </p>
-                    </div>
-                  </div>
-                </div>
               </div>
-              <button type="submit" disabled={isSubmitting || !protocolAccepted}
-                className="w-full border-4 border-[var(--bulletin-border)] bg-[var(--bulletin-text)] px-6 md:px-8 py-4 md:py-5 text-[12px] md:text-[14px] font-black uppercase tracking-widest text-[var(--bulletin-bg)] shadow-[6px_6px_0_0_var(--bulletin-shadow)] md:shadow-[8px_8px_0_0_var(--bulletin-shadow)] hover:translate-y-1 hover:shadow-[4px_4px_0_0_var(--bulletin-shadow)] disabled:opacity-40 transition-all">
-                {isSubmitting ? 'Authenticating...' : 'Sign In'}
-              </button>
-            </form>
+            )}
+
+            {/* Password Login (fallback) */}
+            {!useOtp && (
+              <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
+                <div>
+                  <label className="block text-[11px] font-black uppercase tracking-[0.2em] opacity-40 mb-3 text-[var(--bulletin-text)]">Email</label>
+                  <input type="email" placeholder="you@example.com" autoComplete="email" className={fieldBase} {...register('email')} />
+                  {errors.email && <p className="mt-2 text-[12px] text-red-600 font-black uppercase tracking-widest">{errors.email.message}</p>}
+                </div>
+                <div>
+                  <label className="block text-[11px] font-black uppercase tracking-[0.2em] opacity-40 mb-3 text-[var(--bulletin-text)]">Password</label>
+                  <div className="relative flex items-center">
+                    <input type={showPassword ? 'text' : 'password'} placeholder="Your password" autoComplete="current-password" className={`flex-1 pr-16 ${fieldBase}`} {...register('password')} />
+                    <button type="button" onClick={() => setShowPassword((p) => !p)} className="absolute right-4 text-[var(--bulletin-text)] opacity-40 hover:opacity-100 transition-colors">
+                      {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                    </button>
+                  </div>
+                  {errors.password && <p className="mt-2 text-[12px] text-red-600 font-black uppercase tracking-widest">{errors.password.message}</p>}
+                  <div className="mt-4 flex justify-end">
+                    <Link to="/forgot-password" className="text-[11px] font-black uppercase tracking-widest text-[var(--bulletin-text)] opacity-60 hover:opacity-100 underline decoration-2 underline-offset-4">
+                      Forgot password?
+                    </Link>
+                  </div>
+                </div>
+                <button type="submit" disabled={isSubmitting}
+                  className="w-full border-4 border-[var(--bulletin-border)] bg-[var(--bulletin-text)] px-6 py-4 text-[14px] font-black uppercase tracking-widest text-[var(--bulletin-bg)] shadow-[6px_6px_0_0_var(--bulletin-shadow)] hover:translate-y-1 hover:shadow-[4px_4px_0_0_var(--bulletin-shadow)] disabled:opacity-40 transition-all">
+                  {isSubmitting ? 'Authenticating...' : 'Sign In'}
+                </button>
+                <p className="text-center text-[11px] font-black uppercase tracking-widest opacity-50 text-[var(--bulletin-text)]">
+                  Use email code instead?{' '}
+                  <button type="button" onClick={() => setUseOtp(true)} className="underline decoration-2 underline-offset-4 opacity-100 hover:text-[#ff6b6b]">
+                    Sign in with code
+                  </button>
+                </p>
+              </form>
+            )}
 
             <div className="flex items-center gap-3 md:gap-4 my-6 md:my-12">
               <div className="flex-1 h-1 bg-[var(--bulletin-border)] opacity-20" />

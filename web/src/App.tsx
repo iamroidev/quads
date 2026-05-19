@@ -52,7 +52,6 @@ const HomePage               = lazyWithRetry(() => import('./pages/Home'), 'home
 const DashboardPage          = lazyWithRetry(() => import('./pages/Dashboard'), 'dashboard');
 const LoginPage              = lazyWithRetry(() => import('./pages/Login'), 'login');
 const RegisterPage           = lazyWithRetry(() => import('./pages/Register'), 'register');
-const AuthCallbackPage       = lazyWithRetry(() => import('./pages/AuthCallback'), 'auth-callback');
 const ProfilePage            = lazyWithRetry(() => import('./pages/Profile'), 'profile');
 const NotFoundPage           = lazyWithRetry(() => import('./pages/NotFound'), 'not-found');
 const ProductsPage           = lazyWithRetry(() => import('./pages/Products'), 'products');
@@ -139,7 +138,6 @@ const App: React.FC = () => {
         />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
-        <Route path="/auth/callback" element={<AuthCallbackPage />} />
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
         <Route path="/reset-password" element={<ResetPasswordPage />} />
 

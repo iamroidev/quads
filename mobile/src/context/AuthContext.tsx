@@ -15,6 +15,10 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<void>;
   googleLogin: (credential: string, role?: 'buyer' | 'seller') => Promise<{ isNewUser?: boolean; needsProfileCompletion?: boolean }>;
   register: (data: Omit<RegisterPayload, 'supabaseAccessToken'> & { password: string; email: string }) => Promise<void>;
+  sendRegistrationOtp: (email: string) => Promise<void>;
+  verifyOtpAndRegister: (email: string, otp: string, profile: Omit<RegisterPayload, 'supabaseAccessToken'>) => Promise<void>;
+  sendLoginOtp: (email: string) => Promise<void>;
+  verifyOtpAndLogin: (email: string, otp: string) => Promise<void>;
   logout: () => Promise<void>;
   refreshUser: () => Promise<void>;
   viewMode: 'buyer' | 'seller';
@@ -141,29 +145,34 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
   }, []);
 
-  const register = useCallback(async (data: Omit<RegisterPayload, 'supabaseAccessToken'> & { password: string; email: string }) => {
-    const { data: authData, error } = await supabase.auth.signUp({
-      email: data.email.toLowerCase(),
-      password: data.password,
-      options: {
-        data: {
-          name: data.name,
-          role: data.role,
-        },
-      },
+  const sendRegistrationOtp = useCallback(async (email: string) => {
+    const { error } = await supabase.auth.signInWithOtp({
+      email: email.toLowerCase(),
+      options: { shouldCreateUser: true },
     });
+    if (error) throw new Error(error.message || 'Failed to send verification code.');
+  }, []);
 
-    if (error || !authData.session?.access_token) {
-      throw new Error(error?.message || 'Registration failed at authentication provider.');
+  const verifyOtpAndRegister = useCallback(async (
+    email: string,
+    otp: string,
+    profile: Omit<RegisterPayload, 'supabaseAccessToken'>,
+  ) => {
+    const { data: { session }, error } = await supabase.auth.verifyOtp({
+      email: email.toLowerCase(),
+      token: otp.trim(),
+      type: 'email',
+    });
+    if (error || !session?.access_token) {
+      throw new Error(
+        error?.message?.toLowerCase().includes('expired') || error?.message?.toLowerCase().includes('invalid')
+          ? 'Incorrect or expired code. Please check and try again.'
+          : error?.message || 'Verification failed.'
+      );
     }
-
     const response = await authService.register({
-      supabaseAccessToken: authData.session.access_token,
-      name: data.name,
-      phone: data.phone,
-      role: data.role,
-      studentId: data.studentId,
-      location: data.location,
+      supabaseAccessToken: session.access_token,
+      ...profile,
     });
     const { user: newUser, token: newToken } = response.data;
     const normalized = normalizeUser(newUser);
@@ -171,7 +180,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     await SecureStore.setItemAsync('user', JSON.stringify(newUser));
     setToken(newToken);
     setUser(newUser);
-    
     const storedViewMode = await SecureStore.getItemAsync('viewMode');
     if (storedViewMode === 'buyer' || storedViewMode === 'seller') {
       setViewModeState(storedViewMode);
@@ -181,6 +189,55 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
     await syncPushSubscription();
   }, []);
+
+  const sendLoginOtp = useCallback(async (email: string) => {
+    const { error } = await supabase.auth.signInWithOtp({
+      email: email.toLowerCase(),
+      options: { shouldCreateUser: false },
+    });
+    if (error) {
+      const msg = error.message?.toLowerCase() || '';
+      if (msg.includes('user not found') || msg.includes('no user')) {
+        throw new Error('No account found with that email. Please sign up first.');
+      }
+      throw new Error(error.message || 'Failed to send login code.');
+    }
+  }, []);
+
+  const verifyOtpAndLogin = useCallback(async (email: string, otp: string) => {
+    const { data: { session }, error } = await supabase.auth.verifyOtp({
+      email: email.toLowerCase(),
+      token: otp.trim(),
+      type: 'email',
+    });
+    if (error || !session?.access_token) {
+      throw new Error(
+        error?.message?.toLowerCase().includes('expired') || error?.message?.toLowerCase().includes('invalid')
+          ? 'Incorrect or expired code. Please check and try again.'
+          : error?.message || 'Verification failed.'
+      );
+    }
+    const response = await authService.login({ supabaseAccessToken: session.access_token });
+    const { user: newUser, token: newToken } = response.data;
+    const normalized = normalizeUser(newUser);
+    await SecureStore.setItemAsync('token', newToken);
+    await SecureStore.setItemAsync('user', JSON.stringify(newUser));
+    setToken(newToken);
+    setUser(newUser);
+    const storedViewMode = await SecureStore.getItemAsync('viewMode');
+    if (storedViewMode === 'buyer' || storedViewMode === 'seller') {
+      setViewModeState(storedViewMode);
+    } else if (normalized) {
+      const defaultMode = normalized.role === 'seller' || normalized.role === 'admin' ? 'seller' : 'buyer';
+      await setViewMode(defaultMode);
+    }
+    await syncPushSubscription();
+  }, []);
+
+  // kept for backwards compat — not used by new flows
+  const register = useCallback(async (data: Omit<RegisterPayload, 'supabaseAccessToken'> & { password: string; email: string }) => {
+    await sendRegistrationOtp(data.email);
+  }, [sendRegistrationOtp]);
 
   const [unreadMessagesCount, setUnreadMessagesCount] = useState(0);
   const [unreadNotificationsCount, setUnreadNotificationsCount] = useState(0);
@@ -244,6 +301,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         login,
         googleLogin,
         register,
+        sendRegistrationOtp,
+        verifyOtpAndRegister,
+        sendLoginOtp,
+        verifyOtpAndLogin,
         logout,
         refreshUser,
         viewMode,

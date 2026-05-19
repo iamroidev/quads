@@ -21,9 +21,14 @@ interface AuthContextType {
   token: string | null;
   isLoading: boolean;
   isAuthenticated: boolean;
-  register: (data: Omit<RegisterData, 'supabaseAccessToken'> & { email: string; password: string }) => Promise<void | 'pending'>;
+  // OTP registration flow
+  sendRegistrationOtp: (email: string) => Promise<void>;
+  verifyOtpAndRegister: (email: string, otp: string, profile: Omit<RegisterData, 'supabaseAccessToken'>) => Promise<void>;
+  // OTP login flow
+  sendLoginOtp: (email: string) => Promise<void>;
+  verifyOtpAndLogin: (email: string, otp: string) => Promise<void>;
+  // Password login (kept for admin/support)
   login: (data: { email: string; password: string }) => Promise<void>;
-  finalizeAuth: (supabaseAccessToken: string) => Promise<void>;
   googleLogin: (credential: string, role?: 'buyer' | 'seller', profileData?: Partial<User>) => Promise<{ needsProfileCompletion: boolean; isNewUser?: boolean }>;
   logout: () => Promise<void>;
   updateProfile: (data: UpdateProfileData) => Promise<void>;
@@ -69,120 +74,111 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     loadUser();
   }, [token]);
 
-  const register = useCallback(async (data: Omit<RegisterData, 'supabaseAccessToken' | 'roles'> & { email: string; password: string; role?: any; roles?: any }) => {
-    if (!isSupabaseConfigured) {
-      toast.error('Authentication service is currently offline. Please contact the administrator.');
-      throw new Error('Supabase is not configured.');
-    }
-
-    const { data: authData, error } = await supabase.auth.signUp({
-      email: data.email.toLowerCase(),
-      password: data.password,
-      options: {
-        emailRedirectTo: 'https://quadsmarket.tech/auth/callback',
-        data: {
-          name: data.name,
-          roles: data.roles || [data.role],
-        },
-      },
-    });
-
-    if (error) {
-      throw new Error(error.message || 'Registration failed at authentication provider.');
-    }
-
-    // Email confirmation required — session is null until user clicks the link.
-    // Stash the profile data so the callback page can finish creating the DB record.
-    if (!authData.session?.access_token && authData.user) {
-      sessionStorage.setItem('pending_registration', JSON.stringify({
-        name: data.name,
-        phone: data.phone,
-        roles: data.roles || [data.role],
-        studentId: data.studentId,
-        department: data.department,
-        residenceHall: data.residenceHall,
-        currentLevel: data.currentLevel,
-        location: data.location,
-      }));
-      toast.success('Check your email — click the confirmation link to finish creating your account.', { duration: 8000 });
-      return 'pending' as const;
-    }
-
-    if (!authData.session?.access_token) {
-      throw new Error('Registration succeeded but no session was created. Please check your email.');
-    }
-
-    const response = await authService.register({
-      supabaseAccessToken: authData.session.access_token,
-      name: data.name,
-      phone: data.phone,
-      roles: data.roles || [data.role],
-      studentId: data.studentId,
-      department: data.department,
-      residenceHall: data.residenceHall,
-      currentLevel: data.currentLevel,
-      location: data.location,
-    });
-    const { user: newUser, token: newToken } = response.data;
-
-    const sanitizedUser = { 
-      ...newUser, 
-      roles: newUser.roles || [],
-      viewMode: newUser.viewMode || (newUser.roles?.includes('seller') ? 'seller' : 'buyer')
+  const _persistUser = useCallback((newUser: any, newToken: string) => {
+    const sanitized = {
+      ...newUser,
+      roles:    newUser.roles    || [],
+      viewMode: newUser.viewMode || (newUser.roles?.includes('seller') ? 'seller' : 'buyer'),
     };
     localStorage.setItem('token', newToken);
-    localStorage.setItem('user', JSON.stringify(sanitizedUser));
+    localStorage.setItem('user', JSON.stringify(sanitized));
     setToken(newToken);
-    setUser(sanitizedUser);
-    toast.success('Account created successfully!', { duration: 1400 });
-    trySubscribeWebPush();
+    setUser(sanitized);
+    return sanitized;
   }, []);
 
-  const login = useCallback(async (data: { email: string; password: string }) => {
-    if (!isSupabaseConfigured) {
-      toast.error('Authentication service is currently offline. Please contact the administrator.');
-      throw new Error('Supabase is not configured.');
-    }
+  // ── OTP registration ────────────────────────────────────────────────────────
 
+  const sendRegistrationOtp = useCallback(async (email: string) => {
+    if (!isSupabaseConfigured) throw new Error('Authentication service offline.');
+    const { error } = await supabase.auth.signInWithOtp({
+      email: email.toLowerCase(),
+      options: { shouldCreateUser: true },
+    });
+    if (error) throw new Error(error.message || 'Failed to send verification code.');
+  }, []);
+
+  const verifyOtpAndRegister = useCallback(async (
+    email: string,
+    otp: string,
+    profile: Omit<RegisterData, 'supabaseAccessToken'>,
+  ) => {
+    const { data: { session }, error } = await supabase.auth.verifyOtp({
+      email: email.toLowerCase(),
+      token: otp.trim(),
+      type: 'email',
+    });
+    if (error || !session?.access_token) {
+      throw new Error(error?.message?.includes('expired') || error?.message?.includes('invalid')
+        ? 'Incorrect or expired code. Please check and try again.'
+        : error?.message || 'Verification failed.');
+    }
+    const response = await authService.register({
+      supabaseAccessToken: session.access_token,
+      ...profile,
+    });
+    const { user: newUser, token: newToken } = response.data;
+    _persistUser(newUser, newToken);
+    trySubscribeWebPush();
+  }, [_persistUser]);
+
+  // ── OTP login ───────────────────────────────────────────────────────────────
+
+  const sendLoginOtp = useCallback(async (email: string) => {
+    if (!isSupabaseConfigured) throw new Error('Authentication service offline.');
+    // shouldCreateUser: false so we don't accidentally register someone trying to log in
+    const { error } = await supabase.auth.signInWithOtp({
+      email: email.toLowerCase(),
+      options: { shouldCreateUser: false },
+    });
+    if (error) {
+      const msg = error.message?.toLowerCase() || '';
+      if (msg.includes('user not found') || msg.includes('no user')) {
+        throw new Error('No account found with that email address. Please sign up first.');
+      }
+      throw new Error(error.message || 'Failed to send login code.');
+    }
+  }, []);
+
+  const verifyOtpAndLogin = useCallback(async (email: string, otp: string) => {
+    const { data: { session }, error } = await supabase.auth.verifyOtp({
+      email: email.toLowerCase(),
+      token: otp.trim(),
+      type: 'email',
+    });
+    if (error || !session?.access_token) {
+      throw new Error(error?.message?.includes('expired') || error?.message?.includes('invalid')
+        ? 'Incorrect or expired code. Please check and try again.'
+        : error?.message || 'Verification failed.');
+    }
+    const response = await authService.login({ supabaseAccessToken: session.access_token });
+    const { user: newUser, token: newToken } = response.data;
+    const sanitized = _persistUser(newUser, newToken);
+    toast.success(`Welcome back, ${sanitized.name || newUser.name}!`, { duration: 1200 });
+    trySubscribeWebPush();
+  }, [_persistUser]);
+
+  // ── Password login (admin/support only) ─────────────────────────────────────
+
+  const login = useCallback(async (data: { email: string; password: string }) => {
+    if (!isSupabaseConfigured) throw new Error('Authentication service offline.');
     const { data: authData, error } = await supabase.auth.signInWithPassword({
       email: data.email.toLowerCase(),
       password: data.password,
     });
-
     if (error || !authData.session?.access_token) {
       const msg = error?.message?.toLowerCase() || '';
-      if (msg.includes('email not confirmed')) {
-        throw new Error('Please confirm your email address before logging in. Check your inbox.');
-      }
       if (msg.includes('invalid login credentials') || msg.includes('invalid credentials')) {
-        // Supabase gives the same error for wrong password and unregistered email.
-        // Check if the email exists in Supabase to give a clearer message.
-        const { data: methods } = await supabase.auth.signInWithOtp({ email: data.email.toLowerCase(), options: { shouldCreateUser: false } }).catch(() => ({ data: null }));
-        const emailExists = methods !== null;
-        throw new Error(emailExists
-          ? 'Incorrect password. Please try again or reset your password.'
-          : 'No account found with that email address. Please sign up first.'
-        );
+        throw new Error('Incorrect email or password.');
       }
       throw new Error(error?.message || 'Login failed. Please try again.');
     }
-
     const response = await authService.login({ supabaseAccessToken: authData.session.access_token });
     const { user: newUser, token: newToken } = response.data;
-    const sanitizedUser = { 
-      ...newUser, 
-      roles: newUser.roles || [],
-      viewMode: newUser.viewMode || (newUser.roles?.includes('seller') ? 'seller' : 'buyer')
-    };
-
-    localStorage.setItem('token', newToken);
-    localStorage.setItem('user', JSON.stringify(sanitizedUser));
-    setToken(newToken);
-    setUser(sanitizedUser);
-    toast.success(`Welcome back, ${newUser.name}!`, { duration: 1200 });
-    // Subscribe to web push non-blockingly after login
+    const sanitized = _persistUser(newUser, newToken);
+    toast.success(`Welcome back, ${sanitized.name || newUser.name}!`, { duration: 1200 });
     trySubscribeWebPush();
-  }, []);
+  }, [_persistUser]);
 
   const googleLogin = useCallback(async (credential: string, role: 'buyer' | 'seller' | undefined = 'buyer', profileData?: Partial<User>) => {
     // 1. Exchange Google ID token for Supabase session
@@ -217,42 +213,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
   }, []);
 
-  // Called by /auth/callback after email confirmation — logs in or registers using the Supabase session
-  const finalizeAuth = useCallback(async (supabaseAccessToken: string) => {
-    let response;
-    try {
-      response = await authService.login({ supabaseAccessToken });
-    } catch (err: any) {
-      if (err?.response?.status === 401 || err?.response?.status === 404) {
-        const pending = sessionStorage.getItem('pending_registration');
-        const profile = pending ? JSON.parse(pending) : {};
-        response = await authService.register({
-          supabaseAccessToken,
-          name:          profile.name          || 'Student',
-          phone:         profile.phone          || '',
-          roles:         profile.roles          || ['buyer'],
-          studentId:     profile.studentId      || '',
-          department:    profile.department     || '',
-          residenceHall: profile.residenceHall  || '',
-          currentLevel:  profile.currentLevel   || '',
-          location:      profile.location       || '',
-        });
-        sessionStorage.removeItem('pending_registration');
-      } else {
-        throw err;
-      }
-    }
-    const { user: newUser, token: newToken } = response.data;
-    const sanitized = {
-      ...newUser,
-      roles:    newUser.roles    || [],
-      viewMode: newUser.viewMode || (newUser.roles?.includes('seller') ? 'seller' : 'buyer'),
-    };
-    localStorage.setItem('token', newToken);
-    localStorage.setItem('user', JSON.stringify(sanitized));
-    setToken(newToken);
-    setUser(sanitized);
-  }, []);
 
   const logout = useCallback(async () => {
     try {
@@ -328,9 +288,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         token,
         isLoading,
         isAuthenticated,
-        register,
+        sendRegistrationOtp,
+        verifyOtpAndRegister,
+        sendLoginOtp,
+        verifyOtpAndLogin,
         login,
-        finalizeAuth,
         googleLogin,
         logout,
         updateProfile,
