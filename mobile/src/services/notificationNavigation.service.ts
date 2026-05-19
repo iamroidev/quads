@@ -8,14 +8,11 @@ if (!isExpoGo) {
   try {
     Notifications = require('expo-notifications');
   } catch (e) {
-    console.warn("Failed to load expo-notifications:", e);
+    console.warn('Failed to load expo-notifications:', e);
   }
 }
-
 if (!Notifications) {
-  Notifications = {
-    getLastNotificationResponseAsync: async () => null,
-  };
+  Notifications = { getLastNotificationResponseAsync: async () => null };
 }
 
 const getIdFromUrl = (url: string | undefined, resource: string): string | null => {
@@ -24,56 +21,77 @@ const getIdFromUrl = (url: string | undefined, resource: string): string | null 
   return match?.[1] || null;
 };
 
-const routeFromData = (data: any): { type: 'product' | 'order' | 'chat' | 'none'; id?: string } => {
+/**
+ * Determines where to navigate based on notification payload data.
+ *
+ * Data fields (sent by server):
+ *   conversationId / chatId  → opens Chat screen (message from seller/buyer/AI)
+ *   orderId                  → opens OrderDetail
+ *   productId                → opens ProductDetail
+ *   type: 'promotion'        → opens HomeTab (broadcast promotions)
+ *   type: 'system'           → opens Alerts
+ *   (fallback)               → opens Alerts
+ */
+const routeFromData = (data: any): {
+  type: 'product' | 'order' | 'chat' | 'home' | 'alerts';
+  id?: string;
+  extra?: any;
+} => {
   const url = typeof data?.url === 'string' ? data.url : undefined;
-
-  const productId = data?.productId || getIdFromUrl(url, 'products');
-  if (typeof productId === 'string') return { type: 'product', id: productId };
-
-  const orderId = data?.orderId || getIdFromUrl(url, 'orders');
-  if (typeof orderId === 'string') return { type: 'order', id: orderId };
+  const notifType = data?.type as string | undefined;
 
   const conversationId = data?.conversationId || data?.chatId || getIdFromUrl(url, 'messages');
-  if (typeof conversationId === 'string') return { type: 'chat', id: conversationId };
+  if (conversationId) return { type: 'chat', id: conversationId, extra: data };
 
-  return { type: 'none' };
+  const orderId = data?.orderId || getIdFromUrl(url, 'orders');
+  if (orderId) return { type: 'order', id: orderId };
+
+  const productId = data?.productId || getIdFromUrl(url, 'products');
+  if (productId) return { type: 'product', id: productId };
+
+  if (notifType === 'promotion') return { type: 'home' };
+
+  return { type: 'alerts' };
 };
 
 export const openNotificationTarget = (response: any) => {
-  const data = response.notification.request.content.data || {};
+  const data = response?.notification?.request?.content?.data || {};
   const target = routeFromData(data);
 
   if (!navigationRef.isReady()) return;
 
-  if (target.type === 'product' && target.id) {
-    navigationRef.navigate('ProductsTab', {
-      screen: 'ProductDetail',
-      params: { productId: target.id },
-    });
-    return;
+  switch (target.type) {
+    case 'chat':
+      navigationRef.navigate('MessagesTab', {
+        screen: 'Chat',
+        params: {
+          conversationId: target.id,
+          otherUser: data?.otherUser || null,
+          productTitle: data?.productTitle,
+        },
+      });
+      break;
+    case 'order':
+      navigationRef.navigate('OrdersTab', {
+        screen: 'OrderDetail',
+        params: { orderId: target.id },
+      });
+      break;
+    case 'product':
+      navigationRef.navigate('ProductsTab', {
+        screen: 'ProductDetail',
+        params: { productId: target.id },
+      });
+      break;
+    case 'home':
+      navigationRef.navigate('HomeTab');
+      break;
+    case 'alerts':
+    default:
+      // 'Alerts' is the correct name for NotificationsScreen inside ProfileStack
+      navigationRef.navigate('ProfileTab', { screen: 'Alerts' });
+      break;
   }
-
-  if (target.type === 'order' && target.id) {
-    navigationRef.navigate('OrdersTab', {
-      screen: 'OrderDetail',
-      params: { orderId: target.id },
-    });
-    return;
-  }
-
-  if (target.type === 'chat' && target.id) {
-    navigationRef.navigate('MessagesTab', {
-      screen: 'Chat',
-      params: {
-        conversationId: target.id,
-        otherUser: data?.otherUser || null,
-        productTitle: data?.productTitle,
-      },
-    });
-    return;
-  }
-
-  navigationRef.navigate('Notifications');
 };
 
 export const handleInitialNotificationOpen = async () => {
@@ -81,19 +99,12 @@ export const handleInitialNotificationOpen = async () => {
   if (!response) return;
 
   let attempts = 0;
-  const maxAttempts = 20;
-
   const tryNavigate = () => {
     if (navigationRef.isReady()) {
       openNotificationTarget(response);
       return;
     }
-
-    attempts += 1;
-    if (attempts < maxAttempts) {
-      setTimeout(tryNavigate, 150);
-    }
+    if (++attempts < 20) setTimeout(tryNavigate, 150);
   };
-
   tryNavigate();
 };
