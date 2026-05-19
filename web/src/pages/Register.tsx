@@ -1,13 +1,15 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate, useSearchParams, useLocation } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Eye, EyeOff, Check, ArrowRight, Scissors, Pin } from 'lucide-react';
+import { Eye, EyeOff, Check, ArrowRight, Scissors, Pin, ChevronDown, X } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import toast from 'react-hot-toast';
 import { GoogleLogin } from '@react-oauth/google';
 import BrandMark from '../components/layout/BrandMark';
+import referenceService from '../services/reference.service';
+import type { Program, Hall } from '../services/reference.service';
 
 const registerSchema = z
   .object({
@@ -90,6 +92,95 @@ const StringLine: React.FC<{ from: string; to: string }> = ({ from, to }) => {
   );
 };
 
+// ── Searchable combobox ────────────────────────────────────────────────────────
+interface SearchComboboxProps {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  options: string[];
+  placeholder?: string;
+  error?: string;
+  required?: boolean;
+}
+
+const SearchCombobox: React.FC<SearchComboboxProps> = ({
+  label, value, onChange, options, placeholder = 'Search...', error, required,
+}) => {
+  const [query, setQuery] = useState(value || '');
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  const filtered = query.trim()
+    ? options.filter(o => o.toLowerCase().includes(query.toLowerCase()))
+    : options;
+
+  // Close on outside click
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
+
+  // Keep local query in sync if parent value changes (e.g. prefill)
+  useEffect(() => { setQuery(value || ''); }, [value]);
+
+  const select = (opt: string) => {
+    onChange(opt);
+    setQuery(opt);
+    setOpen(false);
+  };
+
+  const clear = () => { onChange(''); setQuery(''); };
+
+  return (
+    <div>
+      <label className="block text-[11px] font-black uppercase tracking-[0.2em] opacity-40 mb-3 text-[var(--bulletin-text)]">
+        {label}{required && ' *'}
+      </label>
+      <div ref={ref} className="relative">
+        <div className="relative flex items-center">
+          <input
+            type="text"
+            className={`w-full border-4 border-[var(--bulletin-border)] bg-[var(--bulletin-bg)] px-4 py-4 text-[16px] font-black focus:outline-none focus:ring-2 focus:ring-[var(--bulletin-text)] text-[var(--bulletin-text)] placeholder:text-[var(--bulletin-text)] placeholder:opacity-30 shadow-[4px_4px_0_0_var(--bulletin-shadow)] pr-16`}
+            placeholder={placeholder}
+            value={query}
+            onChange={e => { setQuery(e.target.value); onChange(e.target.value); setOpen(true); }}
+            onFocus={() => setOpen(true)}
+            autoComplete="off"
+          />
+          <div className="absolute right-2 flex items-center gap-1">
+            {value && (
+              <button type="button" onClick={clear} className="p-1 opacity-40 hover:opacity-100">
+                <X className="h-4 w-4 text-[var(--bulletin-text)]" />
+              </button>
+            )}
+            <button type="button" onClick={() => setOpen(o => !o)} className="p-1 opacity-40 hover:opacity-100">
+              <ChevronDown className="h-4 w-4 text-[var(--bulletin-text)]" />
+            </button>
+          </div>
+        </div>
+        {open && filtered.length > 0 && (
+          <div className="absolute z-50 w-full border-4 border-t-0 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] shadow-[4px_4px_0_0_var(--bulletin-shadow)] max-h-52 overflow-y-auto">
+            {filtered.map(opt => (
+              <button
+                key={opt}
+                type="button"
+                className={`w-full px-4 py-3 text-left text-[13px] font-bold hover:bg-[var(--bulletin-text)] hover:text-[var(--bulletin-bg)] transition-colors ${value === opt ? 'bg-[var(--bulletin-text)] text-[var(--bulletin-bg)]' : 'text-[var(--bulletin-text)]'}`}
+                onMouseDown={e => { e.preventDefault(); select(opt); }}
+              >
+                {opt}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+      {error && <p className="mt-2 text-[12px] text-red-600 font-black uppercase tracking-widest">{error}</p>}
+    </div>
+  );
+};
+
 const RegisterPage: React.FC = () => {
   const { user, register: registerUser, googleLogin } = useAuth();
   const navigate = useNavigate();
@@ -99,13 +190,25 @@ const RegisterPage: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  
+
+  // Reference data for campus dropdowns
+  const [programs, setPrograms] = useState<Program[]>([]);
+  const [halls, setHalls] = useState<Hall[]>([]);
+  const [levels, setLevels] = useState<string[]>([]);
+  useEffect(() => {
+    referenceService.getAll().then(data => {
+      setPrograms(data.programs);
+      setHalls(data.halls);
+      setLevels(data.levels);
+    }).catch(() => {});
+  }, []);
+
   // Initialize step from sessionStorage if available
   const [step, setStep] = useState<Step>(() => {
     const saved = sessionStorage.getItem('reg_step');
     return (saved ? Number(saved) : 1) as Step;
   });
-  
+
   const [roleShake, setRoleShake] = useState(false);
   const [protocolAccepted, setProtocolAccepted] = useState(() => {
     return sessionStorage.getItem('reg_protocol') === 'true';
@@ -490,35 +593,36 @@ const RegisterPage: React.FC = () => {
                 <h1 className="text-3xl font-black uppercase tracking-tighter mb-2 text-[var(--bulletin-text)]">Campus Details</h1>
                 <p className="text-[12px] font-bold opacity-60 mb-8 text-[var(--bulletin-text)]">Help others know where you're from.</p>
                 <div className="space-y-6">
-                  <div>
-                    <label className="block text-[11px] font-black uppercase tracking-[0.2em] opacity-40 mb-3 text-[var(--bulletin-text)]">Program of Study</label>
-                    <input type="text" placeholder="e.g. Geological Engineering" className={fieldBase} {...register('department')} />
-                    {errors.department && <p className="mt-2 text-[12px] text-red-600 font-black uppercase tracking-widest">{errors.department.message}</p>}
-                  </div>
-                  <div>
-                    <label className="block text-[11px] font-black uppercase tracking-[0.2em] opacity-40 mb-3 text-[var(--bulletin-text)]">Residence Hall / Hostel</label>
-                    <input 
-                      type="text" 
-                      placeholder="e.g. Chamber of Mines Hall" 
-                      className={fieldBase} 
-                      {...register('residenceHall')} 
-                    />
-                    {errors.residenceHall && <p className="mt-2 text-[12px] text-red-600 font-black uppercase tracking-widest">{errors.residenceHall.message}</p>}
-                  </div>
-
-                  <div>
-                    <label className="block text-[11px] font-black uppercase tracking-[0.2em] opacity-40 mb-3 text-[var(--bulletin-text)]">Academic Level / Status</label>
-                    <input 
-                      type="text" 
-                      placeholder="e.g. 400, Graduate, or Staff" 
-                      className={fieldBase} 
-                      {...register('currentLevel')} 
-                    />
-                    {errors.currentLevel && <p className="mt-2 text-[12px] text-red-600 font-black uppercase tracking-widest">{errors.currentLevel.message}</p>}
-                  </div>
+                  <SearchCombobox
+                    label="Program of Study"
+                    required
+                    value={watch('department') || ''}
+                    onChange={v => setValue('department', v, { shouldValidate: true })}
+                    options={programs.map(p => p.name)}
+                    placeholder="e.g. Geological Engineering"
+                    error={errors.department?.message}
+                  />
+                  <SearchCombobox
+                    label="Residence Hall / Hostel"
+                    required
+                    value={watch('residenceHall') || ''}
+                    onChange={v => setValue('residenceHall', v, { shouldValidate: true })}
+                    options={halls.map(h => h.name)}
+                    placeholder="e.g. Chambers of Mines Hall"
+                    error={errors.residenceHall?.message}
+                  />
+                  <SearchCombobox
+                    label="Academic Level / Status"
+                    required
+                    value={watch('currentLevel') || ''}
+                    onChange={v => setValue('currentLevel', v, { shouldValidate: true })}
+                    options={levels}
+                    placeholder="e.g. 400"
+                    error={errors.currentLevel?.message}
+                  />
                   <div>
                     <label className="block text-[11px] font-black uppercase tracking-[0.2em] opacity-40 mb-3 text-[var(--bulletin-text)]">Location <span className="font-bold opacity-60">— optional</span></label>
-                    <input type="text" placeholder="e.g. Jubilee Hostel" className={fieldBase} {...register('location')} />
+                    <input type="text" placeholder="e.g. Tarkwa" className={fieldBase} {...register('location')} />
                   </div>
                 </div>
                 <div className="flex gap-4 mt-10">

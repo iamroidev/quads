@@ -18,3 +18,4 @@ mobile/.expo/
 mobile/android/
 mobile/ios/
 mobile/web-build/
+.claude/

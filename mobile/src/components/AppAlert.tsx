@@ -1,6 +1,7 @@
 import React from 'react';
 import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
-import { colors, shadows } from '../theme';
+import { shadows } from '../theme';
+import { useColors } from '../theme/ThemeContext';
 
 interface AppAlertProps {
   visible: boolean;
@@ -10,6 +11,17 @@ interface AppAlertProps {
 }
 
 const AppAlert: React.FC<AppAlertProps> = ({ visible, title, message, onClose }) => {
+  const colors = useColors();
+
+  const styles = React.useMemo(() => StyleSheet.create({
+    backdrop: { flex: 1, backgroundColor: colors.overlay, justifyContent: 'center', padding: 20 },
+    card: { backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border, padding: 18, ...shadows.bulletin },
+    title: { color: colors.text, fontSize: 15, fontWeight: '800', textTransform: 'uppercase', letterSpacing: 1 },
+    message: { marginTop: 8, color: colors.muted, fontSize: 13, lineHeight: 20 },
+    btn: { marginTop: 14, alignSelf: 'flex-end', backgroundColor: colors.text, paddingHorizontal: 16, paddingVertical: 9, ...shadows.bulletin },
+    btnText: { color: colors.bg, fontSize: 11, fontWeight: '800', textTransform: 'uppercase', letterSpacing: 1.2 },
+  }), [colors]);
+
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
       <View style={styles.backdrop}>
@@ -24,14 +36,5 @@ const AppAlert: React.FC<AppAlertProps> = ({ visible, title, message, onClose })
     </Modal>
   );
 };
-
-const styles = StyleSheet.create({
-  backdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.35)', justifyContent: 'center', padding: 20 },
-  card: { backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border, padding: 18, ...shadows.bulletin },
-  title: { color: colors.text, fontSize: 15, fontWeight: '800', textTransform: 'uppercase', letterSpacing: 1 },
-  message: { marginTop: 8, color: colors.muted, fontSize: 13, lineHeight: 20 },
-  btn: { marginTop: 14, alignSelf: 'flex-end', backgroundColor: colors.text, paddingHorizontal: 16, paddingVertical: 9, ...shadows.bulletin },
-  btnText: { color: '#fff', fontSize: 11, fontWeight: '800', textTransform: 'uppercase', letterSpacing: 1.2 },
-});
 
 export default AppAlert;

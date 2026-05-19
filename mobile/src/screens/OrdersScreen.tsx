@@ -7,33 +7,89 @@ import {
   Text,
   TouchableOpacity,
   View,
+  Dimensions,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import orderService, { Order } from '../services/order.service';
 import { useAuth } from '../context/AuthContext';
-import { colors, shadows } from '../theme';
+import { shadows } from '../theme';
+import { useColors } from '../theme/ThemeContext';
 import ScreenHeader from '../components/ScreenHeader';
 
-const STATUS_COLORS: Record<string, { bg: string; text: string }> = {
-  pending: { bg: '#fef3c7', text: '#92400e' },
-  paid: { bg: '#dbeafe', text: '#1e40af' },
-  confirmed: { bg: '#e0e7ff', text: '#3730a3' },
-  ready: { bg: '#d1fae5', text: '#065f46' },
-  completed: { bg: '#d1fae5', text: '#065f46' },
-  cancelled: { bg: '#fee2e2', text: '#b91c1c' },
-  disputed: { bg: '#fce7f3', text: '#9d174d' },
-};
+const getStatusColors = (colors: any) => ({
+  pending:   { bg: colors.metric1Bg,        text: colors.metric1Text },
+  paid:      { bg: colors.surfaceSecondary,  text: colors.text },
+  confirmed: { bg: colors.surfaceSecondary,  text: colors.text },
+  ready:     { bg: colors.successTint,       text: colors.successTintText },
+  completed: { bg: colors.successTint,       text: colors.successTintText },
+  cancelled: { bg: colors.dangerTint,        text: colors.dangerTintText },
+  disputed:  { bg: colors.dangerTint,        text: colors.dangerTintText },
+});
 
 const formatDate = (d: string) =>
   new Date(d).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
 
 const OrdersScreen = ({ navigation }: any) => {
+  const colors = useColors();
+  const { width: _sw } = Dimensions.get('window');
+  const isMobile = _sw < 640;
   const { user } = useAuth();
   const [tab, setTab] = useState<'purchases' | 'sales'>('purchases');
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [status, setStatus] = useState<string>('all');
+
+  const styles = React.useMemo(() => StyleSheet.create({
+    container: { flex: 1, backgroundColor: colors.bg },
+    tabs: {
+      flexDirection: 'row',
+      backgroundColor: colors.surface,
+      borderBottomWidth: 1,
+      borderBottomColor: colors.boardBorder,
+    },
+    tab: {
+      flex: 1,
+      paddingVertical: 12,
+      alignItems: 'center',
+      borderBottomWidth: 2,
+      borderBottomColor: 'transparent',
+    },
+    tabActive: { borderBottomColor: colors.text },
+    tabText: { fontSize: 11, fontWeight: '800', color: colors.textSecondary, textTransform: 'uppercase', letterSpacing: 1.1 },
+    tabTextActive: { color: colors.text, fontWeight: '900' },
+    statusRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, paddingHorizontal: 12, paddingVertical: 10, backgroundColor: colors.surface, borderBottomWidth: 1, borderBottomColor: colors.boardBorder },
+    statusChip: { borderWidth: 1, borderColor: colors.boardBorder, paddingHorizontal: 10, paddingVertical: 6, backgroundColor: colors.surfaceSecondary },
+    statusChipActive: { backgroundColor: colors.primary, borderColor: colors.boardBorder },
+    statusChipText: { fontSize: 10, fontWeight: '800', color: colors.textSecondary, textTransform: 'uppercase', letterSpacing: 1 },
+    statusChipTextActive: { color: colors.primaryContent },
+    centered: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+    list: { padding: 12, gap: 10 },
+    card: {
+      backgroundColor: colors.surface,
+      borderWidth: 2,
+      borderColor: colors.border,
+      borderRadius: 0,
+      padding: 14,
+      ...shadows.bulletin,
+    },
+    cardTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+    orderNumber: { fontSize: 12, fontWeight: '700', color: colors.muted, letterSpacing: 0.5 },
+    statusBadge: { paddingHorizontal: 8, paddingVertical: 3, borderRadius: 0 },
+    statusText: { fontSize: 10, fontWeight: '700', letterSpacing: 0.5 },
+    itemTitle: { marginTop: 6, fontSize: isMobile ? 13 : 15, fontWeight: '600', color: colors.text },
+    cardBottom: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginTop: 8,
+    },
+    amount: { fontSize: isMobile ? 14 : 16, fontWeight: '800', color: colors.success },
+    date: { fontSize: 12, color: colors.muted },
+    party: { marginTop: 6, fontSize: 12, color: colors.muted },
+    emptyWrap: { padding: 40, alignItems: 'center' },
+    emptyText: { fontSize: isMobile ? 13 : 15, color: colors.muted },
+  }), [colors]);
 
   const fetchOrders = useCallback(
     async (withLoader = true) => {
@@ -57,7 +113,8 @@ const OrdersScreen = ({ navigation }: any) => {
   }, [fetchOrders]);
 
   const renderItem = ({ item }: { item: Order }) => {
-    const colors = STATUS_COLORS[item.status] ?? { bg: '#f3f4f6', text: '#6b7280' };
+    const statusColorMap = getStatusColors(colors);
+    const sc = statusColorMap[item.status as keyof typeof statusColorMap] ?? { bg: colors.surfaceSecondary, text: colors.muted };
     const firstItem = item.items[0];
     return (
       <TouchableOpacity
@@ -66,8 +123,8 @@ const OrdersScreen = ({ navigation }: any) => {
       >
         <View style={styles.cardTop}>
           <Text style={styles.orderNumber}>{item.orderNumber}</Text>
-          <View style={[styles.statusBadge, { backgroundColor: colors.bg }]}>
-            <Text style={[styles.statusText, { color: colors.text }]}>
+          <View style={[styles.statusBadge, { backgroundColor: sc.bg }]}>
+            <Text style={[styles.statusText, { color: sc.text }]}>
               {item.status.replace('_', ' ').toUpperCase()}
             </Text>
           </View>
@@ -130,7 +187,7 @@ const OrdersScreen = ({ navigation }: any) => {
 
       {loading ? (
         <View style={styles.centered}>
-          <ActivityIndicator size="large" color="#2563eb" />
+          <ActivityIndicator size="large" color={colors.text} />
         </View>
       ) : (
         <FlatList
@@ -157,56 +214,5 @@ const OrdersScreen = ({ navigation }: any) => {
     </SafeAreaView>
   );
 };
-
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.bg },
-  tabs: {
-    flexDirection: 'row',
-    backgroundColor: colors.surface,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
-  },
-  tab: {
-    flex: 1,
-    paddingVertical: 12,
-    alignItems: 'center',
-    borderBottomWidth: 2,
-    borderBottomColor: 'transparent',
-  },
-  tabActive: { borderBottomColor: '#1f1a14' },
-  tabText: { fontSize: 11, fontWeight: '800', color: '#7b6f61', textTransform: 'uppercase', letterSpacing: 1.1 },
-  tabTextActive: { color: '#1f1a14', fontWeight: '900' },
-  statusRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, paddingHorizontal: 12, paddingVertical: 10, backgroundColor: colors.surface, borderBottomWidth: 1, borderBottomColor: colors.border },
-  statusChip: { borderWidth: 1, borderColor: colors.border, paddingHorizontal: 10, paddingVertical: 6, backgroundColor: '#fff' },
-  statusChipActive: { backgroundColor: colors.text, borderColor: colors.text },
-  statusChipText: { fontSize: 10, fontWeight: '800', color: '#6f6559', textTransform: 'uppercase', letterSpacing: 1 },
-  statusChipTextActive: { color: '#fff' },
-  centered: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  list: { padding: 12, gap: 10 },
-  card: {
-    backgroundColor: colors.surface,
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: 0,
-    padding: 14,
-    ...shadows.bulletin,
-  },
-  cardTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  orderNumber: { fontSize: 12, fontWeight: '700', color: '#6b7280', letterSpacing: 0.5 },
-  statusBadge: { paddingHorizontal: 8, paddingVertical: 3, borderRadius: 4 },
-  statusText: { fontSize: 10, fontWeight: '700', letterSpacing: 0.5 },
-  itemTitle: { marginTop: 6, fontSize: 15, fontWeight: '600', color: '#111827' },
-  cardBottom: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginTop: 8,
-  },
-  amount: { fontSize: 16, fontWeight: '800', color: '#2f5d4f' },
-  date: { fontSize: 12, color: '#9ca3af' },
-  party: { marginTop: 6, fontSize: 12, color: '#6b7280' },
-  emptyWrap: { padding: 40, alignItems: 'center' },
-  emptyText: { fontSize: 15, color: '#6b7280' },
-});
 
 export default OrdersScreen;

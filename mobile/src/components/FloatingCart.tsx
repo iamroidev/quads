@@ -1,151 +1,155 @@
-import React, { useRef, useEffect } from 'react';
-import { StyleSheet, Text, View, Platform, Animated, PanResponder, TouchableOpacity } from 'react-native';
-import { useNavigation, useNavigationState } from '@react-navigation/native';
+import React, { useRef, useState } from 'react';
+import { StyleSheet, Text, View, Platform, Animated, PanResponder, TouchableOpacity, Dimensions } from 'react-native';
+import { useNavigationState } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { useCart } from '../context/CartContext';
-import { colors, shadows } from '../theme';
+import { useColors } from '../theme/ThemeContext';
+import { navigationRef } from '../navigation/navigationRef';
+
+const BUTTON_SIZE = 56;
+const EDGE_MARGIN = 16;
+const { width: SCREEN_W, height: SCREEN_H } = Dimensions.get('window');
 
 export const FloatingCart: React.FC = () => {
-  const navigation = useNavigation<any>();
+  const colors = useColors();
   const { totalItems } = useCart();
+
+  // Fixed position state — no drifting accumulation
+  const [pos, setPos] = useState({
+    x: SCREEN_W - BUTTON_SIZE - EDGE_MARGIN,
+    y: SCREEN_H - BUTTON_SIZE - 100,
+  });
+  const posRef = useRef(pos);
+  const pan = useRef(new Animated.ValueXY()).current;
+  const isDragging = useRef(false);
+
+  const styles = React.useMemo(() => StyleSheet.create({
+    container: {
+      position: 'absolute',
+      width: BUTTON_SIZE,
+      height: BUTTON_SIZE,
+      zIndex: 9999,
+    },
+    button: {
+      width: BUTTON_SIZE,
+      height: BUTTON_SIZE,
+      borderRadius: BUTTON_SIZE / 2,
+      backgroundColor: colors.pinYellow,
+      borderWidth: 2.5,
+      borderColor: colors.boardBorder,
+      alignItems: 'center',
+      justifyContent: 'center',
+      ...Platform.select({
+        ios: {
+          shadowColor: colors.boardShadow,
+          shadowOffset: { width: 3, height: 3 },
+          shadowOpacity: 1,
+          shadowRadius: 0,
+        },
+        android: { elevation: 6 },
+      }),
+    },
+    badge: {
+      position: 'absolute',
+      top: 4,
+      right: 4,
+      backgroundColor: colors.danger,
+      borderWidth: 1.5,
+      borderColor: colors.boardBorder,
+      borderRadius: 9,
+      minWidth: 18,
+      height: 18,
+      alignItems: 'center',
+      justifyContent: 'center',
+      paddingHorizontal: 3,
+    },
+    badgeText: {
+      color: colors.dangerContent,
+      fontSize: 9,
+      fontWeight: '900',
+    },
+  }), [colors]);
+
+  const panResponder = useRef(
+    PanResponder.create({
+      onStartShouldSetPanResponder: () => false,
+      onMoveShouldSetPanResponder: (_e, g) => Math.abs(g.dx) > 4 || Math.abs(g.dy) > 4,
+      onPanResponderGrant: () => {
+        isDragging.current = false;
+        pan.setValue({ x: 0, y: 0 });
+      },
+      onPanResponderMove: (_e, g) => {
+        isDragging.current = true;
+        pan.setValue({ x: g.dx, y: g.dy });
+      },
+      onPanResponderRelease: (_e, g) => {
+        // Snap to nearest edge, clamp within screen
+        const newX = Math.max(EDGE_MARGIN, Math.min(
+          SCREEN_W - BUTTON_SIZE - EDGE_MARGIN,
+          posRef.current.x + g.dx,
+        ));
+        const newY = Math.max(60, Math.min(
+          SCREEN_H - BUTTON_SIZE - 80,
+          posRef.current.y + g.dy,
+        ));
+
+        // Snap to left or right edge
+        const snappedX = newX < SCREEN_W / 2
+          ? EDGE_MARGIN
+          : SCREEN_W - BUTTON_SIZE - EDGE_MARGIN;
+
+        pan.setValue({ x: 0, y: 0 });
+        const next = { x: snappedX, y: newY };
+        posRef.current = next;
+        setPos(next);
+      },
+    })
+  ).current;
 
   const currentRouteName = useNavigationState(state => {
     if (!state) return null;
     let route: any = state.routes[state.index];
-    while (route && route.state) {
-      const activeState = route.state;
-      if (activeState && typeof activeState.index === 'number' && activeState.routes) {
-        route = activeState.routes[activeState.index];
-      } else {
-        break;
-      }
+    while (route?.state) {
+      const s = route.state;
+      if (typeof s.index === 'number' && s.routes) route = s.routes[s.index];
+      else break;
     }
     return route ? route.name : null;
   });
 
   const hiddenScreens = ['Cart', 'Checkout', 'OrderDetail', 'Chat', 'Settings', 'Scanner'];
 
-  const pan = useRef(new Animated.ValueXY()).current;
-  const offset = useRef({ x: 0, y: 0 });
-
-  useEffect(() => {
-    const listenerId = pan.addListener((value) => {
-      offset.current = value;
-    });
-    return () => {
-      pan.removeListener(listenerId);
-    };
-  }, []);
-
-  const panResponder = useRef(
-    PanResponder.create({
-      onStartShouldSetPanResponder: () => false,
-      onMoveShouldSetPanResponder: (evt, gestureState) => {
-        // Capture gesture only on drag movement beyond 5 pixels
-        return Math.abs(gestureState.dx) > 5 || Math.abs(gestureState.dy) > 5;
-      },
-      onPanResponderGrant: () => {
-        pan.setOffset({
-          x: offset.current.x,
-          y: offset.current.y,
-        });
-        pan.setValue({ x: 0, y: 0 });
-      },
-      onPanResponderMove: Animated.event([null, { dx: pan.x, dy: pan.y }], { useNativeDriver: false }),
-      onPanResponderRelease: () => {
-        pan.flattenOffset();
-      },
-    })
-  ).current;
-
   if (totalItems === 0 || (currentRouteName && hiddenScreens.includes(currentRouteName))) {
     return null;
   }
+
+  const handlePress = () => {
+    if (isDragging.current) return;
+    if (navigationRef.isReady()) {
+      navigationRef.navigate('Cart');
+    }
+  };
 
   return (
     <Animated.View
       {...panResponder.panHandlers}
       style={[
-        styles.floatingBasket,
+        styles.container,
         {
+          left: pos.x,
+          top: pos.y,
           transform: pan.getTranslateTransform(),
         },
       ]}
     >
-      <TouchableOpacity
-        activeOpacity={0.8}
-        onPress={() => {
-          navigation.navigate('Cart');
-        }}
-        style={styles.innerTouchable}
-      >
-        <View style={styles.iconWrapper}>
-          <Ionicons name="basket" size={26} color="#1f1a14" />
-          <View style={styles.badge}>
-            <Text style={styles.badgeText}>{totalItems}</Text>
-          </View>
+      <TouchableOpacity activeOpacity={0.85} onPress={handlePress} style={styles.button}>
+        <Ionicons name="basket" size={22} color={colors.text} />
+        <View style={styles.badge}>
+          <Text style={styles.badgeText}>{totalItems}</Text>
         </View>
       </TouchableOpacity>
     </Animated.View>
   );
 };
-
-const styles = StyleSheet.create({
-  floatingBasket: {
-    position: 'absolute',
-    bottom: 24,
-    right: 20,
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    backgroundColor: '#fbbf24', // Premium warm gold color
-    borderWidth: 2.5,
-    borderColor: '#1f1a14',
-    zIndex: 9999,
-    ...Platform.select({
-      ios: {
-        shadowColor: '#1f1a14',
-        shadowOffset: { width: 4, height: 4 },
-        shadowOpacity: 1,
-        shadowRadius: 0,
-      },
-      android: {
-        elevation: 6,
-      },
-    }),
-  },
-  innerTouchable: {
-    width: '100%',
-    height: '100%',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  iconWrapper: {
-    position: 'relative',
-    width: '100%',
-    height: '100%',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  badge: {
-    position: 'absolute',
-    top: 6,
-    right: 6,
-    backgroundColor: '#ef4444', // Alert red
-    borderWidth: 1.5,
-    borderColor: '#1f1a14',
-    borderRadius: 10,
-    minWidth: 20,
-    height: 20,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: 4,
-  },
-  badgeText: {
-    color: '#fff',
-    fontSize: 10,
-    fontWeight: '900',
-  },
-});
 
 export default FloatingCart;

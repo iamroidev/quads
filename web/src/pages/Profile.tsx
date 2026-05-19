@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -24,50 +24,8 @@ import { useAuth } from '../context/AuthContext';
 import toast from 'react-hot-toast';
 import authService, { UserStats } from '../services/auth.service';
 import { BulletinLayout, BulletinSection } from '../components/layout/BulletinLayout';
-
-const PROGRAMS = [
-  'Computer Science & Engineering',
-  'Geological Engineering',
-  'Mining Engineering',
-  'Petroleum Engineering',
-  'Electrical & Electronic Engineering',
-  'Mechanical Engineering',
-  'Chemical Engineering',
-  'Mathematics',
-  'Physics',
-  'Environmental Science',
-  'Business Administration',
-  'Accounting & Finance',
-  'Humanities & Social Sciences',
-  'Other',
-];
-
-const RESIDENCE_HALLS = [
-  'Chamber of Mines Hall',
-  'Gold Refinery Hall',
-  'KT Hall',
-  'Recognition Hostel',
-  'Osborn Hostel',
-  'Tandoh Hostel',
-  'Good Shepherd Hostel',
-  'Agrich Hostel',
-  'Kiviz Executive Lodge',
-  'Platinum Hostel',
-  'Global Hostel',
-  'Hill View Hostel',
-  'AdeJoe Hostel',
-  'Off-campus',
-  'Other',
-];
-
-const ACADEMIC_LEVELS = [
-  '100',
-  '200',
-  '300',
-  '400',
-  'Graduate',
-  'Staff',
-];
+import referenceService from '../services/reference.service';
+import type { Program, Hall } from '../services/reference.service';
 
 /* ── Schemas ── */
 const profileSchema = z.object({
@@ -121,6 +79,17 @@ const ProfilePage: React.FC = () => {
   const [showRoleModal, setShowRoleModal] = useState(false);
   const [stats, setStats] = useState<UserStats | null>(null);
   const [loadingStats, setLoadingStats] = useState(false);
+  const [refPrograms, setRefPrograms] = useState<Program[]>([]);
+  const [refHalls, setRefHalls] = useState<Hall[]>([]);
+  const [refLevels, setRefLevels] = useState<string[]>([]);
+
+  useEffect(() => {
+    referenceService.getAll().then(d => {
+      setRefPrograms(d.programs);
+      setRefHalls(d.halls);
+      setRefLevels(d.levels);
+    }).catch(() => {});
+  }, []);
 
   const isAdmin = user?.roles?.includes('admin');
   const isSeller = user?.viewMode === 'seller';
@@ -458,20 +427,23 @@ const ProfilePage: React.FC = () => {
                     </div>
                     <div>
                       <label className={labelBase}>Program of Study</label>
-                      <input type="text" className={fieldBase} {...rp('department')} />
+                      <select className={selectBase} {...rp('department')}>
+                        <option value="">Select Program</option>
+                        {refPrograms.map(p => <option key={p.code} value={p.name}>{p.name}</option>)}
+                      </select>
                     </div>
                     <div>
                       <label className={labelBase}>Academic Level</label>
                       <select className={selectBase} {...rp('currentLevel')}>
                         <option value="">Select Level</option>
-                        {ACADEMIC_LEVELS.map(l => <option key={l} value={l}>{l}</option>)}
+                        {refLevels.map(l => <option key={l} value={l}>{l}</option>)}
                       </select>
                     </div>
                     <div>
-                      <label className={labelBase}>Residence Hall</label>
+                      <label className={labelBase}>Residence Hall / Hostel</label>
                       <select className={selectBase} {...rp('residenceHall')}>
                         <option value="">Select Residence</option>
-                        {RESIDENCE_HALLS.map(h => <option key={h} value={h}>{h}</option>)}
+                        {refHalls.map(h => <option key={h.name} value={h.name}>{h.name}</option>)}
                       </select>
                     </div>
                   </div>

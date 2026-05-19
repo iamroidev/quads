@@ -7,6 +7,7 @@ import {
   getMe,
   updateProfile,
   uploadAvatar,
+  uploadIdCard,
   changePassword,
   logout,
   updateNotificationSettings,
@@ -15,6 +16,8 @@ import {
   updateSellerOnboarding,
   switchRole,
   getUserStats,
+  sendEmailVerification,
+  verifyEmail,
 } from '../controllers/auth.controller';
 import { authenticate } from '../middleware/auth';
 import { validate } from '../middleware/validate';
@@ -153,5 +156,19 @@ router.put(
 
 // @route   PUT /api/auth/seller-onboarding
 router.put('/seller-onboarding', authenticate, updateSellerOnboarding);
+
+// @route   POST /api/auth/upload-id-card
+router.post('/upload-id-card', authenticate, upload.single('idCard'), uploadIdCard);
+
+// @route   POST /api/auth/send-verification-email
+router.post('/send-verification-email', authenticate, sendEmailVerification);
+
+// @route   POST /api/auth/verify-email
+router.post(
+  '/verify-email',
+  authenticate,
+  [body('code').trim().notEmpty().withMessage('Verification code is required'), validate],
+  verifyEmail
+);
 
 export default router;

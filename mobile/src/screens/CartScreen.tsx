@@ -2,12 +2,21 @@ import React from 'react';
 import { ScrollView, StyleSheet, Text, View, TouchableOpacity, Image, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { colors, shadows } from '../theme';
+import { useTheme } from '../theme/ThemeContext';
 import ScreenHeader from '../components/ScreenHeader';
 import { useCart, CartItem } from '../context/CartContext';
+import { BulletinCard } from '../components/BulletinCard';
+import { useResponsive } from '../hooks/useResponsive';
+import { getTypography } from '../theme/typography';
+import { navigationRef } from '../navigation/navigationRef';
 
 const CartScreen = ({ navigation }: any) => {
   const { items, removeItem, updateQuantity, totalPrice, clearCart } = useCart();
+  const { colors } = useTheme();
+  const { width, isMobile } = useResponsive();
+  const typography = getTypography(width);
+  const hPadding = isMobile ? 12 : 16;
+  const styles = getStyles(colors, width);
 
   const handleCheckoutItem = (item: CartItem) => {
     const checkoutProduct = {
@@ -33,48 +42,52 @@ const CartScreen = ({ navigation }: any) => {
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
-      <ScrollView contentContainerStyle={styles.content}>
+      <ScrollView contentContainerStyle={[styles.content, { paddingHorizontal: hPadding }]}>
         <View style={styles.headerRow}>
           <ScreenHeader eyebrow="Shopping" title="Cart" subtitle="Review items before checkout." />
           {items.length > 0 && (
             <TouchableOpacity style={styles.clearBtn} onPress={handleClearCart}>
-              <Ionicons name="trash" size={15} color="#ef4444" />
+              <Ionicons name="trash" size={15} color={colors.danger} />
               <Text style={styles.clearBtnText}>Clear All</Text>
             </TouchableOpacity>
           )}
         </View>
 
         {items.length === 0 ? (
-          <View style={styles.emptyContainer}>
-            <Text style={styles.emptyIcon}>🛒</Text>
-            <Text style={styles.emptyTitle}>Your cart is empty</Text>
+          <BulletinCard style={styles.emptyContainer} size="md">
+            
+            <Text style={[styles.emptyTitle, { fontSize: isMobile ? 14 : 16 }]}>Your cart is empty</Text>
             <Text style={styles.emptySubtitle}>Add items from the marketplace to get started!</Text>
             <TouchableOpacity
               style={styles.browseBtn}
-              onPress={() => navigation.navigate('Home')}
+              onPress={() => {
+                if (navigationRef.isReady()) {
+                  navigationRef.navigate('HomeTab');
+                }
+              }}
             >
-              <Text style={styles.browseBtnText}>Start Shopping 🚀</Text>
+              <Text style={styles.browseBtnText}>Start Shopping</Text>
             </TouchableOpacity>
-          </View>
+          </BulletinCard>
         ) : (
           <View style={styles.listContainer}>
             {items.map((item, idx) => {
-              const bgColors = ["#fef08a", "#bbf7d0", "#bfdbfe", "#fbcfe8"];
+              const bgColors = [colors.pinYellow, colors.successTint, colors.surfaceSecondary, colors.metric1Bg];
               const cardAccent = bgColors[idx % bgColors.length];
               return (
-                <View key={item._id} style={[styles.itemCard, { borderLeftColor: cardAccent, borderLeftWidth: 6 }]}>
+                <BulletinCard key={item._id} style={[styles.itemCard, { borderLeftColor: cardAccent }]} size="md">
                   <Image
                     source={{ uri: item.image || 'https://via.placeholder.com/150' }}
                     style={styles.itemImage}
                   />
                   <View style={styles.itemDetails}>
                     <View style={styles.sellerBadge}>
-                      <Text style={styles.itemSeller}>Seller: {item.sellerName}</Text>
+                      <Text style={styles.itemSeller} numberOfLines={1} ellipsizeMode="tail">Seller: {item.sellerName}</Text>
                     </View>
-                    <Text style={styles.itemTitle} numberOfLines={1}>
+                    <Text style={styles.itemTitle} numberOfLines={2} ellipsizeMode="tail">
                       {item.title}
                     </Text>
-                    <Text style={styles.itemPrice}>GHS {item.price.toFixed(2)}</Text>
+                    <Text style={[styles.itemPrice, { fontSize: isMobile ? 12 : typography.h3 }]}>GHS {item.price.toFixed(2)}</Text>
 
                     {/* Quantity Controller & Actions Row */}
                     <View style={styles.controlRow}>
@@ -98,7 +111,7 @@ const CartScreen = ({ navigation }: any) => {
                         style={styles.deleteBtn}
                         onPress={() => removeItem(item.productId)}
                       >
-                        <Ionicons name="trash-outline" size={16} color="#ff4a4a" />
+                        <Ionicons name="trash-outline" size={16} color={colors.danger} />
                       </TouchableOpacity>
                     </View>
 
@@ -106,18 +119,18 @@ const CartScreen = ({ navigation }: any) => {
                       style={styles.checkoutItemBtn}
                       onPress={() => handleCheckoutItem(item)}
                     >
-                      <Text style={styles.checkoutItemText}>Checkout Item ⚡</Text>
+                      <Text style={styles.checkoutItemText}>Checkout Item</Text>
                     </TouchableOpacity>
                   </View>
-                </View>
+                </BulletinCard>
               );
             })}
 
             {/* Cart Summary Banner */}
-            <View style={styles.summaryCard}>
+            <BulletinCard style={styles.summaryCard} size="lg">
               <View style={styles.totalRow}>
-                <Text style={styles.totalLabel}>Cart Subtotal</Text>
-                <Text style={styles.totalValue}>GHS {totalPrice.toFixed(2)}</Text>
+                <Text style={[styles.totalLabel, { fontSize: isMobile ? 12 : typography.h3 }]}>Cart Subtotal</Text>
+                <Text style={[styles.totalValue, { fontSize: isMobile ? 18 : 20 }]}>GHS {totalPrice.toFixed(2)}</Text>
               </View>
               <Text style={styles.summaryNote}>
                 Escrow deposits are securely processed through Paystack.
@@ -126,9 +139,9 @@ const CartScreen = ({ navigation }: any) => {
                 style={styles.checkoutAllBtn}
                 onPress={() => navigation.navigate('Checkout', { cartItems: items })}
               >
-                <Text style={styles.checkoutAllText}>Checkout All Items 🚀</Text>
+                <Text style={styles.checkoutAllText}>Checkout All Items</Text>
               </TouchableOpacity>
-            </View>
+            </BulletinCard>
           </View>
         )}
       </ScrollView>
@@ -136,139 +149,135 @@ const CartScreen = ({ navigation }: any) => {
   );
 };
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.bg },
-  content: { paddingBottom: 40, paddingHorizontal: 16 },
-  headerRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginTop: 8,
-  },
-  clearBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderWidth: 2,
-    borderColor: '#1f1a14',
-    paddingHorizontal: 12,
-    paddingVertical: 7,
-    backgroundColor: '#fff',
-    ...shadows.bulletin,
-    marginTop: 10,
-  },
-  clearBtnText: {
-    marginLeft: 6,
-    fontSize: 10,
-    fontWeight: '900',
-    color: '#ef4444',
-    textTransform: 'uppercase',
-  },
-  emptyContainer: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 30,
-    marginTop: 40,
-    borderWidth: 2,
-    borderColor: '#1f1a14',
-    backgroundColor: '#fff',
-    ...shadows.bulletin,
-  },
-  emptyIcon: { fontSize: 48, marginBottom: 12 },
-  emptyTitle: { fontSize: 16, fontWeight: '900', color: '#1f1a14', textTransform: 'uppercase' },
-  emptySubtitle: { fontSize: 12, color: '#7b6f61', textAlign: 'center', marginTop: 6, lineHeight: 18 },
-  browseBtn: {
-    marginTop: 20,
-    backgroundColor: '#2f5d4f',
-    borderWidth: 2,
-    borderColor: '#1f1a14',
-    paddingHorizontal: 20,
-    paddingVertical: 12,
-    ...shadows.bulletin,
-  },
-  browseBtnText: { color: '#fff', fontSize: 12, fontWeight: '900', textTransform: 'uppercase', letterSpacing: 1 },
-  listContainer: { marginTop: 16 },
-  itemCard: {
-    flexDirection: 'row',
-    borderWidth: 2,
-    borderColor: '#1f1a14',
-    backgroundColor: '#fff',
-    marginBottom: 16,
-    padding: 12,
-    ...shadows.bulletin,
-  },
-  itemImage: {
-    width: 90,
-    height: 120,
-    borderWidth: 2,
-    borderColor: '#1f1a14',
-    backgroundColor: '#efe5d6',
-  } as any,
-  itemDetails: { flex: 1, marginLeft: 12 },
-  sellerBadge: {
-    alignSelf: 'flex-start',
-    backgroundColor: '#f3f4f6',
-    borderWidth: 1.5,
-    borderColor: '#1f1a14',
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    marginBottom: 4,
-  },
-  itemSeller: { fontSize: 9, fontWeight: '900', color: '#2f5d4f', textTransform: 'uppercase', letterSpacing: 0.5 },
-  itemTitle: { fontSize: 13, fontWeight: '900', color: '#1f1a14', textTransform: 'uppercase', letterSpacing: 0.2 },
-  itemPrice: { fontSize: 14, fontWeight: '900', color: '#2f5d4f', marginTop: 4 },
-  controlRow: { flexDirection: 'row', alignItems: 'center', marginTop: 10, gap: 12 },
-  quantityWidget: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderWidth: 2,
-    borderColor: '#1f1a14',
-    backgroundColor: '#fff',
-  },
-  qtyBtn: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    backgroundColor: '#fff',
-  },
-  qtyBtnText: { fontSize: 14, fontWeight: '900', color: '#1f1a14' },
-  qtyText: { paddingHorizontal: 12, fontSize: 12, fontWeight: '900', color: '#1f1a14' },
-  deleteBtn: {
-    borderWidth: 2,
-    borderColor: '#1f1a14',
-    backgroundColor: '#fff',
-    padding: 7,
-  },
-  checkoutItemBtn: {
-    marginTop: 12,
-    backgroundColor: '#1f1a14',
-    borderWidth: 2,
-    borderColor: '#1f1a14',
-    paddingVertical: 9,
-    alignItems: 'center',
-    ...shadows.bulletin,
-  },
-  checkoutItemText: { color: '#fff', fontSize: 11, fontWeight: '900', textTransform: 'uppercase', letterSpacing: 1 },
-  summaryCard: {
-    borderWidth: 2.5,
-    borderColor: '#1f1a14',
-    backgroundColor: '#fff',
-    padding: 16,
-    marginTop: 8,
-    ...shadows.bulletin,
-  },
-  totalRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  totalLabel: { fontSize: 14, fontWeight: '900', color: '#1f1a14', textTransform: 'uppercase' },
-  totalValue: { fontSize: 20, fontWeight: '900', color: '#2f5d4f' },
-  summaryNote: { fontSize: 11, color: '#7b6f61', marginTop: 10, lineHeight: 16, fontWeight: '500' },
-  checkoutAllBtn: {
-    marginTop: 16,
-    backgroundColor: '#fbbf24',
-    borderWidth: 2.5,
-    borderColor: '#1f1a14',
-    paddingVertical: 14,
-    alignItems: 'center',
-    ...shadows.bulletin,
-  },
-  checkoutAllText: { color: '#1f1a14', fontSize: 13, fontWeight: '900', textTransform: 'uppercase', letterSpacing: 1 },
-});
+const getStyles = (colors: any, width: number) => {
+  const isMobile = width < 640;
+  const typography = getTypography(width);
+  const hPadding = isMobile ? 12 : 16;
+
+  return StyleSheet.create({
+    container: { flex: 1, backgroundColor: colors.background },
+    content: { paddingBottom: 40 },
+    headerRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'flex-start',
+      marginTop: 8,
+    },
+    clearBtn: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      borderWidth: colors.boardBorderWidth,
+      borderColor: colors.boardBorder,
+      paddingHorizontal: 12,
+      paddingVertical: 7,
+      backgroundColor: colors.surfaceSecondary,
+      marginTop: 10,
+    },
+    clearBtnText: {
+      marginLeft: 6,
+      fontSize: isMobile ? 9 : typography.tag,
+      fontWeight: '900',
+      color: colors.danger,
+      textTransform: 'uppercase',
+    },
+    emptyContainer: {
+      alignItems: 'center',
+      justifyContent: 'center',
+      padding: 30,
+      marginTop: 40,
+    },
+    emptyIcon: { fontSize: 48, marginBottom: 12 },
+    emptyTitle: { fontWeight: '900', color: colors.text, textTransform: 'uppercase' },
+    emptySubtitle: { fontSize: isMobile ? 11 : typography.body, color: colors.textSecondary, textAlign: 'center', marginTop: 6, lineHeight: 18 },
+    browseBtn: {
+      marginTop: 20,
+      backgroundColor: colors.primary,
+      borderWidth: colors.boardBorderWidth,
+      borderColor: colors.boardBorder,
+      paddingHorizontal: 20,
+      paddingVertical: 12,
+    },
+    browseBtnText: { color: colors.primaryContent, fontSize: isMobile ? 10 : typography.tag, fontWeight: '900', textTransform: 'uppercase', letterSpacing: 1 },
+    listContainer: { marginTop: 16 },
+    itemCard: {
+      flexDirection: 'row',
+      padding: isMobile ? 10 : 12,
+      marginBottom: 16,
+      borderLeftWidth: 6,
+    },
+    itemImage: {
+      width: isMobile ? 70 : 90,
+      height: isMobile ? 100 : 120,
+      borderWidth: colors.boardBorderWidth,
+      borderColor: colors.boardBorder,
+      backgroundColor: colors.surfaceSecondary,
+    } as any,
+    itemDetails: { flex: 1, marginLeft: isMobile ? 10 : 12, minWidth: 0 },
+    sellerBadge: {
+      alignSelf: 'flex-start',
+      backgroundColor: colors.surfaceSecondary,
+      borderWidth: 1,
+      borderColor: colors.boardBorder,
+      paddingHorizontal: 6,
+      paddingVertical: 2,
+      marginBottom: 4,
+    },
+    itemSeller: { fontSize: isMobile ? 8 : typography.tag, fontWeight: '900', color: colors.primary, textTransform: 'uppercase', letterSpacing: 0.5 },
+    itemTitle: { fontSize: isMobile ? 11 : typography.body, fontWeight: '900', color: colors.text, textTransform: 'uppercase', letterSpacing: 0.2 },
+    itemPrice: { fontWeight: '900', color: colors.text, marginTop: 4 },
+    controlRow: { flexDirection: 'row', alignItems: 'center', marginTop: 10, gap: 12 },
+    quantityWidget: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      borderWidth: colors.boardBorderWidth,
+      borderColor: colors.boardBorder,
+      backgroundColor: colors.surfaceSecondary,
+    },
+    qtyBtn: {
+      paddingHorizontal: isMobile ? 16 : 18,
+      paddingVertical: isMobile ? 10 : 12,
+      backgroundColor: colors.surfaceSecondary,
+      alignItems: 'center',
+      justifyContent: 'center',
+      minWidth: 40,
+    },
+    qtyBtnText: { fontSize: isMobile ? 16 : typography.h3, fontWeight: '900', color: colors.text, lineHeight: isMobile ? 20 : 24 },
+    qtyText: { paddingHorizontal: isMobile ? 14 : 16, fontSize: isMobile ? 13 : typography.body, fontWeight: '900', color: colors.text },
+    deleteBtn: {
+      borderWidth: colors.boardBorderWidth,
+      borderColor: colors.boardBorder,
+      backgroundColor: colors.surfaceSecondary,
+      padding: isMobile ? 10 : 12,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    checkoutItemBtn: {
+      marginTop: 12,
+      backgroundColor: colors.primary,
+      borderWidth: colors.boardBorderWidth,
+      borderColor: colors.boardBorder,
+      paddingVertical: 9,
+      alignItems: 'center',
+    },
+    checkoutItemText: { color: colors.primaryContent, fontSize: isMobile ? 9 : typography.tag, fontWeight: '900', textTransform: 'uppercase', letterSpacing: 1 },
+    summaryCard: {
+      padding: isMobile ? 12 : 16,
+      marginTop: 8,
+    },
+    totalRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+    totalLabel: { fontWeight: '900', color: colors.text, textTransform: 'uppercase' },
+    totalValue: { fontWeight: '900', color: colors.primary },
+    summaryNote: { fontSize: isMobile ? 10 : typography.label, color: colors.textSecondary, marginTop: 10, lineHeight: 16, fontWeight: '500' },
+    checkoutAllBtn: {
+      marginTop: 16,
+      backgroundColor: colors.pinYellow,
+      borderWidth: colors.boardBorderWidth,
+      borderColor: colors.boardBorder,
+      paddingVertical: isMobile ? 12 : 14,
+      alignItems: 'center',
+    },
+    checkoutAllText: { color: '#111111', fontSize: isMobile ? 11 : typography.body, fontWeight: '900', textTransform: 'uppercase', letterSpacing: 1 },
+  });
+};
 
 export default CartScreen;

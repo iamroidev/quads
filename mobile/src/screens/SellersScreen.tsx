@@ -1,8 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, ScrollView, StyleSheet, Text, View, TouchableOpacity } from 'react-native';
+import { ActivityIndicator, ScrollView, StyleSheet, Text, View, TouchableOpacity,
+  Dimensions,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { colors, shadows } from '../theme';
+import { shadows } from '../theme';
+import { useColors } from '../theme/ThemeContext';
 import ScreenHeader from '../components/ScreenHeader';
 import api from '../services/api';
 
@@ -14,8 +17,37 @@ interface Seller {
 }
 
 const SellersScreen = ({ navigation }: any) => {
+  const colors = useColors();
+  const { width: _sw } = Dimensions.get('window');
+  const isMobile = _sw < 640;
   const [sellers, setSellers] = useState<Seller[]>([]);
   const [loading, setLoading] = useState(true);
+
+  const styles = React.useMemo(() => StyleSheet.create({
+    container: { flex: 1, backgroundColor: colors.bg },
+    content: { paddingBottom: 40 },
+    centered: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: colors.bg },
+    row: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      borderWidth: 2,
+      borderColor: colors.border,
+      backgroundColor: colors.surface,
+      padding: isMobile ? 12 : 16,
+      marginBottom: 10,
+      marginHorizontal: 16,
+      ...shadows.bulletin,
+    },
+    avatar: {
+      width: 40, height: 40,
+      backgroundColor: colors.accent,
+      alignItems: 'center', justifyContent: 'center',
+      marginRight: 12,
+    },
+    avatarText: { color: colors.primaryContent, fontWeight: '900', fontSize: 16 },
+    name: { fontSize: isMobile ? 12 : 13, fontWeight: '900', textTransform: 'uppercase', color: colors.text },
+    listings: { fontSize: 11, color: colors.muted, marginTop: 2 },
+  }), [colors]);
 
   useEffect(() => {
     api.get('/products/top-sellers')
@@ -35,13 +67,9 @@ const SellersScreen = ({ navigation }: any) => {
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       <ScrollView contentContainerStyle={styles.content}>
-        <ScreenHeader
-          eyebrow="Marketplace"
-          title="Top Sellers"
-          subtitle="Browse verified sellers on campus."
-        />
+        <ScreenHeader eyebrow="Marketplace" title="Top Sellers" subtitle="Browse verified sellers on campus." />
         {sellers.map(s => (
-          <TouchableOpacity key={s._id} style={styles.row} onPress={() => navigation.navigate('Profile', { userId: s._id })}>
+          <TouchableOpacity key={s._id} style={styles.row} onPress={() => navigation.navigate('ProfileTab', { screen: 'ProfileHome' })}>
             <View style={styles.avatar}>
               <Text style={styles.avatarText}>{s.name[0]}</Text>
             </View>
@@ -56,33 +84,5 @@ const SellersScreen = ({ navigation }: any) => {
     </SafeAreaView>
   );
 };
-
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.bg },
-  content: { paddingBottom: 40 },
-  centered: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: colors.bg },
-  row: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderWidth: 2,
-    borderColor: colors.border,
-    backgroundColor: colors.surface,
-    padding: 16,
-    marginBottom: 10,
-    marginHorizontal: 16,
-    ...shadows.bulletin,
-  },
-  avatar: {
-    width: 40,
-    height: 40,
-    backgroundColor: colors.accent,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: 12,
-  },
-  avatarText: { color: '#fff', fontWeight: '900', fontSize: 16 },
-  name: { fontSize: 13, fontWeight: '900', textTransform: 'uppercase' },
-  listings: { fontSize: 11, color: colors.muted, marginTop: 2 },
-});
 
 export default SellersScreen;

@@ -11,6 +11,9 @@ export interface RegisterPayload {
   phone: string;
   role?: 'buyer' | 'seller';
   studentId?: string;
+  department?: string;
+  residenceHall?: string;
+  currentLevel?: string;
   location?: string;
 }
 
@@ -49,6 +52,11 @@ const authService = {
 
   getMe: async (): Promise<MeResponse> => {
     const response = await api.get('/auth/me');
+    return response.data;
+  },
+
+  switchRole: async (targetMode: 'buyer' | 'seller'): Promise<AuthResponse> => {
+    const response = await api.put('/auth/switch-role', { targetMode });
     return response.data;
   },
 

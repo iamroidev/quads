@@ -1,10 +1,13 @@
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, ScrollView, StyleSheet, Text, View, TouchableOpacity, TextInput, Alert } from 'react-native';
+import { ActivityIndicator, ScrollView, StyleSheet, Text, View, TouchableOpacity, TextInput, Alert,
+  Dimensions,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Ionicons } from '@expo/vector-icons';
-import { colors, shadows } from '../theme';
+import { shadows } from '../theme';
+import { useColors } from '../theme/ThemeContext';
 import ScreenHeader from '../components/ScreenHeader';
 import api from '../services/api';
+import EmptyState from '../components/EmptyState';
 
 interface Order {
   _id: string;
@@ -14,10 +17,52 @@ interface Order {
 }
 
 const DisputeCenterScreen = () => {
+  const colors = useColors();
+  const { width: _sw } = Dimensions.get('window');
+  const isMobile = _sw < 640;
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [reason, setReason] = useState('');
+
+  const styles = React.useMemo(() => StyleSheet.create({
+    container: { flex: 1, backgroundColor: colors.bg },
+    content: { paddingBottom: 40 },
+    centered: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: colors.bg },
+    section: { marginTop: 24, paddingHorizontal: 16 },
+    sectionLabel: { fontSize: 10, fontWeight: '900', color: colors.accent, textTransform: 'uppercase', letterSpacing: 1.5, marginBottom: 12 },
+    emptyText: { textAlign: 'center', color: colors.muted, fontSize: 12, marginTop: 40 },
+    orderRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      padding: 12,
+      borderWidth: 1,
+      borderColor: colors.border,
+      backgroundColor: colors.surface,
+      marginBottom: 8,
+      ...shadows.bulletin,
+    },
+    selectedOrder: { borderColor: colors.accent, backgroundColor: colors.accent + '10' },
+    orderText: { fontSize: 12, fontWeight: '900', color: colors.text },
+    orderAmount: { fontSize: 12, color: colors.muted },
+    textInput: {
+      borderWidth: 1,
+      borderColor: colors.border,
+      backgroundColor: colors.surface,
+      padding: 12,
+      minHeight: 100,
+      textAlignVertical: 'top',
+      color: colors.text,
+    },
+    submitBtn: {
+      backgroundColor: colors.danger,
+      paddingVertical: 14,
+      alignItems: 'center',
+      marginTop: 16,
+      ...shadows.bulletin,
+    },
+    submitBtnText: { color: colors.dangerContent, fontWeight: '900', textTransform: 'uppercase', fontSize: 12 },
+  }), [colors]);
 
   useEffect(() => {
     api.get('/orders/my/purchases', { params: { status: 'completed' } })
@@ -58,7 +103,7 @@ const DisputeCenterScreen = () => {
         />
 
         {orders.length === 0 ? (
-          <Text style={styles.emptyText}>No completed orders to dispute</Text>
+          <EmptyState title="Nothing to dispute" subtitle="Disputes can only be opened on completed orders." />
         ) : (
           <>
             <View style={styles.section}>
@@ -81,6 +126,7 @@ const DisputeCenterScreen = () => {
                 <TextInput
                   style={styles.textInput}
                   placeholder="Describe the issue..."
+                  placeholderTextColor={colors.muted}
                   value={reason}
                   onChangeText={setReason}
                   multiline
@@ -97,43 +143,5 @@ const DisputeCenterScreen = () => {
     </SafeAreaView>
   );
 };
-
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.bg },
-  content: { paddingBottom: 40 },
-  centered: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: colors.bg },
-  section: { marginTop: 24, paddingHorizontal: 16 },
-  sectionLabel: { fontSize: 10, fontWeight: '900', color: '#ff6b6b', textTransform: 'uppercase', letterSpacing: 1.5, marginBottom: 12 },
-  emptyText: { textAlign: 'center', color: colors.muted, fontSize: 12, marginTop: 40 },
-  orderRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    padding: 12,
-    borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.surface,
-    marginBottom: 8,
-    ...shadows.bulletin,
-  },
-  selectedOrder: { borderColor: colors.accent, backgroundColor: colors.accent + '10' },
-  orderText: { fontSize: 12, fontWeight: '900' },
-  orderAmount: { fontSize: 12, color: colors.muted },
-  textInput: {
-    borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.surface,
-    padding: 12,
-    minHeight: 100,
-    textAlignVertical: 'top',
-  },
-  submitBtn: {
-    backgroundColor: colors.danger,
-    paddingVertical: 14,
-    alignItems: 'center',
-    marginTop: 16,
-    ...shadows.bulletin,
-  },
-  submitBtnText: { color: '#fff', fontWeight: '900', textTransform: 'uppercase', fontSize: 12 },
-});
 
 export default DisputeCenterScreen;

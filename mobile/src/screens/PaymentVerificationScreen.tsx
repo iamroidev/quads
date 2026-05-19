@@ -1,12 +1,38 @@
 import React from 'react';
-import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity,
+  Dimensions,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { colors, shadows } from '../theme';
+import { shadows } from '../theme';
+import { useColors } from '../theme/ThemeContext';
 import ScreenHeader from '../components/ScreenHeader';
 
 const PaymentVerificationScreen = ({ route, navigation }: any) => {
+  const colors = useColors();
+  const { width: _sw } = Dimensions.get('window');
+  const isMobile = _sw < 640;
   const { success } = route.params || {};
+
+  const styles = React.useMemo(() => StyleSheet.create({
+    container: { flex: 1, backgroundColor: colors.bg },
+    content: { flex: 1, paddingHorizontal: isMobile ? 12 : 16, justifyContent: 'center', alignItems: 'center' },
+    resultCard: {
+      borderWidth: 1,
+      borderColor: colors.border,
+      backgroundColor: colors.surface,
+      padding: 24,
+      alignItems: 'center',
+      width: '100%',
+      marginBottom: 24,
+      ...shadows.bulletin,
+    },
+    iconBox: { marginBottom: 16 },
+    status: { fontSize: isMobile ? 18 : 22, fontWeight: '900', textTransform: 'uppercase', marginBottom: 8, color: colors.text },
+    subtitle: { fontSize: 12, color: colors.muted, textAlign: 'center' },
+    btn: { backgroundColor: colors.text, paddingVertical: 16, paddingHorizontal: 32, ...shadows.bulletin },
+    btnText: { color: colors.bg, fontWeight: '900', textTransform: 'uppercase', fontSize: 12 },
+  }), [colors]);
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
@@ -34,25 +60,5 @@ const PaymentVerificationScreen = ({ route, navigation }: any) => {
     </SafeAreaView>
   );
 };
-
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.bg },
-  content: { flex: 1, paddingHorizontal: 16, justifyContent: 'center', alignItems: 'center' },
-  resultCard: {
-    borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.surface,
-    padding: 24,
-    alignItems: 'center',
-    width: '100%',
-    marginBottom: 24,
-    ...shadows.bulletin,
-  },
-  iconBox: { marginBottom: 16 },
-  status: { fontSize: 22, fontWeight: '900', textTransform: 'uppercase', marginBottom: 8 },
-  subtitle: { fontSize: 12, color: colors.muted, textAlign: 'center' },
-  btn: { backgroundColor: colors.text, paddingVertical: 16, paddingHorizontal: 32, ...shadows.bulletin },
-  btnText: { color: '#fff', fontWeight: '900', textTransform: 'uppercase', fontSize: 12 },
-});
 
 export default PaymentVerificationScreen;

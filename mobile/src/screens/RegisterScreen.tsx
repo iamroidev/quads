@@ -1,26 +1,28 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useEffect, useRef } from "react";
 import {
   View,
   Text,
   TextInput,
   TouchableOpacity,
   StyleSheet,
-  ScrollView,
+  Animated,
   KeyboardAvoidingView,
   Platform,
   Pressable,
   ActivityIndicator,
   Image,
+  Modal,
+  FlatList,
+  Dimensions,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import * as WebBrowser from "expo-web-browser";
 import * as Linking from "expo-linking";
-import { makeRedirectUri } from "expo-auth-session";
-import Constants from "expo-constants";
 import { useAuth } from "../context/AuthContext";
+import { useTheme } from "../theme/ThemeContext";
 import AppAlert from "../components/AppAlert";
-import { colors, shadows } from "../theme";
 import { supabase } from "../services/supabase";
+import referenceService, { Program, Hall } from "../services/reference.service";
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -54,8 +56,83 @@ const extractOAuthParams = (redirectUrl: string) => {
   return result;
 };
 
+// ── Picker modal ──────────────────────────────────────────────────────────────
+interface PickerModalProps {
+  visible: boolean;
+  title: string;
+  options: string[];
+  selected: string;
+  onSelect: (v: string) => void;
+  onClose: () => void;
+  colors: any;
+}
+
+const PickerModal: React.FC<PickerModalProps> = ({
+  visible, title, options, selected, onSelect, onClose, colors,
+}) => {
+  const [query, setQuery] = useState("");
+  const filtered = query.trim()
+    ? options.filter(o => o.toLowerCase().includes(query.toLowerCase()))
+    : options;
+
+  return (
+    <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
+      <View style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.5)", justifyContent: "flex-end" }}>
+        <View style={{ backgroundColor: colors.surface, borderTopWidth: 3, borderColor: colors.boardBorder, maxHeight: "80%" }}>
+          <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", padding: 16, borderBottomWidth: 2, borderColor: colors.boardBorder }}>
+            <Text style={{ fontSize: 12, fontWeight: "900", textTransform: "uppercase", letterSpacing: 1.2, color: colors.text }}>{title}</Text>
+            <TouchableOpacity onPress={onClose}>
+              <Text style={{ fontSize: 11, fontWeight: "800", color: colors.primary, textTransform: "uppercase", letterSpacing: 1 }}>Close</Text>
+            </TouchableOpacity>
+          </View>
+          <View style={{ padding: 12, borderBottomWidth: 2, borderColor: colors.boardBorder }}>
+            <TextInput
+              style={{ borderWidth: 2, borderColor: colors.boardBorder, backgroundColor: colors.surfaceSecondary, paddingHorizontal: 12, paddingVertical: 10, fontSize: 14, color: colors.text }}
+              placeholder="Search..."
+              placeholderTextColor={colors.textDisabled}
+              value={query}
+              onChangeText={setQuery}
+              autoFocus
+            />
+          </View>
+          <FlatList
+            data={filtered}
+            keyExtractor={item => item}
+            renderItem={({ item }) => (
+              <TouchableOpacity
+                style={{ paddingHorizontal: 16, paddingVertical: 14, borderBottomWidth: 1, borderColor: colors.boardBorder, backgroundColor: selected === item ? colors.primary : colors.surface }}
+                onPress={() => { onSelect(item); setQuery(""); onClose(); }}
+              >
+                <Text style={{ fontSize: 14, fontWeight: "700", color: selected === item ? colors.primaryContent : colors.text }}>{item}</Text>
+              </TouchableOpacity>
+            )}
+            ListEmptyComponent={
+              <Text style={{ textAlign: "center", padding: 24, color: colors.textSecondary, fontSize: 12, textTransform: "uppercase", fontWeight: "700" }}>No results</Text>
+            }
+            keyboardShouldPersistTaps="handled"
+          />
+        </View>
+      </View>
+    </Modal>
+  );
+};
+
 const RegisterScreen = ({ navigation }: any) => {
   const { register, googleLogin } = useAuth();
+  const { colors } = useTheme();
+  const { width: _sw } = Dimensions.get('window');
+  const isMobile = _sw < 640;
+  const styles = getStyles(colors, isMobile);
+
+  const slideAnim = useRef(new Animated.Value(40)).current;
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  useEffect(() => {
+    Animated.parallel([
+      Animated.timing(fadeAnim, { toValue: 1, duration: 420, useNativeDriver: true }),
+      Animated.spring(slideAnim, { toValue: 0, tension: 60, friction: 9, useNativeDriver: true }),
+    ]).start();
+  }, []);
+
   const [step, setStep] = useState<1 | 2 | 3>(1);
   const [form, setForm] = useState({
     name: "",
@@ -65,6 +142,9 @@ const RegisterScreen = ({ navigation }: any) => {
     confirmPassword: "",
     role: "" as "" | "buyer" | "seller",
     studentId: "",
+    department: "",
+    residenceHall: "",
+    currentLevel: "",
     location: "",
   });
   const [isLoading, setIsLoading] = useState(false);
@@ -75,6 +155,20 @@ const RegisterScreen = ({ navigation }: any) => {
     title: string;
     message: string;
   }>({ visible: false, title: "", message: "" });
+
+  // Reference data for campus pickers
+  const [programs, setPrograms] = useState<Program[]>([]);
+  const [halls, setHalls] = useState<Hall[]>([]);
+  const [levels, setLevels] = useState<string[]>([]);
+  const [activePicker, setActivePicker] = useState<"department" | "residenceHall" | "currentLevel" | null>(null);
+
+  useEffect(() => {
+    referenceService.getAll().then(data => {
+      setPrograms(data.programs);
+      setHalls(data.halls);
+      setLevels(data.levels);
+    }).catch(() => {});
+  }, []);
 
   const updateForm = (key: string, value: string) => {
     setForm((prev) => ({ ...prev, [key]: value }));
@@ -302,15 +396,13 @@ const RegisterScreen = ({ navigation }: any) => {
         style={styles.container}
         behavior={Platform.OS === "ios" ? "padding" : "height"}
       >
-        <ScrollView
+        <Animated.ScrollView
           contentContainerStyle={styles.scrollContent}
           keyboardShouldPersistTaps="handled"
+          style={{ opacity: fadeAnim, transform: [{ translateY: slideAnim }] }}
         >
           <View style={styles.heroWrap}>
-            {/* Branded Subscript Logo Lockup (Matches the brand identity 100%!) */}
             <View style={[styles.letterRow, { alignItems: 'flex-end', gap: 5, marginBottom: 12 }]}>
-              
-              {/* Massive Vector Q-Logo (Scaled to 54x54 for page header balance) */}
               <View
                 style={[
                   styles.letterCard,
@@ -318,35 +410,29 @@ const RegisterScreen = ({ navigation }: any) => {
                     width: 54,
                     height: 54,
                     borderWidth: 3,
-                    borderColor: colors.border,
+                    borderColor: colors.boardBorder,
                     alignItems: 'center',
                     justifyContent: 'center',
                     position: 'relative',
-                    ...shadows.bulletin,
                   },
                 ]}
               >
-                {/* Bold Stencil Q (Inner Ring) */}
                 <View style={{
                   width: 24,
                   height: 24,
                   borderWidth: 5.5,
-                  borderColor: colors.border,
+                  borderColor: colors.boardBorder,
                   backgroundColor: 'transparent',
                 }} />
-                
-                {/* Bold Stencil Q (Rotated Tail) */}
                 <View style={{
                   position: 'absolute',
                   bottom: 8,
                   right: 8,
                   width: 10,
                   height: 5,
-                  backgroundColor: colors.border,
+                  backgroundColor: colors.boardBorder,
                   transform: [{ rotate: '45deg' }],
                 }} />
-
-                {/* Red Thumbtack detail (Top Right) */}
                 <View style={{
                   position: 'absolute',
                   top: 4,
@@ -354,13 +440,11 @@ const RegisterScreen = ({ navigation }: any) => {
                   width: 8,
                   height: 8,
                   borderRadius: 4,
-                  backgroundColor: '#ff6b6b',
+                  backgroundColor: colors.pinRed,
                   borderWidth: 1.2,
-                  borderColor: colors.border,
+                  borderColor: colors.boardBorder,
                 }} />
               </View>
-
-              {/* Subscript letters: U A D S (Compact 22x22 for clean header proportions) */}
               {['U', 'A', 'D', 'S'].map((char, idx) => (
                 <View
                   key={idx}
@@ -370,11 +454,10 @@ const RegisterScreen = ({ navigation }: any) => {
                       width: 22,
                       height: 22,
                       borderWidth: 1.5,
-                      borderColor: colors.border,
+                      borderColor: colors.boardBorder,
                       justifyContent: 'center',
                       alignItems: 'center',
                       marginBottom: 1,
-                      ...shadows.bulletin,
                     },
                   ]}
                 >
@@ -493,39 +576,86 @@ const RegisterScreen = ({ navigation }: any) => {
             ) : step === 2 ? (
               <>
                 {[
-                  ["Full Name *", "name", "Kwame Asante"],
-                  ["Email *", "email", "you@email.com"],
-                  ["Phone Number *", "phone", "0XX XXX XXXX"],
-                  [
-                    "Student ID (Optional)",
-                    "studentId",
-                    "Your institutional student ID",
-                  ],
-                  [
-                    "Location on Campus (Optional)",
-                    "location",
-                    "e.g. Jubilee Hostel, Esaase",
-                  ],
-                ].map(([label, key, placeholder]) => (
+                  ["Full Name *", "name", "Kwame Asante", "default", "sentences"],
+                  ["Email *", "email", "you@email.com", "email-address", "none"],
+                  ["Phone Number *", "phone", "0XX XXX XXXX", "phone-pad", "none"],
+                  ["Student ID (Optional)", "studentId", "Your institutional student ID", "default", "none"],
+                ].map(([label, key, placeholder, keyboard, autoCapitalize]) => (
                   <View style={styles.inputGroup} key={key}>
                     <Text style={styles.label}>{label}</Text>
                     <TextInput
                       style={styles.input}
                       placeholder={placeholder}
-                      placeholderTextColor="#9a8e7f"
+                      placeholderTextColor={colors.textDisabled}
                       value={(form as any)[key]}
                       onChangeText={(v: string) => updateForm(key, v)}
-                      keyboardType={
-                        key === "email"
-                          ? "email-address"
-                          : key === "phone"
-                            ? "phone-pad"
-                            : "default"
-                      }
-                      autoCapitalize={key === "email" ? "none" : "sentences"}
+                      keyboardType={keyboard as any}
+                      autoCapitalize={autoCapitalize as any}
                     />
                   </View>
                 ))}
+
+                {/* Program of Study picker */}
+                <View style={styles.inputGroup}>
+                  <Text style={styles.label}>Program of Study *</Text>
+                  <TouchableOpacity style={styles.pickerBtn} onPress={() => setActivePicker("department")}>
+                    <Text style={[styles.pickerBtnText, !form.department && { opacity: 0.35 }]}>
+                      {form.department || "Select your program…"}
+                    </Text>
+                    <Text style={styles.pickerChevron}>▼</Text>
+                  </TouchableOpacity>
+                </View>
+
+                {/* Residence Hall / Hostel picker */}
+                <View style={styles.inputGroup}>
+                  <Text style={styles.label}>Residence Hall / Hostel *</Text>
+                  <TouchableOpacity style={styles.pickerBtn} onPress={() => setActivePicker("residenceHall")}>
+                    <Text style={[styles.pickerBtnText, !form.residenceHall && { opacity: 0.35 }]}>
+                      {form.residenceHall || "Select your hall or hostel…"}
+                    </Text>
+                    <Text style={styles.pickerChevron}>▼</Text>
+                  </TouchableOpacity>
+                </View>
+
+                {/* Academic Level picker */}
+                <View style={styles.inputGroup}>
+                  <Text style={styles.label}>Academic Level *</Text>
+                  <TouchableOpacity style={styles.pickerBtn} onPress={() => setActivePicker("currentLevel")}>
+                    <Text style={[styles.pickerBtnText, !form.currentLevel && { opacity: 0.35 }]}>
+                      {form.currentLevel || "Select your level…"}
+                    </Text>
+                    <Text style={styles.pickerChevron}>▼</Text>
+                  </TouchableOpacity>
+                </View>
+
+                {/* Picker modals */}
+                <PickerModal
+                  visible={activePicker === "department"}
+                  title="Program of Study"
+                  options={programs.map(p => p.name)}
+                  selected={form.department}
+                  onSelect={v => updateForm("department", v)}
+                  onClose={() => setActivePicker(null)}
+                  colors={colors}
+                />
+                <PickerModal
+                  visible={activePicker === "residenceHall"}
+                  title="Residence Hall / Hostel"
+                  options={halls.map(h => h.name)}
+                  selected={form.residenceHall}
+                  onSelect={v => updateForm("residenceHall", v)}
+                  onClose={() => setActivePicker(null)}
+                  colors={colors}
+                />
+                <PickerModal
+                  visible={activePicker === "currentLevel"}
+                  title="Academic Level"
+                  options={levels}
+                  selected={form.currentLevel}
+                  onSelect={v => updateForm("currentLevel", v)}
+                  onClose={() => setActivePicker(null)}
+                  colors={colors}
+                />
 
                 <View style={styles.rowActions}>
                   <TouchableOpacity
@@ -550,7 +680,7 @@ const RegisterScreen = ({ navigation }: any) => {
                     <TextInput
                       style={[styles.input, styles.passwordInput]}
                       placeholder="At least 6 characters"
-                      placeholderTextColor="#9a8e7f"
+                      placeholderTextColor={colors.textDisabled}
                       value={form.password}
                       onChangeText={(v) => updateForm("password", v)}
                       secureTextEntry={!showPassword}
@@ -571,7 +701,7 @@ const RegisterScreen = ({ navigation }: any) => {
                     <TextInput
                       style={[styles.input, styles.passwordInput]}
                       placeholder="Re-enter your password"
-                      placeholderTextColor="#9a8e7f"
+                      placeholderTextColor={colors.textDisabled}
                       value={form.confirmPassword}
                       onChangeText={(v) => updateForm("confirmPassword", v)}
                       secureTextEntry={!showConfirmPassword}
@@ -618,7 +748,7 @@ const RegisterScreen = ({ navigation }: any) => {
               </TouchableOpacity>
             </View>
           </View>
-        </ScrollView>
+        </Animated.ScrollView>
 
         <AppAlert
           visible={alertState.visible}
@@ -633,50 +763,49 @@ const RegisterScreen = ({ navigation }: any) => {
   );
 };
 
-const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: colors.bg },
+const getStyles = (colors: any, isMobile = true) => StyleSheet.create({
+  safe: { flex: 1, backgroundColor: colors.background },
   container: { flex: 1 },
   scrollContent: {
     flexGrow: 1,
     justifyContent: "center",
-    paddingHorizontal: 22,
-    paddingVertical: 18,
+    paddingHorizontal: isMobile ? 16 : 22,
+    paddingVertical: 14,
   },
-  heroWrap: { marginBottom: 16 },
+  heroWrap: { marginBottom: isMobile ? 12 : 16 },
   eyebrow: {
-    color: colors.accent,
-    fontSize: 10,
+    color: colors.primary,
+    fontSize: isMobile ? 9 : 10,
     textTransform: "uppercase",
     letterSpacing: 2,
     fontWeight: "800",
   },
   title: {
-    marginTop: 8,
+    marginTop: 6,
     color: colors.text,
-    fontSize: 34,
+    fontSize: isMobile ? 26 : 34,
     fontWeight: "900",
     textTransform: "uppercase",
   },
-  subtitle: { marginTop: 6, color: colors.muted, fontSize: 13, lineHeight: 20 },
+  subtitle: { marginTop: 5, color: colors.textSecondary, fontSize: isMobile ? 12 : 13, lineHeight: isMobile ? 18 : 20 },
   stepDots: { flexDirection: "row", gap: 6, marginTop: 8 },
-  stepDot: { width: 16, height: 3, backgroundColor: colors.surface },
-  stepDotActive: { backgroundColor: colors.accent },
+  stepDot: { width: 16, height: 3, backgroundColor: colors.surfaceSecondary },
+  stepDotActive: { backgroundColor: colors.primary },
   polaroidFrame: {
     marginTop: 20,
     backgroundColor: colors.surface,
-    borderWidth: 2,
-    borderColor: colors.border,
+    borderWidth: colors.boardBorderWidth,
+    borderColor: colors.boardBorder,
     padding: 8,
     paddingBottom: 20,
     transform: [{ rotate: "-1.5deg" }],
-    ...shadows.bulletin,
     zIndex: 10,
   },
   heroArt: {
     width: "100%",
     height: 160,
     borderWidth: 2,
-    borderColor: colors.border,
+    borderColor: colors.boardBorder,
   },
   redThumbtack: {
     position: "absolute",
@@ -686,9 +815,9 @@ const styles = StyleSheet.create({
     width: 20,
     height: 20,
     borderRadius: 10,
-    backgroundColor: "#ff6b6b",
+    backgroundColor: colors.pinRed,
     borderWidth: 2,
-    borderColor: colors.border,
+    borderColor: colors.boardBorder,
     zIndex: 30,
   },
   pinReflection: {
@@ -707,16 +836,15 @@ const styles = StyleSheet.create({
     width: 3,
     height: 3,
     borderRadius: 1.5,
-    backgroundColor: "#991b1b",
+    backgroundColor: colors.primaryPressed,
     transform: [{ translateX: -1.5 }, { translateY: -1.5 }],
   },
   form: {
     backgroundColor: colors.surface,
-    borderWidth: 2,
-    borderColor: colors.border,
+    borderWidth: colors.boardBorderWidth,
+    borderColor: colors.boardBorder,
     padding: 20,
     marginBottom: 24,
-    ...shadows.bulletin,
   },
   inputGroup: { marginBottom: 14 },
   label: {
@@ -728,20 +856,20 @@ const styles = StyleSheet.create({
     letterSpacing: 1.2,
   },
   input: {
-    borderWidth: 2,
-    borderColor: colors.border,
+    borderWidth: colors.boardBorderWidth,
+    borderColor: colors.boardBorder,
     paddingHorizontal: 14,
     paddingVertical: 12,
     fontSize: 15,
     color: colors.text,
-    backgroundColor: colors.surface,
+    backgroundColor: colors.surfaceSecondary,
     borderRadius: 0,
   },
   passwordContainer: { position: "relative" },
   passwordInput: { paddingRight: 60 },
   eyeButton: { position: "absolute", right: 12, top: 13 },
   eyeText: {
-    color: colors.accent,
+    color: colors.primary,
     fontSize: 12,
     fontWeight: "700",
     textTransform: "uppercase",
@@ -751,12 +879,12 @@ const styles = StyleSheet.create({
   roleButton: {
     flex: 1,
     paddingVertical: 12,
-    borderWidth: 1,
-    borderColor: colors.border,
+    borderWidth: colors.boardBorderWidth,
+    borderColor: colors.boardBorder,
     alignItems: "center",
     backgroundColor: colors.surface,
   },
-  roleButtonActive: { borderColor: colors.border, backgroundColor: colors.accent },
+  roleButtonActive: { borderColor: colors.boardBorder, backgroundColor: colors.primary },
   roleText: {
     fontSize: 12,
     fontWeight: "800",
@@ -764,19 +892,18 @@ const styles = StyleSheet.create({
     textTransform: "uppercase",
     letterSpacing: 1.2,
   },
-  roleTextActive: { color: "#fff" },
+  roleTextActive: { color: colors.primaryContent },
   button: {
-    backgroundColor: colors.text,
+    backgroundColor: colors.primary,
     paddingVertical: 13,
     alignItems: "center",
     marginTop: 8,
-    borderWidth: 2,
-    borderColor: colors.border,
-    ...shadows.bulletin,
+    borderWidth: colors.boardBorderWidth,
+    borderColor: colors.boardBorder,
   },
   buttonDisabled: { opacity: 0.45 },
   buttonText: {
-    color: colors.bg,
+    color: colors.primaryContent,
     fontSize: 12,
     fontWeight: "800",
     textTransform: "uppercase",
@@ -788,7 +915,7 @@ const styles = StyleSheet.create({
     marginTop: 14,
     marginBottom: 10,
   },
-  divider: { flex: 1, height: 1, backgroundColor: colors.border },
+  divider: { flex: 1, height: 1, backgroundColor: colors.boardBorder, opacity: 0.2 },
   dividerText: {
     marginHorizontal: 8,
     color: colors.text,
@@ -798,12 +925,11 @@ const styles = StyleSheet.create({
     fontWeight: "700",
   },
   googleBtn: {
-    borderWidth: 2,
-    borderColor: colors.border,
+    borderWidth: colors.boardBorderWidth,
+    borderColor: colors.boardBorder,
     paddingVertical: 12,
     alignItems: "center",
     backgroundColor: colors.surface,
-    ...shadows.bulletin,
   },
   googleBtnText: {
     color: colors.text,
@@ -819,8 +945,8 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   secondaryBtn: {
-    borderWidth: 1,
-    borderColor: colors.border,
+    borderWidth: colors.boardBorderWidth,
+    borderColor: colors.boardBorder,
     paddingHorizontal: 14,
     paddingVertical: 13,
     backgroundColor: colors.surface,
@@ -833,10 +959,10 @@ const styles = StyleSheet.create({
     letterSpacing: 1.2,
   },
   footer: { flexDirection: "row", justifyContent: "center", marginTop: 20 },
-  footerText: { fontSize: 13, color: colors.muted },
+  footerText: { fontSize: 13, color: colors.textSecondary },
   link: {
     fontSize: 13,
-    color: colors.accent,
+    color: colors.primary,
     fontWeight: "800",
     textTransform: "uppercase",
     letterSpacing: 1.1,
@@ -848,7 +974,9 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   letterCard: {
-    backgroundColor: colors.surface,
+    backgroundColor: colors.surfaceSecondary,
+    borderWidth: 1,
+    borderColor: colors.boardBorder,
     justifyContent: "center",
     alignItems: "center",
   },
@@ -857,6 +985,28 @@ const styles = StyleSheet.create({
     fontFamily: Platform.OS === "ios" ? "Courier New" : "monospace",
     fontWeight: "900",
   },
+  pickerBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    borderWidth: colors.boardBorderWidth,
+    borderColor: colors.boardBorder,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    backgroundColor: colors.surfaceSecondary,
+  },
+  pickerBtnText: {
+    fontSize: 15,
+    color: colors.text,
+    fontWeight: "700",
+    flex: 1,
+  },
+  pickerChevron: {
+    fontSize: 10,
+    color: colors.textSecondary,
+    marginLeft: 8,
+  },
 });
 
 export default RegisterScreen;
+

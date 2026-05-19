@@ -1,7 +1,10 @@
 import React, { useState } from 'react';
-import { ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View,
+  Dimensions,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { colors, shadows } from '../theme';
+import { shadows } from '../theme';
+import { useColors } from '../theme/ThemeContext';
 import ScreenHeader from '../components/ScreenHeader';
 
 interface FAQItem {
@@ -72,9 +75,159 @@ const FAQ_DATA: FAQCategory[] = [
 ];
 
 const FAQScreen = () => {
+  const colors = useColors();
+  const { width: _sw } = Dimensions.get('window');
+  const isMobile = _sw < 640;
   const [search, setSearch] = useState('');
   const [activeCat, setActiveCat] = useState('general');
   const [expandedId, setExpandedId] = useState<string | null>(null);
+
+  const styles = React.useMemo(() => StyleSheet.create({
+    container: { flex: 1, backgroundColor: colors.bg },
+    content: { paddingBottom: 40 },
+    searchContainer: {
+      padding: isMobile ? 12 : 16,
+    },
+    searchInput: {
+      backgroundColor: colors.surface,
+      borderWidth: 2,
+      borderColor: colors.border,
+      paddingHorizontal: isMobile ? 12 : 16,
+      paddingVertical: 12,
+      fontSize: isMobile ? 13 : 14,
+      color: colors.text,
+      fontWeight: '700',
+      ...shadows.bulletin,
+    },
+    tabsRow: {
+      flexDirection: 'row',
+      gap: 8,
+      paddingHorizontal: isMobile ? 12 : 16,
+      marginBottom: 16,
+    },
+    tab: {
+      flex: 1,
+      paddingVertical: 10,
+      alignItems: 'center',
+      borderWidth: 2,
+      borderColor: colors.border,
+      backgroundColor: colors.surface,
+      ...shadows.bulletin,
+    },
+    tabText: {
+      fontSize: 11,
+      fontWeight: '900',
+      textTransform: 'uppercase',
+      color: colors.text,
+      letterSpacing: 1,
+    },
+    activeTabText: {
+      color: colors.bg,
+    },
+    list: {
+      paddingHorizontal: isMobile ? 12 : 16,
+      gap: 12,
+    },
+    faqCard: {
+      borderWidth: 2,
+      borderColor: colors.border,
+      backgroundColor: colors.surface,
+      ...shadows.bulletin,
+    },
+    headerRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      padding: 14,
+      gap: 10,
+    },
+    indexBox: {
+      width: 24,
+      height: 24,
+      borderWidth: 1,
+      borderColor: colors.border,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: colors.bg,
+    },
+    indexText: {
+      fontSize: 10,
+      fontWeight: '900',
+      color: colors.muted,
+    },
+    questionText: {
+      flex: 1,
+      fontSize: isMobile ? 12 : 13,
+      fontWeight: '900',
+      textTransform: 'uppercase',
+      color: colors.text,
+    },
+    toggleIcon: {
+      fontSize: 10,
+      fontWeight: '900',
+      color: colors.muted,
+    },
+    answerWrap: {
+      borderTopWidth: 2,
+      borderTopColor: colors.border,
+      padding: 14,
+      flexDirection: 'row',
+      gap: 10,
+    },
+    accentBar: {
+      width: 4,
+      backgroundColor: colors.accent,
+    },
+    answerText: {
+      flex: 1,
+      fontSize: isMobile ? 12 : 13,
+      fontWeight: '700',
+      color: colors.muted,
+      lineHeight: 18,
+    },
+    emptyCard: {
+      padding: 32,
+      borderWidth: 2,
+      borderColor: colors.border,
+      backgroundColor: colors.surface,
+      alignItems: 'center',
+      ...shadows.bulletin,
+    },
+    emptyTitle: {
+      fontSize: isMobile ? 13 : 14,
+      fontWeight: '900',
+      textTransform: 'uppercase',
+      color: colors.text,
+    },
+    emptySub: {
+      fontSize: 12,
+      color: colors.muted,
+      textAlign: 'center',
+      marginTop: 6,
+      lineHeight: 18,
+    },
+    helpCard: {
+      margin: 16,
+      marginTop: 24,
+      padding: 20,
+      borderWidth: 2,
+      borderColor: colors.border,
+      backgroundColor: colors.surfaceSecondary,
+      ...shadows.bulletin,
+    },
+    helpTitle: {
+      fontSize: isMobile ? 13 : 14,
+      fontWeight: '900',
+      color: colors.text,
+      textTransform: 'uppercase',
+    },
+    helpText: {
+      fontSize: 12,
+      fontWeight: '700',
+      color: colors.muted,
+      marginTop: 6,
+      lineHeight: 18,
+    },
+  }), [colors]);
 
   const toggleExpand = (id: string) => {
     setExpandedId(expandedId === id ? null : id);
@@ -114,7 +267,7 @@ const FAQScreen = () => {
           <TextInput
             style={styles.searchInput}
             placeholder="Search questions... (e.g. escrow, momo)"
-            placeholderTextColor="#9ca3af"
+            placeholderTextColor={colors.muted}
             value={search}
             onChangeText={setSearch}
           />
@@ -192,152 +345,5 @@ const FAQScreen = () => {
     </SafeAreaView>
   );
 };
-
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.bg },
-  content: { paddingBottom: 40 },
-  searchContainer: {
-    padding: 16,
-  },
-  searchInput: {
-    backgroundColor: colors.surface,
-    borderWidth: 2,
-    borderColor: colors.border,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    fontSize: 14,
-    color: colors.text,
-    fontWeight: '700',
-    ...shadows.bulletin,
-  },
-  tabsRow: {
-    flexDirection: 'row',
-    gap: 8,
-    paddingHorizontal: 16,
-    marginBottom: 16,
-  },
-  tab: {
-    flex: 1,
-    paddingVertical: 10,
-    alignItems: 'center',
-    borderWidth: 2,
-    borderColor: colors.border,
-    backgroundColor: colors.surface,
-    ...shadows.bulletin,
-  },
-  tabText: {
-    fontSize: 11,
-    fontWeight: '900',
-    textTransform: 'uppercase',
-    color: colors.text,
-    letterSpacing: 1,
-  },
-  activeTabText: {
-    color: '#fff',
-  },
-  list: {
-    paddingHorizontal: 16,
-    gap: 12,
-  },
-  faqCard: {
-    borderWidth: 2,
-    borderColor: colors.border,
-    backgroundColor: colors.surface,
-    ...shadows.bulletin,
-  },
-  headerRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 14,
-    gap: 10,
-  },
-  indexBox: {
-    width: 24,
-    height: 24,
-    borderWidth: 1,
-    borderColor: colors.border,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: colors.bg,
-  },
-  indexText: {
-    fontSize: 10,
-    fontWeight: '900',
-    color: colors.muted,
-  },
-  questionText: {
-    flex: 1,
-    fontSize: 13,
-    fontWeight: '900',
-    textTransform: 'uppercase',
-    color: colors.text,
-  },
-  toggleIcon: {
-    fontSize: 10,
-    fontWeight: '900',
-    color: colors.muted,
-  },
-  answerWrap: {
-    borderTopWidth: 2,
-    borderTopColor: colors.border,
-    padding: 14,
-    flexDirection: 'row',
-    gap: 10,
-  },
-  accentBar: {
-    width: 4,
-    backgroundColor: '#ff6b6b',
-  },
-  answerText: {
-    flex: 1,
-    fontSize: 13,
-    fontWeight: '700',
-    color: 'rgba(0,0,0,0.7)',
-    lineHeight: 18,
-  },
-  emptyCard: {
-    padding: 32,
-    borderWidth: 2,
-    borderColor: colors.border,
-    backgroundColor: colors.surface,
-    alignItems: 'center',
-    ...shadows.bulletin,
-  },
-  emptyTitle: {
-    fontSize: 14,
-    fontWeight: '900',
-    textTransform: 'uppercase',
-    color: colors.text,
-  },
-  emptySub: {
-    fontSize: 12,
-    color: colors.muted,
-    textAlign: 'center',
-    marginTop: 6,
-    lineHeight: 18,
-  },
-  helpCard: {
-    margin: 16,
-    marginTop: 24,
-    padding: 20,
-    borderWidth: 2,
-    borderColor: colors.border,
-    backgroundColor: '#fffacd',
-    ...shadows.bulletin,
-  },
-  helpTitle: {
-    fontSize: 14,
-    fontWeight: '900',
-    color: colors.text,
-    textTransform: 'uppercase',
-  },
-  helpText: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: 'rgba(0,0,0,0.7)',
-    marginTop: 6,
-    lineHeight: 18,
-  },
-});
 
 export default FAQScreen;

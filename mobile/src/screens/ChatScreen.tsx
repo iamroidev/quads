@@ -9,6 +9,7 @@ import {
   TextInput,
   TouchableOpacity,
   View,
+  Dimensions,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { io, Socket } from 'socket.io-client';
@@ -16,7 +17,7 @@ import * as SecureStore from 'expo-secure-store';
 import chatService, { Message } from '../services/chat.service';
 import verificationService from '../services/verification.service';
 import { useAuth } from '../context/AuthContext';
-import { colors, shadows } from '../theme';
+import { useColors } from '../theme/ThemeContext';
 
 const API_BASE = process.env.EXPO_PUBLIC_API_URL?.replace('/api', '') ?? 'http://localhost:5000';
 
@@ -24,6 +25,9 @@ const formatTime = (dateStr: string) =>
   new Date(dateStr).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
 const ChatScreen = ({ route, navigation }: any) => {
+  const colors = useColors();
+  const { width: _sw } = Dimensions.get('window');
+  const isMobile = _sw < 640;
   const { conversationId, otherUser, productTitle } = route.params;
   const { user } = useAuth();
   const [messages, setMessages] = useState<Message[]>([]);
@@ -38,6 +42,97 @@ const ChatScreen = ({ route, navigation }: any) => {
   const flatListRef = useRef<FlatList>(null);
   const socketRef = useRef<Socket | null>(null);
   const insets = useSafeAreaInsets();
+
+  const styles = React.useMemo(() => StyleSheet.create({
+    container: { flex: 1, backgroundColor: colors.bg },
+    centered: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+    productBanner: {
+      backgroundColor: colors.surfaceSecondary, paddingHorizontal: isMobile ? 12 : 16, paddingVertical: 8,
+      borderBottomWidth: 1, borderBottomColor: colors.border,
+    },
+    productBannerText: { fontSize: 11, color: colors.muted, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 1.1 },
+    messagesList: { paddingHorizontal: 12, paddingVertical: 16, gap: 6 },
+    systemMsg: { alignItems: 'center', marginVertical: 8 },
+    systemMsgText: { fontSize: 11, color: colors.muted, backgroundColor: colors.surfaceSecondary, paddingHorizontal: 10, paddingVertical: 4, fontStyle: 'italic' },
+
+    bubbleWrap: { marginBottom: 4 },
+    bubbleWrapMe: { alignItems: 'flex-end' },
+    bubbleWrapThem: { alignItems: 'flex-start' },
+    bubble: { maxWidth: '80%', paddingHorizontal: 12, paddingVertical: 10, borderRadius: 0 },
+    bubbleMe: { backgroundColor: colors.text, borderBottomRightRadius: 2 },
+    bubbleThem: { backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border, borderBottomLeftRadius: 2 },
+    bubbleText: { fontSize: isMobile ? 13 : 14, lineHeight: 20 },
+    bubbleTextMe: { color: colors.bg },
+    bubbleTextThem: { color: colors.text },
+    bubbleTime: { fontSize: 10, marginTop: 4 },
+    bubbleTimeMe: { color: colors.textDisabled, textAlign: 'right' },
+    bubbleTimeThem: { color: colors.muted, textAlign: 'left' },
+    quickTag: { fontSize: 9, marginTop: 4, color: colors.textDisabled, textTransform: 'uppercase', letterSpacing: 1 },
+    quickTagMe: { color: colors.textDisabled },
+
+    // Offer block
+    offerBlock: { marginTop: 8, borderTopWidth: 1, borderTopColor: colors.border, paddingTop: 8, gap: 8 },
+    offerBlockMe: { borderTopColor: colors.border },
+    offerAmountRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 8 },
+    offerAmount: { fontSize: isMobile ? 13 : 15, fontWeight: '900', color: colors.bg },
+    offerAmountMe: { color: colors.bg },
+    offerBadge: { borderWidth: 1, borderColor: colors.border, paddingHorizontal: 8, paddingVertical: 2 },
+    offerBadgeAccepted: { borderColor: colors.accent, backgroundColor: colors.successTint },
+    offerBadgeRejected: { borderColor: colors.danger, backgroundColor: colors.dangerTint },
+    offerBadgeCountered: { borderColor: colors.primary, backgroundColor: colors.metric1Bg },
+    offerBadgeText: { fontSize: 9, fontWeight: '800', textTransform: 'uppercase', letterSpacing: 1, color: colors.text },
+
+    offerActions: { gap: 6 },
+    offerBtnsRow: { flexDirection: 'row', gap: 6 },
+    offerActionBtn: { flex: 1, borderWidth: 1, paddingVertical: 8, alignItems: 'center' },
+    offerAcceptBtn: { borderColor: colors.accent, backgroundColor: colors.successTint },
+    offerDeclineBtn: { borderColor: colors.danger, backgroundColor: colors.dangerTint },
+    offerActionBtnText: { fontSize: 10, fontWeight: '800', textTransform: 'uppercase', letterSpacing: 1, color: colors.text },
+    offerCounterRow: { flexDirection: 'row', gap: 6 },
+    offerCounterInput: {
+      flex: 1, borderWidth: 1, borderColor: colors.border,
+      backgroundColor: colors.surfaceSecondary, paddingHorizontal: 10, paddingVertical: 8, fontSize: 12, borderRadius: 0,
+      color: colors.text,
+    },
+    offerCounterBtn: {
+      borderWidth: 1, borderColor: colors.border, backgroundColor: colors.surface,
+      justifyContent: 'center', paddingHorizontal: 12,
+    },
+
+    // Input area
+    inputRow: {
+      paddingHorizontal: 12, paddingVertical: 8, paddingBottom: 8,
+      backgroundColor: colors.surface, borderTopWidth: 1, borderTopColor: colors.border,
+      gap: 8,
+    },
+    quickReplyRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
+    quickChip: { borderWidth: 1, borderColor: colors.border, paddingHorizontal: 8, paddingVertical: 6, backgroundColor: colors.surfaceSecondary },
+    quickChipText: { fontSize: 10, fontWeight: '800', color: colors.muted, textTransform: 'uppercase', letterSpacing: 1 },
+
+    offerPanel: { borderWidth: 1, borderColor: colors.border, backgroundColor: colors.surfaceSecondary, padding: 10, gap: 8 },
+    offerPanelLabel: { fontSize: 10, fontWeight: '800', color: colors.muted, textTransform: 'uppercase', letterSpacing: 1.2 },
+    offerPanelRow: { flexDirection: 'row', gap: 8 },
+    offerPanelInput: { flex: 1, borderWidth: 1, borderColor: colors.border, backgroundColor: colors.surfaceSecondary, paddingHorizontal: 10, paddingVertical: 8, fontSize: isMobile ? 13 : 14, fontWeight: '700', borderRadius: 0, color: colors.text },
+    offerSendBtn: { backgroundColor: colors.text, justifyContent: 'center', paddingHorizontal: 14 },
+    offerSendBtnText: { color: colors.bg, fontSize: 10, fontWeight: '800', textTransform: 'uppercase', letterSpacing: 1 },
+
+    toolRow: { flexDirection: 'row', gap: 8 },
+    toolBtn: { borderWidth: 1, borderColor: colors.border, backgroundColor: colors.surfaceSecondary, paddingHorizontal: 12, paddingVertical: 8 },
+    toolBtnActive: { backgroundColor: colors.text, borderColor: colors.text },
+    toolBtnText: { fontSize: 10, fontWeight: '800', color: colors.muted, textTransform: 'uppercase', letterSpacing: 1 },
+    toolBtnTextActive: { color: colors.bg },
+
+    messageRow: { flexDirection: 'row', alignItems: 'flex-end', gap: 8 },
+    input: {
+      flex: 1, backgroundColor: colors.surfaceSecondary, borderWidth: 1, borderColor: colors.border,
+      borderRadius: 0, paddingHorizontal: 14, paddingVertical: 10,
+      fontSize: isMobile ? 13 : 14, maxHeight: 100, color: colors.text,
+    },
+    sendBtn: { backgroundColor: colors.text, borderRadius: 0, paddingHorizontal: 18, paddingVertical: 10, justifyContent: 'center', alignItems: 'center' },
+    sendBtnDisabled: { backgroundColor: colors.textDisabled },
+    sendBtnText: { color: colors.bg, fontWeight: '800', fontSize: 11, textTransform: 'uppercase', letterSpacing: 1 },
+    emptyText: { textAlign: 'center', color: colors.muted, marginTop: 40 },
+  }), [colors]);
 
   const scrollToEnd = () => setTimeout(() => flatListRef.current?.scrollToEnd({ animated: true }), 80);
 
@@ -110,7 +205,6 @@ const ChatScreen = ({ route, navigation }: any) => {
     setSending(true);
     setText('');
     try {
-      // ALWAYS use REST to guarantee delivery. The server will broadcast to other users via socket.
       const res = await chatService.sendMessage(conversationId, trimmed);
       if (res.success) {
         setMessages((prev) => {
@@ -129,12 +223,12 @@ const ChatScreen = ({ route, navigation }: any) => {
     setSending(true);
     try {
       const res = await chatService.sendMessage(conversationId, label, 'text', { quickReplyLabel: label });
-      if (res.success) { 
+      if (res.success) {
         setMessages((prev) => {
           if (prev.some((m) => m._id === res.data.message._id)) return prev;
           return [...prev, res.data.message];
         });
-        scrollToEnd(); 
+        scrollToEnd();
       }
     } finally { setSending(false); setQuickReplyMode(false); }
   };
@@ -150,12 +244,12 @@ const ChatScreen = ({ route, navigation }: any) => {
         'text',
         { offer: { amount, status: 'pending' } }
       );
-      if (res.success) { 
+      if (res.success) {
         setMessages((prev) => {
           if (prev.some((m) => m._id === res.data.message._id)) return prev;
           return [...prev, res.data.message];
         });
-        scrollToEnd(); 
+        scrollToEnd();
       }
       setOfferAmount('');
       setShowOfferPanel(false);
@@ -177,7 +271,6 @@ const ChatScreen = ({ route, navigation }: any) => {
         )
       );
       setCounterAmounts((prev) => { const n = { ...prev }; delete n[msgId]; return n; });
-      // Re-fetch to get counter message if any
       if (status === 'countered') await fetchMessages();
     } finally {
       setRespondingOffer(null);
@@ -229,21 +322,21 @@ const ChatScreen = ({ route, navigation }: any) => {
                       onPress={() => handleRespondToOffer(item._id, 'accepted')}
                       disabled={!!respondingOffer}
                     >
-                      <Text style={styles.offerActionBtnText}>✓ Accept</Text>
+                      <Text style={styles.offerActionBtnText}>Accept</Text>
                     </TouchableOpacity>
                     <TouchableOpacity
                       style={[styles.offerActionBtn, styles.offerDeclineBtn]}
                       onPress={() => handleRespondToOffer(item._id, 'rejected')}
                       disabled={!!respondingOffer}
                     >
-                      <Text style={styles.offerActionBtnText}>✕ Decline</Text>
+                      <Text style={styles.offerActionBtnText}>Decline</Text>
                     </TouchableOpacity>
                   </View>
                   <View style={styles.offerCounterRow}>
                     <TextInput
                       style={styles.offerCounterInput}
                       placeholder="Counter (GHS)"
-                      placeholderTextColor="#9a8e7f"
+                      placeholderTextColor={colors.muted}
                       keyboardType="numeric"
                       value={counterAmounts[item._id] || ''}
                       onChangeText={(v) => setCounterAmounts((prev) => ({ ...prev, [item._id]: v }))}
@@ -268,7 +361,7 @@ const ChatScreen = ({ route, navigation }: any) => {
 
           <Text style={[styles.bubbleTime, isMe ? styles.bubbleTimeMe : styles.bubbleTimeThem]}>
             {formatTime(item.createdAt)}
-            {isMe && item.isRead ? '  ✓✓' : ''}
+            {''}
           </Text>
         </View>
       </View>
@@ -289,7 +382,7 @@ const ChatScreen = ({ route, navigation }: any) => {
 
       {loading ? (
         <View style={styles.centered}>
-          <ActivityIndicator size="large" color="#000" />
+          <ActivityIndicator size="large" color={colors.text} />
         </View>
       ) : (
         <FlatList
@@ -325,7 +418,7 @@ const ChatScreen = ({ route, navigation }: any) => {
               <TextInput
                 style={styles.offerPanelInput}
                 placeholder="e.g. 80.00"
-                placeholderTextColor="#9a8e7f"
+                placeholderTextColor={colors.muted}
                 keyboardType="numeric"
                 value={offerAmount}
                 onChangeText={setOfferAmount}
@@ -344,7 +437,7 @@ const ChatScreen = ({ route, navigation }: any) => {
         {/* Toolbar row */}
         <View style={styles.toolRow}>
           <TouchableOpacity style={[styles.toolBtn, showOfferPanel && styles.toolBtnActive]} onPress={() => { setShowOfferPanel((v) => !v); setQuickReplyMode(false); }}>
-            <Text style={[styles.toolBtnText, showOfferPanel && styles.toolBtnTextActive]}>💰</Text>
+            <Text style={[styles.toolBtnText, showOfferPanel && styles.toolBtnTextActive]}>GHS</Text>
           </TouchableOpacity>
           <TouchableOpacity style={[styles.toolBtn, quickReplyMode && styles.toolBtnActive]} onPress={() => { setQuickReplyMode((v) => !v); setShowOfferPanel(false); }}>
             <Text style={[styles.toolBtnText, quickReplyMode && styles.toolBtnTextActive]}>Quick</Text>
@@ -356,7 +449,7 @@ const ChatScreen = ({ route, navigation }: any) => {
           <TextInput
             style={styles.input}
             placeholder="Type a message..."
-            placeholderTextColor="#9a8e7f"
+            placeholderTextColor={colors.muted}
             value={text}
             onChangeText={setText}
             multiline
@@ -368,7 +461,7 @@ const ChatScreen = ({ route, navigation }: any) => {
             onPress={handleSend}
             disabled={!text.trim() || sending}
           >
-            {sending ? <ActivityIndicator size="small" color="#fff" /> : <Text style={styles.sendBtnText}>Send</Text>}
+            {sending ? <ActivityIndicator size="small" color={colors.bg} /> : <Text style={styles.sendBtnText}>Send</Text>}
           </TouchableOpacity>
         </View>
         <View style={{ height: Math.max(insets.bottom - 8, 0) }} />
@@ -376,95 +469,5 @@ const ChatScreen = ({ route, navigation }: any) => {
     </KeyboardAvoidingView>
   );
 };
-
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.bg },
-  centered: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  productBanner: {
-    backgroundColor: '#f1ebdf', paddingHorizontal: 16, paddingVertical: 8,
-    borderBottomWidth: 1, borderBottomColor: colors.border,
-  },
-  productBannerText: { fontSize: 11, color: '#6e6253', fontWeight: '700', textTransform: 'uppercase', letterSpacing: 1.1 },
-  messagesList: { paddingHorizontal: 12, paddingVertical: 16, gap: 6 },
-  systemMsg: { alignItems: 'center', marginVertical: 8 },
-  systemMsgText: { fontSize: 11, color: '#9a8e7f', backgroundColor: '#f1ebdf', paddingHorizontal: 10, paddingVertical: 4, fontStyle: 'italic' },
-
-  bubbleWrap: { marginBottom: 4 },
-  bubbleWrapMe: { alignItems: 'flex-end' },
-  bubbleWrapThem: { alignItems: 'flex-start' },
-  bubble: { maxWidth: '80%', paddingHorizontal: 12, paddingVertical: 10, borderRadius: 0 },
-  bubbleMe: { backgroundColor: '#1f1a14', borderBottomRightRadius: 2 },
-  bubbleThem: { backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border, borderBottomLeftRadius: 2 },
-  bubbleText: { fontSize: 14, lineHeight: 20 },
-  bubbleTextMe: { color: '#fff' },
-  bubbleTextThem: { color: '#221d16' },
-  bubbleTime: { fontSize: 10, marginTop: 4 },
-  bubbleTimeMe: { color: 'rgba(255,255,255,0.55)', textAlign: 'right' },
-  bubbleTimeThem: { color: '#9ca3af', textAlign: 'left' },
-  quickTag: { fontSize: 9, marginTop: 4, color: 'rgba(255,255,255,0.45)', textTransform: 'uppercase', letterSpacing: 1 },
-  quickTagMe: { color: 'rgba(255,255,255,0.45)' },
-
-  // Offer block
-  offerBlock: { marginTop: 8, borderTopWidth: 1, borderTopColor: 'rgba(255,255,255,0.15)', paddingTop: 8, gap: 8 },
-  offerBlockMe: { borderTopColor: 'rgba(255,255,255,0.15)' },
-  offerAmountRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 8 },
-  offerAmount: { fontSize: 15, fontWeight: '900', color: '#fff' },
-  offerAmountMe: { color: '#fff' },
-  offerBadge: { borderWidth: 1, borderColor: 'rgba(255,255,255,0.3)', paddingHorizontal: 8, paddingVertical: 2 },
-  offerBadgeAccepted: { borderColor: colors.accent, backgroundColor: '#d6ede7' },
-  offerBadgeRejected: { borderColor: '#b3453a', backgroundColor: '#fde8e6' },
-  offerBadgeCountered: { borderColor: '#c57f3f', backgroundColor: '#fdf0e0' },
-  offerBadgeText: { fontSize: 9, fontWeight: '800', textTransform: 'uppercase', letterSpacing: 1, color: '#1f1a14' },
-
-  offerActions: { gap: 6 },
-  offerBtnsRow: { flexDirection: 'row', gap: 6 },
-  offerActionBtn: { flex: 1, borderWidth: 1, paddingVertical: 8, alignItems: 'center' },
-  offerAcceptBtn: { borderColor: colors.accent, backgroundColor: '#d6ede7' },
-  offerDeclineBtn: { borderColor: '#b3453a', backgroundColor: '#fde8e6' },
-  offerActionBtnText: { fontSize: 10, fontWeight: '800', textTransform: 'uppercase', letterSpacing: 1, color: '#1f1a14' },
-  offerCounterRow: { flexDirection: 'row', gap: 6 },
-  offerCounterInput: {
-    flex: 1, borderWidth: 1, borderColor: colors.border,
-    backgroundColor: '#fff', paddingHorizontal: 10, paddingVertical: 8, fontSize: 12, borderRadius: 0,
-  },
-  offerCounterBtn: {
-    borderWidth: 1, borderColor: colors.border, backgroundColor: colors.surface,
-    justifyContent: 'center', paddingHorizontal: 12,
-  },
-
-  // Input area
-  inputRow: {
-    paddingHorizontal: 12, paddingVertical: 8, paddingBottom: 8,
-    backgroundColor: colors.surface, borderTopWidth: 1, borderTopColor: colors.border,
-    gap: 8,
-  },
-  quickReplyRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
-  quickChip: { borderWidth: 1, borderColor: colors.border, paddingHorizontal: 8, paddingVertical: 6, backgroundColor: '#fff' },
-  quickChipText: { fontSize: 10, fontWeight: '800', color: '#6f6559', textTransform: 'uppercase', letterSpacing: 1 },
-
-  offerPanel: { borderWidth: 1, borderColor: '#c8b48c', backgroundColor: '#fffacd', padding: 10, gap: 8 },
-  offerPanelLabel: { fontSize: 10, fontWeight: '800', color: '#7c6032', textTransform: 'uppercase', letterSpacing: 1.2 },
-  offerPanelRow: { flexDirection: 'row', gap: 8 },
-  offerPanelInput: { flex: 1, borderWidth: 1, borderColor: colors.border, backgroundColor: '#fff', paddingHorizontal: 10, paddingVertical: 8, fontSize: 14, fontWeight: '700', borderRadius: 0 },
-  offerSendBtn: { backgroundColor: '#1f1a14', justifyContent: 'center', paddingHorizontal: 14 },
-  offerSendBtnText: { color: '#fff', fontSize: 10, fontWeight: '800', textTransform: 'uppercase', letterSpacing: 1 },
-
-  toolRow: { flexDirection: 'row', gap: 8 },
-  toolBtn: { borderWidth: 1, borderColor: colors.border, backgroundColor: '#fff', paddingHorizontal: 12, paddingVertical: 8 },
-  toolBtnActive: { backgroundColor: '#1f1a14', borderColor: '#1f1a14' },
-  toolBtnText: { fontSize: 10, fontWeight: '800', color: '#6f6559', textTransform: 'uppercase', letterSpacing: 1 },
-  toolBtnTextActive: { color: '#fff' },
-
-  messageRow: { flexDirection: 'row', alignItems: 'flex-end', gap: 8 },
-  input: {
-    flex: 1, backgroundColor: '#fff', borderWidth: 1, borderColor: colors.border,
-    borderRadius: 0, paddingHorizontal: 14, paddingVertical: 10,
-    fontSize: 14, maxHeight: 100, color: '#1f1a14',
-  },
-  sendBtn: { backgroundColor: '#1f1a14', borderRadius: 0, paddingHorizontal: 18, paddingVertical: 10, justifyContent: 'center', alignItems: 'center' },
-  sendBtnDisabled: { backgroundColor: '#8f8478' },
-  sendBtnText: { color: '#fff', fontWeight: '800', fontSize: 11, textTransform: 'uppercase', letterSpacing: 1 },
-  emptyText: { textAlign: 'center', color: '#9ca3af', marginTop: 40 },
-});
 
 export default ChatScreen;

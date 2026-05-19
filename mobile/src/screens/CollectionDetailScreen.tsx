@@ -1,14 +1,37 @@
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, ScrollView, StyleSheet, Text, View,
+  Dimensions,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { colors, shadows } from '../theme';
+import { shadows } from '../theme';
+import { useColors } from '../theme/ThemeContext';
 import ScreenHeader from '../components/ScreenHeader';
 import api from '../services/api';
 
 const CollectionDetailScreen = ({ route }: any) => {
+  const colors = useColors();
+  const { width: _sw } = Dimensions.get('window');
+  const isMobile = _sw < 640;
   const { slug } = route.params || {};
   const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+
+  const styles = React.useMemo(() => StyleSheet.create({
+    container: { flex: 1, backgroundColor: colors.bg },
+    content: { padding: 16 },
+    centered: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: colors.bg },
+    empty: { textAlign: 'center', color: colors.muted, fontSize: 12, marginTop: 40 },
+    card: {
+      padding: isMobile ? 12 : 16,
+      borderWidth: 2,
+      borderColor: colors.border,
+      backgroundColor: colors.surface,
+      marginBottom: 10,
+      ...shadows.bulletin,
+    },
+    title: { fontSize: isMobile ? 12 : 13, fontWeight: '900', color: colors.text },
+    price: { fontSize: 12, color: colors.muted, marginTop: 4 },
+  }), [colors]);
 
   useEffect(() => {
     api.get('/products', { params: { collection: slug } })
@@ -42,22 +65,5 @@ const CollectionDetailScreen = ({ route }: any) => {
     </SafeAreaView>
   );
 };
-
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.bg },
-  content: { padding: 16 },
-  centered: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: colors.bg },
-  empty: { textAlign: 'center', color: colors.muted, fontSize: 12, marginTop: 40 },
-  card: {
-    padding: 16,
-    borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.surface,
-    marginBottom: 10,
-    ...shadows.bulletin,
-  },
-  title: { fontSize: 13, fontWeight: '900' },
-  price: { fontSize: 12, color: colors.muted, marginTop: 4 },
-});
 
 export default CollectionDetailScreen;

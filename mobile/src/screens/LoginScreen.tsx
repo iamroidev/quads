@@ -1,25 +1,24 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   View,
   Text,
   TextInput,
   TouchableOpacity,
   StyleSheet,
-  ScrollView,
   KeyboardAvoidingView,
   Platform,
   Pressable,
   ActivityIndicator,
   Image,
+  Animated,
+  Dimensions,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import * as WebBrowser from "expo-web-browser";
 import * as Linking from "expo-linking";
-import { makeRedirectUri } from "expo-auth-session";
-import Constants from "expo-constants";
 import { useAuth } from "../context/AuthContext";
+import { useTheme } from "../theme/ThemeContext";
 import AppAlert from "../components/AppAlert";
-import { colors, shadows } from "../theme";
 import { supabase } from "../services/supabase";
 
 WebBrowser.maybeCompleteAuthSession();
@@ -56,6 +55,20 @@ const extractOAuthParams = (redirectUrl: string) => {
 
 const LoginScreen = ({ navigation }: any) => {
   const { login, googleLogin } = useAuth();
+  const { colors } = useTheme();
+  const { width: _sw } = Dimensions.get('window');
+  const isMobile = _sw < 640;
+  const styles = getStyles(colors, isMobile);
+
+  const slideAnim = useRef(new Animated.Value(40)).current;
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  useEffect(() => {
+    Animated.parallel([
+      Animated.timing(fadeAnim, { toValue: 1, duration: 420, useNativeDriver: true }),
+      Animated.spring(slideAnim, { toValue: 0, tension: 60, friction: 9, useNativeDriver: true }),
+    ]).start();
+  }, []);
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -69,6 +82,31 @@ const LoginScreen = ({ navigation }: any) => {
     title: "",
     message: "",
   });
+
+  const handleLogin = async () => {
+    if (!email || !password) {
+      setAlertState({
+        visible: true,
+        title: "Missing fields",
+        message: "Please fill in all fields.",
+      });
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      await login(email.toLowerCase(), password);
+    } catch (error: any) {
+      const message =
+        error.response?.data?.message ||
+        error.userMessage ||
+        error.message ||
+        "Login failed";
+      setAlertState({ visible: true, title: "Login failed", message });
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleGooglePress = async () => {
     setIsLoading(true);
@@ -173,46 +211,19 @@ const LoginScreen = ({ navigation }: any) => {
     }
   };
 
-  const handleLogin = async () => {
-    if (!email || !password) {
-      setAlertState({
-        visible: true,
-        title: "Missing fields",
-        message: "Please fill in all fields.",
-      });
-      return;
-    }
-
-    setIsLoading(true);
-    try {
-      await login(email.toLowerCase(), password);
-    } catch (error: any) {
-      const message =
-        error.response?.data?.message ||
-        error.userMessage ||
-        error.message ||
-        "Login failed";
-      setAlertState({ visible: true, title: "Login failed", message });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   return (
     <SafeAreaView style={styles.safe} edges={["top", "bottom"]}>
       <KeyboardAvoidingView
         style={styles.container}
         behavior={Platform.OS === "ios" ? "padding" : "height"}
       >
-        <ScrollView
+        <Animated.ScrollView
           contentContainerStyle={styles.scrollContent}
           keyboardShouldPersistTaps="handled"
+          style={{ opacity: fadeAnim, transform: [{ translateY: slideAnim }] }}
         >
           <View style={styles.heroWrap}>
-            {/* Branded Subscript Logo Lockup (Matches the brand identity 100%!) */}
             <View style={[styles.letterRow, { alignItems: 'flex-end', gap: 5, marginBottom: 12 }]}>
-              
-              {/* Massive Vector Q-Logo (Scaled to 54x54 for login page header balance) */}
               <View
                 style={[
                   styles.letterCard,
@@ -220,35 +231,29 @@ const LoginScreen = ({ navigation }: any) => {
                     width: 54,
                     height: 54,
                     borderWidth: 3,
-                    borderColor: colors.border,
+                    borderColor: colors.boardBorder,
                     alignItems: 'center',
                     justifyContent: 'center',
                     position: 'relative',
-                    ...shadows.bulletin,
                   },
                 ]}
               >
-                {/* Bold Stencil Q (Inner Ring) */}
                 <View style={{
                   width: 24,
                   height: 24,
                   borderWidth: 5.5,
-                  borderColor: colors.border,
+                  borderColor: colors.boardBorder,
                   backgroundColor: 'transparent',
                 }} />
-                
-                {/* Bold Stencil Q (Rotated Tail) */}
                 <View style={{
                   position: 'absolute',
                   bottom: 8,
                   right: 8,
                   width: 10,
                   height: 5,
-                  backgroundColor: colors.border,
+                  backgroundColor: colors.boardBorder,
                   transform: [{ rotate: '45deg' }],
                 }} />
-
-                {/* Red Thumbtack detail (Top Right) */}
                 <View style={{
                   position: 'absolute',
                   top: 4,
@@ -256,13 +261,11 @@ const LoginScreen = ({ navigation }: any) => {
                   width: 8,
                   height: 8,
                   borderRadius: 4,
-                  backgroundColor: '#ff6b6b',
+                  backgroundColor: colors.pinRed,
                   borderWidth: 1.2,
-                  borderColor: colors.border,
+                  borderColor: colors.boardBorder,
                 }} />
               </View>
-
-              {/* Subscript letters: U A D S (Compact 22x22 for clean header proportions) */}
               {['U', 'A', 'D', 'S'].map((char, idx) => (
                 <View
                   key={idx}
@@ -272,11 +275,10 @@ const LoginScreen = ({ navigation }: any) => {
                       width: 22,
                       height: 22,
                       borderWidth: 1.5,
-                      borderColor: colors.border,
+                      borderColor: colors.boardBorder,
                       justifyContent: 'center',
                       alignItems: 'center',
                       marginBottom: 1,
-                      ...shadows.bulletin,
                     },
                   ]}
                 >
@@ -284,30 +286,23 @@ const LoginScreen = ({ navigation }: any) => {
                 </View>
               ))}
             </View>
-
             <Text style={styles.title}>Welcome Back</Text>
-            <Text style={styles.subtitle}>
-              Sign in to continue buying and selling on campus.
-            </Text>
+            <Text style={styles.subtitle}>Sign in to continue buying and selling on campus.</Text>
             <View style={styles.polaroidFrame}>
-              <Image
-                source={require("../../assets/marketillustration1.jpg")}
-                style={styles.heroArt}
-              />
+              <Image source={require("../../assets/marketillustration1.jpg")} style={styles.heroArt} />
               <View style={styles.redThumbtack}>
                 <View style={styles.pinReflection} />
                 <View style={styles.pinShadow} />
               </View>
             </View>
           </View>
-
           <View style={styles.form}>
             <View style={styles.inputGroup}>
               <Text style={styles.label}>Email</Text>
               <TextInput
                 style={styles.input}
                 placeholder="you@st.umat.edu.gh"
-                placeholderTextColor="#9a8e7f"
+                placeholderTextColor={colors.textDisabled}
                 value={email}
                 onChangeText={setEmail}
                 keyboardType="email-address"
@@ -315,74 +310,41 @@ const LoginScreen = ({ navigation }: any) => {
                 autoCorrect={false}
               />
             </View>
-
             <View style={styles.inputGroup}>
               <Text style={styles.label}>Password</Text>
               <View style={styles.passwordContainer}>
                 <TextInput
                   style={[styles.input, styles.passwordInput]}
                   placeholder="Enter your password"
-                  placeholderTextColor="#9a8e7f"
+                  placeholderTextColor={colors.textDisabled}
                   value={password}
                   onChangeText={setPassword}
                   secureTextEntry={!showPassword}
                 />
-                <TouchableOpacity
-                  style={styles.eyeButton}
-                  onPress={() => setShowPassword(!showPassword)}
-                >
-                  <Text style={styles.eyeText}>
-                    {showPassword ? "Hide" : "Show"}
-                  </Text>
+                <TouchableOpacity style={styles.eyeButton} onPress={() => setShowPassword(!showPassword)}>
+                  <Text style={styles.eyeText}>{showPassword ? "Hide" : "Show"}</Text>
                 </TouchableOpacity>
               </View>
             </View>
-
-            <TouchableOpacity
-              style={[styles.button, isLoading && styles.buttonDisabled]}
-              onPress={handleLogin}
-              disabled={isLoading}
-            >
-              <Text style={styles.buttonText}>
-                {isLoading ? "Signing in..." : "Login"}
-              </Text>
+            <TouchableOpacity style={[styles.button, isLoading && styles.buttonDisabled]} onPress={handleLogin} disabled={isLoading}>
+              <Text style={styles.buttonText}>{isLoading ? "Signing in..." : "Login"}</Text>
             </TouchableOpacity>
-
-            <TouchableOpacity
-              style={styles.forgotBtn}
-              onPress={() => navigation.navigate("ForgotPassword")}
-            >
+            <TouchableOpacity style={styles.forgotBtn} onPress={() => navigation.navigate("ForgotPassword")}>
               <Text style={styles.forgotText}>Forgot password?</Text>
             </TouchableOpacity>
-
             <View style={styles.dividerRow}>
               <View style={styles.divider} />
               <Text style={styles.dividerText}>or</Text>
               <View style={styles.divider} />
             </View>
-
-            <Pressable
-              onPress={handleGooglePress}
-              disabled={isLoading}
-              style={({ pressed }) => [
-                styles.googleBtn,
-                pressed && { opacity: 0.85 },
-                isLoading && { opacity: 0.5 },
-              ]}
-            >
-              {isLoading ? (
-                <ActivityIndicator color={colors.text} />
-              ) : (
+            <Pressable onPress={handleGooglePress} disabled={isLoading} style={({ pressed }) => [styles.googleBtn, pressed && { opacity: 0.85 }, isLoading && { opacity: 0.5 }]}>
+              {isLoading ? <ActivityIndicator color={colors.text} /> : (
                 <View style={styles.googleInner}>
-                  <Image
-                    source={require("../../assets/adaptive-icon.png")}
-                    style={styles.googleIcon}
-                  />
+                  <Image source={require("../../assets/adaptive-icon.png")} style={styles.googleIcon} />
                   <Text style={styles.googleBtnText}>Continue with Google</Text>
                 </View>
               )}
             </Pressable>
-
             <View style={styles.footer}>
               <Text style={styles.footerText}>No account yet? </Text>
               <TouchableOpacity onPress={() => navigation.navigate("Register")}>
@@ -390,221 +352,52 @@ const LoginScreen = ({ navigation }: any) => {
               </TouchableOpacity>
             </View>
           </View>
-        </ScrollView>
-
-        <AppAlert
-          visible={alertState.visible}
-          title={alertState.title}
-          message={alertState.message}
-          onClose={() =>
-            setAlertState({ visible: false, title: "", message: "" })
-          }
-        />
+        </Animated.ScrollView>
+        <AppAlert visible={alertState.visible} title={alertState.title} message={alertState.message} onClose={() => setAlertState({ visible: false, title: "", message: "" })} />
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
 };
 
-const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: colors.bg },
+const getStyles = (colors: any, isMobile = true) => StyleSheet.create({
+  safe: { flex: 1, backgroundColor: colors.background },
   container: { flex: 1 },
-  scrollContent: {
-    flexGrow: 1,
-    justifyContent: "center",
-    paddingHorizontal: 22,
-    paddingVertical: 18,
-  },
-  heroWrap: { marginBottom: 24, zIndex: 10 },
-  eyebrow: {
-    color: colors.accent,
-    fontSize: 10,
-    textTransform: "uppercase",
-    letterSpacing: 2,
-    fontWeight: "900",
-  },
-  title: {
-    marginTop: 6,
-    color: colors.text,
-    fontSize: 32,
-    fontWeight: "900",
-    textTransform: "uppercase",
-    letterSpacing: -0.5,
-  },
-  subtitle: {
-    marginTop: 6,
-    color: colors.muted,
-    fontSize: 13,
-    fontWeight: "700",
-    lineHeight: 20,
-  },
-  polaroidFrame: {
-    marginTop: 20,
-    backgroundColor: colors.surface,
-    borderWidth: 2,
-    borderColor: "#000",
-    padding: 8,
-    paddingBottom: 20,
-    transform: [{ rotate: "-1.5deg" }],
-    ...shadows.bulletin,
-    zIndex: 10,
-  },
-  heroArt: {
-    width: "100%",
-    height: 160,
-    borderWidth: 2,
-    borderColor: "#000",
-  },
-  redThumbtack: {
-    position: "absolute",
-    top: -10,
-    left: "50%",
-    marginLeft: -10,
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-    backgroundColor: "#ff6b6b",
-    borderWidth: 2,
-    borderColor: "#000",
-    zIndex: 30,
-  },
-  pinReflection: {
-    position: "absolute",
-    top: 2,
-    left: 2,
-    width: 5,
-    height: 5,
-    borderRadius: 2.5,
-    backgroundColor: "rgba(255,255,255,0.6)",
-  },
-  pinShadow: {
-    position: "absolute",
-    top: "50%",
-    left: "50%",
-    width: 3,
-    height: 3,
-    borderRadius: 1.5,
-    backgroundColor: "#991b1b",
-    transform: [{ translateX: -1.5 }, { translateY: -1.5 }],
-  },
-  form: {
-    backgroundColor: colors.surface,
-    borderWidth: 2,
-    borderColor: colors.border,
-    padding: 20,
-    ...shadows.bulletin,
-  },
+  scrollContent: { flexGrow: 1, justifyContent: "center", paddingHorizontal: isMobile ? 16 : 22, paddingVertical: 14 },
+  heroWrap: { marginBottom: isMobile ? 16 : 24, zIndex: 10 },
+  eyebrow: { color: colors.primary, fontSize: isMobile ? 9 : 10, textTransform: "uppercase", letterSpacing: 2, fontWeight: "900" },
+  title: { marginTop: 6, color: colors.text, fontSize: isMobile ? 26 : 32, fontWeight: "900", textTransform: "uppercase", letterSpacing: -0.5 },
+  subtitle: { marginTop: 6, color: colors.textSecondary, fontSize: isMobile ? 12 : 13, fontWeight: "700", lineHeight: isMobile ? 18 : 20 },
+  polaroidFrame: { marginTop: 14, backgroundColor: colors.surface, borderWidth: colors.boardBorderWidth, borderColor: colors.boardBorder, padding: 8, paddingBottom: 16, transform: [{ rotate: "-1.5deg" }], zIndex: 10 },
+  heroArt: { width: "100%", height: isMobile ? 120 : 160, borderWidth: 2, borderColor: colors.boardBorder },
+  redThumbtack: { position: "absolute", top: -10, left: "50%", marginLeft: -10, width: 20, height: 20, borderRadius: 10, backgroundColor: colors.pinRed, borderWidth: 2, borderColor: colors.boardBorder, zIndex: 30 },
+  pinReflection: { position: "absolute", top: 2, left: 2, width: 5, height: 5, borderRadius: 2.5, backgroundColor: "rgba(255,255,255,0.6)" },
+  pinShadow: { position: "absolute", top: "50%", left: "50%", width: 3, height: 3, borderRadius: 1.5, backgroundColor: colors.primaryPressed, transform: [{ translateX: -1.5 }, { translateY: -1.5 }] },
+  form: { backgroundColor: colors.surface, borderWidth: colors.boardBorderWidth, borderColor: colors.boardBorder, padding: 20 },
   inputGroup: { marginBottom: 16 },
-  label: {
-    fontSize: 11,
-    fontWeight: "900",
-    color: colors.text,
-    marginBottom: 6,
-    textTransform: "uppercase",
-    letterSpacing: 1.2,
-  },
-  input: {
-    borderWidth: 2,
-    borderColor: colors.border,
-    paddingHorizontal: 14,
-    paddingVertical: 14,
-    fontSize: 14,
-    fontWeight: "600",
-    color: colors.text,
-    backgroundColor: colors.surface,
-    borderRadius: 0,
-  },
+  label: { fontSize: 11, fontWeight: "900", color: colors.text, marginBottom: 6, textTransform: "uppercase", letterSpacing: 1.2 },
+  input: { borderWidth: colors.boardBorderWidth, borderColor: colors.boardBorder, paddingHorizontal: 14, paddingVertical: 14, fontSize: 14, fontWeight: "600", color: colors.text, backgroundColor: colors.surfaceSecondary, borderRadius: 0 },
   passwordContainer: { position: "relative" },
   passwordInput: { paddingRight: 60 },
   eyeButton: { position: "absolute", right: 12, top: 15 },
-  eyeText: {
-    color: colors.accent,
-    fontSize: 11,
-    fontWeight: "900",
-    textTransform: "uppercase",
-    letterSpacing: 1,
-  },
-  button: {
-    backgroundColor: colors.text,
-    paddingVertical: 15,
-    alignItems: "center",
-    marginTop: 8,
-    borderWidth: 2,
-    borderColor: colors.border,
-    ...shadows.bulletin,
-  },
+  eyeText: { color: colors.primary, fontSize: 11, fontWeight: "900", textTransform: "uppercase", letterSpacing: 1 },
+  button: { backgroundColor: colors.primary, paddingVertical: 15, alignItems: "center", marginTop: 8, borderWidth: colors.boardBorderWidth, borderColor: colors.boardBorder },
   buttonDisabled: { opacity: 0.6 },
-  buttonText: {
-    color: colors.bg,
-    fontSize: 12,
-    fontWeight: "900",
-    textTransform: "uppercase",
-    letterSpacing: 1.4,
-  },
-  dividerRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginTop: 18,
-    marginBottom: 14,
-  },
-  divider: { flex: 1, height: 2, backgroundColor: colors.border },
-  dividerText: {
-    marginHorizontal: 12,
-    color: colors.text,
-    fontSize: 10,
-    textTransform: "uppercase",
-    letterSpacing: 1.4,
-    fontWeight: "900",
-  },
-  googleBtn: {
-    borderWidth: 2,
-    borderColor: colors.border,
-    paddingVertical: 14,
-    alignItems: "center",
-    backgroundColor: colors.surface,
-    ...shadows.bulletin,
-  },
+  buttonText: { color: colors.primaryContent, fontSize: 12, fontWeight: "900", textTransform: "uppercase", letterSpacing: 1.4 },
+  dividerRow: { flexDirection: "row", alignItems: "center", marginTop: 18, marginBottom: 14 },
+  divider: { flex: 1, height: 2, backgroundColor: colors.boardBorder, opacity: 0.2 },
+  dividerText: { marginHorizontal: 12, color: colors.text, fontSize: 10, textTransform: "uppercase", letterSpacing: 1.4, fontWeight: "900" },
+  googleBtn: { borderWidth: colors.boardBorderWidth, borderColor: colors.boardBorder, paddingVertical: 14, alignItems: "center", backgroundColor: colors.surface },
   googleInner: { flexDirection: "row", alignItems: "center", gap: 10 },
   googleIcon: { width: 16, height: 16 },
-  googleBtnText: {
-    color: colors.text,
-    fontSize: 11,
-    fontWeight: "900",
-    textTransform: "uppercase",
-    letterSpacing: 1.4,
-  },
+  googleBtnText: { color: colors.text, fontSize: 11, fontWeight: "900", textTransform: "uppercase", letterSpacing: 1.4 },
   footer: { flexDirection: "row", justifyContent: "center", marginTop: 24 },
-  footerText: { fontSize: 12, fontWeight: "700", color: colors.muted },
-  link: {
-    fontSize: 12,
-    color: colors.accent,
-    fontWeight: "900",
-    textTransform: "uppercase",
-    letterSpacing: 1.1,
-  },
+  footerText: { fontSize: 12, fontWeight: "700", color: colors.textSecondary },
+  link: { fontSize: 12, color: colors.primary, fontWeight: "900", textTransform: "uppercase", letterSpacing: 1.1 },
   forgotBtn: { alignItems: "center", paddingVertical: 10 },
-  forgotText: {
-    fontSize: 11,
-    color: colors.text,
-    fontWeight: "900",
-    textTransform: "uppercase",
-    letterSpacing: 1,
-  },
-  letterRow: {
-    flexDirection: "row",
-    alignItems: "flex-end",
-    gap: 5,
-    marginBottom: 8,
-  },
-  letterCard: {
-    backgroundColor: colors.surface,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  letterText: {
-    color: colors.text,
-    fontFamily: Platform.OS === "ios" ? "Courier New" : "monospace",
-    fontWeight: "900",
-  },
+  forgotText: { fontSize: 11, color: colors.text, fontWeight: "900", textTransform: "uppercase", letterSpacing: 1 },
+  letterRow: { flexDirection: "row", alignItems: "flex-end", gap: 5, marginBottom: 8 },
+  letterCard: { backgroundColor: colors.surfaceSecondary, borderWidth: 1, borderColor: colors.boardBorder, justifyContent: "center", alignItems: "center" },
+  letterText: { color: colors.text, fontFamily: Platform.OS === "ios" ? "Courier New" : "monospace", fontWeight: "900" },
 });
 
 export default LoginScreen;

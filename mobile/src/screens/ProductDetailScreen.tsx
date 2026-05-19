@@ -1,4 +1,5 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { Ionicons } from "@expo/vector-icons";
 import {
   ActivityIndicator,
   FlatList,
@@ -19,10 +20,13 @@ import chatService from "../services/chat.service";
 import { Product } from "../types";
 import { useAuth } from "../context/AuthContext";
 import { useCart } from "../context/CartContext";
-import FloatingCart from "../components/FloatingCart";
-import { colors, shadows } from "../theme";
+import { shadows } from "../theme";
+import { useColors } from "../theme/ThemeContext";
 
 const ProductDetailScreen = ({ route, navigation }: any) => {
+  const colors = useColors();
+  const { width: _sw } = Dimensions.get('window');
+  const isMobile = _sw < 640;
   const { productId } = route.params;
   const { user } = useAuth();
   const { addItem } = useCart();
@@ -36,6 +40,258 @@ const ProductDetailScreen = ({ route, navigation }: any) => {
   const [startingChat, setStartingChat] = useState(false);
   const [activeImageIdx, setActiveImageIdx] = useState(0);
   const imageScrollRef = useRef<ScrollView>(null);
+
+  const styles = useMemo(() => StyleSheet.create({
+    container: { flex: 1, backgroundColor: colors.bg },
+    centered: {
+      flex: 1,
+      justifyContent: "center",
+      alignItems: "center",
+      backgroundColor: colors.bg,
+    },
+    heroImage: { width: SCREEN_W, height: SCREEN_W * 0.75, backgroundColor: colors.surfaceSecondary },
+    // Back button overlay on gallery
+    backBtn: {
+      position: "absolute",
+      top: 14,
+      left: 14,
+      width: 36,
+      height: 36,
+      borderRadius: 18,
+      backgroundColor: colors.overlay,
+      borderWidth: 1.5,
+      borderColor: colors.boardBorder,
+      alignItems: "center",
+      justifyContent: "center",
+      zIndex: 20,
+    },
+    backBtnText: { color: colors.primaryContent, fontSize: isMobile ? 15 : 18, fontWeight: "900", lineHeight: 20 },
+    // Image counter badge top-right
+    imageCounter: {
+      position: "absolute",
+      top: 14,
+      right: 14,
+      backgroundColor: colors.overlay,
+      borderWidth: 1.5,
+      borderColor: colors.boardBorder,
+      paddingHorizontal: 8,
+      paddingVertical: 4,
+      borderRadius: 0,
+      zIndex: 20,
+    },
+    imageCounterText: { color: colors.primaryContent, fontSize: 10, fontWeight: "900" },
+    imageDots: {
+      flexDirection: "row",
+      justifyContent: "center",
+      gap: 8,
+      position: "absolute",
+      bottom: 14,
+      left: 0,
+      right: 0,
+    },
+    imageDot: {
+      width: 8,
+      height: 8,
+      borderRadius: 0,
+      backgroundColor: colors.overlay,
+      borderWidth: 1.5,
+      borderColor: colors.boardBorder,
+    },
+    imageDotActive: { backgroundColor: colors.pinYellow, width: 20 },
+    sheet: {
+      backgroundColor: colors.surface,
+      borderTopWidth: 3,
+      borderTopColor: colors.boardBorder,
+      padding: isMobile ? 12 : 16,
+      paddingBottom: 100, // space for sticky bar
+    },
+    // Sticky action bar
+    stickyBar: {
+      position: "absolute",
+      bottom: 0,
+      left: 0,
+      right: 0,
+      backgroundColor: colors.surface,
+      borderTopWidth: 3,
+      borderTopColor: colors.boardBorder,
+      paddingHorizontal: isMobile ? 12 : 16,
+      paddingVertical: 12,
+      paddingBottom: 20,
+      flexDirection: "row",
+      gap: 10,
+    },
+    stickyBuyBtn: {
+      flex: 2,
+      backgroundColor: colors.text,
+      borderWidth: 2,
+      borderColor: colors.boardBorder,
+      alignItems: "center",
+      paddingVertical: 14,
+      ...shadows.bulletin,
+    },
+    stickyCartBtn: {
+      flex: 1,
+      backgroundColor: colors.accent,
+      borderWidth: 2,
+      borderColor: colors.boardBorder,
+      alignItems: "center",
+      paddingVertical: 14,
+      ...shadows.bulletin,
+    },
+    stickySaveBtn: {
+      width: 52,
+      borderWidth: 2,
+      borderColor: colors.boardBorder,
+      backgroundColor: colors.surface,
+      alignItems: "center",
+      justifyContent: "center",
+      paddingVertical: 14,
+    },
+    stickyBtnText: {
+      color: colors.bg,
+      fontSize: 11,
+      fontWeight: "900",
+      textTransform: "uppercase",
+      letterSpacing: 1,
+    },
+    stickySaveBtnText: {
+      fontSize: isMobile ? 15 : 18,
+      color: colors.text,
+    },
+    category: {
+      fontSize: 10,
+      color: colors.accent,
+      fontWeight: "900",
+      textTransform: "uppercase",
+      letterSpacing: 1.5,
+    },
+    title: {
+      marginTop: 6,
+      fontSize: isMobile ? 18 : 22,
+      fontWeight: "900",
+      color: colors.text,
+      textTransform: "uppercase",
+      lineHeight: 28,
+      letterSpacing: 0.2,
+    },
+    price: { marginTop: 8, fontSize: 28, fontWeight: "900", color: colors.successTintText },
+    intelligenceCard: {
+      marginTop: 14,
+      borderWidth: 2,
+      borderColor: colors.boardBorder,
+      backgroundColor: colors.primaryTint,
+      padding: 14,
+      ...shadows.bulletin,
+    },
+    intelTitle: {
+      fontSize: 11,
+      color: colors.text,
+      fontWeight: "900",
+      textTransform: "uppercase",
+      letterSpacing: 1.2,
+    },
+    intelMeta: { marginTop: 4, fontSize: 12, color: colors.text, fontWeight: "600" },
+    intelDeal: {
+      marginTop: 8,
+      fontSize: 11,
+      fontWeight: "900",
+      color: colors.successTintText,
+      textTransform: "uppercase",
+      backgroundColor: colors.surface,
+      borderWidth: 1.5,
+      borderColor: colors.boardBorder,
+      paddingHorizontal: 8,
+      paddingVertical: 3,
+      alignSelf: "flex-start",
+    },
+    metaChips: { marginTop: 14, flexDirection: "row", flexWrap: "wrap", gap: 8 },
+    chip: {
+      borderWidth: 2,
+      borderColor: colors.boardBorder,
+      backgroundColor: colors.surface,
+      paddingHorizontal: 12,
+      paddingVertical: 6,
+      fontSize: 10,
+      fontWeight: "900",
+      color: colors.text,
+      textTransform: "uppercase",
+      letterSpacing: 0.5,
+    },
+    section: {
+      marginTop: 20,
+      borderTopWidth: 2,
+      borderTopColor: colors.boardBorder,
+      paddingTop: 14,
+    },
+    sectionLabel: {
+      fontSize: 10,
+      color: colors.accent,
+      fontWeight: "900",
+      textTransform: "uppercase",
+      letterSpacing: 1.5,
+      marginBottom: 6,
+    },
+    description: { fontSize: isMobile ? 12 : 13, lineHeight: 20, color: colors.text, fontWeight: "500" },
+    sellerName: { fontSize: isMobile ? 13 : 15, fontWeight: "900", color: colors.text, textTransform: "uppercase" },
+    meta: { fontSize: 12, color: colors.muted, marginTop: 4, fontWeight: "500" },
+    primaryAction: {
+      flex: 1,
+      backgroundColor: colors.text,
+      borderWidth: 2,
+      borderColor: colors.boardBorder,
+      alignItems: "center",
+      paddingVertical: 14,
+      ...shadows.bulletin,
+    },
+    primaryActionText: {
+      color: colors.bg,
+      fontSize: 11,
+      fontWeight: "900",
+      textTransform: "uppercase",
+      letterSpacing: 1.2,
+    },
+    secondaryAction: {
+      width: 94,
+      borderWidth: 2,
+      borderColor: colors.boardBorder,
+      backgroundColor: colors.surface,
+      alignItems: "center",
+      justifyContent: "center",
+      ...shadows.bulletin,
+    },
+    secondaryActionText: {
+      color: colors.text,
+      fontSize: 11,
+      fontWeight: "900",
+      textTransform: "uppercase",
+    },
+    miniCard: {
+      width: 160,
+      borderWidth: 2,
+      borderColor: colors.boardBorder,
+      backgroundColor: colors.surface,
+      paddingBottom: 10,
+      ...shadows.bulletin,
+      overflow: "hidden",
+    },
+    miniImage: { width: "100%", height: 110, backgroundColor: colors.surfaceSecondary, borderBottomWidth: 2, borderBottomColor: colors.boardBorder },
+    miniTitle: {
+      marginTop: 8,
+      paddingHorizontal: 8,
+      fontSize: 12,
+      fontWeight: "900",
+      color: colors.text,
+      textTransform: "uppercase",
+      minHeight: 34,
+    },
+    miniPrice: {
+      marginTop: 4,
+      paddingHorizontal: 8,
+      fontSize: 12,
+      fontWeight: "900",
+      color: colors.successTintText,
+    },
+  }), [colors]);
 
   useEffect(() => {
     const fetchAll = async () => {
@@ -184,20 +440,28 @@ const ProductDetailScreen = ({ route, navigation }: any) => {
               />
             ))}
           </ScrollView>
+
+          {/* Back button overlay */}
+          <TouchableOpacity style={styles.backBtn} onPress={() => navigation.goBack()}>
+            <Text style={styles.backBtnText}>‹</Text>
+          </TouchableOpacity>
+
+          {/* Image counter */}
+          {images.length > 1 && (
+            <View style={styles.imageCounter}>
+              <Text style={styles.imageCounterText}>{activeImageIdx + 1} / {images.length}</Text>
+            </View>
+          )}
+
+          {/* Dot indicators */}
           {images.length > 1 && (
             <View style={styles.imageDots}>
               {images.map((_, i) => (
                 <TouchableOpacity
                   key={i}
-                  style={[
-                    styles.imageDot,
-                    i === activeImageIdx && styles.imageDotActive,
-                  ]}
+                  style={[styles.imageDot, i === activeImageIdx && styles.imageDotActive]}
                   onPress={() => {
-                    imageScrollRef.current?.scrollTo({
-                      x: i * SCREEN_W,
-                      animated: true,
-                    });
+                    imageScrollRef.current?.scrollTo({ x: i * SCREEN_W, animated: true });
                     setActiveImageIdx(i);
                   }}
                 />
@@ -263,52 +527,17 @@ const ProductDetailScreen = ({ route, navigation }: any) => {
             </Text>
           </View>
 
-          {user && user._id !== product.seller?._id ? (
-            <View style={{ gap: 10, marginTop: 16 }}>
-              <View style={{ flexDirection: "row", gap: 10 }}>
-                <TouchableOpacity
-                  style={[styles.primaryAction, { flex: 1 }]}
-                  onPress={() => navigation.navigate("Checkout", { product })}
-                >
-                  <Text style={styles.primaryActionText}>Buy Now</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={[styles.primaryAction, { flex: 1, backgroundColor: colors.accent, borderColor: colors.accent }]}
-                  onPress={() => addItem(product)}
-                >
-                  <Text style={styles.primaryActionText}>Add to Cart</Text>
-                </TouchableOpacity>
-              </View>
-              <View style={{ flexDirection: "row", gap: 10 }}>
-                <TouchableOpacity
-                  style={[
-                    styles.primaryAction,
-                    {
-                      flex: 1,
-                      backgroundColor: colors.surface,
-                      borderColor: colors.border,
-                    },
-                    startingChat && { opacity: 0.7 },
-                  ]}
-                  onPress={handleMessageSeller}
-                >
-                  <Text
-                    style={[styles.primaryActionText, { color: colors.text }]}
-                  >
-                    {startingChat ? "..." : "Chat with Seller"}
-                  </Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={[styles.secondaryAction, saving && { opacity: 0.7 }, { width: 94 }]}
-                  onPress={handleToggleSaved}
-                >
-                  <Text style={styles.secondaryActionText}>
-                    {isSaved ? "♥ Saved" : "♡ Save"}
-                  </Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-          ) : null}
+          {/* Chat with seller (stays inline) */}
+          {user && user._id !== product.seller?._id && (
+            <TouchableOpacity
+              style={[styles.primaryAction, { marginTop: 16, backgroundColor: colors.surface, borderColor: colors.border }, startingChat && { opacity: 0.7 }]}
+              onPress={handleMessageSeller}
+            >
+              <Text style={[styles.primaryActionText, { color: colors.text }]}>
+                {startingChat ? "Connecting..." : "Chat with Seller"}
+              </Text>
+            </TouchableOpacity>
+          )}
 
           <View style={styles.section}>
             <Text style={styles.sectionLabel}>Seller</Text>
@@ -347,177 +576,36 @@ const ProductDetailScreen = ({ route, navigation }: any) => {
           )}
         </View>
       </ScrollView>
+
+      {/* Sticky bottom action bar */}
+      {user && product && user._id !== product.seller?._id && (
+        <View style={styles.stickyBar}>
+          <TouchableOpacity
+            style={styles.stickyBuyBtn}
+            onPress={() => navigation.navigate("Checkout", { product })}
+          >
+            <Text style={styles.stickyBtnText}>Buy Now</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.stickyCartBtn}
+            onPress={() => addItem(product)}
+          >
+            <Text style={styles.stickyBtnText}>+ Cart</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.stickySaveBtn, saving && { opacity: 0.6 }]}
+            onPress={handleToggleSaved}
+          >
+            <Ionicons
+              name={isSaved ? "bookmark" : "bookmark-outline"}
+              size={20}
+              color={isSaved ? colors.accent : colors.text}
+            />
+          </TouchableOpacity>
+        </View>
+      )}
     </SafeAreaView>
   );
 };
-
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.bg },
-  centered: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: colors.bg,
-  },
-  heroImage: { width: SCREEN_W, height: SCREEN_W * 0.75, backgroundColor: "#efe5d6", borderBottomWidth: 3, borderBottomColor: "#1f1a14" },
-  imageDots: {
-    flexDirection: "row",
-    justifyContent: "center",
-    gap: 8,
-    position: "absolute",
-    bottom: 14,
-    left: 0,
-    right: 0,
-  },
-  imageDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: "rgba(255,255,255,0.65)",
-    borderWidth: 1.5,
-    borderColor: "#1f1a14",
-  },
-  imageDotActive: { backgroundColor: "#fbbf24", width: 20 },
-  sheet: {
-    backgroundColor: colors.surface,
-    borderTopWidth: 3,
-    borderTopColor: "#1f1a14",
-    padding: 16,
-    paddingBottom: 40,
-  },
-  category: {
-    fontSize: 10,
-    color: "#ff6b6b",
-    fontWeight: "900",
-    textTransform: "uppercase",
-    letterSpacing: 1.5,
-  },
-  title: {
-    marginTop: 6,
-    fontSize: 22,
-    fontWeight: "900",
-    color: "#1f1a14",
-    textTransform: "uppercase",
-    lineHeight: 28,
-    letterSpacing: 0.2,
-  },
-  price: { marginTop: 8, fontSize: 28, fontWeight: "900", color: "#2f5d4f" },
-  intelligenceCard: {
-    marginTop: 14,
-    borderWidth: 2,
-    borderColor: "#1f1a14",
-    backgroundColor: "#bfdbfe", // pastel blue intelligence block
-    padding: 14,
-    ...shadows.bulletin,
-  },
-  intelTitle: {
-    fontSize: 11,
-    color: "#1f1a14",
-    fontWeight: "900",
-    textTransform: "uppercase",
-    letterSpacing: 1.2,
-  },
-  intelMeta: { marginTop: 4, fontSize: 12, color: "#1f1a14", fontWeight: "600" },
-  intelDeal: {
-    marginTop: 8,
-    fontSize: 11,
-    fontWeight: "900",
-    color: "#2f5d4f",
-    textTransform: "uppercase",
-    backgroundColor: "#fff",
-    borderWidth: 1.5,
-    borderColor: "#1f1a14",
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    alignSelf: "flex-start",
-  },
-  metaChips: { marginTop: 14, flexDirection: "row", flexWrap: "wrap", gap: 8 },
-  chip: {
-    borderWidth: 2,
-    borderColor: "#1f1a14",
-    backgroundColor: "#fff",
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    fontSize: 10,
-    fontWeight: "900",
-    color: "#1f1a14",
-    textTransform: "uppercase",
-    letterSpacing: 0.5,
-  },
-  section: {
-    marginTop: 20,
-    borderTopWidth: 2,
-    borderTopColor: "#1f1a14",
-    paddingTop: 14,
-  },
-  sectionLabel: {
-    fontSize: 10,
-    color: "#ff6b6b",
-    fontWeight: "900",
-    textTransform: "uppercase",
-    letterSpacing: 1.5,
-    marginBottom: 6,
-  },
-  description: { fontSize: 13, lineHeight: 20, color: "#2f2921", fontWeight: "500" },
-  sellerName: { fontSize: 15, fontWeight: "900", color: "#1f1a14", textTransform: "uppercase" },
-  meta: { fontSize: 12, color: "#6e6253", marginTop: 4, fontWeight: "500" },
-  primaryAction: {
-    flex: 1,
-    backgroundColor: "#1f1a14",
-    borderWidth: 2,
-    borderColor: "#1f1a14",
-    alignItems: "center",
-    paddingVertical: 14,
-    ...shadows.bulletin,
-  },
-  primaryActionText: {
-    color: "#fff",
-    fontSize: 11,
-    fontWeight: "900",
-    textTransform: "uppercase",
-    letterSpacing: 1.2,
-  },
-  secondaryAction: {
-    width: 94,
-    borderWidth: 2,
-    borderColor: "#1f1a14",
-    backgroundColor: "#fff",
-    alignItems: "center",
-    justifyContent: "center",
-    ...shadows.bulletin,
-  },
-  secondaryActionText: {
-    color: "#1f1a14",
-    fontSize: 11,
-    fontWeight: "900",
-    textTransform: "uppercase",
-  },
-  miniCard: {
-    width: 160,
-    borderWidth: 2,
-    borderColor: "#1f1a14",
-    backgroundColor: "#fff",
-    paddingBottom: 10,
-    ...shadows.bulletin,
-    overflow: "hidden",
-  },
-  miniImage: { width: "100%", height: 110, backgroundColor: "#efe5d6", borderBottomWidth: 2, borderBottomColor: "#1f1a14" },
-  miniTitle: {
-    marginTop: 8,
-    paddingHorizontal: 8,
-    fontSize: 12,
-    fontWeight: "900",
-    color: "#1f1a14",
-    textTransform: "uppercase",
-    minHeight: 34,
-  },
-  miniPrice: {
-    marginTop: 4,
-    paddingHorizontal: 8,
-    fontSize: 12,
-    fontWeight: "900",
-    color: "#2f5d4f",
-  },
-});
 
 export default ProductDetailScreen;

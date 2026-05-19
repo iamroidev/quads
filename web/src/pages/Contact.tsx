@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { 
-  MessageSquare, 
+import {
+  MessageSquare,
   Info,
   X,
   Mail,
@@ -8,7 +8,9 @@ import {
   MapPin,
   Clock,
   Send,
-  AlertCircle
+  AlertCircle,
+  ShieldAlert,
+  Phone,
 } from 'lucide-react';
 import { BulletinLayout, BulletinSection, BulletinCard } from '../components/layout/BulletinLayout';
 import toast from 'react-hot-toast';
@@ -39,6 +41,35 @@ const ContactPage: React.FC = () => {
         <div className="max-w-[1400px] mx-auto relative z-10">
           <p className="text-[10px] font-black uppercase tracking-[0.35em] text-[var(--bulletin-text)] opacity-40 mb-3">Support Operations</p>
           <h1 className="text-4xl md:text-5xl font-black uppercase tracking-tighter text-[var(--bulletin-text)]">Communication Protocol</h1>
+        </div>
+      </div>
+
+      {/* Campus Emergency Contacts */}
+      <div className="border-b-4 border-[var(--bulletin-border)] bg-[#ff6b6b]/10 px-6 py-8">
+        <div className="max-w-[1400px] mx-auto">
+          <div className="flex items-center gap-3 mb-6">
+            <ShieldAlert className="h-6 w-6 text-[#ff6b6b]" />
+            <span className="text-[11px] font-black uppercase tracking-[0.3em] text-[#ff6b6b]">Campus Emergency Contacts</span>
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {[
+              { label: 'UMaT Security', value: '+233 (0) 312 023 551', icon: <ShieldAlert className="h-5 w-5" /> },
+              { label: 'Campus Police Post', value: 'Near Main Gate', icon: <MapPin className="h-5 w-5" /> },
+              { label: 'Student Affairs', value: '+233 (0) 312 023 559', icon: <Phone className="h-5 w-5" /> },
+              { label: 'Emergency Hotline', value: '191 (Ghana Police)', icon: <AlertCircle className="h-5 w-5" /> },
+            ].map(({ label, value, icon }) => (
+              <div key={label} className="border-4 border-[#ff6b6b] bg-[var(--bulletin-card)] p-4 shadow-[4px_4px_0_0_#ff6b6b] flex items-start gap-3">
+                <div className="text-[#ff6b6b] mt-0.5">{icon}</div>
+                <div>
+                  <div className="text-[9px] font-black uppercase tracking-widest opacity-60 text-[var(--bulletin-text)] mb-1">{label}</div>
+                  <div className="text-[12px] font-black text-[var(--bulletin-text)]">{value}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+          <p className="mt-4 text-[10px] font-bold opacity-50 uppercase tracking-widest text-[var(--bulletin-text)]">
+            For safety during marketplace transactions, always meet at public campus spots during daylight.
+          </p>
         </div>
       </div>
 

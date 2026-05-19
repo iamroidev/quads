@@ -10,19 +10,208 @@ import {
   TextInput,
   TouchableOpacity,
   View,
+  Dimensions,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { colors, shadows } from '../theme';
+import { shadows } from '../theme';
+import { useColors } from '../theme/ThemeContext';
 import ScreenHeader from '../components/ScreenHeader';
 import { Ionicons } from '@expo/vector-icons';
 import api from '../services/api';
 
 const ContactScreen = () => {
+  const colors = useColors();
+  const { width: _sw } = Dimensions.get('window');
+  const isMobile = _sw < 640;
   const [email, setEmail] = useState('');
   const [subject, setSubject] = useState('');
   const [message, setMessage] = useState('');
   const [category, setCategory] = useState<'technical' | 'payment' | 'safety' | 'account'>('technical');
   const [submitting, setSubmitting] = useState(false);
+
+  const styles = React.useMemo(() => StyleSheet.create({
+    container: { flex: 1, backgroundColor: colors.bg },
+    content: { paddingBottom: 40 },
+    infoRow: {
+      flexDirection: 'row',
+      paddingHorizontal: isMobile ? 12 : 16,
+      gap: 12,
+      marginTop: 12,
+    },
+    infoBox: {
+      flex: 1,
+      borderWidth: 2,
+      borderColor: colors.border,
+      backgroundColor: colors.surface,
+      padding: isMobile ? 12 : 16,
+      ...shadows.bulletin,
+    },
+    infoLabel: {
+      fontSize: 9,
+      fontWeight: '900',
+      color: colors.muted,
+      marginTop: 8,
+      letterSpacing: 1.5,
+    },
+    infoValue: {
+      fontSize: 11,
+      fontWeight: '900',
+      color: colors.text,
+      marginTop: 4,
+    },
+    warningBox: {
+      marginHorizontal: 16,
+      marginTop: 16,
+      padding: 12,
+      borderWidth: 2,
+      borderColor: colors.border,
+      backgroundColor: colors.dangerTint,
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 10,
+      ...shadows.bulletin,
+    },
+    warningText: {
+      fontSize: 11,
+      fontWeight: '700',
+      color: colors.dangerTintText,
+      flex: 1,
+      lineHeight: 16,
+    },
+    formCard: {
+      margin: 16,
+      marginTop: 20,
+      borderWidth: 2,
+      borderColor: colors.border,
+      backgroundColor: colors.surface,
+      padding: 20,
+      ...shadows.bulletin,
+    },
+    formTitle: {
+      fontSize: isMobile ? 13 : 15,
+      fontWeight: '900',
+      color: colors.text,
+      marginBottom: 20,
+    },
+    field: {
+      marginBottom: 16,
+      gap: 6,
+    },
+    fieldLabel: {
+      fontSize: 10,
+      fontWeight: '900',
+      color: colors.text,
+      textTransform: 'uppercase',
+      letterSpacing: 1,
+    },
+    input: {
+      borderWidth: 2,
+      borderColor: colors.border,
+      backgroundColor: colors.surfaceSecondary,
+      paddingHorizontal: 14,
+      paddingVertical: 12,
+      fontSize: isMobile ? 12 : 13,
+      fontWeight: '700',
+      color: colors.text,
+    },
+    textArea: {
+      height: 120,
+      textAlignVertical: 'top',
+    },
+    categoryRow: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      gap: 6,
+    },
+    categoryBtn: {
+      borderWidth: 2,
+      borderColor: colors.border,
+      backgroundColor: colors.surface,
+      paddingHorizontal: 10,
+      paddingVertical: 6,
+    },
+    categoryBtnActive: {
+      backgroundColor: colors.text,
+    },
+    categoryText: {
+      fontSize: 11,
+      fontWeight: '900',
+      color: colors.text,
+      textTransform: 'uppercase',
+    },
+    categoryTextActive: {
+      color: colors.bg,
+    },
+    submitBtn: {
+      backgroundColor: colors.text,
+      paddingVertical: 14,
+      alignItems: 'center',
+      marginTop: 10,
+      borderWidth: 2,
+      borderColor: colors.border,
+      ...shadows.bulletin,
+    },
+    btnDisabled: {
+      opacity: 0.5,
+    },
+    submitBtnText: {
+      color: colors.bg,
+      fontSize: 12,
+      fontWeight: '900',
+      textTransform: 'uppercase',
+      letterSpacing: 1.5,
+    },
+    emergencyCard: {
+      marginHorizontal: 16,
+      marginTop: 12,
+      borderWidth: 3,
+      borderColor: colors.danger,
+      backgroundColor: colors.dangerTint,
+      padding: isMobile ? 12 : 16,
+    },
+    emergencyHeader: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 8,
+      marginBottom: 12,
+    },
+    emergencyTitle: {
+      fontSize: 11,
+      fontWeight: '900',
+      textTransform: 'uppercase',
+      letterSpacing: 1.2,
+      color: colors.danger,
+    },
+    emergencyRow: {
+      flexDirection: 'row',
+      alignItems: 'flex-start',
+      paddingVertical: 8,
+      borderTopWidth: 1,
+      borderTopColor: colors.border,
+    },
+    emergencyLabel: {
+      fontSize: 10,
+      fontWeight: '900',
+      textTransform: 'uppercase',
+      letterSpacing: 0.8,
+      color: colors.dangerTintText,
+      opacity: 0.7,
+      marginBottom: 2,
+    },
+    emergencyValue: {
+      fontSize: isMobile ? 12 : 13,
+      fontWeight: '800',
+      color: colors.text,
+    },
+    emergencySafety: {
+      marginTop: 10,
+      fontSize: 10,
+      fontWeight: '700',
+      color: colors.dangerTintText,
+      opacity: 0.7,
+      lineHeight: 15,
+    },
+  }), [colors]);
 
   const handleSubmit = async () => {
     const trimmedEmail = email.trim();
@@ -81,9 +270,34 @@ const ContactScreen = () => {
             </View>
           </View>
 
+          {/* Campus Emergency Contacts */}
+          <View style={styles.emergencyCard}>
+            <View style={styles.emergencyHeader}>
+              <Ionicons name="warning-outline" size={18} color={colors.accent} />
+              <Text style={styles.emergencyTitle}>Campus Emergency Contacts</Text>
+            </View>
+            {[
+              { label: 'UMaT Security', value: '+233 (0) 312 023 551', icon: 'shield-outline' },
+              { label: 'Campus Police Post', value: 'Near Main Gate', icon: 'location-outline' },
+              { label: 'Student Affairs', value: '+233 (0) 312 023 559', icon: 'people-outline' },
+              { label: 'Ghana Police (Emergency)', value: '191', icon: 'call-outline' },
+            ].map(({ label, value, icon }) => (
+              <View key={label} style={styles.emergencyRow}>
+                <Ionicons name={icon as any} size={16} color={colors.accent} style={{ marginRight: 10 }} />
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.emergencyLabel}>{label}</Text>
+                  <Text style={styles.emergencyValue}>{value}</Text>
+                </View>
+              </View>
+            ))}
+            <Text style={styles.emergencySafety}>
+              Always meet sellers at public campus spots during daylight for safety.
+            </Text>
+          </View>
+
           {/* Physical Desk & Safety Zone */}
           <View style={styles.warningBox}>
-            <Ionicons name="location-outline" size={20} color="#ff6b6b" />
+            <Ionicons name="location-outline" size={20} color={colors.accent} />
             <Text style={styles.warningText}>
               <Text style={{ fontWeight: '900' }}>Physical Desk:</Text> Tovet Hostel. For emergencies, contact UMaT Campus Security immediately.
             </Text>
@@ -91,7 +305,7 @@ const ContactScreen = () => {
 
           {/* Ticket Form */}
           <View style={styles.formCard}>
-            <Text style={styles.formTitle}>📋 OPEN SUPPORT TICKET</Text>
+            <Text style={styles.formTitle}>OPEN SUPPORT TICKET</Text>
 
             {/* Email */}
             <View style={styles.field}>
@@ -99,7 +313,7 @@ const ContactScreen = () => {
               <TextInput
                 style={styles.input}
                 placeholder="name@student.umat.edu.gh"
-                placeholderTextColor="#9ca3af"
+                placeholderTextColor={colors.muted}
                 value={email}
                 onChangeText={setEmail}
                 keyboardType="email-address"
@@ -139,7 +353,7 @@ const ContactScreen = () => {
               <TextInput
                 style={styles.input}
                 placeholder="Brief summary of the issue"
-                placeholderTextColor="#9ca3af"
+                placeholderTextColor={colors.muted}
                 value={subject}
                 onChangeText={setSubject}
               />
@@ -151,7 +365,7 @@ const ContactScreen = () => {
               <TextInput
                 style={[styles.input, styles.textArea]}
                 placeholder="Explain the problem or request in detail..."
-                placeholderTextColor="#9ca3af"
+                placeholderTextColor={colors.muted}
                 value={message}
                 onChangeText={setMessage}
                 multiline
@@ -166,7 +380,7 @@ const ContactScreen = () => {
               disabled={submitting}
             >
               {submitting ? (
-                <ActivityIndicator color="#fff" size={16} />
+                <ActivityIndicator color={colors.bg} size={16} />
               ) : (
                 <Text style={styles.submitBtnText}>Submit Official Ticket</Text>
               )}
@@ -177,139 +391,5 @@ const ContactScreen = () => {
     </KeyboardAvoidingView>
   );
 };
-
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.bg },
-  content: { paddingBottom: 40 },
-  infoRow: {
-    flexDirection: 'row',
-    paddingHorizontal: 16,
-    gap: 12,
-    marginTop: 12,
-  },
-  infoBox: {
-    flex: 1,
-    borderWidth: 2,
-    borderColor: colors.border,
-    backgroundColor: colors.surface,
-    padding: 16,
-    ...shadows.bulletin,
-  },
-  infoLabel: {
-    fontSize: 9,
-    fontWeight: '900',
-    color: colors.muted,
-    marginTop: 8,
-    letterSpacing: 1.5,
-  },
-  infoValue: {
-    fontSize: 11,
-    fontWeight: '900',
-    color: colors.text,
-    marginTop: 4,
-  },
-  warningBox: {
-    marginHorizontal: 16,
-    marginTop: 16,
-    padding: 12,
-    borderWidth: 2,
-    borderColor: colors.border,
-    backgroundColor: '#ffe4e4',
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-    ...shadows.bulletin,
-  },
-  warningText: {
-    fontSize: 11,
-    fontWeight: '700',
-    color: '#c53030',
-    flex: 1,
-    lineHeight: 16,
-  },
-  formCard: {
-    margin: 16,
-    marginTop: 20,
-    borderWidth: 2,
-    borderColor: colors.border,
-    backgroundColor: colors.surface,
-    padding: 20,
-    ...shadows.bulletin,
-  },
-  formTitle: {
-    fontSize: 15,
-    fontWeight: '900',
-    color: colors.text,
-    marginBottom: 20,
-  },
-  field: {
-    marginBottom: 16,
-    gap: 6,
-  },
-  fieldLabel: {
-    fontSize: 10,
-    fontWeight: '900',
-    color: colors.text,
-    textTransform: 'uppercase',
-    letterSpacing: 1,
-  },
-  input: {
-    borderWidth: 2,
-    borderColor: colors.border,
-    backgroundColor: '#fff',
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    fontSize: 13,
-    fontWeight: '700',
-    color: colors.text,
-  },
-  textArea: {
-    height: 120,
-    textAlignVertical: 'top',
-  },
-  categoryRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 6,
-  },
-  categoryBtn: {
-    borderWidth: 2,
-    borderColor: colors.border,
-    backgroundColor: colors.surface,
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-  },
-  categoryBtnActive: {
-    backgroundColor: colors.text,
-  },
-  categoryText: {
-    fontSize: 11,
-    fontWeight: '900',
-    color: colors.text,
-    textTransform: 'uppercase',
-  },
-  categoryTextActive: {
-    color: '#fff',
-  },
-  submitBtn: {
-    backgroundColor: colors.text,
-    paddingVertical: 14,
-    alignItems: 'center',
-    marginTop: 10,
-    borderWidth: 2,
-    borderColor: colors.border,
-    ...shadows.bulletin,
-  },
-  btnDisabled: {
-    opacity: 0.5,
-  },
-  submitBtnText: {
-    color: '#fff',
-    fontSize: 12,
-    fontWeight: '900',
-    textTransform: 'uppercase',
-    letterSpacing: 1.5,
-  },
-});
 
 export default ContactScreen;

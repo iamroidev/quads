@@ -1,16 +1,22 @@
 import React from 'react';
-import { Alert, ScrollView, StyleSheet, Switch, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Alert, ScrollView, StyleSheet, Switch, Text, TextInput, TouchableOpacity, View,
+  Dimensions,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuth } from '../context/AuthContext';
-import { useTheme } from '../context/ThemeContext';
+import { useTheme } from '../theme/ThemeContext';
 import api from '../services/api';
 import { supabase } from '../services/supabase';
-import { colors, shadows } from '../theme';
 import ScreenHeader from '../components/ScreenHeader';
+import { BulletinCard } from '../components/BulletinCard';
 
 const SettingsScreen = () => {
   const { user, refreshUser, logout } = useAuth();
-  const { theme, setTheme } = useTheme();
+  const { theme, setTheme, colors } = useTheme();
+  const { width: _sw } = Dimensions.get('window');
+  const isMobile = _sw < 640;
+  const styles = getStyles(colors, isMobile);
+  
   const [notifPrefs, setNotifPrefs] = React.useState({
     orderUpdates: true, messages: true, reviews: true, promotions: false, systemAlerts: true,
   });
@@ -88,7 +94,7 @@ const SettingsScreen = () => {
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       <ScreenHeader eyebrow="Account" title="Settings" subtitle={user?.email} />
-      <ScrollView contentContainerStyle={{ paddingBottom: 40 }} showsVerticalScrollIndicator={false}>
+      <ScrollView contentContainerStyle={{ paddingBottom: 40, paddingHorizontal: 16 }} showsVerticalScrollIndicator={false}>
 
       <Text style={styles.sectionLabel}>App theme</Text>
       <View style={styles.themeSelectorContainer}>
@@ -99,7 +105,7 @@ const SettingsScreen = () => {
               key={t}
               style={[
                 styles.themeBtn,
-                isActive && { backgroundColor: colors.accent, borderColor: colors.border },
+                isActive && { backgroundColor: colors.primary, borderColor: colors.boardBorder },
               ]}
               onPress={() => setTheme(t)}
               activeOpacity={0.8}
@@ -107,7 +113,7 @@ const SettingsScreen = () => {
               <Text
                 style={[
                   styles.themeBtnText,
-                  isActive && { color: '#ffffff', fontWeight: '900' },
+                  isActive && { color: colors.primaryContent, fontWeight: '900' },
                 ]}
               >
                 {t}
@@ -119,7 +125,7 @@ const SettingsScreen = () => {
 
       <Text style={styles.sectionLabel}>Notification settings</Text>
 
-      <View style={styles.card}>
+      <BulletinCard style={styles.card} size="sm">
         {[
           ['orderUpdates', 'Order updates', 'Payment, confirmation, and delivery status changes'],
           ['messages', 'Messages', 'When buyers or sellers reply to your chats'],
@@ -137,17 +143,18 @@ const SettingsScreen = () => {
                 value={notifPrefs[key as keyof typeof notifPrefs]}
                 onValueChange={(v) => saveNotification(key as keyof typeof notifPrefs, v)}
                 disabled={savingNotif}
-                trackColor={{ false: '#767577', true: colors.accent }}
+                trackColor={{ false: colors.surfaceSecondary, true: colors.primary }}
+                thumbColor={colors.surface}
               />
             </View>
             {idx < 4 ? <View style={styles.sep} /> : null}
           </View>
         ))}
-      </View>
+      </BulletinCard>
 
       <Text style={styles.sectionLabel}>Privacy settings</Text>
 
-      <View style={styles.card}>
+      <BulletinCard style={styles.card} size="sm">
         {[
           ['showPhone', 'Show phone', 'Let others contact you directly'],
           ['showLocation', 'Show location', 'Display campus pickup area on profile/listing'],
@@ -164,26 +171,27 @@ const SettingsScreen = () => {
                 value={privacyPrefs[key as keyof typeof privacyPrefs]}
                 onValueChange={(v) => savePrivacy(key as keyof typeof privacyPrefs, v)}
                 disabled={savingPrivacy}
-                trackColor={{ false: '#767577', true: colors.accent }}
+                trackColor={{ false: colors.surfaceSecondary, true: colors.primary }}
+                thumbColor={colors.surface}
               />
             </View>
             {idx < 3 ? <View style={styles.sep} /> : null}
           </View>
         ))}
-      </View>
+      </BulletinCard>
 
       <TouchableOpacity style={styles.secondaryBtn} onPress={handleRefresh} disabled={loading} activeOpacity={0.8}>
         <Text style={styles.secondaryBtnText}>{loading ? 'Refreshing...' : 'Refresh account data'}</Text>
       </TouchableOpacity>
 
       <Text style={styles.sectionLabel}>Change password</Text>
-      <View style={styles.card}>
+      <BulletinCard style={styles.card} size="sm">
         <View style={[styles.row, { paddingBottom: 0 }]}>
-          <View style={{ flex: 1, paddingRight: 8, gap: 8 }}>
+          <View style={{ flex: 1, paddingRight: 8, gap: 12, paddingVertical: 12 }}>
             <TextInput
               style={styles.pwInput}
               placeholder="New password"
-              placeholderTextColor="rgba(0,0,0,0.3)"
+              placeholderTextColor={colors.textDisabled}
               secureTextEntry
               value={newPw}
               onChangeText={setNewPw}
@@ -191,7 +199,7 @@ const SettingsScreen = () => {
             <TextInput
               style={styles.pwInput}
               placeholder="Confirm new password"
-              placeholderTextColor="rgba(0,0,0,0.3)"
+              placeholderTextColor={colors.textDisabled}
               secureTextEntry
               value={confirmPw}
               onChangeText={setConfirmPw}
@@ -206,7 +214,7 @@ const SettingsScreen = () => {
             </TouchableOpacity>
           </View>
         </View>
-      </View>
+      </BulletinCard>
 
       <TouchableOpacity style={styles.logoutBtn} onPress={logout} activeOpacity={0.8}>
         <Text style={styles.logoutText}>Sign out</Text>
@@ -216,15 +224,14 @@ const SettingsScreen = () => {
   );
 };
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.bg, padding: 16 },
+const getStyles = (colors: any, isMobile = true) => StyleSheet.create({
+  container: { flex: 1, backgroundColor: colors.background },
   sectionLabel: {
-    marginTop: 16,
+    marginTop: 20,
     marginBottom: 8,
     fontSize: 10,
     fontWeight: '900',
-    color: colors.text,
-    opacity: 0.6,
+    color: colors.primary,
     letterSpacing: 1.6,
     textTransform: 'uppercase',
   },
@@ -235,12 +242,11 @@ const styles = StyleSheet.create({
   },
   themeBtn: {
     flex: 1,
-    borderWidth: 2,
-    borderColor: colors.border,
+    borderWidth: colors.boardBorderWidth,
+    borderColor: colors.boardBorder,
     paddingVertical: 10,
     alignItems: 'center',
     backgroundColor: colors.surface,
-    ...shadows.bulletin,
   },
   themeBtnText: {
     fontSize: 11,
@@ -252,9 +258,7 @@ const styles = StyleSheet.create({
   card: { 
     marginTop: 10, 
     backgroundColor: colors.surface, 
-    borderWidth: 2.5, 
-    borderColor: colors.border, 
-    ...shadows.bulletin 
+    borderWidth: 0, // border handled by BulletinCard
   },
   row: { 
     paddingHorizontal: 14, 
@@ -264,9 +268,9 @@ const styles = StyleSheet.create({
     alignItems: 'center' 
   },
   sep: { 
-    height: 1.5, 
-    backgroundColor: colors.border,
-    opacity: 0.1,
+    height: 1, 
+    backgroundColor: colors.boardBorder,
+    opacity: 0.2,
   },
   rowTitle: { 
     fontSize: 12, 
@@ -277,19 +281,17 @@ const styles = StyleSheet.create({
   },
   rowNote: { 
     marginTop: 2, 
-    color: colors.text,
-    opacity: 0.5, 
+    color: colors.textSecondary,
     fontSize: 11,
     fontWeight: '500',
   },
   secondaryBtn: { 
-    marginTop: 16, 
-    borderWidth: 2.5, 
-    borderColor: colors.border, 
+    marginTop: 20, 
+    borderWidth: colors.boardBorderWidth, 
+    borderColor: colors.boardBorder, 
     paddingVertical: 12, 
     alignItems: 'center', 
     backgroundColor: colors.surface, 
-    ...shadows.bulletin 
   },
   secondaryBtnText: { 
     fontSize: 11, 
@@ -299,40 +301,39 @@ const styles = StyleSheet.create({
     letterSpacing: 1.1 
   },
   logoutBtn: { 
-    marginTop: 16, 
-    borderWidth: 2.5, 
-    borderColor: '#d6b8b4', 
+    marginTop: 24, 
+    borderWidth: colors.boardBorderWidth, 
+    borderColor: colors.danger, 
     paddingVertical: 12, 
     alignItems: 'center', 
-    backgroundColor: colors.surface 
+    backgroundColor: colors.surfaceSecondary 
   },
   logoutText: { 
     fontSize: 11, 
-    color: '#9f3d34', 
+    color: colors.danger, 
     textTransform: 'uppercase', 
     fontWeight: '900', 
     letterSpacing: 1.1 
   },
   pwInput: {
-    borderWidth: 2.5, 
-    borderColor: colors.border, 
-    backgroundColor: colors.surface,
+    borderWidth: colors.boardBorderWidth, 
+    borderColor: colors.boardBorder, 
+    backgroundColor: colors.surfaceSecondary,
     paddingHorizontal: 12, 
     paddingVertical: 10, 
-    fontSize: 14, 
+    fontSize: isMobile ? 13 : 14, 
     color: colors.text,
   },
   pwBtn: { 
-    backgroundColor: colors.accent, 
-    borderWidth: 2.5,
-    borderColor: colors.border,
+    backgroundColor: colors.primary, 
+    borderWidth: colors.boardBorderWidth,
+    borderColor: colors.boardBorder,
     paddingVertical: 12, 
     alignItems: 'center', 
-    marginBottom: 14, 
-    ...shadows.bulletin 
+    marginTop: 8,
   },
   pwBtnText: { 
-    color: '#fff', 
+    color: colors.primaryContent, 
     fontSize: 11, 
     fontWeight: '900', 
     textTransform: 'uppercase', 
