@@ -146,11 +146,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const sendRegistrationOtp = useCallback(async (email: string) => {
-    const { error } = await supabase.auth.signInWithOtp({
-      email: email.toLowerCase(),
-      options: { shouldCreateUser: true },
-    });
-    if (error) throw new Error(error.message || 'Failed to send verification code.');
+    await authService.sendOtp(email.toLowerCase(), 'register');
   }, []);
 
   const verifyOtpAndRegister = useCallback(async (
@@ -158,22 +154,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     otp: string,
     profile: Omit<RegisterPayload, 'supabaseAccessToken'>,
   ) => {
-    const { data: { session }, error } = await supabase.auth.verifyOtp({
-      email: email.toLowerCase(),
-      token: otp.trim(),
-      type: 'email',
-    });
-    if (error || !session?.access_token) {
-      throw new Error(
-        error?.message?.toLowerCase().includes('expired') || error?.message?.toLowerCase().includes('invalid')
-          ? 'Incorrect or expired code. Please check and try again.'
-          : error?.message || 'Verification failed.'
-      );
-    }
-    const response = await authService.register({
-      supabaseAccessToken: session.access_token,
-      ...profile,
-    });
+    const response = await authService.verifyOtpRegister(email.toLowerCase(), otp.trim(), profile);
     const { user: newUser, token: newToken } = response.data;
     const normalized = normalizeUser(newUser);
     await SecureStore.setItemAsync('token', newToken);
@@ -191,33 +172,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const sendLoginOtp = useCallback(async (email: string) => {
-    const { error } = await supabase.auth.signInWithOtp({
-      email: email.toLowerCase(),
-      options: { shouldCreateUser: false },
-    });
-    if (error) {
-      const msg = error.message?.toLowerCase() || '';
-      if (msg.includes('user not found') || msg.includes('no user')) {
-        throw new Error('No account found with that email. Please sign up first.');
-      }
-      throw new Error(error.message || 'Failed to send login code.');
-    }
+    await authService.sendOtp(email.toLowerCase(), 'login');
   }, []);
 
   const verifyOtpAndLogin = useCallback(async (email: string, otp: string) => {
-    const { data: { session }, error } = await supabase.auth.verifyOtp({
-      email: email.toLowerCase(),
-      token: otp.trim(),
-      type: 'email',
-    });
-    if (error || !session?.access_token) {
-      throw new Error(
-        error?.message?.toLowerCase().includes('expired') || error?.message?.toLowerCase().includes('invalid')
-          ? 'Incorrect or expired code. Please check and try again.'
-          : error?.message || 'Verification failed.'
-      );
-    }
-    const response = await authService.login({ supabaseAccessToken: session.access_token });
+    const response = await authService.verifyOtpLogin(email.toLowerCase(), otp.trim());
     const { user: newUser, token: newToken } = response.data;
     const normalized = normalizeUser(newUser);
     await SecureStore.setItemAsync('token', newToken);
