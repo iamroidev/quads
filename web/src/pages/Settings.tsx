@@ -400,7 +400,7 @@ const SettingsPage: React.FC = () => {
                     className="w-full border-4 border-red-600 dark:border-red-400 bg-white dark:bg-black p-4 text-[14px] font-black uppercase focus:outline-none focus:ring-0 text-red-600 dark:text-red-400 placeholder:text-red-600/30 dark:placeholder:text-red-400/30"
                   />
 
-                  {!user?.supabaseId ? (
+                  {!user?.googleId ? (
                     <>
                       <p className="text-[11px] font-black uppercase tracking-widest text-red-600 dark:text-red-400">Enter your password to confirm</p>
                       <input
@@ -430,7 +430,7 @@ const SettingsPage: React.FC = () => {
                       onClick={handleDeleteAccount}
                       disabled={
                         deleteConfirmation !== 'DELETE' || 
-                        (!user?.supabaseId && !deletePassword) || 
+                        (!user?.googleId && !deletePassword) || 
                         deleting
                       }
                       className="flex-1 border-4 border-red-600 dark:border-red-400 bg-red-600 dark:bg-red-400 px-4 py-4 text-[11px] font-black uppercase tracking-widest text-white dark:text-black transition-colors hover:bg-red-700 dark:hover:bg-red-300 disabled:opacity-40"
