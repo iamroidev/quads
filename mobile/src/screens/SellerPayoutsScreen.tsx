@@ -61,14 +61,15 @@ const SellerPayoutsScreen = () => {
   };
 
   useEffect(() => {
-    Promise.all([
-      api.get('/payouts/seller').then(r => r.data),
-      api.get('/payouts').then(r => r.data),
-    ]).then(([payoutRes, statsRes]) => {
-      if (payoutRes.success) setPayouts(payoutRes.data.payouts || []);
-      if (statsRes.success) {
-        const s = statsRes.data.stats || {};
-        setStats({ totalPending: s.totalPending || 0, totalCompleted: s.totalCompleted || 0, totalAmount: s.totalCommissionEarned || 0 });
+    api.get('/payouts/seller').then(r => r.data).then((payoutRes) => {
+      if (payoutRes.success) {
+        const list: Payout[] = payoutRes.data.payouts || [];
+        setPayouts(list);
+        setStats({
+          totalPending: list.filter(p => p.status === 'pending' || p.status === 'processing').length,
+          totalCompleted: list.filter(p => p.status === 'completed').length,
+          totalAmount: list.filter(p => p.status === 'completed').reduce((sum, p) => sum + (p.netAmount || 0), 0),
+        });
       }
     }).finally(() => setLoading(false));
   }, []);
