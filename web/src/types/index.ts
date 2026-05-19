@@ -1,6 +1,7 @@
 export interface User {
   _id: string;
-  supabaseId?: string;
+  supabaseId?: string;  // legacy
+  googleId?: string;
   name: string;
   storeName?: string;
   brandName?: string;

@@ -13,9 +13,9 @@ interface AuthContextType {
   isAuthenticated: boolean;
   login: (email: string, password: string) => Promise<void>;
   googleLogin: (credential: string, role?: 'buyer' | 'seller') => Promise<{ isNewUser?: boolean; needsProfileCompletion?: boolean }>;
-  register: (data: Omit<RegisterPayload, 'supabaseAccessToken'> & { password: string; email: string }) => Promise<void>;
+  register: (data: RegisterPayload & { email: string }) => Promise<void>;
   sendRegistrationOtp: (email: string) => Promise<void>;
-  verifyOtpAndRegister: (email: string, otp: string, profile: Omit<RegisterPayload, 'supabaseAccessToken'>) => Promise<void>;
+  verifyOtpAndRegister: (email: string, otp: string, profile: RegisterPayload) => Promise<void>;
   sendLoginOtp: (email: string) => Promise<void>;
   verifyOtpAndLogin: (email: string, otp: string) => Promise<void>;
   logout: () => Promise<void>;
@@ -142,7 +142,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const verifyOtpAndRegister = useCallback(async (
     email: string,
     otp: string,
-    profile: Omit<RegisterPayload, 'supabaseAccessToken'>,
+    profile: RegisterPayload,
   ) => {
     const response = await authService.verifyOtpRegister(email.toLowerCase(), otp.trim(), profile);
     const { user: newUser, token: newToken } = response.data;
@@ -184,7 +184,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   // kept for backwards compat — not used by new flows
-  const register = useCallback(async (data: Omit<RegisterPayload, 'supabaseAccessToken'> & { password: string; email: string }) => {
+  const register = useCallback(async (data: RegisterPayload & { email: string }) => {
     await sendRegistrationOtp(data.email);
   }, [sendRegistrationOtp]);
 

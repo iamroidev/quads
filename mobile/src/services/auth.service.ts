@@ -1,15 +1,11 @@
 import api from './api';
 import { User } from '../types';
 
-export interface LoginPayload {
-  supabaseAccessToken: string;
-}
-
 export interface RegisterPayload {
-  supabaseAccessToken: string;
   name: string;
   phone: string;
   role?: 'buyer' | 'seller';
+  roles?: ('buyer' | 'seller')[];
   studentId?: string;
   department?: string;
   residenceHall?: string;
