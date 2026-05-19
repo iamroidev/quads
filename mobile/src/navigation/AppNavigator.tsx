@@ -1,8 +1,7 @@
-import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { ActivityIndicator, Text, View, Platform } from 'react-native';
+import { Text, View, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAuth } from '../context/AuthContext';
@@ -53,7 +52,6 @@ import {
    FollowingFeedScreen,
  } from '../screens';
 import { navigationRef } from './navigationRef';
-import { shadows } from '../theme';
 import { useColors } from '../theme/ThemeContext';
 import FloatingCart from '../components/FloatingCart';
 
@@ -152,6 +150,7 @@ const ProfileStackScreen = () => {
       <ProfileStack.Screen name="Verification" component={VerificationScreen} options={{ ...dsh, title: 'Verify Account' }} />
       <ProfileStack.Screen name="Categories" component={CategoriesScreen} options={{ ...dsh, title: 'Categories' }} />
       <ProfileStack.Screen name="Sellers" component={SellersScreen} options={{ ...dsh, title: 'Sellers' }} />
+      <ProfileStack.Screen name="MyListings" component={MyListingsScreen} options={{ ...dsh, title: 'My Listings' }} />
       <ProfileStack.Screen name="SellerOrders" component={SellerOrdersScreen} options={{ ...dsh, title: 'Sales Orders' }} />
       <ProfileStack.Screen name="Support" component={SupportScreen} options={{ ...dsh, title: 'Support' }} />
       <ProfileStack.Screen name="Contact" component={ContactScreen} options={{ ...dsh, title: 'Contact' }} />

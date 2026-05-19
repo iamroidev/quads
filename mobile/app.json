@@ -48,7 +48,13 @@
       "expo-web-browser",
       "expo-camera",
       "expo-font",
-      "@sentry/react-native"
+      [
+        "@sentry/react-native",
+        {
+          "uploadSourceMaps": false,
+          "deployGate": false
+        }
+      ]
     ],
     "owner": "richieroidev"
   }
