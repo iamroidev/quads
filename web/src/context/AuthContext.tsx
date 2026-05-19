@@ -21,8 +21,9 @@ interface AuthContextType {
   token: string | null;
   isLoading: boolean;
   isAuthenticated: boolean;
-  register: (data: Omit<RegisterData, 'supabaseAccessToken'> & { email: string; password: string }) => Promise<void>;
+  register: (data: Omit<RegisterData, 'supabaseAccessToken'> & { email: string; password: string }) => Promise<void | 'pending'>;
   login: (data: { email: string; password: string }) => Promise<void>;
+  finalizeAuth: (supabaseAccessToken: string) => Promise<void>;
   googleLogin: (credential: string, role?: 'buyer' | 'seller', profileData?: Partial<User>) => Promise<{ needsProfileCompletion: boolean; isNewUser?: boolean }>;
   logout: () => Promise<void>;
   updateProfile: (data: UpdateProfileData) => Promise<void>;
@@ -90,13 +91,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       throw new Error(error.message || 'Registration failed at authentication provider.');
     }
 
-    // If email verification is enabled, session might be null. 
-    // We should still attempt to create the user record in our DB if we have the user ID.
+    // Email confirmation required — session is null until user clicks the link.
+    // Stash the profile data so the callback page can finish creating the DB record.
     if (!authData.session?.access_token && authData.user) {
-      // For Supabase, if no session is returned, we can't verify the token on the backend yet.
-      // But we can show a success message to the user to check their email.
-      toast.success('Confirmation email sent! Please check your inbox to verify your account.', { duration: 5000 });
-      return;
+      sessionStorage.setItem('pending_registration', JSON.stringify({
+        name: data.name,
+        phone: data.phone,
+        roles: data.roles || [data.role],
+        studentId: data.studentId,
+        department: data.department,
+        residenceHall: data.residenceHall,
+        currentLevel: data.currentLevel,
+        location: data.location,
+      }));
+      toast.success('Check your email — click the confirmation link to finish creating your account.', { duration: 8000 });
+      return 'pending' as const;
     }
 
     if (!authData.session?.access_token) {
@@ -141,7 +150,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     });
 
     if (error || !authData.session?.access_token) {
-      throw new Error(error?.message || 'Invalid email or password.');
+      const msg = error?.message?.toLowerCase() || '';
+      if (msg.includes('email not confirmed')) {
+        throw new Error('Please confirm your email address before logging in. Check your inbox.');
+      }
+      if (msg.includes('invalid login credentials') || msg.includes('invalid credentials')) {
+        // Supabase gives the same error for wrong password and unregistered email.
+        // Check if the email exists in Supabase to give a clearer message.
+        const { data: methods } = await supabase.auth.signInWithOtp({ email: data.email.toLowerCase(), options: { shouldCreateUser: false } }).catch(() => ({ data: null }));
+        const emailExists = methods !== null;
+        throw new Error(emailExists
+          ? 'Incorrect password. Please try again or reset your password.'
+          : 'No account found with that email address. Please sign up first.'
+        );
+      }
+      throw new Error(error?.message || 'Login failed. Please try again.');
     }
 
     const response = await authService.login({ supabaseAccessToken: authData.session.access_token });
@@ -192,6 +215,43 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       needsProfileCompletion: !!response.data?.needsProfileCompletion,
       isNewUser: !!response.data?.isNewUser,
     };
+  }, []);
+
+  // Called by /auth/callback after email confirmation — logs in or registers using the Supabase session
+  const finalizeAuth = useCallback(async (supabaseAccessToken: string) => {
+    let response;
+    try {
+      response = await authService.login({ supabaseAccessToken });
+    } catch (err: any) {
+      if (err?.response?.status === 401 || err?.response?.status === 404) {
+        const pending = sessionStorage.getItem('pending_registration');
+        const profile = pending ? JSON.parse(pending) : {};
+        response = await authService.register({
+          supabaseAccessToken,
+          name:          profile.name          || 'Student',
+          phone:         profile.phone          || '',
+          roles:         profile.roles          || ['buyer'],
+          studentId:     profile.studentId      || '',
+          department:    profile.department     || '',
+          residenceHall: profile.residenceHall  || '',
+          currentLevel:  profile.currentLevel   || '',
+          location:      profile.location       || '',
+        });
+        sessionStorage.removeItem('pending_registration');
+      } else {
+        throw err;
+      }
+    }
+    const { user: newUser, token: newToken } = response.data;
+    const sanitized = {
+      ...newUser,
+      roles:    newUser.roles    || [],
+      viewMode: newUser.viewMode || (newUser.roles?.includes('seller') ? 'seller' : 'buyer'),
+    };
+    localStorage.setItem('token', newToken);
+    localStorage.setItem('user', JSON.stringify(sanitized));
+    setToken(newToken);
+    setUser(sanitized);
   }, []);
 
   const logout = useCallback(async () => {
@@ -270,6 +330,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         isAuthenticated,
         register,
         login,
+        finalizeAuth,
         googleLogin,
         logout,
         updateProfile,
