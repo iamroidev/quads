@@ -20,6 +20,7 @@ export interface IDisputeDocument extends Document {
   status: DisputeStatus;
   adminNote?: string;
   resolvedAt?: Date;
+  escalated?: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -71,6 +72,7 @@ const disputeSchema = new Schema<IDisputeDocument>(
     },
     adminNote: String,
     resolvedAt: Date,
+    escalated: { type: Boolean, default: false },
   },
   { timestamps: true }
 );

@@ -14,6 +14,7 @@ import { apiLimiter, authLimiter, paymentLimiter, uploadLimiter } from './middle
 import { sanitizeInput, validateBodySize } from './middleware/validateRequest';
 import { setupSocketHandlers } from './socket';
 import { startPayoutScheduler } from './services/payoutScheduler';
+import { startTaskScheduler } from './services/taskScheduler.service';
 
 // Initialize Express app
 const app = express();
@@ -200,8 +201,9 @@ const startServer = async () => {
     connectDB()
       .then(() => {
         console.log('MongoDB connection established');
-        // Start background payout scheduler only after DB is ready
+        // Start background schedulers only after DB is ready
         startPayoutScheduler(15);
+        startTaskScheduler();
 
         // Self-heal QUADS AI Support avatar to high-compatibility Base64
         import('./models/User').then(({ default: User }) => {
