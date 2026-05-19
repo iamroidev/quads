@@ -1,13 +1,36 @@
 import axios from 'axios';
-import ApiError from '../utils/ApiError';
 
 class AiService {
   private readonly apiKey: string;
   private readonly apiUrl: string = 'https://openrouter.ai/api/v1/chat/completions';
-  private readonly model: string = 'google/gemini-2.0-flash-001'; // Fast and capable
+  // Primary model + fallback in case of rate limits
+  private readonly models: string[] = [
+    'google/gemini-2.0-flash-lite-001',
+    'meta-llama/llama-3.1-8b-instruct',
+    'google/gemini-2.0-flash-001',
+  ];
 
   constructor() {
     this.apiKey = process.env.OPENROUTER_API_KEY || '';
+  }
+
+  private async callModel(model: string, messages: { role: string; content: string }[]): Promise<string> {
+    const response = await axios.post(
+      this.apiUrl,
+      { model, messages, max_tokens: 500 },
+      {
+        headers: {
+          Authorization: `Bearer ${this.apiKey}`,
+          'HTTP-Referer': 'https://quadsmarket.tech',
+          'X-Title': 'QUADS Marketplace AI Support',
+          'Content-Type': 'application/json',
+        },
+        timeout: 15000,
+      }
+    );
+    const content = response.data?.choices?.[0]?.message?.content;
+    if (!content) throw new Error('Empty response from model');
+    return content;
   }
 
   async generateResponse(
@@ -16,56 +39,42 @@ class AiService {
     context?: any
   ): Promise<string> {
     if (!this.apiKey) {
-      console.error('OPENROUTER_API_KEY is not set');
-      return "I'm sorry, I'm having trouble connecting to my brain right now. Please try again later or contact support@quadsmarket.tech.";
+      console.error('[AI] OPENROUTER_API_KEY is not configured');
+      return "I'm currently offline. Please contact support@quadsmarket.tech directly.";
     }
 
-    try {
-      const systemPrompt = `
-You are the Official QUADS (Institutional Marketplace) AI Assistant.
-Your goal is to help UMaT students with their marketplace queries.
+    const systemPrompt = `You are the official QUADS campus marketplace AI assistant for UMaT students in Ghana.
+Be concise, helpful, and friendly. Help with: buying/selling items, escrow payments, pickup spots, account issues.
+If you cannot resolve something (disputes, bugs, refunds), say "ESCALATING TO HUMAN SUPPORT" and explain why.
+Context: ${JSON.stringify(context || {})}`;
 
-GUIDELINES:
-1. Be professional, helpful, and concise.
-2. Answer questions about how the platform works (escrow, delivery, verified sellers).
-3. If you CANNOT help with a specific request (e.g., technical bugs, payment issues, disputes), you MUST ESCALATE.
-4. To escalate, include the phrase "ESCALATING TO HUMAN SUPPORT" in your response.
-5. Use context about the current conversation if provided.
+    const messages = [
+      { role: 'system', content: systemPrompt },
+      ...history.slice(-8), // last 8 messages for context window efficiency
+      { role: 'user', content: userMessage },
+    ];
 
-CONTEXT:
-${JSON.stringify(context || {})}
-
-USER MESSAGE:
-${userMessage}
-      `;
-
-      const messages = [
-        { role: 'system', content: systemPrompt },
-        ...history,
-        { role: 'user', content: userMessage },
-      ];
-
-      const response = await axios.post(
-        this.apiUrl,
-        {
-          model: this.model,
-          messages,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${this.apiKey}`,
-            'HTTP-Referer': 'https://quadsmarket.tech',
-            'X-Title': 'QUADS Marketplace',
-            'Content-Type': 'application/json',
-          },
+    // Try each model in order, fall back if rate-limited
+    for (const model of this.models) {
+      try {
+        const result = await this.callModel(model, messages);
+        console.log(`[AI] Responded via ${model}`);
+        return result;
+      } catch (error: any) {
+        const msg = error.response?.data?.error?.message || error.message || '';
+        const isRateLimit = msg.includes('rate-limit') || msg.includes('rate_limit') || msg.includes('429') || error.response?.status === 429;
+        const isNotFound = msg.includes('not a valid model') || error.response?.status === 404;
+        if (isRateLimit || isNotFound) {
+          console.warn(`[AI] Model ${model} unavailable (${isRateLimit ? 'rate-limit' : 'not-found'}), trying next...`);
+          continue;
         }
-      );
-
-      return response.data.choices[0].message.content;
-    } catch (error: any) {
-      console.error('OpenRouter Error:', error.response?.data || error.message);
-      return "I'm having a bit of trouble processing that. Let me get a human to help you. ESCALATING TO HUMAN SUPPORT.";
+        // Non-recoverable error
+        console.error(`[AI] OpenRouter error on ${model}:`, msg);
+        break;
+      }
     }
+
+    return "I'm having trouble responding right now. ESCALATING TO HUMAN SUPPORT — a team member will follow up shortly.";
   }
   async groupProducts(products: any[]): Promise<any[]> {
     if (!this.apiKey) {
@@ -113,7 +122,7 @@ ${userMessage}
       const response = await axios.post(
         this.apiUrl,
         {
-          model: this.model,
+          model: this.models[0],
           messages: [
             { role: 'system', content: 'You are a professional marketplace curator. Return only valid JSON.' },
             { role: 'user', content: prompt }
