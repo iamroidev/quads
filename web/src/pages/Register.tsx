@@ -350,8 +350,11 @@ const RegisterPage: React.FC = () => {
       if (!ok) return;
 
       const { confirmPassword, ...registerData } = data;
-      await registerUser(registerData as any);
-      navigate(from, { replace: true });
+      const registered = await registerUser(registerData as any);
+      // registerUser returns undefined when email confirmation is pending — don't navigate
+      if (registered !== 'pending') {
+        navigate(from, { replace: true });
+      }
     } catch (error: any) {
       toast.error(error.response?.data?.message || error.message || 'Registration failed. Please try again.');
     } finally {
