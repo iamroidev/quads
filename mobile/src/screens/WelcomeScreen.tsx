@@ -13,7 +13,8 @@ import {
   Linking,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { colors, shadows } from '../theme';
+import { useTheme } from '../theme/ThemeContext';
+import { shadows } from '../theme';
 
 const { width, height } = Dimensions.get('window');
 
@@ -21,34 +22,37 @@ const SLIDES = [
   {
     icon: 'storefront-outline',
     title: 'Campus Swaps',
-    highlight: '🔥 0% COMMISSION ALWAYS',
+    highlight: '0% COMMISSION ALWAYS',
     color: '#ff6b6b',
     desc: 'Selling your old mini-fridge, engineering calculator, or textbook gear? Post it in 10 seconds. Keep 100% of your money. Zero commission. Always.',
   },
   {
     icon: 'lock-closed-outline',
     title: 'Paystack Escrow',
-    highlight: '🛡️ NO MORE SCAMS',
+    highlight: 'NO MORE SCAMS',
     color: '#3d307c',
     desc: 'Pay with Momo inside the app. We hold the cash securely in escrow. The seller doesn\'t get a single pesewa until you verify the item in person.',
   },
   {
     icon: 'scan-outline',
     title: 'QR Scanner Handoff',
-    highlight: '⚡ INSTANT RELEASE',
+    highlight: 'INSTANT RELEASE',
     color: '#10b981',
     desc: 'Meet safely at the Library or Main Gate. Scan the seller\'s automatically generated QR code on your phone to instantly release escrow funds.',
   },
   {
     icon: 'shield-checkmark-outline',
     title: 'Campus Safety Memo',
-    highlight: '📢 SAFE SWAPS ONLY',
+    highlight: 'SAFE SWAPS ONLY',
     color: '#eab308',
     desc: 'Always perform exchange handoffs at public squares (Library, Hall Cafes, or Main Gates). Scan the seller\'s QR code on-site to release escrow instantly.',
   },
 ];
 
 const WelcomeScreen = ({ navigation }: any) => {
+  const { colors } = useTheme();
+  const isMobile = width < 640;
+  const styles = getStyles(colors, isMobile);
   const [activeSlide, setActiveSlide] = useState(0);
   const [showIntro, setShowIntro] = useState(true);
 
@@ -176,6 +180,9 @@ const WelcomeScreen = ({ navigation }: any) => {
   const renderBackgroundGrid = () => {
     const horizontalLines = Array.from({ length: 28 });
     const verticalLines = Array.from({ length: 12 });
+    const isDark = colors.background === '#0a0a0a';
+    const gridLineColor = isDark ? 'rgba(255, 255, 255, 0.04)' : 'rgba(0, 0, 0, 0.06)';
+    const crossmarkColor = isDark ? 'rgba(255, 255, 255, 0.12)' : 'rgba(0, 0, 0, 0.18)';
     
     return (
       <View style={StyleSheet.absoluteFillObject} pointerEvents="none">
@@ -189,7 +196,7 @@ const WelcomeScreen = ({ navigation }: any) => {
               left: 0,
               right: 0,
               height: 1,
-              backgroundColor: 'rgba(0, 0, 0, 0.08)',
+              backgroundColor: gridLineColor,
             }}
           />
         ))}
@@ -203,7 +210,7 @@ const WelcomeScreen = ({ navigation }: any) => {
               top: 0,
               bottom: 0,
               width: 1,
-              backgroundColor: 'rgba(0, 0, 0, 0.08)',
+              backgroundColor: gridLineColor,
             }}
           />
         ))}
@@ -228,17 +235,17 @@ const WelcomeScreen = ({ navigation }: any) => {
           left: -40,
           width: 90,
           height: 90,
-          backgroundColor: '#fffacd15',
+          backgroundColor: isDark ? 'rgba(255, 250, 205, 0.04)' : 'rgba(255, 250, 205, 0.15)',
           borderWidth: 2,
-          borderColor: '#fffacd35',
+          borderColor: isDark ? 'rgba(255, 250, 205, 0.15)' : 'rgba(255, 250, 205, 0.35)',
           transform: [{ rotate: '28deg' }],
         }} />
 
         {/* Tiny Retro crossmarks (+) floating around for depth */}
-        <Text style={{ position: 'absolute', top: 120, left: 35, fontSize: 26, fontWeight: '400', color: 'rgba(0,0,0,0.18)' }}>+</Text>
-        <Text style={{ position: 'absolute', top: 290, right: 45, fontSize: 22, fontWeight: '400', color: 'rgba(0,0,0,0.18)' }}>+</Text>
-        <Text style={{ position: 'absolute', top: 540, left: 45, fontSize: 24, fontWeight: '400', color: 'rgba(0,0,0,0.18)' }}>+</Text>
-        <Text style={{ position: 'absolute', top: 760, right: 35, fontSize: 28, fontWeight: '400', color: 'rgba(0,0,0,0.18)' }}>+</Text>
+        <Text style={{ position: 'absolute', top: 120, left: 35, fontSize: 26, fontWeight: '400', color: crossmarkColor }}>+</Text>
+        <Text style={{ position: 'absolute', top: 290, right: 45, fontSize: 22, fontWeight: '400', color: crossmarkColor }}>+</Text>
+        <Text style={{ position: 'absolute', top: 540, left: 45, fontSize: 24, fontWeight: '400', color: crossmarkColor }}>+</Text>
+        <Text style={{ position: 'absolute', top: 760, right: 35, fontSize: 28, fontWeight: '400', color: crossmarkColor }}>+</Text>
       </View>
     );
   };
@@ -253,11 +260,11 @@ const WelcomeScreen = ({ navigation }: any) => {
       width: 20,
       height: 20,
       borderRadius: 10,
-      backgroundColor: '#ff6b6b',
+      backgroundColor: colors.pinRed,
       borderWidth: 2.5,
-      borderColor: '#000',
+      borderColor: colors.boardBorder,
       zIndex: 100,
-      shadowColor: '#000',
+      shadowColor: colors.boardShadow,
       shadowOffset: { width: 1.5, height: 1.5 },
       shadowOpacity: 0.4,
       shadowRadius: 0,
@@ -337,9 +344,9 @@ const WelcomeScreen = ({ navigation }: any) => {
                   width: 10,
                   height: 10,
                   borderRadius: 5,
-                  backgroundColor: '#ff6b6b',
+                  backgroundColor: colors.pinRed,
                   borderWidth: 1.5,
-                  borderColor: colors.border,
+                  borderColor: colors.boardBorder,
                 }} />
               </View>
 
@@ -373,7 +380,7 @@ const WelcomeScreen = ({ navigation }: any) => {
 
           {/* Catchy Carousel Visual Slides - Staggered Slide In */}
           <Animated.View style={[styles.slideCard, { transform: [{ translateY: carouselY }] }]}>
-            {/* 📌 Red Thumbtack detail pinned at the top-center */}
+            {/* Red Thumbtack detail pinned at the top-center */}
             {renderThumbtack()}
 
             <View style={[styles.slideBadge, { backgroundColor: SLIDES[activeSlide].color + '15', borderColor: SLIDES[activeSlide].color }]}>
@@ -384,7 +391,7 @@ const WelcomeScreen = ({ navigation }: any) => {
 
             <View style={styles.slideHeader}>
               <View style={[styles.iconBox, { backgroundColor: SLIDES[activeSlide].color }]}>
-                <Ionicons name={SLIDES[activeSlide].icon as any} size={28} color="#fff" />
+                <Ionicons name={SLIDES[activeSlide].icon as any} size={28} color={colors.primaryContent} />
               </View>
               <Text style={styles.slideTitle}>{SLIDES[activeSlide].title}</Text>
             </View>
@@ -410,15 +417,15 @@ const WelcomeScreen = ({ navigation }: any) => {
           {/* Catchy Statistics / Parity Badges - Staggered Slide In */}
           <Animated.View style={[styles.metricsGrid, { transform: [{ translateY: metricsY }] }]}>
             <View style={styles.metricBox}>
-              <Text style={styles.metricVal}>🔥 0% FEES</Text>
+              <Text style={styles.metricVal}>0% FEES</Text>
               <Text style={styles.metricLabel}>Zero slop swaps</Text>
             </View>
             <View style={styles.metricBox}>
-              <Text style={styles.metricVal}>🛡️ ESCROW</Text>
+              <Text style={styles.metricVal}>ESCROW</Text>
               <Text style={styles.metricLabel}>Anti-scam shield</Text>
             </View>
             <View style={styles.metricBox}>
-              <Text style={styles.metricVal}>🎓 UMaT ONLY</Text>
+              <Text style={styles.metricVal}>UMaT ONLY</Text>
               <Text style={styles.metricLabel}>Verified scholars</Text>
             </View>
           </Animated.View>
@@ -429,14 +436,14 @@ const WelcomeScreen = ({ navigation }: any) => {
               style={styles.signUpBtn}
               onPress={() => navigation.navigate('Register')}
             >
-              <Text style={styles.signUpBtnText}>🚀 LETS GO / SIGN UP</Text>
+              <Text style={styles.signUpBtnText}>LETS GO / SIGN UP</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
               style={styles.logInBtn}
               onPress={() => navigation.navigate('Login')}
             >
-              <Text style={styles.logInBtnText}>🔑 ALREADY A MEMBER? LOG IN</Text>
+              <Text style={styles.logInBtnText}>ALREADY A MEMBER? LOG IN</Text>
             </TouchableOpacity>
           </Animated.View>
 
@@ -463,7 +470,7 @@ const WelcomeScreen = ({ navigation }: any) => {
         </ScrollView>
       </Animated.View>
 
-      {/* 🚀 Brand Intro Anim Container Overlay */}
+      {/* Brand Intro Anim Container Overlay */}
       {showIntro && (
         <Animated.View style={[styles.introContainer, { transform: [{ translateY: introY }] }]}>
           <View style={styles.introInner}>
@@ -471,7 +478,7 @@ const WelcomeScreen = ({ navigation }: any) => {
             {/* Animated Brand Letters with Integrated Large Vector Q-Logo & Subscript UADS */}
             <View style={[styles.letterRow, { alignItems: 'flex-end', gap: 5 }]}>
               
-              {/* 🚀 First Letter is the Massive Vector Q-Logo! (86x86) */}
+              {/* First Letter is the Massive Vector Q-Logo! (86x86) */}
               <Animated.View
                 style={[
                   styles.letterCard,
@@ -517,9 +524,9 @@ const WelcomeScreen = ({ navigation }: any) => {
                   width: 13,
                   height: 13,
                   borderRadius: 6.5,
-                  backgroundColor: '#ff6b6b',
+                  backgroundColor: colors.pinRed,
                   borderWidth: 2,
-                  borderColor: colors.border,
+                  borderColor: colors.boardBorder,
                 }} />
               </Animated.View>
 
@@ -577,7 +584,7 @@ const WelcomeScreen = ({ navigation }: any) => {
   );
 };
 
-const styles = StyleSheet.create({
+const getStyles = (colors: any, isMobile = false) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.bg,
@@ -589,7 +596,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.accent,
     paddingVertical: 8,
     borderBottomWidth: 3,
-    borderColor: '#000',
+    borderColor: colors.boardBorder,
     zIndex: 10,
     overflow: 'hidden',
   },
@@ -598,7 +605,7 @@ const styles = StyleSheet.create({
     width: 800,
   },
   tickerText: {
-    color: '#000',
+    color: colors.bg,
     fontSize: 10,
     fontWeight: '900',
     textTransform: 'uppercase',
@@ -616,7 +623,7 @@ const styles = StyleSheet.create({
     gap: 2,
   },
   logoTitle: {
-    fontSize: 54,
+    fontSize: isMobile ? 40 : 54,
     fontWeight: '900',
     letterSpacing: -2,
     color: colors.text,
@@ -640,7 +647,7 @@ const styles = StyleSheet.create({
   // Canary Yellow Pinned Safety Memo Note
   stickyNotice: {
     position: 'relative',
-    backgroundColor: '#fffacd',
+    backgroundColor: colors.surfaceSecondary,
     borderWidth: 2.5,
     borderColor: colors.border,
     padding: 14,
@@ -652,7 +659,7 @@ const styles = StyleSheet.create({
     fontSize: 10,
     fontWeight: '900',
     letterSpacing: 1.2,
-    color: '#000',
+    color: colors.text,
     textTransform: 'uppercase',
     marginBottom: 5,
     textAlign: 'center',
@@ -660,7 +667,7 @@ const styles = StyleSheet.create({
   stickyBody: {
     fontSize: 10.5,
     fontWeight: '700',
-    color: '#333',
+    color: colors.muted,
     lineHeight: 15,
     textAlign: 'center',
   },
@@ -808,7 +815,7 @@ const styles = StyleSheet.create({
     ...shadows.bulletinHeavy,
   },
   signUpBtnText: {
-    color: '#fff',
+    color: colors.primaryContent,
     fontSize: 14,
     fontWeight: '900',
     letterSpacing: 0.8,
@@ -829,7 +836,7 @@ const styles = StyleSheet.create({
     letterSpacing: 0.8,
   },
 
-  // 🚀 Brand Intro Animations Overlay Styles
+  // Brand Intro Animations Overlay Styles
   introContainer: {
     position: 'absolute',
     top: 0,
@@ -871,7 +878,7 @@ const styles = StyleSheet.create({
     fontSize: 9,
     fontWeight: '900',
     letterSpacing: 1.4,
-    color: '#7c6f60',
+    color: colors.muted,
     textTransform: 'uppercase',
   },
   loadTrack: {

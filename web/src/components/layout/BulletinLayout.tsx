@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
   ChevronRight,
@@ -18,13 +18,99 @@ import {
   Shield,
   TrendingUp,
   Menu,
-  X
+  X,
+  ShieldCheck,
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useCart } from '../../context/CartContext';
 import { BulletinMarquee } from '../ui/BulletinMarquee';
 import BrandMark from './BrandMark';
 import Footer from './Footer';
+import authService from '../../services/auth.service';
+import toast from 'react-hot-toast';
+
+const EmailVerificationBanner: React.FC = () => {
+  const { user, refreshUser } = useAuth();
+  const [dismissed, setDismissed] = useState(false);
+  const [sending, setSending] = useState(false);
+  const [codeSent, setCodeSent] = useState(false);
+  const [code, setCode] = useState('');
+  const [verifying, setVerifying] = useState(false);
+
+  if (!user || user.emailVerified || dismissed) return null;
+
+  const handleSend = async () => {
+    setSending(true);
+    try {
+      await authService.sendEmailVerification();
+      setCodeSent(true);
+      toast.success('Verification code sent to your email.');
+    } catch {
+      toast.error('Failed to send code. Try again.');
+    } finally {
+      setSending(false);
+    }
+  };
+
+  const handleVerify = async () => {
+    if (!code.trim()) return;
+    setVerifying(true);
+    try {
+      await authService.verifyEmail(code.trim());
+      await refreshUser();
+      toast.success('Email verified!');
+      setDismissed(true);
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message || 'Invalid or expired code.');
+    } finally {
+      setVerifying(false);
+    }
+  };
+
+  return (
+    <div className="relative z-[999] border-b-4 border-[#f59e0b] bg-[#fffbeb] px-4 py-3">
+      <div className="mx-auto max-w-[1400px] flex flex-wrap items-center gap-3">
+        <ShieldCheck className="h-4 w-4 text-[#d97706] flex-shrink-0" />
+        <span className="text-[11px] font-black uppercase tracking-widest text-[#92400e]">
+          Verify your email to unlock all features
+        </span>
+        {!codeSent ? (
+          <button
+            onClick={handleSend}
+            disabled={sending}
+            className="border-2 border-[#d97706] bg-[#d97706] text-white px-3 py-1 text-[10px] font-black uppercase tracking-widest hover:opacity-80 transition-opacity disabled:opacity-50"
+          >
+            {sending ? 'Sending...' : 'Send Code'}
+          </button>
+        ) : (
+          <div className="flex items-center gap-2">
+            <input
+              type="text"
+              value={code}
+              onChange={e => setCode(e.target.value)}
+              placeholder="Enter 6-digit code"
+              maxLength={6}
+              className="border-2 border-[#d97706] bg-white px-3 py-1 text-[12px] font-bold w-36 focus:outline-none"
+            />
+            <button
+              onClick={handleVerify}
+              disabled={verifying || code.length < 6}
+              className="border-2 border-[#d97706] bg-[#d97706] text-white px-3 py-1 text-[10px] font-black uppercase tracking-widest hover:opacity-80 transition-opacity disabled:opacity-50"
+            >
+              {verifying ? '...' : 'Verify'}
+            </button>
+            <button onClick={handleSend} disabled={sending} className="text-[10px] font-bold text-[#92400e] underline opacity-60 hover:opacity-100">
+              Resend
+            </button>
+          </div>
+        )}
+        <button onClick={() => setDismissed(true)} className="ml-auto opacity-40 hover:opacity-100">
+          <X className="h-4 w-4 text-[#92400e]" />
+        </button>
+      </div>
+    </div>
+  );
+};
 
 interface BulletinLayoutProps {
   children: React.ReactNode;
@@ -120,6 +206,9 @@ export const BulletinLayout: React.FC<BulletinLayoutProps> = ({
 
       {/* Main Container */}
       <div className="pt-[42px]">
+        {/* Email verification banner — shown to logged-in users with unverified email */}
+        <EmailVerificationBanner />
+
         {/* Bulletin-Style Top Nav */}
         <nav className="border-b-2 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] px-3 py-4 sm:px-6 md:px-12 relative z-[900]">
           <div className="mx-auto flex max-w-[1400px] items-center justify-between">

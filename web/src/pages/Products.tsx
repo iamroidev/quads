@@ -34,21 +34,24 @@ const deliveryOptions = [
 
 const proximityOptions = [
   { value: '', label: 'All Halls & Hostels' },
-  { value: 'Chamber of Mines Hall', label: 'Chamber of Mines' },
+  // On-campus halls
+  { value: 'KT Hall', label: 'KT Hall' },
+  { value: 'Chambers of Mines Hall', label: 'Chambers of Mines' },
   { value: 'Gold Refinery Hall', label: 'Gold Refinery' },
-  { value: 'KT Hall', label: 'K.T. Hall' },
-  { value: 'Recognition Hostel', label: 'Recognition' },
-  { value: 'Osborn Hostel', label: 'Osborn' },
-  { value: 'Tandoh Hostel', label: 'Tandoh' },
-  { value: 'Good Shepherd Hostel', label: 'Good Shepherd' },
-  { value: 'Agrich Hostel', label: 'Agrich' },
-  { value: 'Kiviz Executive Lodge', label: 'Kiviz Lodge' },
+  // Hostels
+  { value: 'CK Hostel', label: 'CK Hostel' },
+  { value: 'Corazon Hostel', label: 'Corazon' },
+  { value: 'Tovet Hostel', label: 'Tovet' },
+  { value: 'Hilda Hostel', label: 'Hilda' },
+  { value: 'Figenco Hostel', label: 'Figenco' },
+  { value: "Kabi's Hostel", label: "Kabi's" },
+  { value: 'Castle Gate Hostel', label: 'Castle Gate' },
+  { value: 'The White House Hostel', label: 'White House' },
   { value: 'Platinum Hostel', label: 'Platinum' },
-  { value: 'Global Hostel', label: 'Global' },
-  { value: 'Hill View Hostel', label: 'Hill View' },
-  { value: 'AdeJoe Hostel', label: 'AdeJoe' },
-  { value: 'Off-campus', label: 'Off-campus' },
-  { value: 'Other', label: 'Other' },
+  { value: 'RNM Hostel', label: 'RNM' },
+  { value: 'Nhiraba Hostel', label: 'Nhiraba' },
+  { value: 'Osborne Hostel', label: 'Osborne' },
+  { value: 'Off-Campus', label: 'Off-Campus' },
 ];
 
 const Products: React.FC = () => {
@@ -136,6 +139,35 @@ const Products: React.FC = () => {
       section="02"
     >
       <BulletinSection bgColor="bg-[var(--bulletin-bg)]">
+        {/* Search bar — always visible at the top of listings */}
+        <div className="mb-8">
+          <form
+            onSubmit={e => { e.preventDefault(); const q = (e.currentTarget.elements.namedItem('q') as HTMLInputElement).value; updateFilter('search', q); }}
+            className="flex gap-0 border-4 border-black shadow-[8px_8px_0_0_var(--bulletin-shadow)]"
+          >
+            <input
+              name="q"
+              defaultValue={search}
+              type="search"
+              placeholder="Search for textbooks, electronics, food..."
+              className="flex-1 bg-[var(--bulletin-card)] px-6 py-4 text-[14px] font-bold focus:outline-none text-[var(--bulletin-text)] placeholder:opacity-30 min-w-0"
+            />
+            <button type="submit" className="bg-[var(--bulletin-text)] text-[var(--bulletin-bg)] px-8 py-4 text-[12px] font-black uppercase tracking-widest border-l-4 border-black hover:opacity-80 transition-opacity whitespace-nowrap">
+              Search
+            </button>
+            {search && (
+              <button type="button" onClick={() => updateFilter('search', '')} className="bg-[#ff6b6b] text-white px-4 py-4 text-[12px] font-black border-l-4 border-black hover:opacity-80 transition-opacity">
+                ✕
+              </button>
+            )}
+          </form>
+          {search && (
+            <p className="mt-2 text-[11px] font-bold opacity-50 uppercase tracking-widest text-[var(--bulletin-text)]">
+              Showing results for: <span className="opacity-100">"{search}"</span>
+            </p>
+          )}
+        </div>
+
         <div className="mb-12 flex flex-col md:flex-row md:items-center justify-between gap-6 border-b-4 border-black pb-8">
           <div>
             <h2 className="text-[10px] font-black uppercase tracking-[0.3em] opacity-40 text-[var(--bulletin-text)] mb-2">Stuff on Campus</h2>

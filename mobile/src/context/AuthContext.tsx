@@ -35,6 +35,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const setViewMode = async (mode: 'buyer' | 'seller') => {
     setViewModeState(mode);
     await SecureStore.setItemAsync('viewMode', mode);
+    // Sync with server so viewMode persists across sessions
+    try {
+      const response = await authService.switchRole(mode);
+      const { user: updatedUser, token: newToken } = response.data;
+      await SecureStore.setItemAsync('token', newToken);
+      await SecureStore.setItemAsync('user', JSON.stringify(updatedUser));
+      setToken(newToken);
+      setUser(updatedUser);
+    } catch {
+      // Server sync failed silently — local state is already updated
+    }
   };
 
   const normalizeUser = (u: any): User | null => {

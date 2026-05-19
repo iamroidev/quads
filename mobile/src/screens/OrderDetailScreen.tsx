@@ -7,6 +7,7 @@ import {
   Text,
   TouchableOpacity,
   View,
+  Dimensions,
 } from 'react-native';
 import QRCode from 'react-native-qrcode-svg';
 import { Ionicons } from '@expo/vector-icons';
@@ -14,7 +15,8 @@ import * as WebBrowser from 'expo-web-browser';
 import orderService, { Order } from '../services/order.service';
 import api from '../services/api';
 import { useAuth } from '../context/AuthContext';
-import { colors, shadows } from '../theme';
+import { shadows } from '../theme';
+import { useColors } from '../theme/ThemeContext';
 
 const STATUS_STEPS = ['pending', 'paid', 'confirmed', 'ready', 'completed'] as const;
 const STEP_LABELS: Record<string, string> = {
@@ -25,26 +27,183 @@ const STEP_LABELS: Record<string, string> = {
   completed: 'Completed',
 };
 
-const STATUS_COLORS: Record<string, { border: string; bg: string; text: string }> = {
-  pending:   { border: '#c8b48c', bg: '#fffacd', text: '#7b5e1a' },
-  paid:      { border: colors.border, bg: '#e0f2f7', text: '#1a4a5e' },
-  confirmed: { border: colors.border, bg: '#e8e4f8', text: '#3d307c' },
-  ready:     { border: colors.accent, bg: '#d6ede7', text: colors.accent },
-  completed: { border: colors.accent, bg: '#d6ede7', text: colors.accent },
-  cancelled: { border: '#b3453a', bg: '#fde8e6', text: '#b3453a' },
-  disputed:  { border: '#c57f3f', bg: '#fdf0e0', text: '#8f5428' },
-};
+const getStatusColors = (colors: any) => ({
+  pending:   { border: colors.border,      bg: colors.metric1Bg,        text: colors.metric1Text },
+  paid:      { border: colors.border,      bg: colors.surfaceSecondary, text: colors.text },
+  confirmed: { border: colors.border,      bg: colors.surfaceSecondary, text: colors.text },
+  ready:     { border: colors.accent,      bg: colors.successTint,      text: colors.successTintText },
+  completed: { border: colors.accent,      bg: colors.successTint,      text: colors.successTintText },
+  cancelled: { border: colors.danger,      bg: colors.dangerTint,       text: colors.dangerTintText },
+  disputed:  { border: colors.danger,      bg: colors.dangerTint,       text: colors.dangerTintText },
+});
 
 const formatDate = (d: string) =>
   new Date(d).toLocaleString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
 
 const OrderDetailScreen = ({ route, navigation }: any) => {
+  const colors = useColors();
+  const { width: _sw } = Dimensions.get('window');
+  const isMobile = _sw < 640;
   const { orderId } = route.params;
   const { user } = useAuth();
   const [order, setOrder] = useState<Order | null>(null);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
   const [paying, setPaying] = useState(false);
+
+  const styles = React.useMemo(() => StyleSheet.create({
+    container: { flex: 1, backgroundColor: colors.bg },
+    content: { padding: isMobile ? 12 : 16, paddingBottom: 40 },
+    centered: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: colors.bg },
+
+    orderHeader: {
+      flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
+      borderWidth: 2, borderColor: colors.border, backgroundColor: colors.surface,
+      padding: 14, marginBottom: 12, ...shadows.bulletin,
+    },
+    orderNumberLabel: { fontSize: 10, fontWeight: '800', color: colors.muted, textTransform: 'uppercase', letterSpacing: 1.4 },
+    orderNumber: { fontSize: isMobile ? 13 : 15, fontWeight: '900', color: colors.text, marginTop: 2, textTransform: 'uppercase' },
+    statusBadge: { borderWidth: 1, paddingHorizontal: 10, paddingVertical: 5 },
+    statusText: { fontSize: 10, fontWeight: '800', letterSpacing: 1, textTransform: 'uppercase' },
+
+    section: {
+      borderWidth: 2, borderColor: colors.border, backgroundColor: colors.surface,
+      padding: 14, marginBottom: 12, ...shadows.bulletin,
+    },
+    sectionTitle: { fontSize: 10, fontWeight: '800', color: colors.muted, textTransform: 'uppercase', letterSpacing: 1.4, marginBottom: 12 },
+
+    // Timeline
+    timelineRow: { flexDirection: 'row', minHeight: 40 },
+    timelineLeft: { width: 22, alignItems: 'center' },
+    dot: { width: 10, height: 10, borderWidth: 2, borderColor: colors.border, backgroundColor: colors.surface },
+    dotDone: { borderColor: colors.accent, backgroundColor: colors.accent },
+    dotCurrent: { borderColor: colors.accent, backgroundColor: colors.surface, borderWidth: 3, width: 12, height: 12 },
+    connector: { flex: 1, width: 2, backgroundColor: colors.border, marginTop: 2 },
+    connectorDone: { backgroundColor: colors.accent },
+    timelineContent: { flex: 1, paddingLeft: 10, paddingBottom: 6, flexDirection: 'row', alignItems: 'flex-start', gap: 8 },
+    stepLabel: { fontSize: isMobile ? 12 : 13, color: colors.muted },
+    stepLabelDone: { color: colors.text, fontWeight: '600' },
+    currentBadge: { borderWidth: 1, borderColor: colors.accent, backgroundColor: colors.successTint, paddingHorizontal: 6, paddingVertical: 2 },
+    currentBadgeText: { fontSize: 9, fontWeight: '800', color: colors.accent, textTransform: 'uppercase', letterSpacing: 1 },
+
+    // Items
+    itemRow: { flexDirection: 'row', alignItems: 'flex-start', marginBottom: 10, gap: 10 },
+    itemQty: { width: 28, height: 28, borderWidth: 1, borderColor: colors.border, backgroundColor: colors.surfaceSecondary, justifyContent: 'center', alignItems: 'center' },
+    itemQtyText: { fontSize: 12, fontWeight: '700', color: colors.text },
+    itemTitle: { flex: 1, fontSize: isMobile ? 12 : 13, color: colors.text },
+    itemPrice: { fontSize: isMobile ? 12 : 13, fontWeight: '700', color: colors.accent },
+    totalRow: { flexDirection: 'row', justifyContent: 'space-between', borderTopWidth: 1, borderTopColor: colors.border, paddingTop: 10, marginTop: 4 },
+    totalLabel: { fontSize: isMobile ? 12 : 13, fontWeight: '800', color: colors.muted, textTransform: 'uppercase', letterSpacing: 1 },
+    totalAmount: { fontSize: isMobile ? 14 : 16, fontWeight: '900', color: colors.text },
+
+    // Details
+    detailRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 8, gap: 12 },
+    detailKey: { fontSize: 12, color: colors.muted, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.8, flexShrink: 0 },
+    detailValue: { fontSize: isMobile ? 12 : 13, color: colors.text, fontWeight: '600', textAlign: 'right', flex: 1 },
+
+    // Actions
+    actions: { gap: 8 },
+    actionBtn: { backgroundColor: colors.text, paddingVertical: 14, alignItems: 'center', borderWidth: 1, borderColor: colors.text, ...shadows.bulletin },
+    actionBtnText: { color: colors.bg, fontWeight: '800', fontSize: isMobile ? 12 : 13, textTransform: 'uppercase', letterSpacing: 1 },
+    payBtn: { backgroundColor: colors.success, paddingVertical: 14, alignItems: 'center', borderWidth: 1, borderColor: colors.success, ...shadows.bulletin },
+    payBtnText: { color: colors.successContent, fontWeight: '900', fontSize: isMobile ? 12 : 13, textTransform: 'uppercase', letterSpacing: 1 },
+    cancelBtn: { borderWidth: 1, borderColor: colors.dangerTint, backgroundColor: colors.dangerTint, paddingVertical: 12, alignItems: 'center' },
+    cancelBtnText: { color: colors.dangerTintText, fontWeight: '800', fontSize: 12, textTransform: 'uppercase', letterSpacing: 1 },
+    reviewBtn: { borderWidth: 1, borderColor: colors.border, backgroundColor: colors.surfaceSecondary, paddingVertical: 12, alignItems: 'center' },
+    reviewBtnText: { color: colors.muted, fontWeight: '800', fontSize: 12, textTransform: 'uppercase', letterSpacing: 1 },
+    disputeBtn: { borderWidth: 1, borderColor: colors.border, backgroundColor: colors.surface, paddingVertical: 12, alignItems: 'center' },
+    disputeBtnText: { color: colors.muted, fontWeight: '800', fontSize: 12, textTransform: 'uppercase', letterSpacing: 1 },
+    btnDisabled: { opacity: 0.5 },
+
+    // Handover Styles
+    handoverSection: {
+      borderWidth: 2, borderColor: colors.border, backgroundColor: colors.surface,
+      padding: isMobile ? 12 : 16, marginBottom: 12, ...shadows.bulletin,
+    },
+    sellerHandover: { flexDirection: 'row', alignItems: 'center', gap: 16 },
+    handoverText: { flex: 1 },
+    handoverBadge: { fontSize: 9, fontWeight: '800', color: colors.accent, textTransform: 'uppercase', marginBottom: 4 },
+    handoverTitle: { fontSize: isMobile ? 14 : 16, fontWeight: '900', color: colors.text, marginBottom: 4 },
+    handoverSub: { fontSize: 11, color: colors.muted, fontWeight: '600' },
+    codeContainer: { marginTop: 12, backgroundColor: colors.text, paddingVertical: 8, alignItems: 'center' },
+    codeText: { color: colors.bg, fontSize: isMobile ? 15 : 18, fontWeight: '900', letterSpacing: 4 },
+    qrContainer: { padding: 8, backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border },
+
+    buyerHandover: { alignItems: 'center' },
+    handoverBadgeBuyer: { fontSize: 9, fontWeight: '800', color: colors.accent, textTransform: 'uppercase', marginBottom: 4 },
+    handoverActions: { flexDirection: 'row', gap: 10, marginTop: 16, width: '100%' },
+    scanBtn: { flex: 1, backgroundColor: colors.text, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingVertical: 12, gap: 8 },
+    scanBtnText: { color: colors.bg, fontSize: 11, fontWeight: '800', textTransform: 'uppercase' },
+    manualBtn: { flex: 1, borderWidth: 1, borderColor: colors.border, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingVertical: 12, gap: 8 },
+    manualBtnText: { color: colors.text, fontSize: 11, fontWeight: '800', textTransform: 'uppercase' },
+
+    successSection: {
+      flexDirection: 'row', alignItems: 'center', gap: 16,
+      borderWidth: 2, borderColor: colors.accent, backgroundColor: colors.successTint,
+      padding: isMobile ? 12 : 16, marginBottom: 12,
+    },
+    successContent: { flex: 1 },
+    successTitle: { fontSize: isMobile ? 14 : 16, fontWeight: '900', color: colors.text },
+    successSub: { fontSize: 12, color: colors.accent, fontWeight: '600' },
+
+    // Horizontal step progress bar
+    stepBar: {
+      flexDirection: 'row' as const,
+      alignItems: 'flex-start' as const,
+      marginTop: 12,
+      paddingHorizontal: 4,
+    },
+    stepBarItem: {
+      flex: 1,
+      alignItems: 'center' as const,
+      position: 'relative' as const,
+    },
+    stepConnector: {
+      position: 'absolute' as const,
+      top: 6,
+      right: '50%',
+      left: '-50%',
+      height: 2,
+      backgroundColor: colors.border,
+    },
+    stepConnectorDone: {
+      backgroundColor: colors.accent,
+    },
+    stepDot: {
+      width: 14,
+      height: 14,
+      borderRadius: 7,
+      borderWidth: 2,
+      borderColor: colors.border,
+      backgroundColor: colors.surface,
+      zIndex: 1,
+    },
+    stepDotDone: {
+      borderColor: colors.accent,
+      backgroundColor: colors.accent,
+    },
+    stepDotCurrent: {
+      borderColor: colors.accent,
+      backgroundColor: colors.surface,
+      borderWidth: 3,
+      width: 16,
+      height: 16,
+      borderRadius: 8,
+    },
+    stepLabelNew: {
+      fontSize: 8,
+      fontWeight: '700' as const,
+      color: colors.muted,
+      textTransform: 'uppercase' as const,
+      letterSpacing: 0.3,
+      marginTop: 5,
+      textAlign: 'center' as const,
+    },
+    stepLabelCurrent: {
+      color: colors.accent,
+      fontWeight: '900' as const,
+    },
+  }), [colors]);
 
   const fetchOrder = useCallback(async () => {
     setLoading(true);
@@ -131,8 +290,8 @@ const OrderDetailScreen = ({ route, navigation }: any) => {
 
   const handleCancel = () => {
     const isPaid = order?.status === 'paid';
-    const warningMsg = isPaid 
-      ? 'Are you sure you want to cancel this order? Since you have already paid, your escrow refund will be processed.' 
+    const warningMsg = isPaid
+      ? 'Are you sure you want to cancel this order? Since you have already paid, your escrow refund will be processed.'
       : 'Are you sure you want to cancel this order?';
     Alert.alert('Cancel Order', warningMsg, [
       { text: 'No', style: 'cancel' },
@@ -169,7 +328,6 @@ const OrderDetailScreen = ({ route, navigation }: any) => {
   const handlePayNow = async () => {
     setPaying(true);
     try {
-      // 1. Initialize payment session on server
       const callbackUrl = `${api.defaults.baseURL}/payments/verify-success`;
       const initRes = await api.post('/payments/initiate', {
         orderId: order?._id,
@@ -179,17 +337,12 @@ const OrderDetailScreen = ({ route, navigation }: any) => {
 
       if (initRes.data.success) {
         const { authorizationUrl, reference } = initRes.data.data;
-
-        // 2. Open Paystack payment interface in in-app web browser
         await WebBrowser.openBrowserAsync(authorizationUrl);
-
-        // 3. Automatically request backend verification upon return
         setActionLoading(true);
         try {
           const verifyRes = await api.get(`/payments/verify/${reference}`);
           if (verifyRes.data.success) {
             Alert.alert('Payment Successful!', 'Your payment was successfully validated.');
-            // Refresh order
             const freshRes = await orderService.getOrderById(orderId);
             if (freshRes.success) setOrder(freshRes.data.order);
           } else {
@@ -237,7 +390,8 @@ const OrderDetailScreen = ({ route, navigation }: any) => {
     );
   }
 
-  const sc = STATUS_COLORS[order.status] ?? { border: colors.border, bg: colors.surface, text: '#6f6559' };
+  const statusColorMap = getStatusColors(colors);
+  const sc = statusColorMap[order.status as keyof typeof statusColorMap] ?? { border: colors.border, bg: colors.surface, text: colors.muted };
   const currentStepIdx = STATUS_STEPS.indexOf(order.status as any);
   const isCancelledOrDisputed = ['cancelled', 'disputed'].includes(order.status);
   const nextStatusMap: Record<string, string> = { paid: 'confirmed', confirmed: 'ready', ready: 'completed' };
@@ -259,28 +413,38 @@ const OrderDetailScreen = ({ route, navigation }: any) => {
         </View>
       </View>
 
-      {/* Timeline */}
+      {/* Timeline — horizontal step bar */}
       {!isCancelledOrDisputed && (
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Progress</Text>
-          {STATUS_STEPS.map((step, idx) => {
-            const done = idx <= currentStepIdx;
-            const isCurrent = idx === currentStepIdx;
-            return (
-              <View key={step} style={styles.timelineRow}>
-                <View style={styles.timelineLeft}>
-                  <View style={[styles.dot, done && styles.dotDone, isCurrent && styles.dotCurrent]} />
-                  {idx < STATUS_STEPS.length - 1 && (
-                    <View style={[styles.connector, done && styles.connectorDone]} />
+          <View style={styles.stepBar}>
+            {STATUS_STEPS.map((step, idx) => {
+              const done = idx <= currentStepIdx;
+              const isCurrent = idx === currentStepIdx;
+              return (
+                <View key={step} style={styles.stepBarItem}>
+                  {/* Connector before */}
+                  {idx > 0 && (
+                    <View style={[styles.stepConnector, idx <= currentStepIdx && styles.stepConnectorDone]} />
                   )}
+                  {/* Dot */}
+                  <View style={[
+                    styles.stepDot,
+                    done && styles.stepDotDone,
+                    isCurrent && styles.stepDotCurrent,
+                  ]} />
+                  {/* Label */}
+                  <Text style={[
+                    styles.stepLabelNew,
+                    done && styles.stepLabelDone,
+                    isCurrent && styles.stepLabelCurrent,
+                  ]} numberOfLines={1}>
+                    {STEP_LABELS[step]}
+                  </Text>
                 </View>
-                <View style={styles.timelineContent}>
-                  <Text style={[styles.stepLabel, done && styles.stepLabelDone]}>{STEP_LABELS[step]}</Text>
-                  {isCurrent && <View style={styles.currentBadge}><Text style={styles.currentBadgeText}>Now</Text></View>}
-                </View>
-              </View>
-            );
-          })}
+              );
+            })}
+          </View>
         </View>
       )}
 
@@ -298,7 +462,7 @@ const OrderDetailScreen = ({ route, navigation }: any) => {
                 </View>
               </View>
               <View style={styles.qrContainer}>
-                <QRCode 
+                <QRCode
                   value={JSON.stringify({ orderId: order._id, code: order.handoffCode, type: 'HANDOVER' })}
                   size={120}
                 />
@@ -311,7 +475,7 @@ const OrderDetailScreen = ({ route, navigation }: any) => {
               <Text style={styles.handoverSub}>Scan the seller's QR code or enter their code manually.</Text>
               <View style={styles.handoverActions}>
                 <TouchableOpacity style={styles.scanBtn} onPress={handleOpenScanner}>
-                  <Ionicons name="camera-outline" size={20} color="#fff" />
+                  <Ionicons name="camera-outline" size={20} color={colors.bg} />
                   <Text style={styles.scanBtnText}>Scan QR Code</Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.manualBtn} onPress={handleManualEntry}>
@@ -335,6 +499,7 @@ const OrderDetailScreen = ({ route, navigation }: any) => {
           </View>
         </View>
       )}
+
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Items</Text>
         {order.items.map((item, idx) => (
@@ -384,7 +549,7 @@ const OrderDetailScreen = ({ route, navigation }: any) => {
               disabled={actionLoading}
             >
               {actionLoading
-                ? <ActivityIndicator size="small" color="#fff" />
+                ? <ActivityIndicator size="small" color={colors.bg} />
                 : <Text style={styles.actionBtnText}>
                     Mark as {nextStatus.charAt(0).toUpperCase() + nextStatus.slice(1)}
                   </Text>
@@ -398,9 +563,9 @@ const OrderDetailScreen = ({ route, navigation }: any) => {
               disabled={actionLoading || paying}
             >
               {paying ? (
-                <ActivityIndicator size="small" color="#fff" />
+                <ActivityIndicator size="small" color={colors.successContent} />
               ) : (
-                <Text style={styles.payBtnText}>💳 Pay Now (Paystack)</Text>
+                <Text style={styles.payBtnText}>Pay Now</Text>
               )}
             </TouchableOpacity>
           )}
@@ -419,7 +584,7 @@ const OrderDetailScreen = ({ route, navigation }: any) => {
               onPress={handleLeaveReview}
               disabled={actionLoading}
             >
-              <Text style={styles.reviewBtnText}>⭐ Leave a Review</Text>
+              <Text style={styles.reviewBtnText}>Leave a Review</Text>
             </TouchableOpacity>
           )}
           {['paid', 'confirmed', 'ready'].includes(order.status) && (
@@ -436,101 +601,5 @@ const OrderDetailScreen = ({ route, navigation }: any) => {
     </ScrollView>
   );
 };
-
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.bg },
-  content: { padding: 16, paddingBottom: 40 },
-  centered: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: colors.bg },
-
-  orderHeader: {
-    flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
-    borderWidth: 1, borderColor: colors.border, backgroundColor: colors.surface,
-    padding: 14, marginBottom: 12, ...shadows.bulletin,
-  },
-  orderNumberLabel: { fontSize: 10, fontWeight: '800', color: '#7c6f60', textTransform: 'uppercase', letterSpacing: 1.4 },
-  orderNumber: { fontSize: 15, fontWeight: '900', color: colors.text, marginTop: 2, textTransform: 'uppercase' },
-  statusBadge: { borderWidth: 1, paddingHorizontal: 10, paddingVertical: 5 },
-  statusText: { fontSize: 10, fontWeight: '800', letterSpacing: 1, textTransform: 'uppercase' },
-
-  section: {
-    borderWidth: 1, borderColor: colors.border, backgroundColor: colors.surface,
-    padding: 14, marginBottom: 12, ...shadows.bulletin,
-  },
-  sectionTitle: { fontSize: 10, fontWeight: '800', color: '#7c6f60', textTransform: 'uppercase', letterSpacing: 1.4, marginBottom: 12 },
-
-  // Timeline
-  timelineRow: { flexDirection: 'row', minHeight: 40 },
-  timelineLeft: { width: 22, alignItems: 'center' },
-  dot: { width: 10, height: 10, borderWidth: 2, borderColor: colors.border, backgroundColor: colors.surface },
-  dotDone: { borderColor: colors.accent, backgroundColor: colors.accent },
-  dotCurrent: { borderColor: colors.accent, backgroundColor: '#fff', borderWidth: 3, width: 12, height: 12 },
-  connector: { flex: 1, width: 2, backgroundColor: colors.border, marginTop: 2 },
-  connectorDone: { backgroundColor: colors.accent },
-  timelineContent: { flex: 1, paddingLeft: 10, paddingBottom: 6, flexDirection: 'row', alignItems: 'flex-start', gap: 8 },
-  stepLabel: { fontSize: 13, color: '#9a8e7f' },
-  stepLabelDone: { color: colors.text, fontWeight: '600' },
-  currentBadge: { borderWidth: 1, borderColor: colors.accent, backgroundColor: '#d6ede7', paddingHorizontal: 6, paddingVertical: 2 },
-  currentBadgeText: { fontSize: 9, fontWeight: '800', color: colors.accent, textTransform: 'uppercase', letterSpacing: 1 },
-
-  // Items
-  itemRow: { flexDirection: 'row', alignItems: 'flex-start', marginBottom: 10, gap: 10 },
-  itemQty: { width: 28, height: 28, borderWidth: 1, borderColor: colors.border, backgroundColor: '#fff', justifyContent: 'center', alignItems: 'center' },
-  itemQtyText: { fontSize: 12, fontWeight: '700', color: colors.text },
-  itemTitle: { flex: 1, fontSize: 13, color: colors.text },
-  itemPrice: { fontSize: 13, fontWeight: '700', color: colors.accent },
-  totalRow: { flexDirection: 'row', justifyContent: 'space-between', borderTopWidth: 1, borderTopColor: colors.border, paddingTop: 10, marginTop: 4 },
-  totalLabel: { fontSize: 13, fontWeight: '800', color: '#7c6f60', textTransform: 'uppercase', letterSpacing: 1 },
-  totalAmount: { fontSize: 16, fontWeight: '900', color: colors.text },
-
-  // Details
-  detailRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 8, gap: 12 },
-  detailKey: { fontSize: 12, color: '#7b6f61', fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.8, flexShrink: 0 },
-  detailValue: { fontSize: 13, color: colors.text, fontWeight: '600', textAlign: 'right', flex: 1 },
-
-  // Actions
-  actions: { gap: 8 },
-  actionBtn: { backgroundColor: '#1f1a14', paddingVertical: 14, alignItems: 'center', borderWidth: 1, borderColor: '#1f1a14', ...shadows.bulletin },
-  actionBtnText: { color: '#fff', fontWeight: '800', fontSize: 13, textTransform: 'uppercase', letterSpacing: 1 },
-  payBtn: { backgroundColor: '#10b981', paddingVertical: 14, alignItems: 'center', borderWidth: 1, borderColor: '#10b981', ...shadows.bulletin },
-  payBtnText: { color: '#fff', fontWeight: '900', fontSize: 13, textTransform: 'uppercase', letterSpacing: 1 },
-  cancelBtn: { borderWidth: 1, borderColor: '#d6b8b4', backgroundColor: '#fde8e6', paddingVertical: 12, alignItems: 'center' },
-  cancelBtnText: { color: '#9f3d34', fontWeight: '800', fontSize: 12, textTransform: 'uppercase', letterSpacing: 1 },
-  reviewBtn: { borderWidth: 1, borderColor: '#c8b48c', backgroundColor: '#fffacd', paddingVertical: 12, alignItems: 'center' },
-  reviewBtnText: { color: '#7b5e1a', fontWeight: '800', fontSize: 12, textTransform: 'uppercase', letterSpacing: 1 },
-  disputeBtn: { borderWidth: 1, borderColor: colors.border, backgroundColor: colors.surface, paddingVertical: 12, alignItems: 'center' },
-  disputeBtnText: { color: '#6f6559', fontWeight: '800', fontSize: 12, textTransform: 'uppercase', letterSpacing: 1 },
-  btnDisabled: { opacity: 0.5 },
-
-  // Handover Styles
-  handoverSection: {
-    borderWidth: 1, borderColor: colors.border, backgroundColor: colors.surface,
-    padding: 16, marginBottom: 12, ...shadows.bulletin,
-  },
-  sellerHandover: { flexDirection: 'row', alignItems: 'center', gap: 16 },
-  handoverText: { flex: 1 },
-  handoverBadge: { fontSize: 9, fontWeight: '800', color: '#ff6b6b', textTransform: 'uppercase', marginBottom: 4 },
-  handoverTitle: { fontSize: 16, fontWeight: '900', color: colors.text, marginBottom: 4 },
-  handoverSub: { fontSize: 11, color: '#7c6f60', fontWeight: '600' },
-  codeContainer: { marginTop: 12, backgroundColor: '#1f1a14', paddingVertical: 8, alignItems: 'center' },
-  codeText: { color: '#fff', fontSize: 18, fontWeight: '900', letterSpacing: 4 },
-  qrContainer: { padding: 8, backgroundColor: '#fff', borderWidth: 1, borderColor: colors.border },
-  
-  buyerHandover: { alignItems: 'center' },
-  handoverBadgeBuyer: { fontSize: 9, fontWeight: '800', color: colors.accent, textTransform: 'uppercase', marginBottom: 4 },
-  handoverActions: { flexDirection: 'row', gap: 10, marginTop: 16, width: '100%' },
-  scanBtn: { flex: 1, backgroundColor: '#1f1a14', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingVertical: 12, gap: 8 },
-  scanBtnText: { color: '#fff', fontSize: 11, fontWeight: '800', textTransform: 'uppercase' },
-  manualBtn: { flex: 1, borderWidth: 1, borderColor: colors.border, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingVertical: 12, gap: 8 },
-  manualBtnText: { color: colors.text, fontSize: 11, fontWeight: '800', textTransform: 'uppercase' },
-
-  successSection: {
-    flexDirection: 'row', alignItems: 'center', gap: 16,
-    borderWidth: 1, borderColor: colors.accent, backgroundColor: '#d6ede7',
-    padding: 16, marginBottom: 12,
-  },
-  successContent: { flex: 1 },
-  successTitle: { fontSize: 16, fontWeight: '900', color: colors.text },
-  successSub: { fontSize: 12, color: colors.accent, fontWeight: '600' },
-});
 
 export default OrderDetailScreen;

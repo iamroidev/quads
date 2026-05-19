@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   ActivityIndicator,
   FlatList,
@@ -14,20 +14,17 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import productService from "../services/product.service";
+import categoryService from "../services/category.service";
 import { Product } from "../types";
-import { colors, shadows } from "../theme";
+import { useTheme } from "../theme/ThemeContext";
 import ScreenHeader from "../components/ScreenHeader";
 import FloatingCart from "../components/FloatingCart";
+import { BulletinCard } from "../components/BulletinCard";
+import { useResponsive } from "../hooks/useResponsive";
+import { getTypography } from "../theme/typography";
+import EmptyState from "../components/EmptyState";
 
 const PRODUCTS_CACHE_KEY = "products_cache_v2";
-const CATEGORY_OPTIONS = [
-  { label: "All", value: "" },
-  { label: "Books", value: "books" },
-  { label: "Electronics", value: "electronics" },
-  { label: "Hostel", value: "hostel" },
-  { label: "Services", value: "services" },
-  { label: "Fashion", value: "fashion" },
-];
 const DELIVERY_OPTIONS = [
   { label: "Any", value: "" },
   { label: "Pickup", value: "pickup" },
@@ -36,6 +33,10 @@ const DELIVERY_OPTIONS = [
 ];
 
 const ProductsScreen = ({ navigation, route }: any) => {
+  const { colors } = useTheme();
+  const { width, isMobile, isTablet } = useResponsive();
+  const typography = getTypography(width);
+  const styles = getStyles(colors, width);
   const [products, setProducts] = useState<Product[]>([]);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
@@ -46,8 +47,28 @@ const ProductsScreen = ({ navigation, route }: any) => {
   const [sort, setSort] = useState<"newest" | "popular" | "featured">("newest");
   const [category, setCategory] = useState("");
   const [deliveryOption, setDeliveryOption] = useState("");
+  const [categoriesList, setCategoriesList] = useState<{ label: string; value: string; slug: string }[]>([
+    { label: "All", value: "", slug: "" }
+  ]);
 
-  const fetchProducts = async (
+  useEffect(() => {
+    categoryService.getCategoriesWithCounts().then(res => {
+      if (res.success && res.data?.categories) {
+        const list = res.data.categories.map(c => ({
+          label: c.name,
+          value: c._id,
+          slug: c.slug
+        }));
+        setCategoriesList([{ label: "All", value: "", slug: "" }, ...list]);
+      }
+    }).catch(() => {});
+  }, []);
+
+  const hPadding = isMobile ? 12 : 16;
+  const gap = isMobile ? 10 : 16;
+  const columns = isMobile ? 2 : isTablet ? 2 : 3;
+
+  const fetchProducts = useCallback(async (
     withLoader = true,
     targetPage = 1,
     append = false,
@@ -86,7 +107,7 @@ const ProductsScreen = ({ navigation, route }: any) => {
       setLoadingMore(false);
       setRefreshing(false);
     }
-  };
+  }, [search, sort, category, deliveryOption]);
 
   useEffect(() => {
     const incomingSearch =
@@ -107,64 +128,72 @@ const ProductsScreen = ({ navigation, route }: any) => {
     fetchProducts(false, page + 1, true);
   };
 
-  const renderItem = ({ item }: { item: Product }) => {
+  const renderItem = useCallback(({ item }: { item: Product }) => {
     const image = item.images?.[0]?.url;
-    const conditionColor = 
-      item.condition === 'new' ? '#4ade80' : 
-      item.condition === 'like-new' ? '#c084fc' : 
-      item.condition === 'good' ? '#60a5fa' : '#fbbf24';
+    const conditionColor =
+      item.condition === 'new' ? colors.success :
+      item.condition === 'like-new' ? colors.primary :
+      item.condition === 'good' ? colors.pinBlue : colors.pinYellow;
+
+    const cardWidth = (width - hPadding * 2 - gap * (columns - 1)) / columns;
 
     return (
-      <TouchableOpacity
-        style={styles.card}
-        onPress={() =>
-          navigation.navigate("ProductDetail", { productId: item._id })
-        }
-        activeOpacity={0.85}
-      >
-        <View style={styles.imageContainer}>
-          <Image
-            source={image ? { uri: image } : require("../../assets/icon.png")}
-            style={styles.image}
-            resizeMode="cover"
-          />
-          {item.isFeatured && (
-            <View style={styles.featuredBadge}>
-              <Text style={styles.featuredBadgeText}>⚡ DROP</Text>
+      <BulletinCard style={[styles.card, { width: cardWidth }]} size="sm">
+        <TouchableOpacity
+          onPress={() => navigation.navigate("ProductDetail", { productId: item._id })}
+          activeOpacity={0.88}
+        >
+          {/* Portrait image */}
+          <View style={styles.imageContainer}>
+            <Image
+              source={image ? { uri: image } : require("../../assets/icon.png")}
+              style={styles.image}
+              resizeMode="cover"
+            />
+
+            {/* Featured flash — circle top-left */}
+            {item.isFeatured && (
+              <View style={styles.featuredBadge}>
+                <Text style={styles.featuredBadgeText}>NEW</Text>
+              </View>
+            )}
+
+            {/* Condition pill — top-right */}
+            <View style={[styles.conditionTag, { backgroundColor: conditionColor }]}>
+              <Text style={styles.conditionTagText}>{item.condition.replace('-', ' ')}</Text>
             </View>
-          )}
-          
-          <View style={[styles.conditionTag, { backgroundColor: conditionColor }]}>
-            <Text style={styles.conditionTagText}>{item.condition}</Text>
+
+            {/* Sold / pending stamp */}
+            {(item.status === "sold" || item.status === "reserved") && (
+              <View style={styles.stampOverlay}>
+                <Text style={styles.stampText}>
+                  {item.status === "sold" ? "SOLD" : "PENDING"}
+                </Text>
+              </View>
+            )}
           </View>
 
-          {(item.status === "sold" || item.status === "reserved") && (
-            <View style={styles.stampOverlay}>
-              <Text style={styles.stampText}>
-                {item.status === "sold" ? "SOLD" : "PENDING"}
-              </Text>
-            </View>
-          )}
-        </View>
-        <View style={styles.cardContent}>
-          <Text style={styles.title} numberOfLines={2}>
-            {item.title}
-          </Text>
-          <View style={styles.cardPriceRow}>
+          {/* Card body */}
+          <View style={styles.cardContent}>
             <Text style={styles.price}>
-              GHS{" "}
-              {item.price.toLocaleString("en-GH", { minimumFractionDigits: 2 })}
+              GHS {item.price.toLocaleString("en-GH", { minimumFractionDigits: 2 })}
             </Text>
-            <View style={styles.locationBadge}>
-              <Text style={styles.locationBadgeText} numberOfLines={1}>
-                📍 {item.pickupLocation || "UMaT"}
+            <Text style={styles.title} numberOfLines={2} ellipsizeMode="tail">
+              {item.title}
+            </Text>
+            <View style={styles.cardMeta}>
+              <Text style={styles.cardMetaText} numberOfLines={1}>
+                {item.pickupLocation || "UMaT"}
               </Text>
+              {(item.views ?? 0) > 0 && (
+                <Text style={styles.cardViews}>{item.views} views</Text>
+              )}
             </View>
           </View>
-        </View>
-      </TouchableOpacity>
+        </TouchableOpacity>
+      </BulletinCard>
     );
-  };
+  }, [styles, colors, navigation, hPadding, gap, columns]);
 
   return (
     <SafeAreaView style={styles.container} edges={["top"]}>
@@ -174,11 +203,11 @@ const ProductsScreen = ({ navigation, route }: any) => {
         subtitle="Find verified deals by category and latest posts."
       />
 
-      <View style={styles.searchWrap}>
+      <View style={[styles.searchWrap, { paddingHorizontal: hPadding }]}>
         <TextInput
           style={styles.searchInput}
           placeholder="Search for books, devices, rooms..."
-          placeholderTextColor="#9a8e7f"
+          placeholderTextColor={colors.muted}
           value={search}
           onChangeText={(value: string) => setSearch(value)}
           onSubmitEditing={() => fetchProducts(true, 1, false)}
@@ -224,25 +253,28 @@ const ProductsScreen = ({ navigation, route }: any) => {
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={styles.optionWrap}
         >
-          {CATEGORY_OPTIONS.map((opt) => (
-            <TouchableOpacity
-              key={opt.label}
-              style={[
-                styles.optionChip,
-                category === opt.value && styles.optionChipActive,
-              ]}
-              onPress={() => setCategory(opt.value)}
-            >
-              <Text
+          {categoriesList.map((opt) => {
+            const isActive = category === opt.value || (!!opt.slug && category === opt.slug);
+            return (
+              <TouchableOpacity
+                key={opt.label}
                 style={[
-                  styles.optionChipText,
-                  category === opt.value && styles.optionChipTextActive,
+                  styles.optionChip,
+                  isActive && styles.optionChipActive,
                 ]}
+                onPress={() => setCategory(opt.value)}
               >
-                {opt.label}
-              </Text>
-            </TouchableOpacity>
-          ))}
+                <Text
+                  style={[
+                    styles.optionChipText,
+                    isActive && styles.optionChipTextActive,
+                  ]}
+                >
+                  {opt.label}
+                </Text>
+              </TouchableOpacity>
+            );
+          })}
         </ScrollView>
         <ScrollView
           horizontal
@@ -273,16 +305,17 @@ const ProductsScreen = ({ navigation, route }: any) => {
 
       {loading ? (
         <View style={styles.centered}>
-          <ActivityIndicator size="large" color={colors.accent} />
+          <ActivityIndicator size="large" color={colors.primary} />
         </View>
       ) : (
         <FlatList
           data={products}
+          key={String(columns)}
           keyExtractor={(item) => item._id}
           renderItem={renderItem}
-          numColumns={2}
-          columnWrapperStyle={styles.grid}
-          contentContainerStyle={styles.listContent}
+          numColumns={columns}
+          columnWrapperStyle={columns > 1 ? [styles.grid, { gap }] : undefined}
+          contentContainerStyle={[styles.listContent, { paddingHorizontal: hPadding }]}
           refreshControl={
             <RefreshControl
               refreshing={refreshing}
@@ -298,14 +331,15 @@ const ProductsScreen = ({ navigation, route }: any) => {
             loadingMore ? (
               <ActivityIndicator
                 style={{ marginVertical: 10 }}
-                color={colors.accent}
+                color={colors.primary}
               />
             ) : null
           }
           ListEmptyComponent={
-            <Text style={styles.emptyText}>
-              No products found. Try changing filters.
-            </Text>
+            <EmptyState
+              title="No listings found"
+              subtitle="Try adjusting your search or filters."
+            />
           }
         />
       )}
@@ -313,217 +347,234 @@ const ProductsScreen = ({ navigation, route }: any) => {
   );
 };
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.bg },
-  searchWrap: {
-    flexDirection: "row",
-    gap: 8,
-    paddingHorizontal: 16,
-    paddingTop: 16,
-    paddingBottom: 14,
-    backgroundColor: colors.surface,
-    borderBottomWidth: 2,
-    borderBottomColor: "#1f1a14",
-  },
-  searchInput: {
-    flex: 1,
-    backgroundColor: "#fff",
-    borderWidth: 2,
-    borderColor: "#1f1a14",
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    color: "#1f1a14",
-    fontWeight: "600",
-  },
-  searchBtn: {
-    backgroundColor: "#ff6b6b",
-    justifyContent: "center",
-    paddingHorizontal: 18,
-    borderWidth: 2,
-    borderColor: "#1f1a14",
-    ...shadows.bulletin,
-  },
-  searchBtnText: {
-    color: "#fff",
-    fontWeight: "900",
-    fontSize: 12,
-    textTransform: "uppercase",
-    letterSpacing: 0.5,
-  },
-  filterRow: {
-    flexDirection: "row",
-    gap: 8,
-    paddingHorizontal: 16,
-    paddingBottom: 14,
-    backgroundColor: colors.surface,
-    borderBottomWidth: 2,
-    borderBottomColor: "#1f1a14",
-  },
-  filterChip: {
-    borderWidth: 2,
-    borderColor: "#1f1a14",
-    borderRadius: 999,
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    backgroundColor: "#fff",
-  },
-  filterChipActive: { backgroundColor: "#1f1a14", borderColor: "#1f1a14" },
-  filterChipText: {
-    fontSize: 10,
-    fontWeight: "900",
-    color: "#1f1a14",
-    textTransform: "uppercase",
-    letterSpacing: 0.5,
-  },
-  filterChipTextActive: { color: "#fff" },
-  filterPanel: {
-    paddingHorizontal: 16,
-    paddingTop: 12,
-    paddingBottom: 14,
-    backgroundColor: colors.surface,
-    borderBottomWidth: 3,
-    borderBottomColor: "#1f1a14",
-  },
-  filterHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: 8,
-  },
-  filterTitle: {
-    fontSize: 10,
-    fontWeight: "900",
-    color: "#7b6f61",
-    textTransform: "uppercase",
-    letterSpacing: 1.5,
-  },
-  optionWrap: { gap: 8 },
-  optionChip: {
-    borderWidth: 2,
-    borderColor: "#1f1a14",
-    paddingHorizontal: 12,
-    paddingVertical: 7,
-    backgroundColor: "#fff",
-    borderRadius: 999,
-  },
-  optionChipActive: { backgroundColor: "#2f5d4f", borderColor: "#1f1a14" },
-  optionChipText: {
-    fontSize: 10,
-    fontWeight: "900",
-    color: "#1f1a14",
-    textTransform: "uppercase",
-  },
-  optionChipTextActive: { color: "#fff" },
-  listContent: { padding: 12, paddingBottom: 24 },
-  grid: { gap: 12, marginBottom: 12 },
-  card: {
-    flex: 1,
-    backgroundColor: colors.surface,
-    borderWidth: 2,
-    borderColor: "#1f1a14",
-    ...shadows.bulletin,
-    overflow: "hidden",
-  },
-  imageContainer: {
-    width: "100%",
-    height: 130,
-    backgroundColor: "#efe5d6",
-    position: "relative",
-    borderBottomWidth: 2,
-    borderBottomColor: "#1f1a14",
-  },
-  image: { width: "100%", height: "100%" } as any,
-  featuredBadge: {
-    position: "absolute",
-    top: 6,
-    left: 6,
-    backgroundColor: "#ff6b6b",
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderWidth: 1.5,
-    borderColor: '#1f1a14',
-    zIndex: 5,
-  },
-  featuredBadgeText: {
-    fontSize: 8,
-    fontWeight: "900",
-    color: "#fff",
-    letterSpacing: 0.5,
-  },
-  conditionTag: {
-    position: "absolute",
-    bottom: 6,
-    left: 6,
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderWidth: 1.5,
-    borderColor: '#1f1a14',
-    zIndex: 5,
-  },
-  conditionTagText: {
-    fontSize: 8,
-    fontWeight: "900",
-    color: "#1f1a14",
-    textTransform: "uppercase",
-  },
-  cardContent: { padding: 10 },
-  title: { fontSize: 13, fontWeight: "900", color: "#1f1a14", textTransform: "uppercase", letterSpacing: 0.2, minHeight: 34 },
-  cardPriceRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginTop: 6,
-    gap: 4,
-  },
-  price: { fontSize: 13, fontWeight: "900", color: "#2f5d4f" },
-  locationBadge: {
-    backgroundColor: "#f3f4f6",
-    borderWidth: 1,
-    borderColor: "#1f1a14",
-    paddingHorizontal: 4,
-    paddingVertical: 2,
-    maxWidth: "50%",
-  },
-  locationBadgeText: {
-    fontSize: 8,
-    fontWeight: "800",
-    color: "#1f1a14",
-    textTransform: "uppercase",
-  },
-  stampOverlay: {
-    position: "absolute",
-    top: "30%",
-    left: "10%",
-    right: "10%",
-    transform: [{ rotate: "-12deg" }],
-    backgroundColor: "#dc2626",
-    borderWidth: 2,
-    borderColor: "#1f1a14",
-    paddingVertical: 4,
-    alignItems: "center",
-    zIndex: 10,
-  },
-  stampText: {
-    color: "#fff",
-    fontSize: 14,
-    fontWeight: "900",
-    textTransform: "uppercase",
-    letterSpacing: 2,
-  },
-  centered: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: colors.bg,
-  },
-  emptyText: {
-    textAlign: "center",
-    color: "#8f8478",
-    marginTop: 40,
-    textTransform: "uppercase",
-    letterSpacing: 1.2,
-    fontSize: 11,
-    fontWeight: "900",
-  },
-});
+const getStyles = (colors: any, width: number) => {
+  const isMobile = width < 640;
+  const typography = getTypography(width);
+  const hPadding = isMobile ? 12 : 16;
+  const gap = isMobile ? 10 : 16;
+
+  return StyleSheet.create({
+    container: { flex: 1, backgroundColor: colors.background },
+    searchWrap: {
+      flexDirection: "row",
+      gap: 8,
+      paddingTop: 16,
+      paddingBottom: 14,
+      backgroundColor: colors.surface,
+      borderBottomWidth: colors.boardBorderWidth,
+      borderBottomColor: colors.boardBorder,
+    },
+    searchInput: {
+      flex: 1,
+      minWidth: 0,
+      backgroundColor: colors.surfaceSecondary,
+      borderWidth: colors.boardBorderWidth,
+      borderColor: colors.boardBorder,
+      paddingHorizontal: 14,
+      paddingVertical: 12,
+      color: colors.text,
+      fontWeight: "700",
+      fontSize: isMobile ? 13 : typography.body,
+    },
+    searchBtn: {
+      backgroundColor: colors.primary,
+      justifyContent: "center",
+      paddingHorizontal: isMobile ? 14 : 18,
+      borderWidth: colors.boardBorderWidth,
+      borderColor: colors.boardBorder,
+    },
+    searchBtnText: {
+      color: colors.primaryContent,
+      fontWeight: "900",
+      fontSize: isMobile ? 10 : typography.tag,
+      textTransform: "uppercase",
+      letterSpacing: 0.5,
+    },
+    filterRow: {
+      flexDirection: "row",
+      gap: 8,
+      paddingHorizontal: hPadding,
+      paddingBottom: 14,
+      paddingTop: 12,
+      backgroundColor: colors.surface,
+      borderBottomWidth: colors.boardBorderWidth,
+      borderBottomColor: colors.boardBorder,
+    },
+    filterChip: {
+      borderWidth: colors.boardBorderWidth,
+      borderColor: colors.boardBorder,
+      borderRadius: 999,
+      paddingHorizontal: isMobile ? 10 : 14,
+      paddingVertical: isMobile ? 6 : 8,
+      backgroundColor: colors.surfaceSecondary,
+    },
+    filterChipActive: { backgroundColor: colors.boardBorder, borderColor: colors.boardBorder },
+    filterChipText: {
+      fontSize: isMobile ? 8 : typography.tag,
+      fontWeight: "900",
+      color: colors.text,
+      textTransform: "uppercase",
+      letterSpacing: 0.5,
+    },
+    filterChipTextActive: { color: colors.surface },
+    filterPanel: {
+      paddingHorizontal: hPadding,
+      paddingTop: 12,
+      paddingBottom: 14,
+      backgroundColor: colors.surface,
+      borderBottomWidth: colors.boardBorderWidth,
+      borderBottomColor: colors.boardBorder,
+    },
+    filterHeader: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      marginBottom: 8,
+    },
+    filterTitle: {
+      fontSize: isMobile ? 8 : typography.tag,
+      fontWeight: "900",
+      color: colors.textSecondary,
+      textTransform: "uppercase",
+      letterSpacing: 1.5,
+    },
+    optionWrap: { gap: 8 },
+    optionChip: {
+      borderWidth: colors.boardBorderWidth,
+      borderColor: colors.boardBorder,
+      paddingHorizontal: isMobile ? 10 : 12,
+      paddingVertical: isMobile ? 6 : 7,
+      backgroundColor: colors.surfaceSecondary,
+      borderRadius: 999,
+    },
+    optionChipActive: { backgroundColor: colors.primary, borderColor: colors.boardBorder },
+    optionChipText: {
+      fontSize: isMobile ? 8 : typography.tag,
+      fontWeight: "900",
+      color: colors.text,
+      textTransform: "uppercase",
+    },
+    optionChipTextActive: { color: colors.primaryContent },
+    listContent: { paddingBottom: 24 },
+    grid: { marginBottom: 12 },
+    card: { flex: 1 },
+    imageContainer: {
+      width: "100%",
+      aspectRatio: 4 / 3,
+      backgroundColor: colors.surfaceSecondary,
+      position: "relative",
+      overflow: "hidden",
+    },
+    image: { width: "100%", height: "100%" } as any,
+    featuredBadge: {
+      position: "absolute",
+      top: 6,
+      left: 6,
+      backgroundColor: colors.primary,
+      paddingHorizontal: 5,
+      paddingVertical: 2,
+      borderRadius: 3,
+      zIndex: 5,
+    },
+    featuredBadgeText: {
+      fontSize: 9,
+      fontWeight: "900",
+      color: colors.primaryContent,
+    },
+    conditionTag: {
+      position: "absolute",
+      top: 6,
+      right: 6,
+      paddingHorizontal: 6,
+      paddingVertical: 2,
+      borderRadius: 3,
+      zIndex: 5,
+    },
+    conditionTagText: {
+      fontSize: 8,
+      fontWeight: "900",
+      color: colors.primaryContent,
+      textTransform: "uppercase",
+      letterSpacing: 0.3,
+    },
+    stampOverlay: {
+      position: "absolute",
+      top: "32%",
+      left: "5%",
+      right: "5%",
+      transform: [{ rotate: "-10deg" }],
+      backgroundColor: colors.danger,
+      borderWidth: 2,
+      borderColor: colors.primaryContent,
+      paddingVertical: 5,
+      alignItems: "center",
+      zIndex: 10,
+    },
+    stampText: {
+      color: colors.dangerContent,
+      fontSize: 11,
+      fontWeight: "900",
+      textTransform: "uppercase",
+      letterSpacing: 2,
+    },
+    cardContent: {
+      paddingHorizontal: 8,
+      paddingTop: 8,
+      paddingBottom: 10,
+      minWidth: 0,
+      overflow: "hidden",
+    },
+    price: {
+      fontSize: isMobile ? 14 : 16,
+      fontWeight: "900",
+      color: colors.primary,
+      letterSpacing: -0.3,
+      marginBottom: 3,
+    },
+    title: {
+      fontSize: isMobile ? 11 : 13,
+      fontWeight: "700",
+      color: colors.text,
+      lineHeight: isMobile ? 15 : 18,
+      minHeight: isMobile ? 30 : 36,
+    },
+    cardMeta: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+      marginTop: 5,
+      gap: 4,
+    },
+    cardMetaText: {
+      fontSize: 9,
+      color: colors.muted,
+      fontWeight: "500",
+      flex: 1,
+    },
+    cardViews: {
+      fontSize: 9,
+      color: colors.textDisabled,
+      fontWeight: "700",
+      textTransform: "uppercase",
+      letterSpacing: 0.4,
+    },
+    locationBadge: { backgroundColor: colors.surfaceSecondary, borderWidth: 1, borderColor: colors.boardBorder, paddingHorizontal: 4, paddingVertical: 2, maxWidth: "50%" },
+    locationBadgeText: { fontSize: 9, fontWeight: "800", color: colors.text, textTransform: "uppercase" },
+    centered: {
+      flex: 1,
+      justifyContent: "center",
+      alignItems: "center",
+      backgroundColor: colors.background,
+    },
+    emptyText: {
+      textAlign: "center",
+      color: colors.textSecondary,
+      marginTop: 40,
+      textTransform: "uppercase",
+      letterSpacing: 1.2,
+      fontSize: isMobile ? 10 : typography.label,
+      fontWeight: "900",
+    },
+  });
+};
 
 export default ProductsScreen;

@@ -18,6 +18,7 @@ import supportRoutes from './support.routes';
 import feedRoutes from './feed.routes';
 import offerRoutes from './offer.routes';
 import userRoutes from './user.routes';
+import referenceRoutes from './reference.routes';
 
 const router = Router();
 
@@ -50,5 +51,6 @@ router.use('/support', supportRoutes);
 router.use('/feed', feedRoutes);
 router.use('/offers', offerRoutes);
 router.use('/users', userRoutes); // Added user routes
+router.use('/reference', referenceRoutes);
 
 export default router;

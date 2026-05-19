@@ -18,6 +18,8 @@ export interface IUserDocument extends Document {
   currentLevel: string;
   isVerified: boolean;
   emailVerified: boolean;
+  emailVerificationToken?: string;
+  emailVerificationExpires?: Date;
   phoneVerified: boolean;
   isInstitutional: boolean;
   isBanned: boolean;
@@ -57,6 +59,9 @@ export interface IUserDocument extends Document {
   responseTimeMinutes: number;
   storeName?: string;
   brandName?: string;
+  idCardImageUrl?: string;
+  idVerificationStatus?: 'not_submitted' | 'pending' | 'verified' | 'rejected';
+  idSubmittedAt?: Date;
   sellerOnboarding?: {
     completed: boolean;
     payoutSetupComplete: boolean;
@@ -158,6 +163,13 @@ const userSchema = new Schema<IUserDocument>(
       type: Boolean,
       default: false,
     },
+    emailVerificationToken: {
+      type: String,
+      default: '',
+    },
+    emailVerificationExpires: {
+      type: Date,
+    },
     phoneVerified: {
       type: Boolean,
       default: false,
@@ -255,6 +267,13 @@ const userSchema = new Schema<IUserDocument>(
       trim: true,
       maxlength: [80, 'Brand name cannot exceed 80 characters'],
     },
+    idCardImageUrl: { type: String, default: '' },
+    idVerificationStatus: {
+      type: String,
+      enum: ['not_submitted', 'pending', 'verified', 'rejected'],
+      default: 'not_submitted',
+    },
+    idSubmittedAt: { type: Date },
     sellerOnboarding: {
       completed: { type: Boolean, default: false },
       payoutSetupComplete: { type: Boolean, default: false },

@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState, useMemo } from 'react';
 import {
   ActivityIndicator,
   FlatList,
@@ -6,15 +6,19 @@ import {
   RefreshControl,
   StyleSheet,
   Text,
+  TextInput,
   TouchableOpacity,
   View,
+  Dimensions,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
 import chatService, { Conversation } from '../services/chat.service';
 import { useAuth } from '../context/AuthContext';
-import { colors, shadows } from '../theme';
+import { shadows } from '../theme';
+import { useColors } from '../theme/ThemeContext';
 import ScreenHeader from '../components/ScreenHeader';
+import EmptyState from '../components/EmptyState';
 
 const formatTime = (dateStr: string) => {
   const d = new Date(dateStr);
@@ -28,10 +32,76 @@ const formatTime = (dateStr: string) => {
 };
 
 const ConversationListScreen = ({ navigation }: any) => {
+  const colors = useColors();
+  const { width: _sw } = Dimensions.get('window');
+  const isMobile = _sw < 640;
   const { user } = useAuth();
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [search, setSearch] = useState('');
+
+  const filtered = useMemo(() => {
+    if (!search.trim()) return conversations;
+    const q = search.toLowerCase();
+    return conversations.filter(c => {
+      const other = c.participants.find((p: any) => p._id !== user?._id) ?? c.participants[0];
+      return (
+        other?.name?.toLowerCase().includes(q) ||
+        c.product?.title?.toLowerCase().includes(q) ||
+        c.lastMessage?.content?.toLowerCase().includes(q)
+      );
+    });
+  }, [conversations, search, user?._id]);
+
+  const styles = React.useMemo(() => StyleSheet.create({
+    container: { flex: 1, backgroundColor: colors.bg },
+    centered: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+    row: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingHorizontal: isMobile ? 12 : 16,
+      paddingVertical: 12,
+      backgroundColor: colors.surface,
+    },
+    avatarWrap: { marginRight: 12 },
+    avatar: { width: 48, height: 48, borderRadius: 24 },
+    avatarPlaceholder: {
+      width: 48, height: 48, borderRadius: 24,
+      backgroundColor: colors.surfaceSecondary, justifyContent: 'center', alignItems: 'center',
+    },
+    avatarInitial: { fontSize: isMobile ? 17 : 20, fontWeight: '700', color: colors.muted },
+    rowContent: { flex: 1 },
+    rowTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+    name: { fontSize: isMobile ? 13 : 14, color: colors.text, flex: 1, marginRight: 8, textTransform: 'uppercase', letterSpacing: 0.8, fontWeight: '700' },
+    nameBold: { fontWeight: '700', color: colors.text },
+    time: { fontSize: 12, color: colors.muted },
+    productLabel: { fontSize: 10, color: colors.muted, marginTop: 1, textTransform: 'uppercase', letterSpacing: 1 },
+    rowBottom: { flexDirection: 'row', alignItems: 'center', marginTop: 3 },
+    lastMsg: { fontSize: isMobile ? 12 : 13, color: colors.muted, flex: 1 },
+    lastMsgBold: { fontWeight: '600', color: colors.text },
+    badge: {
+      backgroundColor: colors.success, borderRadius: 10,
+      minWidth: 20, paddingHorizontal: 5, paddingVertical: 2,
+      justifyContent: 'center', alignItems: 'center', marginLeft: 8,
+    },
+    badgeText: { color: colors.successContent, fontSize: 11, fontWeight: '700' },
+    separator: { height: 1, backgroundColor: colors.border, marginLeft: 76 },
+    searchWrap: {
+      paddingHorizontal: isMobile ? 12 : 16, paddingVertical: 10,
+      backgroundColor: colors.surface,
+      borderBottomWidth: 1, borderBottomColor: colors.border,
+    },
+    searchInput: {
+      backgroundColor: colors.surfaceSecondary,
+      borderWidth: 1, borderColor: colors.border,
+      paddingHorizontal: 14, paddingVertical: 10,
+      fontSize: isMobile ? 12 : 13, color: colors.text, fontWeight: '600',
+    },
+    emptyWrap: { padding: 40, alignItems: 'center' },
+    emptyText: { fontSize: isMobile ? 14 : 16, fontWeight: '600', color: colors.text },
+    emptySubtext: { marginTop: 8, fontSize: isMobile ? 12 : 13, color: colors.muted, textAlign: 'center' },
+  }), [colors]);
 
   const fetchConversations = useCallback(async (withLoader = true) => {
     if (withLoader) setLoading(true);
@@ -119,13 +189,25 @@ const ConversationListScreen = ({ navigation }: any) => {
     <SafeAreaView style={styles.container} edges={['top']}>
       <ScreenHeader eyebrow="Inbox" title="Messages" subtitle="Offers, negotiations, and deal chats." />
 
+      <View style={styles.searchWrap}>
+        <TextInput
+          style={styles.searchInput}
+          placeholder="Search conversations..."
+          placeholderTextColor={colors.muted}
+          value={search}
+          onChangeText={setSearch}
+          returnKeyType="search"
+          clearButtonMode="while-editing"
+        />
+      </View>
+
       {loading ? (
         <View style={styles.centered}>
-          <ActivityIndicator size="large" color="#2563eb" />
+          <ActivityIndicator size="large" color={colors.text} />
         </View>
       ) : (
         <FlatList
-          data={conversations}
+          data={filtered}
           keyExtractor={(item) => item._id}
           renderItem={renderItem}
           refreshControl={
@@ -137,66 +219,12 @@ const ConversationListScreen = ({ navigation }: any) => {
               }}
             />
           }
-          ListEmptyComponent={
-            <View style={styles.emptyWrap}>
-              <Text style={styles.emptyText}>No conversations yet.</Text>
-              <Text style={styles.emptySubtext}>
-                Start a conversation from a product listing.
-              </Text>
-            </View>
-          }
+          ListEmptyComponent={<EmptyState title="No messages yet" subtitle="Start a conversation from any product listing." />}
           ItemSeparatorComponent={() => <View style={styles.separator} />}
         />
       )}
     </SafeAreaView>
   );
 };
-
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.bg },
-  centered: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  row: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    backgroundColor: colors.surface,
-  },
-  avatarWrap: { marginRight: 12 },
-  avatar: { width: 48, height: 48, borderRadius: 24 },
-  avatarPlaceholder: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: '#ece3d2',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  avatarInitial: { fontSize: 20, fontWeight: '700', color: '#5b5042' },
-  rowContent: { flex: 1 },
-  rowTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  name: { fontSize: 14, color: '#3f372d', flex: 1, marginRight: 8, textTransform: 'uppercase', letterSpacing: 0.8, fontWeight: '700' },
-  nameBold: { fontWeight: '700', color: '#111827' },
-  time: { fontSize: 12, color: '#9ca3af' },
-  productLabel: { fontSize: 10, color: '#7c6f60', marginTop: 1, textTransform: 'uppercase', letterSpacing: 1 },
-  rowBottom: { flexDirection: 'row', alignItems: 'center', marginTop: 3 },
-  lastMsg: { fontSize: 13, color: '#9ca3af', flex: 1 },
-  lastMsgBold: { fontWeight: '600', color: '#374151' },
-  badge: {
-    backgroundColor: '#2f5d4f',
-    borderRadius: 10,
-    minWidth: 20,
-    paddingHorizontal: 5,
-    paddingVertical: 2,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginLeft: 8,
-  },
-  badgeText: { color: '#fff', fontSize: 11, fontWeight: '700' },
-  separator: { height: 1, backgroundColor: '#efe7d7', marginLeft: 76 },
-  emptyWrap: { padding: 40, alignItems: 'center' },
-  emptyText: { fontSize: 16, fontWeight: '600', color: '#374151' },
-  emptySubtext: { marginTop: 8, fontSize: 13, color: '#9ca3af', textAlign: 'center' },
-});
 
 export default ConversationListScreen;

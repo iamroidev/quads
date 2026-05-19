@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import mongoose from 'mongoose';
+import crypto from 'crypto';
 import authService from '../services/auth.service';
 import env from '../config/env';
 import { emailService } from '../services/email.service';
@@ -9,6 +10,11 @@ import fs from 'fs';
 import path from 'path';
 import growthService from '../services/growth.service';
 import userService from '../services/user.service';
+
+const STUDENT_EMAIL_DOMAIN = 'st.umat.edu.gh';
+
+const isStudentEmail = (email: string): boolean =>
+  email.toLowerCase().endsWith(`@${STUDENT_EMAIL_DOMAIN}`);
 
 /**
  * @route   POST /api/auth/register
@@ -499,6 +505,165 @@ export const googleLogin = async (
     }
   } catch (error: any) {
     console.error('[GoogleLogin] CRITICAL ERROR:', error.message, error.stack);
+    next(error);
+  }
+};
+
+/**
+ * @route   POST /api/auth/upload-id-card
+ * @desc    Upload student ID card image for manual admin review
+ * @access  Private
+ */
+export const uploadIdCard = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    if (!req.file) {
+      res.status(400).json({ success: false, message: 'No image uploaded.' });
+      return;
+    }
+
+    const user = await User.findById(req.user!._id);
+    if (!user) {
+      res.status(404).json({ success: false, message: 'User not found.' });
+      return;
+    }
+
+    if (user.idVerificationStatus === 'verified') {
+      res.status(400).json({ success: false, message: 'ID already verified.' });
+      return;
+    }
+
+    let imageUrl = '';
+    try {
+      const uploaded = await uploadToCloudinary(req.file.buffer, 'quads/id-cards');
+      imageUrl = uploaded.url;
+    } catch {
+      const uploadsDir = path.resolve(process.cwd(), 'uploads', 'id-cards');
+      if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
+      const ext = (req.file.mimetype || 'image/jpeg').includes('png') ? 'png' : 'jpg';
+      const filename = `${req.user!._id.toString()}-id-${Date.now()}.${ext}`;
+      fs.writeFileSync(path.join(uploadsDir, filename), req.file.buffer);
+      imageUrl = `${req.protocol}://${req.get('host')}/uploads/id-cards/${filename}`;
+    }
+
+    user.idCardImageUrl = imageUrl;
+    user.idVerificationStatus = 'pending';
+    user.idSubmittedAt = new Date();
+    await user.save();
+
+    res.status(200).json({
+      success: true,
+      message: 'ID card submitted for review.',
+      data: { idVerificationStatus: 'pending', idCardImageUrl: imageUrl },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * @route   POST /api/auth/send-verification-email
+ * @desc    Send a 6-digit code to the user's email for verification
+ * @access  Private
+ */
+export const sendEmailVerification = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const user = await User.findById(req.user!._id);
+    if (!user) {
+      res.status(404).json({ success: false, message: 'User not found.' });
+      return;
+    }
+
+    if (user.emailVerified) {
+      res.status(400).json({ success: false, message: 'Email is already verified.' });
+      return;
+    }
+
+    const code = String(Math.floor(100000 + Math.random() * 900000));
+    const expires = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+    const hashed = crypto.createHash('sha256').update(code).digest('hex');
+
+    user.emailVerificationToken = hashed;
+    user.emailVerificationExpires = expires;
+    await user.save();
+
+    await emailService.sendVerificationEmail(user.email, user.name, code);
+
+    const isStudent = isStudentEmail(user.email);
+
+    res.status(200).json({
+      success: true,
+      message: `Verification code sent to ${user.email}.`,
+      data: { isStudentEmail: isStudent },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * @route   POST /api/auth/verify-email
+ * @desc    Confirm email with the 6-digit code
+ * @access  Private
+ */
+export const verifyEmail = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const { code } = req.body;
+    if (!code) {
+      res.status(400).json({ success: false, message: 'Verification code is required.' });
+      return;
+    }
+
+    const user = await User.findById(req.user!._id);
+    if (!user) {
+      res.status(404).json({ success: false, message: 'User not found.' });
+      return;
+    }
+
+    if (user.emailVerified) {
+      res.status(400).json({ success: false, message: 'Email is already verified.' });
+      return;
+    }
+
+    if (!user.emailVerificationToken || !user.emailVerificationExpires) {
+      res.status(400).json({ success: false, message: 'No verification code found. Please request a new one.' });
+      return;
+    }
+
+    if (user.emailVerificationExpires < new Date()) {
+      res.status(400).json({ success: false, message: 'Verification code has expired. Please request a new one.' });
+      return;
+    }
+
+    const hashed = crypto.createHash('sha256').update(code).digest('hex');
+    if (hashed !== user.emailVerificationToken) {
+      res.status(400).json({ success: false, message: 'Invalid verification code.' });
+      return;
+    }
+
+    user.emailVerified = true;
+    user.isInstitutional = isStudentEmail(user.email);
+    user.emailVerificationToken = '';
+    user.emailVerificationExpires = undefined;
+    await user.save();
+
+    res.status(200).json({
+      success: true,
+      message: 'Email verified successfully.',
+      data: { emailVerified: true, isInstitutional: user.isInstitutional },
+    });
+  } catch (error) {
     next(error);
   }
 };

@@ -7,7 +7,6 @@
   --bulletin-shadow: rgba(0, 0, 0, 1);
   --bulletin-muted: rgba(0, 0, 0, 0.4);
 
-  /* Tactical Custom Card Theming */
   --bulletin-notice-bg: #fffacd;
   --bulletin-notice-text: #000000;
   --bulletin-metric1-bg: #e0f2f7;
@@ -21,18 +20,17 @@
   --bulletin-text: #ffffff;
   --bulletin-accent: #ff6b6b;
   --bulletin-card: #121212;
-  --bulletin-border: #ffffff;     /* Sharp white borders for neobrutalist punch! */
-  --bulletin-shadow: #ff6b6b;     /* Solid coral-red offset block shadows! */
+  --bulletin-border: #ffffff;
+  --bulletin-shadow: #ff6b6b;
   --bulletin-muted: rgba(255, 255, 255, 0.4);
   color-scheme: dark;
 
-  /* Tactical Custom Card Theming */
-  --bulletin-notice-bg: #2c2203;  /* Deep gold-dark backdrop */
-  --bulletin-notice-text: #ffd700; /* Rich golden text */
-  --bulletin-metric1-bg: #05262e;  /* Deep cyan-dark backdrop */
-  --bulletin-metric1-text: #80deea; /* High-contrast light cyan text */
-  --bulletin-metric2-bg: #2d0816;  /* Deep magenta-dark backdrop */
-  --bulletin-metric2-text: #f48fb1; /* High-contrast light pink text */
+  --bulletin-notice-bg: #2c2203;
+  --bulletin-notice-text: #ffd700;
+  --bulletin-metric1-bg: #05262e;
+  --bulletin-metric1-text: #80deea;
+  --bulletin-metric2-bg: #2d0816;
+  --bulletin-metric2-text: #f48fb1;
 }
 
 @tailwind base;
@@ -57,7 +55,6 @@
     padding: 0;
   }
 
-  /* ── CRITICAL: Prevent any element from overflowing viewport width ── */
   body {
     background-color: var(--bulletin-bg);
     color: var(--bulletin-text);
@@ -69,14 +66,12 @@
     overflow-x: hidden !important;
   }
 
-  /* Force ALL elements to not overflow viewport by default */
   #root {
     width: 100%;
     max-width: 100vw;
     overflow-x: hidden;
   }
 
-  /* Prevent any absolutely-positioned element from forcing horizontal scroll */
   [style*="position: absolute"],
   [style*="position:absolute"],
   .absolute {
@@ -84,7 +79,6 @@
     overflow-wrap: break-word;
   }
 
-  /* Images and media should never overflow */
   img, video, iframe, svg {
     max-width: 100% !important;
     height: auto;
@@ -95,64 +89,22 @@
     color: #ffffff !important;
   }
 
-  /* Custom scrollbar */
-  ::-webkit-scrollbar {
-    width: 6px;
-  }
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background-color: var(--bulletin-bg); }
+  ::-webkit-scrollbar-thumb { background-color: rgba(0, 0, 0, 0.2); border-radius: 9999px; }
+  .dark ::-webkit-scrollbar-thumb { background-color: rgba(255, 255, 255, 0.2); }
 
-  ::-webkit-scrollbar-track {
-    background-color: var(--bulletin-bg);
-  }
-
-  ::-webkit-scrollbar-thumb {
-    background-color: rgba(0, 0, 0, 0.2);
-    border-radius: 9999px;
-  }
-
-  .dark ::-webkit-scrollbar-thumb {
-    background-color: rgba(255, 255, 255, 0.2);
-  }
-
-  /* ── MOBILE RESPONSIVE OVERRIDES ── */
-  @media (max-width: 640px) {
-    /* Force viewport-fit for any overflowing elements */
+  /* ── RESPONSIVE: < 1024px (mobile + tablet) ── */
+  @media (max-width: 1023px) {
     html, body, #root {
       overflow-x: hidden !important;
       width: 100% !important;
       max-width: 100vw !important;
     }
 
-    /* Reset inline rotations to prevent corner-bleeding layout overflow */
-    [style*="rotate"] {
-      transform: none !important;
-    }
-
-    /* Contain all absolutely-positioned and custom w-max children */
-    .relative {
-      overflow: visible;
-    }
-
-    .w-max {
-      max-width: 100% !important;
-      width: auto !important;
-    }
-
-    /* Keep margins, paddings, and shadow dimensions clean and contained */
-    .p-20, .p-16, .p-12, .p-10, .p-8 {
-      padding: 1rem !important; /* 16px */
-    }
-    .px-12, .px-8, .px-6 {
-      padding-left: 0.75rem !important;
-      padding-right: 0.75rem !important;
-    }
-    .py-16, .py-12, .py-10, .py-8 {
-      padding-top: 1.25rem !important;
-      padding-bottom: 1.25rem !important;
-    }
-
-    /* Auto-scale heavy neobrutalist box shadows to prevent viewport spilling */
+    /* Scale shadows — keeps the bulletin feel, just smaller */
     .shadow-\[16px_16px_0_0_var\(--bulletin-shadow\)\] {
-      box-shadow: 4px 4px 0 0 var(--bulletin-shadow) !important;
+      box-shadow: 5px 5px 0 0 var(--bulletin-shadow) !important;
     }
     .shadow-\[12px_12px_0_0_var\(--bulletin-shadow\)\] {
       box-shadow: 4px 4px 0 0 var(--bulletin-shadow) !important;
@@ -164,93 +116,168 @@
       box-shadow: 3px 3px 0 0 rgba(0,0,0,1) !important;
     }
     .shadow-\[16px_16px_0_0_\#000\] {
-      box-shadow: 4px 4px 0 0 #000 !important;
+      box-shadow: 5px 5px 0 0 #000 !important;
+    }
+    .shadow-\[16px_16px_0_0_\#ff6b6b\] {
+      box-shadow: 5px 5px 0 0 #ff6b6b !important;
+    }
+    .shadow-\[4px_4px_0_0_black\],
+    .shadow-\[4px_4px_0_0_\#000\] {
+      box-shadow: 2px 2px 0 0 #000 !important;
+    }
+    .shadow-\[8px_8px_0_0_\#ff6b6b\],
+    .shadow-\[6px_6px_0_0_\#ff6b6b\] {
+      box-shadow: 3px 3px 0 0 #ff6b6b !important;
     }
 
-    .bulletin-container {
-      padding-left: 0.75rem;
-      padding-right: 0.75rem;
+    /* ── KEEP rotations (bulletin identity), just contain them ── */
+    [style*="rotate"] {
+      max-width: 99vw !important;
+      overflow: hidden !important;
+    }
+    /* Slightly reduce rotation angles to prevent corner clipping */
+    [style*="rotate(1.5deg)"] { transform: rotate(0.8deg) scale(0.98) !important; }
+    [style*="rotate(-1.5deg)"] { transform: rotate(-0.8deg) scale(0.98) !important; }
+    [style*="rotate(2.5deg)"] { transform: rotate(1.2deg) scale(0.98) !important; }
+    [style*="rotate(-2.5deg)"] { transform: rotate(-1.2deg) scale(0.98) !important; }
+    [style*="rotate(3deg)"] { transform: rotate(1.5deg) scale(0.98) !important; }
+    [style*="rotate(-3deg)"] { transform: rotate(-1.5deg) scale(0.98) !important; }
+    [style*="rotate(0.5deg)"] { transform: rotate(0.3deg) scale(0.98) !important; }
+    [style*="rotate(-0.5deg)"] { transform: rotate(-0.3deg) scale(0.98) !important; }
+    [style*="rotate(1.2deg)"] { transform: rotate(0.6deg) scale(0.98) !important; }
+    [style*="rotate(-1.2deg)"] { transform: rotate(-0.6deg) scale(0.98) !important; }
+    [style*="rotate(0.3deg)"] { transform: rotate(0.2deg) scale(0.98) !important; }
+    [style*="rotate(-0.3deg)"] { transform: rotate(-0.2deg) scale(0.98) !important; }
+
+    section, .bulletin-section, [class*="bulletin-section"] {
+      width: 100% !important;
+      max-width: 100vw !important;
+      overflow-x: hidden !important;
     }
 
-    /* Prevent Tawk.to from covering content on mobile */
-    .tawk-min-container,
-    #tawk-chat-container {
-      bottom: 12px !important;
-      right: 12px !important;
-      transform: scale(0.85);
-      transform-origin: bottom right;
+    nav .flex.items-center { gap: 0.5rem !important; }
+
+    .min-h-\[700px\], .min-h-\[600px\], .min-h-\[500px\],
+    [style*="min-height: 700px"], [style*="min-height: 600px"] {
+      min-height: auto !important;
     }
 
-    /* Fluid Typography */
-    h1 { font-size: clamp(2.5rem, 8vw, 5rem) !important; }
-    h2 { font-size: clamp(1.8rem, 6vw, 3.5rem) !important; }
-    .text-5xl { font-size: clamp(2.2rem, 7vw, 3.5rem) !important; }
-    .text-4xl { font-size: clamp(1.8rem, 6vw, 2.5rem) !important; }
-    .text-6xl { font-size: clamp(2rem, 10vw, 4rem) !important; }
-    .text-7xl { font-size: clamp(2.2rem, 10vw, 4.5rem) !important; }
-    .text-8xl { font-size: clamp(2.5rem, 12vw, 5rem) !important; }
-    .text-9xl { font-size: clamp(2.8rem, 14vw, 6rem) !important; }
+    /* De-absolute large-positioned elements so they flow naturally */
+    .lg\:absolute { position: static !important; }
+    .lg\:top-20, .lg\:top-12 { top: 0 !important; }
+    .lg\:right-20, .lg\:right-12 { right: auto !important; }
 
-    /* Fix nav bar overflow on mobile */
-    nav .flex.items-center {
-      gap: 0.5rem !important;
-    }
+    .relative { overflow: visible; }
+    .w-max { max-width: 100% !important; width: auto !important; }
 
-    /* Make stat cards stack vertically on mobile */
-    .hero-stats-desktop {
+    /* Stat cards flow inline instead of absolute */
+    .hero-stats-container {
       position: static !important;
       width: 100% !important;
       max-width: 100% !important;
-      margin-top: 1rem;
       flex-direction: row !important;
+      flex-wrap: wrap !important;
     }
 
-    /* Hide decorative elements that cause overflow */
-    .hero-decorative-bg {
-      display: none !important;
+    [class*="hero-decorative"] { display: none !important; }
+
+    /* Fluid Typography */
+    h1, .text-9xl, .text-8xl, .text-7xl, .text-6xl, .text-5xl, .text-4xl {
+      font-size: clamp(1.8rem, 8vw, 2.8rem) !important;
+      line-height: 1.1 !important;
     }
 
-    /* Stack 2-col grids to single column */
-    .grid-cols-2 {
+    .gap-12 { gap: 1rem !important; }
+    .gap-16 { gap: 1.25rem !important; }
+    .gap-24 { gap: 1.5rem !important; }
+    .gap-6 { gap: 0.75rem !important; }
+    .gap-8 { gap: 0.75rem !important; }
+  }
+
+  /* ── MOBILE < 640px ── */
+  @media (max-width: 640px) {
+    .shadow-\[16px_16px_0_0_var\(--bulletin-shadow\)\] { box-shadow: 4px 4px 0 0 var(--bulletin-shadow) !important; }
+    .shadow-\[12px_12px_0_0_var\(--bulletin-shadow\)\] { box-shadow: 3px 3px 0 0 var(--bulletin-shadow) !important; }
+    .shadow-\[8px_8px_0_0_var\(--bulletin-shadow\)\]  { box-shadow: 3px 3px 0 0 var(--bulletin-shadow) !important; }
+    .shadow-\[24px_24px_0_0_var\(--bulletin-shadow\)\] { box-shadow: 4px 4px 0 0 var(--bulletin-shadow) !important; }
+
+    /* Padding compression */
+    .p-20, .p-16, .p-12, .p-10, .p-8 { padding: 1rem !important; }
+    .px-12, .px-8, .px-6 { padding-left: 0.75rem !important; padding-right: 0.75rem !important; }
+    .py-16, .py-12, .py-10, .py-8 { padding-top: 1.25rem !important; padding-bottom: 1.25rem !important; }
+    .gap-16, .gap-20 { gap: 1rem !important; }
+
+    /* Arbitrary pixel font sizes — scale up for readability on small screens */
+    /* Tailwind arbitrary values bypass class-level media queries, so we target them here */
+    .text-\[7px\], .text-\[8px\], .text-\[9px\] { font-size: 10px !important; }
+    .text-\[10px\] { font-size: 11px !important; }
+    .text-\[11px\] { font-size: 12px !important; }
+    .text-\[12px\] { font-size: 13px !important; }
+    .text-\[13px\] { font-size: 13px !important; }
+    .text-\[14px\] { font-size: 14px !important; }
+    .text-\[16px\] { font-size: 15px !important; }
+
+    /* Large decorative text — clamp aggressively */
+    .text-\[280px\], .text-\[200px\] { font-size: clamp(4rem, 25vw, 8rem) !important; }
+    .text-\[48px\] { font-size: 2rem !important; }
+    .text-\[42px\] { font-size: 1.75rem !important; }
+    .text-\[34px\] { font-size: 1.5rem !important; }
+
+    /* Grid */
+    .grid-cols-2 { grid-template-columns: repeat(1, minmax(0, 1fr)) !important; }
+
+    /* Form controls — ensure inputs don't overflow */
+    input, select, textarea, button { max-width: 100% !important; box-sizing: border-box !important; }
+
+    /* Rotations */
+    [style*="rotate"] { transform: scale(0.97) !important; }
+
+    /* Max content width — prevent wide cards overflowing */
+    .max-w-lg, .max-w-xl, .max-w-2xl { max-width: calc(100vw - 2rem) !important; }
+    .max-w-\[340px\], .max-w-\[360px\] { max-width: calc(100vw - 1.5rem) !important; }
+
+    /* Layout — stack horizontal grids vertically */
+    .grid.grid-cols-2:not(.force-grid),
+    .grid.grid-cols-3:not(.force-grid) {
       grid-template-columns: repeat(1, minmax(0, 1fr)) !important;
     }
 
-    /* Reduce large gaps on mobile */
-    .gap-12 { gap: 1.5rem !important; }
-    .gap-16 { gap: 2rem !important; }
-    .gap-24 { gap: 2rem !important; }
+    /* Truncate overflowing content in table-like layouts */
+    .max-w-\[200px\], .max-w-\[160px\] { max-width: 100% !important; }
 
-    /* Remove fixed min-heights that block mobile layouts */
-    .min-h-\[700px\] { min-height: auto !important; }
-    .min-h-\[600px\] { min-height: auto !important; }
-
-    /* De-absolute elements that rely on lg: breakpoints */
-    .lg\:absolute { position: static !important; }
-
-    /* Ensure all sections are full-width and clipped */
-    section, .bulletin-section {
-      width: 100% !important;
-      overflow-x: hidden !important;
-    }
+    /* BulletinLayout section padding */
+    .py-5.px-4, .md\:py-12.md\:px-12 { padding: 0.875rem 0.75rem !important; }
   }
 
-  /* Tablet adjustments (641px - 1024px) */
+  /* ── TABLET 641px-1024px ── */
   @media (min-width: 641px) and (max-width: 1024px) {
-    .text-6xl { font-size: clamp(2.5rem, 6vw, 4rem) !important; }
-    .text-8xl { font-size: clamp(3rem, 8vw, 5rem) !important; }
-  }
+    h1, .text-9xl, .text-8xl, .text-7xl { font-size: clamp(2rem, 6vw, 3.5rem) !important; }
+    .text-6xl, .text-5xl { font-size: clamp(1.8rem, 4vw, 2.5rem) !important; }
+    .text-4xl { font-size: clamp(1.5rem, 3.5vw, 2rem) !important; }
+    .text-\[9px\], .text-\[8px\] { font-size: 10px !important; }
+    .text-\[10px\] { font-size: 11px !important; }
+    .text-\[280px\], .text-\[200px\] { font-size: clamp(6rem, 18vw, 12rem) !important; }
 
-  /* Tablet grid caps (641px - 768px) */
-  @media (min-width: 641px) and (max-width: 768px) {
     .lg\:grid-cols-4 { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
     .lg\:grid-cols-3 { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
     .lg\:col-span-8 { grid-column: span 2 !important; }
     .lg\:col-span-4 { grid-column: span 2 !important; }
   }
+
+  /* ── VERY SMALL < 400px (budget Android phones) ── */
+  @media (max-width: 400px) {
+    .text-\[7px\], .text-\[8px\], .text-\[9px\], .text-\[10px\] { font-size: 11px !important; }
+    .text-\[11px\], .text-\[12px\] { font-size: 13px !important; }
+    /* Neobrutalist border widths — reduce on very small screens */
+    .border-4 { border-width: 2px !important; }
+    .border-8 { border-width: 3px !important; }
+    /* Padding further compressed */
+    .p-8, .p-6 { padding: 0.75rem !important; }
+    .px-8, .px-6 { padding-left: 0.5rem !important; padding-right: 0.5rem !important; }
+  }
 }
 
 @layer components {
-  /* Bulletin Design Tokens */
   .bulletin-border { border: 2px solid var(--bulletin-border); }
   .bulletin-border-4 { border: 4px solid var(--bulletin-border); }
   .bulletin-shadow { box-shadow: 4px 4px 0 0 var(--bulletin-shadow); }
@@ -263,8 +290,7 @@
 }
 
 @keyframes role-shake {
-  0%,
-  100% { transform: translateX(0); }
+  0%, 100% { transform: translateX(0); }
   20% { transform: translateX(-4px); }
   40% { transform: translateX(4px); }
   60% { transform: translateX(-3px); }
@@ -272,64 +298,29 @@
 }
 
 @keyframes fade-up-in {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes card-drop-in {
-  from {
-    opacity: 0;
-    transform: translateY(24px) scale(0.985);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
+  from { opacity: 0; transform: translateY(24px) scale(0.985); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
 @keyframes card-float {
-  0%,
-  100% {
-    transform: translateY(0px);
-  }
-  50% {
-    transform: translateY(-4px);
-  }
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-4px); }
 }
 
 @keyframes hero-rise-in {
-  from {
-    opacity: 0;
-    transform: translateY(18px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(18px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
-.animate-shimmer {
-  animation: shimmer 2s infinite linear;
-}
-
-.animate-role-shake {
-  animation: role-shake 320ms ease-in-out;
-}
-
-.animate-fade-up-in {
-  animation: fade-up-in 420ms ease-out both;
-}
-
-.animate-card-drop {
-  animation: card-drop-in 560ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
-  animation-delay: var(--reveal-delay, 0ms);
-}
+.animate-shimmer { animation: shimmer 2s infinite linear; }
+.animate-role-shake { animation: role-shake 320ms ease-in-out; }
+.animate-fade-up-in { animation: fade-up-in 420ms ease-out both; }
+.animate-card-drop { animation: card-drop-in 560ms cubic-bezier(0.2, 0.7, 0.2, 1) both; animation-delay: var(--reveal-delay, 0ms); }
 
 .reveal-on-scroll {
   opacity: 0;
@@ -353,40 +344,23 @@
     -ms-overflow-style: none;
     scrollbar-width: none;
   }
+  .scrollbar-hide::-webkit-scrollbar { display: none; }
 
-  .scrollbar-hide::-webkit-scrollbar {
-    display: none;
-  }
-
-  .bulletin-toast {
-    overflow: visible !important;
-  }
-
+  .bulletin-toast { overflow: visible !important; }
   .bulletin-toast::before {
     content: '';
     position: absolute;
-    top: -10px;
-    left: 50%;
+    top: -10px; left: 50%;
     transform: translateX(-50%) rotate(-2deg);
-    width: 60px;
-    height: 16px;
+    width: 60px; height: 16px;
     background-color: rgba(255, 107, 107, 0.4);
     border: 1px solid rgba(0, 0, 0, 0.1);
     z-index: 100;
   }
 
-  /* Mobile safe area utilities */
-  .mobile-safe {
-    max-width: 100vw !important;
-    overflow-x: hidden !important;
-  }
+  .mobile-safe { max-width: 100vw !important; overflow-x: hidden !important; }
+  .mobile-stack { position: static !important; width: 100% !important; }
 
-  .mobile-stack {
-    position: static !important;
-    width: 100% !important;
-  }
-
-  /* ── Polaroid Bulletin Tactility Utilities ── */
   @keyframes thumbtack-jiggle {
     0%, 100% { transform: translate(-50%, -50%) rotate(0deg) scale(1.1); }
     15% { transform: translate(-50%, -50%) rotate(-12deg) scale(1.15); }
@@ -395,41 +369,19 @@
     60% { transform: translate(-50%, -50%) rotate(6deg) scale(1.1); }
     75% { transform: translate(-50%, -50%) rotate(-3deg) scale(1.1); }
   }
-
-  .animate-thumbtack-jiggle {
-    animation: thumbtack-jiggle 0.45s ease-in-out infinite;
-  }
+  .animate-thumbtack-jiggle { animation: thumbtack-jiggle 0.45s ease-in-out infinite; }
 }
 
-/* ── Dark Mode Text Readability & Contrast Enhancements ── */
-.dark input::placeholder,
-.dark textarea::placeholder {
-  color: rgba(255, 255, 255, 0.65) !important;
-  opacity: 1 !important;
+.dark input::placeholder, .dark textarea::placeholder {
+  color: rgba(255, 255, 255, 0.65) !important; opacity: 1 !important;
 }
-
-.dark label,
-.dark .opacity-40,
-.dark .text-\[var\(--bulletin-text\)\]\.opacity-40 {
+.dark label, .dark .opacity-40, .dark .text-\[var\(--bulletin-text\)\]\.opacity-40 {
   opacity: 0.8 !important;
 }
-
-.dark select {
+.dark select { background-color: #1a1a1a !important; color: #ffffff !important; }
+.dark select option { background-color: #1a1a1a !important; color: #ffffff !important; }
+.dark .opacity-30 { opacity: 0.65 !important; }
+.dark input, .dark textarea {
   background-color: #1a1a1a !important;
-  color: #ffffff !important;
-}
-
-.dark select option {
-  background-color: #1a1a1a !important;
-  color: #ffffff !important;
-}
-
-.dark .opacity-30 {
-  opacity: 0.65 !important;
-}
-
-.dark input,
-.dark textarea {
-  background-color: #1a1a1a !important; /* Elegant dark-gray depth contrasting beautifully against dark cards */
   color: #ffffff !important;
 }

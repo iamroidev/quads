@@ -53,10 +53,11 @@ import {
    FollowingFeedScreen,
  } from '../screens';
 import { navigationRef } from './navigationRef';
-import { colors, shadows } from '../theme';
+import { shadows } from '../theme';
+import { useColors } from '../theme/ThemeContext';
 import FloatingCart from '../components/FloatingCart';
 
-const defaultStackHeader = {
+const makeStackHeader = (c: ReturnType<typeof useColors>) => ({
   headerShown: true,
   headerBackTitle: 'Back',
   headerTitleStyle: {
@@ -64,259 +65,112 @@ const defaultStackHeader = {
     fontSize: 15,
     textTransform: 'uppercase' as const,
     letterSpacing: 0.7,
-    color: '#1f1a14',
+    color: c.text,
   },
-  headerStyle: {
-    backgroundColor: colors.surface,
-  },
-  headerTintColor: '#1f1a14',
+  headerStyle: { backgroundColor: c.surface },
+  headerTintColor: c.text,
   gestureEnabled: true,
   gestureDirection: 'horizontal' as const,
-};
+});
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 
 // ── Products stack ────────────────────────────────────────────────────────────
 const ProductsStack = createNativeStackNavigator();
-const ProductsStackScreen = () => (
-  <ProductsStack.Navigator initialRouteName="ProductsHome" screenOptions={{ headerShown: false }}>
-    <ProductsStack.Screen name="ProductsHome" component={ProductsScreen} />
-    <ProductsStack.Screen
-      name="ProductDetail"
-      component={ProductDetailScreen}
-      options={{ ...defaultStackHeader, title: 'Product Details' }}
-    />
-    <ProductsStack.Screen
-      name="Checkout"
-      component={CheckoutScreen}
-      options={{ ...defaultStackHeader, title: 'Checkout' }}
-    />
-    <ProductsStack.Screen
-      name="OrderDetail"
-      component={OrderDetailScreen}
-      options={{ ...defaultStackHeader, title: 'Order Details' }}
-    />
-  </ProductsStack.Navigator>
-);
+const ProductsStackScreen = () => {
+  const colors = useColors();
+  const dsh = makeStackHeader(colors);
+  return (
+    <ProductsStack.Navigator initialRouteName="ProductsHome" screenOptions={{ headerShown: false }}>
+      <ProductsStack.Screen name="ProductsHome" component={ProductsScreen} />
+      <ProductsStack.Screen name="ProductDetail" component={ProductDetailScreen} options={{ ...dsh, title: 'Product Details' }} />
+      <ProductsStack.Screen name="OrderDetail" component={OrderDetailScreen} options={{ ...dsh, title: 'Order Details' }} />
+    </ProductsStack.Navigator>
+  );
+};
 
 // ── Messages stack ────────────────────────────────────────────────────────────
 const MessagesStack = createNativeStackNavigator();
-const MessagesStackScreen = () => (
-  <MessagesStack.Navigator screenOptions={{ headerShown: false }}>
-    <MessagesStack.Screen name="ConversationList" component={ConversationListScreen} />
-    <MessagesStack.Screen
-      name="Chat"
-      component={ChatScreen}
-      options={{ ...defaultStackHeader }}
-    />
-  </MessagesStack.Navigator>
-);
+const MessagesStackScreen = () => {
+  const colors = useColors();
+  const dsh = makeStackHeader(colors);
+  return (
+    <MessagesStack.Navigator screenOptions={{ headerShown: false }}>
+      <MessagesStack.Screen name="ConversationList" component={ConversationListScreen} />
+      <MessagesStack.Screen name="Chat" component={ChatScreen} options={{ ...dsh }} />
+    </MessagesStack.Navigator>
+  );
+};
 
 // ── Seller tools stack ────────────────────────────────────────────────────────
 const SellerStack = createNativeStackNavigator();
-const SellerStackScreen = () => (
-  <SellerStack.Navigator initialRouteName="MyListings" screenOptions={{ headerShown: false }}>
-    <SellerStack.Screen
-      name="CreateListing"
-      component={CreateListingScreen}
-      options={{ ...defaultStackHeader, title: 'New Listing' }}
-    />
-    <SellerStack.Screen name="MyListings" component={MyListingsScreen} />
-    <SellerStack.Screen
-      name="SellerAnalytics"
-      component={SellerAnalyticsScreen}
-      options={{ ...defaultStackHeader, title: 'Seller Dashboard' }}
-    />
-  </SellerStack.Navigator>
-);
+const SellerStackScreen = () => {
+  const colors = useColors();
+  const dsh = makeStackHeader(colors);
+  return (
+    <SellerStack.Navigator initialRouteName="MyListings" screenOptions={{ headerShown: false }}>
+      <SellerStack.Screen name="CreateListing" component={CreateListingScreen} options={{ ...dsh, title: 'New Listing' }} />
+      <SellerStack.Screen name="MyListings" component={MyListingsScreen} />
+      <SellerStack.Screen name="SellerAnalytics" component={SellerAnalyticsScreen} options={{ ...dsh, title: 'Seller Dashboard' }} />
+    </SellerStack.Navigator>
+  );
+};
 
 // ── Orders stack ──────────────────────────────────────────────────────────────
 const OrdersStack = createNativeStackNavigator();
-const OrdersStackScreen = () => (
-  <OrdersStack.Navigator screenOptions={{ headerShown: false }}>
-    <OrdersStack.Screen name="OrdersList" component={OrdersScreen} />
-    <OrdersStack.Screen
-      name="OrderDetail"
-      component={OrderDetailScreen}
-      options={{ ...defaultStackHeader, title: 'Order Details' }}
-    />
-    <OrdersStack.Screen
-      name="Scanner"
-      component={ScannerScreen}
-      options={{ ...defaultStackHeader, title: 'Scanner', headerShown: false }}
-    />
-  </OrdersStack.Navigator>
-);
+const OrdersStackScreen = () => {
+  const colors = useColors();
+  const dsh = makeStackHeader(colors);
+  return (
+    <OrdersStack.Navigator screenOptions={{ headerShown: false }}>
+      <OrdersStack.Screen name="OrdersList" component={OrdersScreen} />
+      <OrdersStack.Screen name="OrderDetail" component={OrderDetailScreen} options={{ ...dsh, title: 'Order Details' }} />
+      <OrdersStack.Screen name="Scanner" component={ScannerScreen} options={{ ...dsh, title: 'Scanner', headerShown: false }} />
+    </OrdersStack.Navigator>
+  );
+};
 
 // ── Profile stack ─────────────────────────────────────────────────────────────
 const ProfileStack = createNativeStackNavigator();
-const ProfileStackScreen = () => (
-  <ProfileStack.Navigator screenOptions={{ headerShown: false }}>
-    <ProfileStack.Screen name="ProfileHome" component={ProfileScreen} />
-    <ProfileStack.Screen
-      name="ProductDetail"
-      component={ProductDetailScreen}
-      options={{ ...defaultStackHeader, title: 'Product Details' }}
-    />
-    <ProfileStack.Screen
-      name="ProfileEdit"
-      component={ProfileEditScreen}
-      options={{ ...defaultStackHeader, title: 'Edit Profile' }}
-    />
-    <ProfileStack.Screen
-      name="Settings"
-      component={SettingsScreen}
-      options={{ ...defaultStackHeader, title: 'Settings' }}
-    />
-    <ProfileStack.Screen
-      name="SellerOnboarding"
-      component={SellerOnboardingScreen}
-      options={{ ...defaultStackHeader, title: 'Seller Onboarding' }}
-    />
-    <ProfileStack.Screen
-      name="SavedItems"
-      component={SavedScreen}
-      options={{ ...defaultStackHeader, title: 'Saved Items' }}
-    />
-    <ProfileStack.Screen
-      name="Orders"
-      component={OrdersScreen}
-      options={{ ...defaultStackHeader, title: 'My Orders' }}
-    />
-    <ProfileStack.Screen
-      name="OrderDetail"
-      component={OrderDetailScreen}
-      options={{ ...defaultStackHeader, title: 'Order Details' }}
-    />
-    <ProfileStack.Screen
-      name="Alerts"
-      component={NotificationsScreen}
-      options={{ ...defaultStackHeader, title: 'Alerts' }}
-    />
-    <ProfileStack.Screen
-      name="MessagesCenter"
-      component={ConversationListScreen}
-      options={{ ...defaultStackHeader, title: 'Messages' }}
-    />
-    <ProfileStack.Screen
-      name="Chat"
-      component={ChatScreen}
-      options={{ ...defaultStackHeader }}
-    />
-    <ProfileStack.Screen
-      name="Verification"
-      component={VerificationScreen}
-      options={{ ...defaultStackHeader, title: 'Verify Account' }}
-    />
-    <ProfileStack.Screen
-      name="Checkout"
-      component={CheckoutScreen}
-      options={{ ...defaultStackHeader, title: 'Checkout' }}
-    />
-    <ProfileStack.Screen
-      name="Categories"
-      component={CategoriesScreen}
-      options={{ ...defaultStackHeader, title: 'Categories' }}
-    />
-    <ProfileStack.Screen
-      name="Sellers"
-      component={SellersScreen}
-      options={{ ...defaultStackHeader, title: 'Sellers' }}
-    />
-    <ProfileStack.Screen
-      name="SellerOrders"
-      component={SellerOrdersScreen}
-      options={{ ...defaultStackHeader, title: 'Sales Orders' }}
-    />
-    <ProfileStack.Screen
-      name="Cart"
-      component={CartScreen}
-      options={{ ...defaultStackHeader, title: 'Shopping Cart' }}
-    />
-    <ProfileStack.Screen
-      name="PaymentVerification"
-      component={PaymentVerificationScreen}
-      options={{ ...defaultStackHeader, title: 'Payment Status' }}
-    />
-    <ProfileStack.Screen
-      name="Support"
-      component={SupportScreen}
-      options={{ ...defaultStackHeader, title: 'Support' }}
-    />
-    <ProfileStack.Screen
-      name="Contact"
-      component={ContactScreen}
-      options={{ ...defaultStackHeader, title: 'Contact' }}
-    />
-    <ProfileStack.Screen
-      name="Terms"
-      component={TermsScreen}
-      options={{ ...defaultStackHeader, title: 'Terms' }}
-    />
-    <ProfileStack.Screen
-      name="CollectionDetail"
-      component={CollectionDetailScreen}
-      options={{ ...defaultStackHeader, title: 'Collection' }}
-    />
-    <ProfileStack.Screen
-      name="Scanner"
-      component={ScannerScreen}
-      options={{ ...defaultStackHeader, title: 'Scanner', headerShown: false }}
-    />
-    <ProfileStack.Screen
-      name="LostFound"
-      component={LostFoundScreen}
-      options={{ ...defaultStackHeader, title: 'Lost & Found' }}
-    />
-    {/* Previously dead screens — now registered */}
-    <ProfileStack.Screen
-      name="SellerPayouts"
-      component={SellerPayoutsScreen}
-      options={{ ...defaultStackHeader, title: 'Earnings' }}
-    />
-    <ProfileStack.Screen
-      name="DisputeCenter"
-      component={DisputeCenterScreen}
-      options={{ ...defaultStackHeader, title: 'Disputes' }}
-    />
-    <ProfileStack.Screen
-      name="GrowthTools"
-      component={GrowthToolsScreen}
-      options={{ ...defaultStackHeader, title: 'Growth Tools' }}
-    />
-    <ProfileStack.Screen
-      name="Maintenance"
-      component={MaintenanceScreen}
-      options={{ ...defaultStackHeader, title: 'Maintenance' }}
-    />
-    <ProfileStack.Screen
-      name="FAQ"
-      component={FAQScreen}
-      options={{ ...defaultStackHeader, title: 'FAQ' }}
-    />
-    <ProfileStack.Screen
-      name="PrivacyPolicy"
-      component={PrivacyPolicyScreen}
-      options={{ ...defaultStackHeader, title: 'Privacy Policy' }}
-    />
-    <ProfileStack.Screen
-      name="AboutUs"
-      component={AboutUsScreen}
-      options={{ ...defaultStackHeader, title: 'About Us' }}
-    />
-    <ProfileStack.Screen
-      name="FollowingFeed"
-      component={FollowingFeedScreen}
-      options={{ ...defaultStackHeader, title: 'Following Feed' }}
-    />
-    <ProfileStack.Screen
-      name="Pulse"
-      component={PulseScreen}
-      options={{ ...defaultStackHeader, title: 'Campus Pulse' }}
-    />
-  </ProfileStack.Navigator>
-);
+const ProfileStackScreen = () => {
+  const colors = useColors();
+  const dsh = makeStackHeader(colors);
+  return (
+    <ProfileStack.Navigator screenOptions={{ headerShown: false }}>
+      <ProfileStack.Screen name="ProfileHome" component={ProfileScreen} />
+      <ProfileStack.Screen name="ProductDetail" component={ProductDetailScreen} options={{ ...dsh, title: 'Product Details' }} />
+      <ProfileStack.Screen name="ProfileEdit" component={ProfileEditScreen} options={{ ...dsh, title: 'Edit Profile' }} />
+      <ProfileStack.Screen name="Settings" component={SettingsScreen} options={{ ...dsh, title: 'Settings' }} />
+      <ProfileStack.Screen name="SellerOnboarding" component={SellerOnboardingScreen} options={{ ...dsh, title: 'Seller Onboarding' }} />
+      <ProfileStack.Screen name="SavedItems" component={SavedScreen} options={{ ...dsh, title: 'Saved Items' }} />
+      <ProfileStack.Screen name="Orders" component={OrdersScreen} options={{ ...dsh, title: 'My Orders' }} />
+      <ProfileStack.Screen name="OrderDetail" component={OrderDetailScreen} options={{ ...dsh, title: 'Order Details' }} />
+      <ProfileStack.Screen name="Alerts" component={NotificationsScreen} options={{ ...dsh, title: 'Alerts' }} />
+      <ProfileStack.Screen name="MessagesCenter" component={ConversationListScreen} options={{ ...dsh, title: 'Messages' }} />
+      <ProfileStack.Screen name="Chat" component={ChatScreen} options={{ ...dsh }} />
+      <ProfileStack.Screen name="Verification" component={VerificationScreen} options={{ ...dsh, title: 'Verify Account' }} />
+      <ProfileStack.Screen name="Categories" component={CategoriesScreen} options={{ ...dsh, title: 'Categories' }} />
+      <ProfileStack.Screen name="Sellers" component={SellersScreen} options={{ ...dsh, title: 'Sellers' }} />
+      <ProfileStack.Screen name="SellerOrders" component={SellerOrdersScreen} options={{ ...dsh, title: 'Sales Orders' }} />
+      <ProfileStack.Screen name="Support" component={SupportScreen} options={{ ...dsh, title: 'Support' }} />
+      <ProfileStack.Screen name="Contact" component={ContactScreen} options={{ ...dsh, title: 'Contact' }} />
+      <ProfileStack.Screen name="Terms" component={TermsScreen} options={{ ...dsh, title: 'Terms' }} />
+      <ProfileStack.Screen name="CollectionDetail" component={CollectionDetailScreen} options={{ ...dsh, title: 'Collection' }} />
+      <ProfileStack.Screen name="Scanner" component={ScannerScreen} options={{ ...dsh, title: 'Scanner', headerShown: false }} />
+      <ProfileStack.Screen name="LostFound" component={LostFoundScreen} options={{ ...dsh, title: 'Lost & Found' }} />
+      <ProfileStack.Screen name="SellerPayouts" component={SellerPayoutsScreen} options={{ ...dsh, title: 'Earnings' }} />
+      <ProfileStack.Screen name="DisputeCenter" component={DisputeCenterScreen} options={{ ...dsh, title: 'Disputes' }} />
+      <ProfileStack.Screen name="GrowthTools" component={GrowthToolsScreen} options={{ ...dsh, title: 'Growth Tools' }} />
+      <ProfileStack.Screen name="Maintenance" component={MaintenanceScreen} options={{ ...dsh, title: 'Maintenance' }} />
+      <ProfileStack.Screen name="FAQ" component={FAQScreen} options={{ ...dsh, title: 'FAQ' }} />
+      <ProfileStack.Screen name="PrivacyPolicy" component={PrivacyPolicyScreen} options={{ ...dsh, title: 'Privacy Policy' }} />
+      <ProfileStack.Screen name="AboutUs" component={AboutUsScreen} options={{ ...dsh, title: 'About Us' }} />
+      <ProfileStack.Screen name="FollowingFeed" component={FollowingFeedScreen} options={{ ...dsh, title: 'Following Feed' }} />
+      <ProfileStack.Screen name="Pulse" component={PulseScreen} options={{ ...dsh, title: 'Campus Pulse' }} />
+    </ProfileStack.Navigator>
+  );
+};
 
 const PulseStack = createNativeStackNavigator();
 const PulseStackScreen = () => (
@@ -347,11 +201,12 @@ const tabIcon = (name: any) => ({ color }: { color: string }) => (
 const BuyerTabs = () => {
   const { unreadMessagesCount, unreadNotificationsCount } = useAuth();
   const insets = useSafeAreaInsets();
+  const colors = useColors();
 
   const commonOptions = {
     headerShown: false,
     tabBarActiveTintColor: colors.text,
-    tabBarInactiveTintColor: '#9f9382',
+    tabBarInactiveTintColor: colors.textSecondary,
     tabBarStyle: {
       borderTopColor: colors.border,
       backgroundColor: colors.surface,
@@ -438,11 +293,12 @@ const BuyerTabs = () => {
 const SellerTabs = () => {
   const { unreadMessagesCount, unreadNotificationsCount } = useAuth();
   const insets = useSafeAreaInsets();
+  const colors = useColors();
 
   const commonOptions = {
     headerShown: false,
     tabBarActiveTintColor: colors.text,
-    tabBarInactiveTintColor: '#9f9382',
+    tabBarInactiveTintColor: colors.textSecondary,
     tabBarStyle: {
       borderTopColor: colors.border,
       backgroundColor: colors.surface,
@@ -526,84 +382,98 @@ const MainTabsWrapper = () => {
 // ── Root navigator ────────────────────────────────────────────────────────────
 const AppNavigator = () => {
   const { isAuthenticated, isLoading } = useAuth();
+  const colors = useColors();
 
   if (isLoading) {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: colors.bg }}>
-        {/* Stunning, Stylized Neobrutalist Splash Loading Screen */}
         <View style={{ alignItems: 'center', gap: 20 }}>
-          {/* Centered Brand Mark box */}
-          <View style={{
-            width: 76,
-            height: 76,
-            borderWidth: 4,
-            borderColor: '#000',
-            backgroundColor: colors.surface,
-            alignItems: 'center',
-            justifyContent: 'center',
-            shadowColor: '#000',
-            shadowOffset: { width: 5, height: 5 },
-            shadowOpacity: 1,
-            shadowRadius: 0,
-            elevation: 5,
-            position: 'relative',
-          }}>
-            {/* Bold Stencil Q (Outer Frame) */}
+          {/* Brand Row: Q-Logo box + U, A, D, S subscripts */}
+          <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 5 }}>
+            {/* Centered Brand Mark Box (Q-Logo) */}
             <View style={{
-              width: 36,
-              height: 36,
-              borderWidth: 8,
-              borderColor: '#000',
-              backgroundColor: 'transparent',
-            }} />
-            
-            {/* Bold Stencil Q (Rotated Tail) */}
-            <View style={{
-              position: 'absolute',
-              bottom: 12,
-              right: 12,
-              width: 14,
-              height: 7,
-              backgroundColor: '#000',
-              transform: [{ rotate: '45deg' }],
-            }} />
+              width: 76,
+              height: 76,
+              borderWidth: 4,
+              borderColor: colors.boardBorder,
+              backgroundColor: colors.surface,
+              alignItems: 'center',
+              justifyContent: 'center',
+              shadowColor: colors.boardShadow,
+              shadowOffset: { width: 5, height: 5 },
+              shadowOpacity: 1,
+              shadowRadius: 0,
+              elevation: 5,
+              position: 'relative',
+            }}>
+              {/* Bold Stencil Q (Outer Frame) */}
+              <View style={{
+                width: 36,
+                height: 36,
+                borderWidth: 8,
+                borderColor: colors.text,
+                backgroundColor: 'transparent',
+              }} />
 
-            {/* Red Thumbtack detail (Top Right) */}
-            <View style={{
-              position: 'absolute',
-              top: 6,
-              right: 6,
-              width: 12,
-              height: 12,
-              borderRadius: 6,
-              backgroundColor: '#ff6b6b',
-              borderWidth: 2,
-              borderColor: '#000',
-            }} />
+              {/* Bold Stencil Q (Rotated Tail) */}
+              <View style={{
+                position: 'absolute',
+                bottom: 12,
+                right: 12,
+                width: 14,
+                height: 7,
+                backgroundColor: colors.text,
+                transform: [{ rotate: '45deg' }],
+              }} />
+
+              {/* Red Thumbtack detail (Top Right) */}
+              <View style={{
+                position: 'absolute',
+                top: 6,
+                right: 6,
+                width: 12,
+                height: 12,
+                borderRadius: 6,
+                backgroundColor: colors.pinRed,
+                borderWidth: 2,
+                borderColor: colors.boardBorder,
+              }} />
+            </View>
+
+            {/* Subscript letters: U A D S */}
+            {['U', 'A', 'D', 'S'].map((char, idx) => (
+              <View
+                key={idx}
+                style={{
+                  width: 28,
+                  height: 28,
+                  borderWidth: 2.2,
+                  borderColor: colors.boardBorder,
+                  backgroundColor: colors.surface,
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  marginBottom: 2,
+                  shadowColor: colors.boardShadow,
+                  shadowOffset: { width: 2, height: 2 },
+                  shadowOpacity: 1,
+                  shadowRadius: 0,
+                  elevation: 2,
+                }}
+              >
+                <Text style={{ fontSize: 14, fontWeight: '900', color: colors.text }}>{char}</Text>
+              </View>
+            ))}
           </View>
-
-          {/* Large Stylized Brand Title */}
-          <Text style={{
-            fontSize: 48,
-            fontWeight: '900',
-            letterSpacing: -2,
-            color: '#000',
-            textShadowColor: colors.accent,
-            textShadowOffset: { width: 3, height: 3 },
-            textShadowRadius: 0,
-          }}>
-            QUADS
-          </Text>
 
           {/* Official Tagline */}
           <Text style={{
             fontSize: 9,
             fontWeight: '900',
-            letterSpacing: 1.2,
-            color: '#7c6f60',
+            letterSpacing: 1.4,
+            color: colors.muted,
             textTransform: 'uppercase',
             borderTopWidth: 2,
-            borderColor: '#000',
+            borderTopColor: colors.boardBorder,
             paddingTop: 8,
             marginTop: 4,
           }}>
@@ -612,16 +482,16 @@ const AppNavigator = () => {
 
           {/* High contrast loading progress indicator */}
           <View style={{
-            marginTop: 15,
+            marginTop: 10,
             width: 140,
             height: 6,
             borderWidth: 2,
-            borderColor: '#000',
-            backgroundColor: '#fff',
+            borderColor: colors.boardBorder,
+            backgroundColor: colors.surfaceSecondary,
             overflow: 'hidden',
           }}>
             <View style={{
-              width: '60%',
+              width: '65%',
               height: '100%',
               backgroundColor: colors.accent,
             }} />
@@ -631,15 +501,33 @@ const AppNavigator = () => {
     );
   }
 
+
   return (
     <NavigationContainer ref={navigationRef}>
       <View style={{ flex: 1 }}>
         <Stack.Navigator screenOptions={{ headerShown: false }}>
           {isAuthenticated ? (
-            <Stack.Screen 
-              name="Main" 
-              component={MainTabsWrapper} 
-            />
+            <>
+              <Stack.Screen 
+                name="Main" 
+                component={MainTabsWrapper} 
+              />
+              <Stack.Screen 
+                name="Cart" 
+                component={CartScreen} 
+                options={{ ...makeStackHeader(colors), title: 'Shopping Cart', headerShown: true }} 
+              />
+              <Stack.Screen 
+                name="Checkout" 
+                component={CheckoutScreen} 
+                options={{ ...makeStackHeader(colors), title: 'Checkout', headerShown: true }} 
+              />
+              <Stack.Screen 
+                name="PaymentVerification" 
+                component={PaymentVerificationScreen} 
+                options={{ ...makeStackHeader(colors), title: 'Payment Status', headerShown: true }} 
+              />
+            </>
           ) : (
             <>
               <Stack.Screen name="Welcome" component={WelcomeScreen} />
@@ -648,12 +536,12 @@ const AppNavigator = () => {
               <Stack.Screen
                 name="ForgotPassword"
                 component={ForgotPasswordScreen}
-                options={{ ...defaultStackHeader, title: 'Reset Password', headerShown: true }}
+                options={{ ...makeStackHeader(colors), title: 'Reset Password', headerShown: true }}
               />
               <Stack.Screen
                 name="ResetPassword"
                 component={ResetPasswordScreen}
-                options={{ ...defaultStackHeader, title: 'New Password', headerShown: true }}
+                options={{ ...makeStackHeader(colors), title: 'New Password', headerShown: true }}
               />
             </>
           )}

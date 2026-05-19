@@ -88,6 +88,10 @@ const allowedOrigins = [
    'http://localhost:5173',
    'http://localhost:5200',
    'http://127.0.0.1:5200',
+   'http://localhost:8088',
+   'http://127.0.0.1:8088',
+   'http://localhost:3000',
+   'http://127.0.0.1:3000',
    'http://localhost:19006',
    // Additional origins may be supplied via CORS_EXTRA_ORIGINS (comma-separated)
    ...env.CORS_EXTRA_ORIGINS.split(',').map((o) => o.trim()).filter(Boolean),

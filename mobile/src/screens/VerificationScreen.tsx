@@ -10,16 +10,20 @@ import {
   TextInput,
   TouchableOpacity,
   View,
+  Dimensions,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuth } from '../context/AuthContext';
 import verificationService from '../services/verification.service';
-import { colors, shadows } from '../theme';
+import { useColors } from '../theme/ThemeContext';
 import ScreenHeader from '../components/ScreenHeader';
 
 type TabType = 'email' | 'phone';
 
 const VerificationScreen = ({ navigation }: any) => {
+  const colors = useColors();
+  const { width: _sw } = Dimensions.get('window');
+  const isMobile = _sw < 640;
   const { user, refreshUser } = useAuth();
   const [tab, setTab] = useState<TabType>('email');
   const [phone, setPhone] = useState(user?.phone ?? '');
@@ -30,6 +34,49 @@ const VerificationScreen = ({ navigation }: any) => {
   const [emailVerified, setEmailVerified] = useState(false);
   const [phoneVerified, setPhoneVerified] = useState(false);
   const [statusLoading, setStatusLoading] = useState(true);
+
+  const styles = React.useMemo(() => StyleSheet.create({
+    container: { flex: 1, backgroundColor: colors.bg },
+    centered: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: colors.bg },
+    content: { padding: isMobile ? 12 : 16, paddingBottom: 40 },
+    statusRow: {
+      flexDirection: 'row', borderWidth: 1, borderColor: colors.border,
+      backgroundColor: colors.surface, marginBottom: 16,
+    },
+    statusItem: { flex: 1, padding: 14, alignItems: 'center' },
+    statusLabel: { fontSize: 10, fontWeight: '800', color: colors.muted, textTransform: 'uppercase', letterSpacing: 1.4, marginBottom: 8 },
+    statusBadge: { borderWidth: 1, paddingHorizontal: 10, paddingVertical: 4 },
+    badgeVerified: { borderColor: colors.accent, backgroundColor: colors.successTint },
+    badgePending: { borderColor: colors.border, backgroundColor: colors.surfaceSecondary },
+    statusBadgeText: { fontSize: 10, fontWeight: '800', textTransform: 'uppercase', letterSpacing: 1 },
+    badgeTextVerified: { color: colors.accent },
+    badgeTextPending: { color: colors.muted },
+    tabs: { flexDirection: 'row', borderWidth: 1, borderColor: colors.border, marginBottom: 16 },
+    tab: { flex: 1, paddingVertical: 12, alignItems: 'center', backgroundColor: colors.surface },
+    tabActive: { backgroundColor: colors.text },
+    tabText: { fontSize: 11, fontWeight: '800', textTransform: 'uppercase', letterSpacing: 1.1, color: colors.muted },
+    tabTextActive: { color: colors.bg },
+    verifiedBanner: { borderWidth: 1, borderColor: colors.accent, backgroundColor: colors.successTint, padding: 14, marginBottom: 16 },
+    verifiedBannerText: { fontSize: isMobile ? 12 : 13, fontWeight: '800', color: colors.accent, textTransform: 'uppercase', letterSpacing: 1, textAlign: 'center' },
+    form: { gap: 12 },
+    field: { gap: 6 },
+    fieldLabel: { fontSize: 10, fontWeight: '800', color: colors.muted, textTransform: 'uppercase', letterSpacing: 1.4 },
+    input: {
+      borderWidth: 1, borderColor: colors.border, backgroundColor: colors.surfaceSecondary,
+      borderRadius: 0, paddingHorizontal: 14, paddingVertical: 12, fontSize: isMobile ? 13 : 15, color: colors.text,
+    },
+    codeInput: { fontSize: isMobile ? 18 : 22, fontWeight: '900', letterSpacing: 6, textAlign: 'center' },
+    primaryBtn: { backgroundColor: colors.text, paddingVertical: 14, alignItems: 'center', marginTop: 4 },
+    btnDisabled: { opacity: 0.5 },
+    primaryBtnText: { color: colors.bg, fontSize: 12, fontWeight: '800', textTransform: 'uppercase', letterSpacing: 1.3 },
+    sentNote: { borderWidth: 1, borderColor: colors.border, backgroundColor: colors.surfaceSecondary, padding: 12 },
+    sentNoteText: { fontSize: 12, color: colors.muted, lineHeight: 18 },
+    resendBtn: { marginTop: 8, alignItems: 'center', paddingVertical: 10, borderWidth: 1, borderColor: colors.border, backgroundColor: colors.surface },
+    resendText: { fontSize: 10, fontWeight: '800', color: colors.muted, textTransform: 'uppercase', letterSpacing: 1.1 },
+    infoBox: { marginTop: 24, borderWidth: 1, borderColor: colors.border, backgroundColor: colors.surface, padding: 14 },
+    infoTitle: { fontSize: 10, fontWeight: '800', color: colors.muted, textTransform: 'uppercase', letterSpacing: 1.4, marginBottom: 6 },
+    infoText: { fontSize: 12, color: colors.muted, lineHeight: 18 },
+  }), [colors]);
 
   useEffect(() => {
     verificationService.getStatus().then((res) => {
@@ -100,20 +147,15 @@ const VerificationScreen = ({ navigation }: any) => {
   return (
     <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <SafeAreaView style={styles.container} edges={['top']}>
-        <ScreenHeader
-          eyebrow="Account security"
-          title="Verify Account"
-          subtitle="Verify your email or phone to start selling on campus."
-        />
+        <ScreenHeader eyebrow="Account security" title="Verify Account" subtitle="Verify your email or phone to start selling on campus." />
         <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
 
-          {/* Status row */}
           <View style={styles.statusRow}>
             <View style={styles.statusItem}>
               <Text style={styles.statusLabel}>Email</Text>
               <View style={[styles.statusBadge, emailVerified ? styles.badgeVerified : styles.badgePending]}>
                 <Text style={[styles.statusBadgeText, emailVerified ? styles.badgeTextVerified : styles.badgeTextPending]}>
-                  {emailVerified ? '✓ Verified' : 'Pending'}
+                  {emailVerified ? 'Verified' : 'Pending'}
                 </Text>
               </View>
             </View>
@@ -121,13 +163,12 @@ const VerificationScreen = ({ navigation }: any) => {
               <Text style={styles.statusLabel}>Phone</Text>
               <View style={[styles.statusBadge, phoneVerified ? styles.badgeVerified : styles.badgePending]}>
                 <Text style={[styles.statusBadgeText, phoneVerified ? styles.badgeTextVerified : styles.badgeTextPending]}>
-                  {phoneVerified ? '✓ Verified' : 'Pending'}
+                  {phoneVerified ? 'Verified' : 'Pending'}
                 </Text>
               </View>
             </View>
           </View>
 
-          {/* Tabs */}
           <View style={styles.tabs}>
             {(['email', 'phone'] as TabType[]).map((t) => (
               <TouchableOpacity
@@ -142,24 +183,21 @@ const VerificationScreen = ({ navigation }: any) => {
             ))}
           </View>
 
-          {/* Verified banner */}
           {isCurrentTabVerified ? (
             <View style={styles.verifiedBanner}>
               <Text style={styles.verifiedBannerText}>
-                ✓ {tab === 'email' ? 'Email' : 'Phone'} already verified
+                {tab === 'email' ? 'Email' : 'Phone'} already verified
               </Text>
             </View>
           ) : (
             <View style={styles.form}>
-
-              {/* Phone input (only for phone tab) */}
               {tab === 'phone' && (
                 <View style={styles.field}>
                   <Text style={styles.fieldLabel}>Phone number</Text>
                   <TextInput
                     style={styles.input}
                     placeholder="e.g. 0244123456"
-                    placeholderTextColor="#9a8e7f"
+                    placeholderTextColor={colors.muted}
                     value={phone}
                     onChangeText={setPhone}
                     keyboardType="phone-pad"
@@ -168,7 +206,6 @@ const VerificationScreen = ({ navigation }: any) => {
                 </View>
               )}
 
-              {/* Send button */}
               {!codeSent ? (
                 <TouchableOpacity
                   style={[styles.primaryBtn, sending && styles.btnDisabled]}
@@ -176,10 +213,8 @@ const VerificationScreen = ({ navigation }: any) => {
                   disabled={sending}
                 >
                   {sending
-                    ? <ActivityIndicator color="#fff" />
-                    : <Text style={styles.primaryBtnText}>
-                        Send {tab === 'email' ? 'Email' : 'SMS'} Code
-                      </Text>
+                    ? <ActivityIndicator color={colors.bg} />
+                    : <Text style={styles.primaryBtnText}>Send {tab === 'email' ? 'Email' : 'SMS'} Code</Text>
                   }
                 </TouchableOpacity>
               ) : (
@@ -195,7 +230,7 @@ const VerificationScreen = ({ navigation }: any) => {
                     <TextInput
                       style={[styles.input, styles.codeInput]}
                       placeholder="Enter 6-digit code"
-                      placeholderTextColor="#9a8e7f"
+                      placeholderTextColor={colors.muted}
                       value={code}
                       onChangeText={setCode}
                       keyboardType="number-pad"
@@ -210,7 +245,7 @@ const VerificationScreen = ({ navigation }: any) => {
                     disabled={verifying}
                   >
                     {verifying
-                      ? <ActivityIndicator color="#fff" />
+                      ? <ActivityIndicator color={colors.bg} />
                       : <Text style={styles.primaryBtnText}>Verify Code</Text>
                     }
                   </TouchableOpacity>
@@ -235,65 +270,5 @@ const VerificationScreen = ({ navigation }: any) => {
     </KeyboardAvoidingView>
   );
 };
-
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.bg },
-  centered: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: colors.bg },
-  content: { padding: 16, paddingBottom: 40 },
-
-  statusRow: {
-    flexDirection: 'row',
-    borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.surface,
-    marginBottom: 16,
-  },
-  statusItem: { flex: 1, padding: 14, alignItems: 'center' },
-  statusLabel: { fontSize: 10, fontWeight: '800', color: '#7c6f60', textTransform: 'uppercase', letterSpacing: 1.4, marginBottom: 8 },
-  statusBadge: { borderWidth: 1, paddingHorizontal: 10, paddingVertical: 4 },
-  badgeVerified: { borderColor: colors.accent, backgroundColor: '#d6ede7' },
-  badgePending: { borderColor: colors.border, backgroundColor: '#fffacd' },
-  statusBadgeText: { fontSize: 10, fontWeight: '800', textTransform: 'uppercase', letterSpacing: 1 },
-  badgeTextVerified: { color: colors.accent },
-  badgeTextPending: { color: '#7b6f61' },
-
-  tabs: { flexDirection: 'row', borderWidth: 1, borderColor: colors.border, marginBottom: 16 },
-  tab: { flex: 1, paddingVertical: 12, alignItems: 'center', backgroundColor: colors.surface },
-  tabActive: { backgroundColor: '#1f1a14' },
-  tabText: { fontSize: 11, fontWeight: '800', textTransform: 'uppercase', letterSpacing: 1.1, color: '#6f6559' },
-  tabTextActive: { color: '#fff' },
-
-  verifiedBanner: { borderWidth: 1, borderColor: colors.accent, backgroundColor: '#d6ede7', padding: 14, marginBottom: 16 },
-  verifiedBannerText: { fontSize: 13, fontWeight: '800', color: colors.accent, textTransform: 'uppercase', letterSpacing: 1, textAlign: 'center' },
-
-  form: { gap: 12 },
-  field: { gap: 6 },
-  fieldLabel: { fontSize: 10, fontWeight: '800', color: '#7c6f60', textTransform: 'uppercase', letterSpacing: 1.4 },
-  input: {
-    borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: '#fff',
-    borderRadius: 0,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    fontSize: 15,
-    color: colors.text,
-  },
-  codeInput: { fontSize: 22, fontWeight: '900', letterSpacing: 6, textAlign: 'center' },
-
-  primaryBtn: { backgroundColor: '#1f1a14', paddingVertical: 14, alignItems: 'center', marginTop: 4 },
-  btnDisabled: { opacity: 0.5 },
-  primaryBtnText: { color: '#fff', fontSize: 12, fontWeight: '800', textTransform: 'uppercase', letterSpacing: 1.3 },
-
-  sentNote: { borderWidth: 1, borderColor: colors.border, backgroundColor: '#fffacd', padding: 12 },
-  sentNoteText: { fontSize: 12, color: '#5e5038', lineHeight: 18 },
-
-  resendBtn: { marginTop: 8, alignItems: 'center', paddingVertical: 10, borderWidth: 1, borderColor: colors.border, backgroundColor: colors.surface },
-  resendText: { fontSize: 10, fontWeight: '800', color: '#6f6559', textTransform: 'uppercase', letterSpacing: 1.1 },
-
-  infoBox: { marginTop: 24, borderWidth: 1, borderColor: colors.border, backgroundColor: colors.surface, padding: 14 },
-  infoTitle: { fontSize: 10, fontWeight: '800', color: '#7c6f60', textTransform: 'uppercase', letterSpacing: 1.4, marginBottom: 6 },
-  infoText: { fontSize: 12, color: '#5e5447', lineHeight: 18 },
-});
 
 export default VerificationScreen;

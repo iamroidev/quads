@@ -18,13 +18,16 @@ import { Ionicons } from "@expo/vector-icons";
 import productService from "../services/product.service";
 import { Product } from "../types";
 import { useAuth } from "../context/AuthContext";
-import { colors, shadows } from "../theme";
+import { useTheme } from "../theme/ThemeContext";
+import { BulletinCard } from "../components/BulletinCard";
 import ScreenHeader from "../components/ScreenHeader";
 import { SkeletonPulse, CardSkeleton } from "../components/SkeletonLoader";
 import FloatingCart from "../components/FloatingCart";
 import categoryService, {
   CategoryWithCount,
 } from "../services/category.service";
+import { useResponsive } from "../hooks/useResponsive";
+import { getTypography } from "../theme/typography";
 
 const CURATED_HERO_CARDS = [
   {
@@ -53,61 +56,84 @@ const formatPrice = (n: number) =>
 const ProductCard = ({
   item,
   onPress,
+  columns,
 }: {
   item: Product;
   onPress: () => void;
+  columns: number;
 }) => {
+  const { colors } = useTheme();
+  const { width } = useResponsive();
+  const styles = getStyles(colors, width);
   const image = item.images?.[0]?.url;
   const conditionColor = 
-    item.condition === 'new' ? '#4ade80' : 
-    item.condition === 'like-new' ? '#c084fc' : 
-    item.condition === 'good' ? '#60a5fa' : '#fbbf24';
+    item.condition === 'new' ? colors.success : 
+    item.condition === 'like-new' ? colors.primary : 
+    item.condition === 'good' ? colors.pinBlue : colors.textSecondary;
+
+  const gap = 16;
+  const padding = width < 640 ? 12 : 16;
+  const cardWidth = (width - padding * 2 - gap * (columns - 1)) / columns;
 
   return (
-    <TouchableOpacity style={styles.card} onPress={onPress} activeOpacity={0.85}>
-      <View style={styles.imageContainer}>
-        <Image
-          source={image ? { uri: image } : require("../../assets/icon.png")}
-          style={styles.cardImage}
-          resizeMode="cover"
-        />
-        {item.isFeatured && (
-          <View style={styles.featuredBadge}>
-            <Text style={styles.featuredBadgeText}>⚡ DROP</Text>
+    <BulletinCard style={[styles.card, { width: cardWidth }]} size="sm">
+      <TouchableOpacity onPress={onPress} activeOpacity={0.88}>
+        {/* Image — tall portrait ratio */}
+        <View style={styles.imageContainer}>
+          <Image
+            source={image ? { uri: image } : require("../../assets/icon.png")}
+            style={styles.cardImage}
+            resizeMode="cover"
+          />
+
+          {/* Top-left: featured flash badge */}
+          {item.isFeatured && (
+            <View style={styles.featuredBadge}>
+              <Text style={styles.featuredBadgeText}>NEW</Text>
+            </View>
+          )}
+
+          {/* Top-right: condition pill */}
+          <View style={[styles.conditionTag, { backgroundColor: conditionColor }]}>
+            <Text style={styles.conditionTagText}>{item.condition.replace('-', ' ')}</Text>
           </View>
-        )}
-        
-        <View style={[styles.conditionTag, { backgroundColor: conditionColor }]}>
-          <Text style={styles.conditionTagText}>{item.condition}</Text>
+
+          {/* SOLD / PENDING stamp */}
+          {(item.status === "sold" || item.status === "reserved") && (
+            <View style={styles.stampOverlay}>
+              <Text style={styles.stampText}>
+                {item.status === "sold" ? "SOLD" : "PENDING"}
+              </Text>
+            </View>
+          )}
         </View>
 
-        {(item.status === "sold" || item.status === "reserved") && (
-          <View style={styles.stampOverlay}>
-            <Text style={styles.stampText}>
-              {item.status === "sold" ? "SOLD" : "PENDING"}
-            </Text>
-          </View>
-        )}
-      </View>
-      <View style={styles.cardBody}>
-        <Text style={styles.cardTitle} numberOfLines={2}>
-          {item.title}
-        </Text>
-        <View style={styles.cardPriceRow}>
+        {/* Card body */}
+        <View style={styles.cardBody}>
           <Text style={styles.cardPrice}>{formatPrice(item.price)}</Text>
-          <View style={styles.locationBadge}>
-            <Text style={styles.locationBadgeText} numberOfLines={1}>
-              📍 {item.pickupLocation || "UMaT"}
+          <Text style={styles.cardTitle} numberOfLines={2} ellipsizeMode="tail">
+            {item.title}
+          </Text>
+          <View style={styles.cardMeta}>
+            <Text style={styles.cardMetaText} numberOfLines={1}>
+              {item.pickupLocation || "UMaT"}
             </Text>
+            {(item.views ?? 0) > 0 && (
+              <Text style={styles.cardViews}>{item.views} views</Text>
+            )}
           </View>
         </View>
-      </View>
-    </TouchableOpacity>
+      </TouchableOpacity>
+    </BulletinCard>
   );
 };
 
 const HomeScreen = ({ navigation }: any) => {
   const { user, setViewMode } = useAuth();
+  const { colors, isDark } = useTheme();
+  const { width, isMobile, isTablet } = useResponsive();
+  const typography = getTypography(width);
+  const styles = getStyles(colors, width);
   const [featured, setFeatured] = useState<Product[]>([]);
   const [recent, setRecent] = useState<Product[]>([]);
   const [trending, setTrending] = useState<Product[]>([]);
@@ -119,6 +145,8 @@ const HomeScreen = ({ navigation }: any) => {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const fadeAnim = useRef(new Animated.Value(0)).current;
+
+  const columns = isMobile ? 2 : isTablet ? 2 : 3;
 
   const fetchData = useCallback(async (withLoader = true) => {
     if (withLoader) setLoading(true);
@@ -191,11 +219,15 @@ const HomeScreen = ({ navigation }: any) => {
       params: { search },
     });
 
-  const goToProduct = (productId: string) =>
+  const goToProduct = useCallback((productId: string) =>
     navigation.navigate("ProductsTab", {
       screen: "ProductDetail",
       params: { productId },
-    });
+    }), [navigation]);
+
+  const renderProductItem = useCallback(({ item }: { item: Product }) => (
+    <ProductCard item={item} onPress={() => goToProduct(item._id)} columns={columns} />
+  ), [goToProduct, columns]);
 
   if (loading) {
     return (
@@ -205,8 +237,8 @@ const HomeScreen = ({ navigation }: any) => {
           title="Home"
           subtitle="Curated highlights, featured drops, and fresh campus listings."
         />
-        <ScrollView contentContainerStyle={{ padding: 16 }}>
-          <SkeletonPulse height={180} style={{ marginBottom: 24, borderWidth: 1, borderColor: colors.border }} />
+        <ScrollView contentContainerStyle={{ padding: isMobile ? 12 : 16 }}>
+          <SkeletonPulse height={180} style={{ marginBottom: 24, borderWidth: 1, borderColor: colors.boardBorder }} />
           <SkeletonPulse width="40%" height={16} style={{ marginBottom: 12 }} />
           <View style={{ flexDirection: 'row', gap: 12, marginBottom: 24 }}>
             <CardSkeleton />
@@ -221,6 +253,13 @@ const HomeScreen = ({ navigation }: any) => {
       </SafeAreaView>
     );
   }
+
+  const hPadding = isMobile ? 12 : 16;
+  const sectionVSpace = isMobile ? 18 : 26;
+  const curatedCardW = isMobile ? 170 : isTablet ? 200 : 210;
+  const curatedCardPad = isMobile ? 12 : 16;
+  const featuredCardW = isMobile ? 160 : isTablet ? 180 : 190;
+  const featuredCardH = isMobile ? 120 : isTablet ? 130 : 140;
 
   return (
     <SafeAreaView style={styles.container} edges={["top"]}>
@@ -242,11 +281,10 @@ const HomeScreen = ({ navigation }: any) => {
           subtitle="Direct student-to-student transactions with escrow protection."
         />
         
-        {/* Premium Neobrutalist Header & Search */}
         <Animated.View style={[styles.premiumHeader, { opacity: fadeAnim }]}>
           <View style={styles.headerGreetingBlock}>
-            <Text style={styles.premiumGreeting}>
-              {user ? `Hey, ${user.name.split(" ")[0]} 👋` : "WELCOME TO QUADS"}
+            <Text style={[styles.premiumGreeting]}>
+              {user ? `Hey, ${user.name.split(" ")[0]}` : "WELCOME TO QUADS"}
             </Text>
             <Text style={styles.premiumSubtitle}>Find great deals verified on campus.</Text>
           </View>
@@ -255,14 +293,14 @@ const HomeScreen = ({ navigation }: any) => {
             <TextInput
               style={styles.premiumSearchInput}
               placeholder="Search textbooks, devices, hostel items..."
-              placeholderTextColor="#9ca3af"
+              placeholderTextColor={colors.textSecondary}
               value={search}
               onChangeText={setSearch}
               onSubmitEditing={handleSearch}
               returnKeyType="search"
             />
             <TouchableOpacity style={styles.premiumSearchBtn} onPress={handleSearch}>
-              <Text style={styles.premiumSearchBtnText}>GO 🔍</Text>
+              <Text style={styles.premiumSearchBtnText}>GO</Text>
             </TouchableOpacity>
           </View>
           <TouchableOpacity
@@ -273,16 +311,15 @@ const HomeScreen = ({ navigation }: any) => {
           </TouchableOpacity>
         </Animated.View>
 
-        {/* Curated Spotlights */}
         <View style={styles.quickSection}>
-          <View style={styles.sectionHeader}>
+          <View style={[styles.sectionHeader, { paddingHorizontal: hPadding }]}>
             <Text style={styles.sectionLabel}>CURATED SELECTIONS</Text>
             <Text style={styles.sectionTitle}>Shop by need</Text>
           </View>
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.hScroll}
+            contentContainerStyle={[styles.hScroll, { paddingHorizontal: hPadding }]}
           >
             {CURATED_HERO_CARDS.map((card) => {
               const cardIcon = 
@@ -290,41 +327,42 @@ const HomeScreen = ({ navigation }: any) => {
                 card.id === 'hostel' ? 'bed-outline' : 'hardware-chip-outline';
               
               return (
-                <TouchableOpacity
-                  key={card.id}
-                  style={styles.curatedCard}
-                  onPress={() =>
-                    navigation.navigate("ProductsTab", {
-                      screen: "ProductsHome",
-                      params: { search: card.filter },
-                    })
-                  }
-                  activeOpacity={0.8}
-                >
-                  <View style={styles.curatedTopRow}>
-                    <View style={styles.curatedIconBox}>
-                      <Ionicons name={cardIcon} size={20} color="#ff6b6b" />
+                <BulletinCard key={card.id} style={[styles.curatedCard, { width: curatedCardW }]} size="md">
+                  <TouchableOpacity
+                    onPress={() =>
+                      navigation.navigate("ProductsTab", {
+                        screen: "ProductsHome",
+                        params: { search: card.filter },
+                      })
+                    }
+                    activeOpacity={0.8}
+                  >
+                    <View style={[styles.curatedTopRow, { padding: curatedCardPad }]}>
+                      <View style={styles.curatedIconBox}>
+                        <Ionicons name={cardIcon} size={20} color={colors.primary} />
+                      </View>
+                      <View style={styles.curatedBadge}>
+                        <Text style={styles.curatedBadgeText}>SPOTLIGHT</Text>
+                      </View>
                     </View>
-                    <View style={styles.curatedBadge}>
-                      <Text style={styles.curatedBadgeText}>SPOTLIGHT</Text>
+                    <View style={{ padding: curatedCardPad, paddingTop: 0 }}>
+                      <Text style={styles.curatedCardTitle} numberOfLines={2} ellipsizeMode="tail">{card.title}</Text>
+                      <Text style={styles.curatedCardSubtitle} numberOfLines={2} ellipsizeMode="tail">{card.subtitle}</Text>
                     </View>
-                  </View>
-                  <Text style={styles.curatedCardTitle}>{card.title}</Text>
-                  <Text style={styles.curatedCardSubtitle}>{card.subtitle}</Text>
-                </TouchableOpacity>
+                  </TouchableOpacity>
+                </BulletinCard>
               );
             })}
           </ScrollView>
         </View>
 
-        {/* Categories / Departments */}
         {categories.length > 0 && (
-          <View style={styles.section}>
-            <View style={styles.sectionHeader}>
+          <View style={[styles.section, { paddingTop: sectionVSpace }]}>
+            <View style={[styles.sectionHeader, { paddingHorizontal: hPadding }]}>
               <Text style={styles.sectionLabel}>DEPARTMENTS</Text>
               <Text style={styles.sectionTitle}>Browse categories</Text>
             </View>
-            <View style={styles.categoryGrid}>
+            <View style={[styles.categoryGrid, { paddingHorizontal: hPadding }]}>
               {categories.map((cat) => {
                 const mapSlugToIcon = (slug: string): string => {
                   const s = slug.toLowerCase();
@@ -339,94 +377,95 @@ const HomeScreen = ({ navigation }: any) => {
                   return 'grid-outline';
                 };
 
+                const catCols = isMobile ? 2 : 4;
+                const catGap = 12;
+                const catCardWidth = (width - hPadding * 2 - catGap * (catCols - 1)) / catCols;
+
                 return (
-                  <TouchableOpacity
-                    key={cat._id}
-                    style={styles.categoryTile}
-                    onPress={() =>
-                      navigation.navigate("ProductsTab", {
-                        screen: "ProductsHome",
-                        params: { category: cat._id },
-                      })
-                    }
-                    activeOpacity={0.8}
-                  >
-                    <View style={styles.categoryTileHeader}>
-                      <View style={styles.categoryIconBox}>
-                        <Ionicons name={mapSlugToIcon(cat.slug) as any} size={18} color="#2f5d4f" />
+                  <BulletinCard key={cat._id} style={[styles.categoryTile, { width: catCardWidth }]} size="sm">
+                    <TouchableOpacity
+                      onPress={() =>
+                        navigation.navigate("ProductsTab", {
+                          screen: "ProductsHome",
+                          params: { category: cat._id },
+                        })
+                      }
+                      activeOpacity={0.8}
+                    >
+                      <View style={[styles.categoryTileHeader]}>
+                        <View style={styles.categoryIconBox}>
+                          <Ionicons name={mapSlugToIcon(cat.slug) as any} size={18} color={colors.textSecondary} />
+                        </View>
+                        <View style={styles.categoryBadge}>
+                          <Text style={styles.categoryBadgeText}>
+                            {cat.productCount} {cat.productCount === 1 ? 'item' : 'items'}
+                          </Text>
+                        </View>
                       </View>
-                      <View style={styles.categoryBadge}>
-                        <Text style={styles.categoryBadgeText}>
-                          {cat.productCount} {cat.productCount === 1 ? 'item' : 'items'}
-                        </Text>
-                      </View>
-                    </View>
-                    <Text style={styles.categoryTileTitle} numberOfLines={1}>
-                      {cat.name}
-                    </Text>
-                  </TouchableOpacity>
+                      <Text style={styles.categoryTileTitle} numberOfLines={1} ellipsizeMode="tail">
+                        {cat.name}
+                      </Text>
+                    </TouchableOpacity>
+                  </BulletinCard>
                 );
               })}
             </View>
           </View>
         )}
 
-        {/* Featured */}
         {featured.length > 0 && (
-          <View style={styles.section}>
-            <View style={styles.sectionHeader}>
-              <Text style={styles.sectionLabel}>⚡ SPOTLIGHT</Text>
+          <View style={[styles.section, { paddingTop: sectionVSpace }]}>
+            <View style={[styles.sectionHeader, { paddingHorizontal: hPadding }]}>
+              <Text style={styles.sectionLabel}>SPOTLIGHT</Text>
               <Text style={styles.sectionTitle}>Featured Drops</Text>
             </View>
             <ScrollView
               horizontal
               showsHorizontalScrollIndicator={false}
-              contentContainerStyle={styles.hScroll}
+              contentContainerStyle={[styles.hScroll, { paddingHorizontal: hPadding }]}
             >
               {featured.map((item) => (
-                <TouchableOpacity
-                  key={item._id}
-                  style={styles.featuredCard}
-                  onPress={() => goToProduct(item._id)}
-                  activeOpacity={0.8}
-                >
-                  <Image
-                    source={
-                      item.images?.[0]?.url
-                        ? { uri: item.images[0].url }
-                        : require("../../assets/icon.png")
-                    }
-                    style={styles.featuredImage}
-                  />
-                  <View style={styles.featuredOverlay} />
-                  <View style={styles.featuredInfo}>
-                    <Text style={styles.featuredTitle} numberOfLines={2}>
-                      {item.title}
-                    </Text>
-                    <Text style={styles.featuredPrice}>
-                      {formatPrice(item.price)}
-                    </Text>
-                  </View>
-                </TouchableOpacity>
+                <BulletinCard key={item._id} style={[styles.featuredCard, { width: featuredCardW, height: featuredCardH }]} size="md">
+                  <TouchableOpacity
+                    onPress={() => goToProduct(item._id)}
+                    activeOpacity={0.8}
+                  >
+                    <Image
+                      source={
+                        item.images?.[0]?.url
+                          ? { uri: item.images[0].url }
+                          : require("../../assets/icon.png")
+                      }
+                      style={styles.featuredImage}
+                    />
+                    <View style={styles.featuredOverlay} />
+                    <View style={styles.featuredInfo}>
+                      <Text style={[styles.featuredTitle, { fontSize: isMobile ? 10 : 11 }]} numberOfLines={2} ellipsizeMode="tail">
+                        {item.title}
+                      </Text>
+                      <Text style={[styles.featuredPrice, { fontSize: isMobile ? 10 : 11 }]}>
+                        {formatPrice(item.price)}
+                      </Text>
+                    </View>
+                  </TouchableOpacity>
+                </BulletinCard>
               ))}
             </ScrollView>
           </View>
         )}
 
-        {/* Recent */}
-        <View style={styles.section}>
-          <View style={styles.sectionHeader}>
+        <View style={[styles.section, { paddingTop: sectionVSpace }]}>
+          <View style={[styles.sectionHeader, { paddingHorizontal: hPadding }]}>
             <Text style={styles.sectionLabel}>LATEST LISTINGS</Text>
             <Text style={styles.sectionTitle}>Freshly Posted</Text>
           </View>
           <FlatList
             data={recent}
+            key={String(columns)}
             keyExtractor={(item) => item._id}
-            renderItem={({ item }) => (
-              <ProductCard item={item} onPress={() => goToProduct(item._id)} />
-            )}
-            numColumns={2}
-            columnWrapperStyle={styles.grid}
+            renderItem={renderProductItem}
+            numColumns={columns}
+            columnWrapperStyle={columns > 1 ? [styles.grid, { paddingHorizontal: hPadding }] : undefined}
             scrollEnabled={false}
             ListEmptyComponent={
               <Text style={styles.emptyText}>
@@ -450,19 +489,18 @@ const HomeScreen = ({ navigation }: any) => {
           />
         </View>
 
-        <View style={styles.section}>
-          <View style={styles.sectionHeader}>
+        <View style={[styles.section, { paddingTop: sectionVSpace }]}>
+          <View style={[styles.sectionHeader, { paddingHorizontal: hPadding }]}>
             <Text style={styles.sectionLabel}>TRENDING</Text>
             <Text style={styles.sectionTitle}>Most Popular</Text>
           </View>
           <FlatList
             data={trending}
+            key={String(columns)}
             keyExtractor={(item) => item._id}
-            renderItem={({ item }) => (
-              <ProductCard item={item} onPress={() => goToProduct(item._id)} />
-            )}
-            numColumns={2}
-            columnWrapperStyle={styles.grid}
+            renderItem={renderProductItem}
+            numColumns={columns}
+            columnWrapperStyle={columns > 1 ? [styles.grid, { paddingHorizontal: hPadding }] : undefined}
             scrollEnabled={false}
             ListEmptyComponent={
               <Text style={styles.emptyText}>No trending products yet.</Text>
@@ -470,31 +508,33 @@ const HomeScreen = ({ navigation }: any) => {
           />
         </View>
 
-        {user?.role === "buyer" ? (
+        {user?.role === "buyer" || !(user as any)?.sellerOnboarding?.completed ? (
           <TouchableOpacity
-            style={styles.buyerCta}
-            onPress={() =>
-              navigation.navigate("ProfileTab", { screen: "SellerOnboarding" })
-            }
-            activeOpacity={0.9}
+            style={[styles.buyerCta, { marginHorizontal: hPadding }]}
+            onPress={() => navigation.navigate("ProfileTab", { screen: "SellerOnboarding" })}
+            activeOpacity={0.88}
           >
-            <Text style={styles.buyerCtaTop}>Got items to declutter?</Text>
-            <Text style={styles.buyerCtaTitle}>Upgrade to seller account</Text>
-            <Text style={styles.buyerCtaSub}>
-              Set up your seller profile and start listing campus items instantly.
-            </Text>
+            
+            <View style={styles.buyerCtaContent}>
+              <Text style={styles.buyerCtaTop}>Got items to sell?</Text>
+              <Text style={styles.buyerCtaTitle}>Start selling on QUADS</Text>
+              <Text style={styles.buyerCtaSub}>List campus items and reach thousands of UMaT students.</Text>
+            </View>
+            
           </TouchableOpacity>
         ) : (
           <TouchableOpacity
-            style={styles.buyerCta}
+            style={[styles.buyerCta, { marginHorizontal: hPadding }]}
             onPress={() => setViewMode("seller")}
-            activeOpacity={0.9}
+            activeOpacity={0.88}
           >
-            <Text style={styles.buyerCtaTop}>Seller workspace</Text>
-            <Text style={styles.buyerCtaTitle}>Return to Seller Hub</Text>
-            <Text style={styles.buyerCtaSub}>
-              Post new products, manage active listings, and track your campus sales.
-            </Text>
+            
+            <View style={styles.buyerCtaContent}>
+              <Text style={styles.buyerCtaTop}>Seller workspace</Text>
+              <Text style={styles.buyerCtaTitle}>Return to Seller Hub</Text>
+              <Text style={styles.buyerCtaSub}>Manage listings, orders and growth tools.</Text>
+            </View>
+            
           </TouchableOpacity>
         )}
       </ScrollView>
@@ -502,451 +542,395 @@ const HomeScreen = ({ navigation }: any) => {
   );
 };
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.bg },
-  centered: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: colors.bg,
-  },
-  // Premium Header
-  premiumHeader: {
-    backgroundColor: "#000000",
-    paddingTop: 24,
-    paddingBottom: 28,
-    paddingHorizontal: 20,
-    borderBottomWidth: 4,
-    borderBottomColor: "#000000",
-  },
-  headerGreetingBlock: {
-    marginBottom: 16,
-  },
-  premiumGreeting: {
-    fontSize: 26,
-    fontWeight: "900",
-    color: "#ff6b6b",
-    textTransform: "uppercase",
-    letterSpacing: 0.5,
-  },
-  premiumSubtitle: {
-    fontSize: 13,
-    color: "rgba(255,255,255,0.75)",
-    marginTop: 4,
-    fontWeight: "600",
-  },
-  premiumSearchBox: {
-    flexDirection: "row",
-    gap: 8,
-    marginTop: 8,
-  },
-  premiumSearchInput: {
-    flex: 1,
-    backgroundColor: "#fff",
-    borderWidth: 2.5,
-    borderColor: "#000000",
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    fontSize: 14,
-    color: "#000000",
-    fontWeight: "600",
-  },
-  premiumSearchBtn: {
-    backgroundColor: '#ff6b6b',
-    paddingHorizontal: 20,
-    justifyContent: 'center',
-    borderWidth: 2.5,
-    borderColor: '#000000',
-    ...shadows.bulletin,
-  },
-  premiumSearchBtnText: {
-    color: "#fff",
-    fontWeight: "900",
-    fontSize: 12,
-    textTransform: "uppercase",
-    letterSpacing: 0.5,
-  },
-  secondaryHeroBtn: {
-    marginTop: 16,
-    backgroundColor: "#ffffff",
-    borderWidth: 2.5,
-    borderColor: "#000000",
-    paddingVertical: 12,
-    alignItems: "center",
-    ...shadows.bulletin,
-  },
-  secondaryHeroBtnText: {
-    color: "#000000",
-    fontSize: 11,
-    fontWeight: "900",
-    textTransform: "uppercase",
-    letterSpacing: 1.2,
-  },
-  // Sections
-  section: { paddingTop: 26, paddingBottom: 10 },
-  quickSection: { paddingTop: 22, paddingBottom: 8 },
-  sectionHeader: { paddingHorizontal: 16, marginBottom: 14 },
-  sectionLabel: {
-    fontSize: 10,
-    fontWeight: "900",
-    color: "#ff6b6b",
-    letterSpacing: 2,
-    textTransform: "uppercase",
-  },
-  sectionTitle: {
-    fontSize: 22,
-    fontWeight: "900",
-    color: "#000000",
-    marginTop: 2,
-    textTransform: "uppercase",
-    letterSpacing: 0.5,
-  },
-  // Curated horizontal scroll
-  hScroll: { paddingHorizontal: 16, gap: 12 },
-  curatedCard: {
-    width: 210,
-    backgroundColor: "#fff",
-    borderWidth: 2.5,
-    borderColor: "#000000",
-    padding: 16,
-    ...Platform.select({
-      ios: {
-        shadowColor: '#000000',
-        shadowOffset: { width: 4, height: 4 },
-        shadowOpacity: 1,
-        shadowRadius: 0,
-      },
-      android: {
-        elevation: 4,
-      },
-    }),
-  },
-  curatedTopRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 16,
-  },
-  curatedIconBox: {
-    width: 32,
-    height: 32,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  curatedBadge: {
-    backgroundColor: "#fff",
-    borderWidth: 1.5,
-    borderColor: "#000000",
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-  },
-  curatedBadgeText: {
-    fontSize: 8,
-    fontWeight: "900",
-    color: "#000000",
-    letterSpacing: 0.8,
-  },
-  curatedCardTitle: {
-    fontSize: 14,
-    fontWeight: "900",
-    color: "#000000",
-    textTransform: "uppercase",
-    letterSpacing: 0.5,
-  },
-  curatedCardSubtitle: {
-    marginTop: 6,
-    fontSize: 11,
-    color: "#6b7280",
-    lineHeight: 16,
-    fontWeight: "600",
-  },
-  categoryGrid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    paddingHorizontal: 16,
-    gap: 10,
-  },
-  categoryTile: {
-    width: "48%",
-    backgroundColor: "#fff",
-    borderWidth: 2.5,
-    borderColor: "#000000",
-    paddingVertical: 14,
-    paddingHorizontal: 12,
-    ...Platform.select({
-      ios: {
-        shadowColor: '#000000',
-        shadowOffset: { width: 3, height: 3 },
-        shadowOpacity: 1,
-        shadowRadius: 0,
-      },
-      android: {
-        elevation: 3,
-      },
-    }),
-    justifyContent: "space-between",
-  },
-  categoryTileHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 12,
-  },
-  categoryIconBox: {
-    width: 30,
-    height: 30,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  categoryTileTitle: {
-    fontSize: 11,
-    fontWeight: "900",
-    color: "#000000",
-    textTransform: "uppercase",
-    letterSpacing: 0.5,
-  },
-  categoryBadge: {
-    backgroundColor: "#fff",
-    borderWidth: 1.5,
-    borderColor: "#000000",
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-  },
-  categoryBadgeText: {
-    fontSize: 8,
-    fontWeight: "900",
-    color: "#ff6b6b",
-    letterSpacing: 0.5,
-  },
-  // Featured list
-  featuredCard: {
-    width: 190,
-    height: 140,
-    borderWidth: 2.5,
-    borderColor: "#000000",
-    overflow: "hidden",
-    backgroundColor: "#e5e7eb",
-    ...Platform.select({
-      ios: {
-        shadowColor: '#000000',
-        shadowOffset: { width: 3, height: 3 },
-        shadowOpacity: 1,
-        shadowRadius: 0,
-      },
-      android: {
-        elevation: 3,
-      },
-    }),
-  },
-  featuredImage: { width: "100%", height: "100%", position: "absolute" } as any,
-  featuredOverlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(0,0,0,0.35)",
-  },
-  featuredInfo: {
-    position: "absolute",
-    bottom: 0,
-    left: 0,
-    right: 0,
-    padding: 10,
-    backgroundColor: "rgba(0, 0, 0, 0.85)",
-    borderTopWidth: 1.5,
-    borderTopColor: "#000000",
-  },
-  featuredTitle: {
-    fontSize: 11,
-    fontWeight: "800",
-    color: "#fff",
-    lineHeight: 14,
-    textTransform: "uppercase",
-  },
-  featuredPrice: {
-    marginTop: 2,
-    fontSize: 11,
-    fontWeight: "900",
-    color: "#ff6b6b",
-  },
-  // Grid
-  grid: { paddingHorizontal: 12, gap: 10, marginBottom: 10 },
-  card: {
-    flex: 1,
-    backgroundColor: colors.surface,
-    borderWidth: 2.5,
-    borderColor: "#000000",
-    ...Platform.select({
-      ios: {
-        shadowColor: '#000000',
-        shadowOffset: { width: 3, height: 3 },
-        shadowOpacity: 1,
-        shadowRadius: 0,
-      },
-      android: {
-        elevation: 3,
-      },
-    }),
-    overflow: "hidden",
-  },
-  imageContainer: {
-    width: "100%",
-    height: 120,
-    backgroundColor: "#f3f4f6",
-    position: "relative",
-    borderBottomWidth: 2.5,
-    borderBottomColor: "#000000",
-  },
-  cardImage: { width: "100%", height: "100%" } as any,
-  featuredBadge: {
-    position: "absolute",
-    top: 6,
-    left: 6,
-    backgroundColor: "#ff6b6b",
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderWidth: 1.5,
-    borderColor: '#000000',
-    zIndex: 5,
-  },
-  featuredBadgeText: {
-    fontSize: 8,
-    fontWeight: "900",
-    color: "#fff",
-    letterSpacing: 0.5,
-  },
-  conditionTag: {
-    position: "absolute",
-    bottom: 6,
-    left: 6,
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderWidth: 1.5,
-    borderColor: '#000000',
-    zIndex: 5,
-  },
-  conditionTagText: {
-    fontSize: 8,
-    fontWeight: "900",
-    color: "#000000",
-    textTransform: "uppercase",
-  },
-  cardBody: { padding: 10 },
-  cardTitle: { fontSize: 13, fontWeight: "900", color: "#000000", textTransform: "uppercase", letterSpacing: 0.2, minHeight: 34 },
-  cardPriceRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginTop: 6,
-    gap: 4,
-  },
-  cardPrice: {
-    fontSize: 13,
-    fontWeight: "900",
-    color: "#000000",
-  },
-  locationBadge: {
-    backgroundColor: "#f3f4f6",
-    borderWidth: 1.5,
-    borderColor: "#000000",
-    paddingHorizontal: 4,
-    paddingVertical: 2,
-    maxWidth: "50%",
-  },
-  locationBadgeText: {
-    fontSize: 8,
-    fontWeight: "800",
-    color: "#000000",
-    textTransform: "uppercase",
-  },
-  stampOverlay: {
-    position: "absolute",
-    top: "30%",
-    left: "10%",
-    right: "10%",
-    transform: [{ rotate: "-12deg" }],
-    backgroundColor: "#dc2626",
-    borderWidth: 2.5,
-    borderColor: "#000000",
-    paddingVertical: 4,
-    alignItems: "center",
-    zIndex: 10,
-  },
-  stampText: {
-    color: "#fff",
-    fontSize: 14,
-    fontWeight: "900",
-    textTransform: "uppercase",
-    letterSpacing: 2,
-  },
-  emptyText: {
-    textAlign: "center",
-    color: "#8f8478",
-    padding: 24,
-    textTransform: "uppercase",
-    letterSpacing: 1.1,
-    fontWeight: "900",
-    fontSize: 11,
-  },
-  buyerCta: {
-    marginTop: 18,
-    marginHorizontal: 16,
-    marginBottom: 28,
-    borderWidth: 2.5,
-    borderColor: "#000000",
-    backgroundColor: "#000000",
-    padding: 16,
-    ...Platform.select({
-      ios: {
-        shadowColor: '#000000',
-        shadowOffset: { width: 4, height: 4 },
-        shadowOpacity: 1,
-        shadowRadius: 0,
-      },
-      android: {
-        elevation: 4,
-      },
-    }),
-  },
-  buyerCtaTop: {
-    fontSize: 10,
-    color: "#ff6b6b",
-    fontWeight: "900",
-    textTransform: "uppercase",
-    letterSpacing: 1.5,
-  },
-  buyerCtaTitle: {
-    marginTop: 6,
-    fontSize: 18,
-    color: "#fff",
-    fontWeight: "900",
-    textTransform: "uppercase",
-  },
-  buyerCtaSub: { marginTop: 6, fontSize: 11, color: "rgba(255,255,255,0.75)", lineHeight: 16 },
-  loadMoreBtn: {
-    marginTop: 12,
-    alignSelf: "center",
-    borderWidth: 2.5,
-    borderColor: "#000000",
-    paddingHorizontal: 18,
-    paddingVertical: 10,
-    backgroundColor: colors.surface,
-    ...Platform.select({
-      ios: {
-        shadowColor: '#000000',
-        shadowOffset: { width: 3, height: 3 },
-        shadowOpacity: 1,
-        shadowRadius: 0,
-      },
-      android: {
-        elevation: 3,
-      },
-    }),
-  },
-  loadMoreBtnText: {
-    fontSize: 10,
-    fontWeight: "900",
-    color: "#000000",
-    textTransform: "uppercase",
-    letterSpacing: 1.2,
-  },
-});
+const getStyles = (colors: any, width: number) => {
+  const isMobile = width < 640;
+  const typography = getTypography(width);
+  const hPadding = isMobile ? 12 : 16;
+  const gap = isMobile ? 10 : 16;
+
+  return StyleSheet.create({
+    container: { flex: 1, backgroundColor: colors.background },
+    centered: {
+      flex: 1,
+      justifyContent: "center",
+      alignItems: "center",
+      backgroundColor: colors.background,
+    },
+    premiumHeader: {
+      backgroundColor: colors.background,
+      paddingTop: 16,
+      paddingBottom: 20,
+      paddingHorizontal: hPadding,
+      borderBottomWidth: colors.boardBorderWidth,
+      borderBottomColor: colors.boardBorder,
+    },
+    headerGreetingBlock: {
+      marginBottom: 16,
+    },
+    premiumGreeting: {
+      fontSize: isMobile ? 20 : typography.h1,
+      fontWeight: "900",
+      color: colors.primary,
+      textTransform: "uppercase",
+      letterSpacing: 0.5,
+    },
+    premiumSubtitle: {
+      fontSize: isMobile ? 11 : typography.label,
+      color: colors.textSecondary,
+      marginTop: 4,
+      fontWeight: "700",
+    },
+    premiumSearchBox: {
+      flexDirection: "row",
+      gap: 8,
+      marginTop: 8,
+    },
+    premiumSearchInput: {
+      flex: 1,
+      minWidth: 0,
+      backgroundColor: colors.surfaceSecondary,
+      borderWidth: colors.boardBorderWidth,
+      borderColor: colors.boardBorder,
+      paddingHorizontal: 14,
+      paddingVertical: 12,
+      fontSize: isMobile ? 13 : typography.body,
+      color: colors.text,
+      fontWeight: "700",
+    },
+    premiumSearchBtn: {
+      backgroundColor: colors.primary,
+      paddingHorizontal: isMobile ? 14 : 20,
+      justifyContent: 'center',
+      borderWidth: colors.boardBorderWidth,
+      borderColor: colors.boardBorder,
+    },
+    premiumSearchBtnText: {
+      color: colors.primaryContent,
+      fontWeight: "900",
+      fontSize: isMobile ? 11 : typography.tag,
+      textTransform: "uppercase",
+      letterSpacing: 0.5,
+    },
+    secondaryHeroBtn: {
+      marginTop: 16,
+      backgroundColor: colors.surface,
+      borderWidth: colors.boardBorderWidth,
+      borderColor: colors.boardBorder,
+      paddingVertical: 12,
+      alignItems: "center",
+    },
+    secondaryHeroBtnText: {
+      color: colors.text,
+      fontSize: isMobile ? 10 : typography.label,
+      fontWeight: "900",
+      textTransform: "uppercase",
+      letterSpacing: 1.2,
+    },
+    section: { paddingTop: 26, paddingBottom: 10 },
+    quickSection: { paddingTop: 22, paddingBottom: 8 },
+    sectionHeader: { paddingHorizontal: hPadding, marginBottom: 14 },
+    sectionLabel: {
+      fontSize: isMobile ? 9 : typography.tag,
+      fontWeight: "900",
+      color: colors.primary,
+      letterSpacing: 2,
+      textTransform: "uppercase",
+    },
+    sectionTitle: {
+      fontSize: isMobile ? 18 : typography.h2,
+      fontWeight: "900",
+      color: colors.text,
+      marginTop: 2,
+      textTransform: "uppercase",
+      letterSpacing: 0.5,
+    },
+    hScroll: { paddingHorizontal: hPadding, paddingRight: isMobile ? 24 : 32, gap: gap, paddingBottom: 10 },
+    curatedCard: {
+      padding: 0,
+    },
+    curatedTopRow: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+      marginBottom: 16,
+    },
+    curatedIconBox: {
+      width: 32,
+      height: 32,
+      justifyContent: "center",
+      alignItems: "center",
+    },
+    curatedBadge: {
+      backgroundColor: colors.surfaceSecondary,
+      borderWidth: 1,
+      borderColor: colors.boardBorder,
+      paddingHorizontal: 8,
+      paddingVertical: 3,
+    },
+    curatedBadgeText: {
+      fontSize: isMobile ? 7 : typography.tag,
+      fontWeight: "900",
+      color: colors.text,
+      letterSpacing: 0.8,
+    },
+    curatedCardTitle: {
+      fontSize: isMobile ? 12 : typography.h3,
+      fontWeight: "900",
+      color: colors.text,
+      textTransform: "uppercase",
+      letterSpacing: 0.5,
+    },
+    curatedCardSubtitle: {
+      marginTop: 6,
+      fontSize: isMobile ? 10 : typography.body,
+      color: colors.textSecondary,
+      lineHeight: isMobile ? 14 : 16,
+      fontWeight: "700",
+    },
+    categoryGrid: {
+      flexDirection: "row",
+      flexWrap: "wrap",
+      paddingHorizontal: hPadding,
+      gap: 12,
+    },
+    categoryTile: {
+      paddingVertical: 14,
+      paddingHorizontal: 12,
+    },
+    categoryTileHeader: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+      marginBottom: 12,
+    },
+    categoryIconBox: {
+      width: 30,
+      height: 30,
+      justifyContent: "center",
+      alignItems: "center",
+    },
+    categoryTileTitle: {
+      fontSize: isMobile ? 10 : typography.label,
+      fontWeight: "900",
+      color: colors.text,
+      textTransform: "uppercase",
+      letterSpacing: 0.5,
+    },
+    categoryBadge: {
+      backgroundColor: colors.surfaceSecondary,
+      borderWidth: 1,
+      borderColor: colors.boardBorder,
+      paddingHorizontal: 8,
+      paddingVertical: 3,
+    },
+    categoryBadgeText: {
+      fontSize: isMobile ? 7 : typography.tag,
+      fontWeight: "900",
+      color: colors.primary,
+      letterSpacing: 0.5,
+    },
+    featuredCard: {
+      borderWidth: colors.boardBorderWidth,
+      borderColor: colors.boardBorder,
+      overflow: "hidden",
+      backgroundColor: colors.surfaceSecondary,
+    },
+    featuredImage: { width: "100%", height: "100%", position: "absolute" } as any,
+    featuredOverlay: {
+      ...StyleSheet.absoluteFillObject,
+      backgroundColor: "rgba(0,0,0,0.35)",
+    },
+    featuredInfo: {
+      position: "absolute",
+      bottom: 0,
+      left: 0,
+      right: 0,
+      padding: 10,
+      backgroundColor: colors.overlay,
+      borderTopWidth: 1,
+      borderTopColor: colors.boardBorder,
+    },
+    featuredTitle: {
+      fontWeight: "900",
+      color: colors.primaryContent,
+      lineHeight: 14,
+      textTransform: "uppercase",
+    },
+    featuredPrice: {
+      marginTop: 2,
+      fontWeight: "900",
+      color: colors.primary,
+    },
+    grid: { paddingHorizontal: hPadding, gap: gap, marginBottom: 12 },
+    card: { flex: 1 },
+    imageContainer: {
+      width: "100%",
+      aspectRatio: 4 / 3,
+      backgroundColor: colors.surfaceSecondary,
+      position: "relative",
+      overflow: "hidden",
+    },
+    cardImage: { width: "100%", height: "100%" } as any,
+    featuredBadge: {
+      position: "absolute",
+      top: 6,
+      left: 6,
+      backgroundColor: colors.primary,
+      paddingHorizontal: 5,
+      paddingVertical: 2,
+      borderRadius: 3,
+      zIndex: 5,
+    },
+    featuredBadgeText: {
+      fontSize: 9,
+      fontWeight: "900",
+      color: colors.primaryContent,
+    },
+    conditionTag: {
+      position: "absolute",
+      top: 6,
+      right: 6,
+      paddingHorizontal: 6,
+      paddingVertical: 2,
+      borderRadius: 3,
+      zIndex: 5,
+    },
+    conditionTagText: {
+      fontSize: 8,
+      fontWeight: "900",
+      color: colors.primaryContent,
+      textTransform: "uppercase",
+      letterSpacing: 0.3,
+    },
+    stampOverlay: {
+      position: "absolute",
+      top: "32%",
+      left: "5%",
+      right: "5%",
+      transform: [{ rotate: "-10deg" }],
+      backgroundColor: colors.danger,
+      borderWidth: 2,
+      borderColor: colors.primaryContent,
+      paddingVertical: 5,
+      alignItems: "center",
+      zIndex: 10,
+    },
+    stampText: {
+      color: colors.dangerContent,
+      fontSize: 11,
+      fontWeight: "900",
+      textTransform: "uppercase",
+      letterSpacing: 2,
+    },
+    cardBody: {
+      paddingHorizontal: 8,
+      paddingTop: 8,
+      paddingBottom: 10,
+      minWidth: 0,
+      overflow: "hidden",
+    },
+    cardPrice: {
+      fontSize: isMobile ? 14 : 16,
+      fontWeight: "900",
+      color: colors.primary,
+      letterSpacing: -0.3,
+      marginBottom: 3,
+    },
+    cardTitle: {
+      fontSize: isMobile ? 11 : 13,
+      fontWeight: "700",
+      color: colors.text,
+      lineHeight: isMobile ? 15 : 18,
+      minHeight: isMobile ? 30 : 36,
+    },
+    cardMeta: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+      marginTop: 5,
+      gap: 4,
+    },
+    cardMetaText: {
+      fontSize: 9,
+      color: colors.muted,
+      fontWeight: "500",
+      flex: 1,
+    },
+    cardViews: {
+      fontSize: 9,
+      color: colors.textDisabled,
+      fontWeight: "700",
+      textTransform: "uppercase",
+      letterSpacing: 0.4,
+    },
+    locationBadge: { backgroundColor: colors.surfaceSecondary, borderWidth: 1, borderColor: colors.boardBorder, paddingHorizontal: 4, paddingVertical: 2, maxWidth: "50%" },
+    locationBadgeText: { fontSize: isMobile ? 7 : 9, fontWeight: "800", color: colors.text, textTransform: "uppercase" },
+    emptyText: {
+      textAlign: "center",
+      color: colors.textSecondary,
+      padding: 24,
+      textTransform: "uppercase",
+      letterSpacing: 1.1,
+      fontWeight: "900",
+      fontSize: isMobile ? 10 : typography.label,
+    },
+    buyerCta: {
+      marginTop: 18,
+      marginBottom: 28,
+      borderWidth: colors.boardBorderWidth,
+      borderColor: colors.boardBorder,
+      backgroundColor: colors.surface,
+      padding: isMobile ? 14 : 18,
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 12,
+      shadowColor: colors.boardShadow,
+      shadowOffset: { width: 4, height: 4 },
+      shadowOpacity: 1,
+      shadowRadius: 0,
+      elevation: 4,
+    },
+    buyerCtaIcon: {
+      fontSize: 28,
+    },
+    buyerCtaContent: { flex: 1 },
+    buyerCtaTop: {
+      fontSize: isMobile ? 9 : typography.tag,
+      color: colors.accent,
+      fontWeight: "900",
+      textTransform: "uppercase",
+      letterSpacing: 1.5,
+    },
+    buyerCtaTitle: {
+      marginTop: 4,
+      color: colors.text,
+      fontWeight: "900",
+      fontSize: isMobile ? 14 : 16,
+    },
+    buyerCtaSub: {
+      marginTop: 3,
+      color: colors.textSecondary,
+      fontSize: isMobile ? 10 : 11,
+      lineHeight: 16,
+      fontWeight: "600",
+    },
+    loadMoreBtn: {
+      marginTop: 12,
+      alignSelf: "center",
+      borderWidth: colors.boardBorderWidth,
+      borderColor: colors.boardBorder,
+      paddingHorizontal: 18,
+      paddingVertical: 10,
+      backgroundColor: colors.surface,
+    },
+    loadMoreBtnText: {
+      fontSize: isMobile ? 9 : typography.tag,
+      fontWeight: "900",
+      color: colors.text,
+      textTransform: "uppercase",
+      letterSpacing: 1.2,
+    },
+  });
+};
 
 export default HomeScreen;

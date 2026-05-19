@@ -22,6 +22,7 @@ import { ProductPopulated, PaymentMethod, PAYMENT_METHODS } from '../types';
 import { LoadingSpinner } from '../components/ui';
 import { BulletinLayout, BulletinSection, BulletinCard } from '../components/layout/BulletinLayout';
 import paymentService from '../services/payment.service';
+import referenceService, { PickupSpot } from '../services/reference.service';
 
 interface CheckoutFormState {
   deliveryMethod: 'pickup' | 'delivery';
@@ -54,6 +55,21 @@ const Checkout: React.FC = () => {
   });
   const [couponData, setCouponData] = useState<{ code: string; discount: number } | null>(null);
   const [validatingCoupon, setValidatingCoupon] = useState(false);
+  const [pickupSpots, setPickupSpots] = useState<PickupSpot[]>([]);
+  const [spotQuery, setSpotQuery] = useState('');
+  const [spotDropdownOpen, setSpotDropdownOpen] = useState(false);
+  const [customPickup, setCustomPickup] = useState('');
+
+  useEffect(() => {
+    referenceService.getPickupSpots().then(setPickupSpots).catch(() => {});
+  }, []);
+
+  const filteredSpots = spotQuery.trim()
+    ? pickupSpots.filter(s => s.name.toLowerCase().includes(spotQuery.toLowerCase()) || s.area.toLowerCase().includes(spotQuery.toLowerCase()))
+    : pickupSpots;
+
+  const isManualPickup = form.pickupLocation === 'Other (specify below)';
+  const effectivePickupLocation = isManualPickup ? customPickup : form.pickupLocation;
 
   useEffect(() => {
     if (!user) {
@@ -115,7 +131,7 @@ const Checkout: React.FC = () => {
         items: products.map(p => ({ productId: p.productId || p._id, quantity: p.quantity })),
         deliveryMethod: form.deliveryMethod,
         couponCode: couponData ? couponData.code : undefined,
-        pickupLocation: form.deliveryMethod === 'pickup' ? form.pickupLocation : undefined,
+        pickupLocation: form.deliveryMethod === 'pickup' ? effectivePickupLocation : undefined,
         deliveryAddress: form.deliveryMethod === 'delivery' ? form.deliveryAddress : undefined,
         note: form.note || undefined,
       });
@@ -242,13 +258,49 @@ const Checkout: React.FC = () => {
               </div>
 
               {form.deliveryMethod === 'pickup' ? (
-                <input
-                  type="text"
-                  value={form.pickupLocation}
-                  onChange={(e) => setForm((f) => ({ ...f, pickupLocation: e.target.value }))}
-                  placeholder="Pickup location on campus"
-                  className="w-full border border-[var(--bulletin-border)] bg-[var(--bulletin-card)] p-2 text-[12px] font-bold focus:outline-none focus:ring-2 focus:ring-[var(--bulletin-text)]"
-                />
+                <div className="relative">
+                  <div className="relative flex items-center">
+                    <input
+                      type="text"
+                      value={spotQuery || form.pickupLocation}
+                      onChange={(e) => { setSpotQuery(e.target.value); setSpotDropdownOpen(true); }}
+                      onFocus={() => setSpotDropdownOpen(true)}
+                      onBlur={() => setTimeout(() => setSpotDropdownOpen(false), 150)}
+                      placeholder="Search pickup spots…"
+                      className="w-full border border-[var(--bulletin-border)] bg-[var(--bulletin-card)] p-2 pr-8 text-[12px] font-bold focus:outline-none focus:ring-2 focus:ring-[var(--bulletin-text)]"
+                      autoComplete="off"
+                    />
+                    {form.pickupLocation && (
+                      <button type="button" className="absolute right-2 opacity-40 hover:opacity-100" onClick={() => { setForm(f => ({ ...f, pickupLocation: '' })); setSpotQuery(''); }}>
+                        <X className="h-3 w-3" />
+                      </button>
+                    )}
+                  </div>
+                  {spotDropdownOpen && filteredSpots.length > 0 && (
+                    <div className="absolute z-50 w-full border border-t-0 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] shadow-lg max-h-48 overflow-y-auto">
+                      {filteredSpots.map(spot => (
+                        <button
+                          key={spot.name}
+                          type="button"
+                          className={`w-full text-left px-3 py-2 text-[11px] font-bold hover:bg-[var(--bulletin-text)] hover:text-[var(--bulletin-bg)] transition-colors ${form.pickupLocation === spot.name ? 'bg-[var(--bulletin-text)] text-[var(--bulletin-bg)]' : ''}`}
+                          onMouseDown={() => { setForm(f => ({ ...f, pickupLocation: spot.name })); setSpotQuery(''); setSpotDropdownOpen(false); }}
+                        >
+                          <span>{spot.name}</span>
+                          {spot.area !== 'Custom' && <span className="ml-2 opacity-50 font-normal">{spot.area}</span>}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                  {isManualPickup && (
+                    <input
+                      type="text"
+                      value={customPickup}
+                      onChange={(e) => setCustomPickup(e.target.value)}
+                      placeholder="Describe your pickup location"
+                      className="w-full mt-2 border border-[var(--bulletin-border)] bg-[var(--bulletin-card)] p-2 text-[12px] font-bold focus:outline-none focus:ring-2 focus:ring-[var(--bulletin-text)]"
+                    />
+                  )}
+                </div>
               ) : (
                 <textarea
                   value={form.deliveryAddress}

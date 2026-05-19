@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, ScrollView, StyleSheet, Text, View, TouchableOpacity } from 'react-native';
+import { ActivityIndicator, ScrollView, StyleSheet, Text, View,
+  Dimensions,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Ionicons } from '@expo/vector-icons';
-import { colors, shadows } from '../theme';
+import { shadows } from '../theme';
+import { useColors } from '../theme/ThemeContext';
 import ScreenHeader from '../components/ScreenHeader';
 import api from '../services/api';
 
@@ -17,13 +19,46 @@ interface Payout {
 }
 
 const SellerPayoutsScreen = () => {
+  const colors = useColors();
+  const { width: _sw } = Dimensions.get('window');
+  const isMobile = _sw < 640;
   const [payouts, setPayouts] = useState<Payout[]>([]);
   const [loading, setLoading] = useState(true);
-  const [stats, setStats] = useState({
-    totalPending: 0,
-    totalCompleted: 0,
-    totalAmount: 0,
-  });
+  const [stats, setStats] = useState({ totalPending: 0, totalCompleted: 0, totalAmount: 0 });
+
+  const styles = React.useMemo(() => StyleSheet.create({
+    container: { flex: 1, backgroundColor: colors.bg },
+    content: { paddingBottom: 40 },
+    centered: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: colors.bg },
+    statsRow: { flexDirection: 'row', gap: 8, paddingHorizontal: isMobile ? 12 : 16, marginTop: 8 },
+    statCard: {
+      flex: 1, borderWidth: 2, borderColor: colors.border, padding: 12,
+      backgroundColor: colors.surface, alignItems: 'center', ...shadows.bulletin,
+    },
+    statLabel: { fontSize: 9, fontWeight: '800', textTransform: 'uppercase', color: colors.muted },
+    statValue: { fontSize: isMobile ? 17 : 20, fontWeight: '900', color: colors.text, marginTop: 4 },
+    section: { marginTop: 24, paddingHorizontal: 16 },
+    sectionLabel: { fontSize: 10, fontWeight: '900', color: colors.accent, textTransform: 'uppercase', letterSpacing: 1.5, marginBottom: 12 },
+    emptyText: { textAlign: 'center', color: colors.muted, fontSize: 12, marginTop: 20 },
+    payoutRow: {
+      flexDirection: 'row', alignItems: 'center',
+      paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: colors.border,
+    },
+    payoutOrder: { fontSize: 12, fontWeight: '900', textTransform: 'uppercase', color: colors.text },
+    payoutDate: { fontSize: 10, color: colors.muted, marginTop: 2 },
+    payoutAmount: { fontSize: isMobile ? 12 : 13, fontWeight: '900', marginRight: 12, color: colors.text },
+    statusBadge: { paddingHorizontal: 8, paddingVertical: 4 },
+    statusText: { fontSize: 9, fontWeight: '900' },
+  }), [colors]);
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'completed': return colors.accent;
+      case 'processing': return colors.accentAlt;
+      case 'failed': return colors.danger;
+      default: return colors.muted;
+    }
+  };
 
   useEffect(() => {
     Promise.all([
@@ -33,11 +68,7 @@ const SellerPayoutsScreen = () => {
       if (payoutRes.success) setPayouts(payoutRes.data.payouts || []);
       if (statsRes.success) {
         const s = statsRes.data.stats || {};
-        setStats({
-          totalPending: s.totalPending || 0,
-          totalCompleted: s.totalCompleted || 0,
-          totalAmount: s.totalCommissionEarned || 0,
-        });
+        setStats({ totalPending: s.totalPending || 0, totalCompleted: s.totalCompleted || 0, totalAmount: s.totalCommissionEarned || 0 });
       }
     }).finally(() => setLoading(false));
   }, []);
@@ -50,23 +81,10 @@ const SellerPayoutsScreen = () => {
     );
   }
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'completed': return colors.accent;
-      case 'processing': return colors.accentAlt;
-      case 'failed': return colors.danger;
-      default: return colors.muted;
-    }
-  };
-
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       <ScrollView contentContainerStyle={styles.content}>
-        <ScreenHeader
-          eyebrow="Seller Hub"
-          title="Earnings Ledger"
-          subtitle="Track your payouts and sales performance."
-        />
+        <ScreenHeader eyebrow="Seller Hub" title="Earnings Ledger" subtitle="Track your payouts and sales performance." />
 
         <View style={styles.statsRow}>
           <View style={styles.statCard}>
@@ -108,38 +126,5 @@ const SellerPayoutsScreen = () => {
     </SafeAreaView>
   );
 };
-
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.bg },
-  content: { paddingBottom: 40 },
-  centered: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: colors.bg },
-  statsRow: { flexDirection: 'row', gap: 8, paddingHorizontal: 16, marginTop: 8 },
-  statCard: {
-    flex: 1,
-    borderWidth: 1,
-    borderColor: colors.border,
-    padding: 12,
-    backgroundColor: colors.surface,
-    alignItems: 'center',
-    ...shadows.bulletin,
-  },
-  statLabel: { fontSize: 9, fontWeight: '800', textTransform: 'uppercase', color: colors.muted },
-  statValue: { fontSize: 20, fontWeight: '900', color: colors.text, marginTop: 4 },
-  section: { marginTop: 24, paddingHorizontal: 16 },
-  sectionLabel: { fontSize: 10, fontWeight: '900', color: '#ff6b6b', textTransform: 'uppercase', letterSpacing: 1.5, marginBottom: 12 },
-  emptyText: { textAlign: 'center', color: colors.muted, fontSize: 12, marginTop: 20 },
-  payoutRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
-  },
-  payoutOrder: { fontSize: 12, fontWeight: '900', textTransform: 'uppercase' },
-  payoutDate: { fontSize: 10, color: colors.muted, marginTop: 2 },
-  payoutAmount: { fontSize: 13, fontWeight: '900', marginRight: 12 },
-  statusBadge: { paddingHorizontal: 8, paddingVertical: 4 },
-  statusText: { fontSize: 9, fontWeight: '900' },
-});
 
 export default SellerPayoutsScreen;

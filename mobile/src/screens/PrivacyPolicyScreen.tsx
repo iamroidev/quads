@@ -1,10 +1,148 @@
 import React from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, View,
+  Dimensions,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { colors, shadows } from '../theme';
+import { shadows } from '../theme';
+import { useColors } from '../theme/ThemeContext';
 import ScreenHeader from '../components/ScreenHeader';
 
 const PrivacyPolicyScreen = () => {
+  const colors = useColors();
+  const { width: _sw } = Dimensions.get('window');
+  const isMobile = _sw < 640;
+
+  const styles = React.useMemo(() => StyleSheet.create({
+    container: { flex: 1, backgroundColor: colors.bg },
+    content: { paddingBottom: 40 },
+    headerCard: {
+      margin: 16,
+      padding: 20,
+      borderWidth: 2,
+      borderColor: colors.border,
+      backgroundColor: colors.noticeBg,
+      ...shadows.bulletin,
+    },
+    headerCardTitle: {
+      fontSize: isMobile ? 15 : 18,
+      fontWeight: '900',
+      textTransform: 'uppercase',
+      color: colors.text,
+      marginBottom: 8,
+    },
+    headerCardText: {
+      fontSize: isMobile ? 12 : 13,
+      fontWeight: '700',
+      color: colors.text,
+      lineHeight: 18,
+    },
+    lastUpdated: {
+      fontSize: 9,
+      fontWeight: '900',
+      color: colors.muted,
+      marginTop: 14,
+      letterSpacing: 1,
+    },
+    section: {
+      marginTop: 16,
+      paddingHorizontal: isMobile ? 12 : 16,
+    },
+    sectionTitle: {
+      fontSize: 12,
+      fontWeight: '900',
+      color: colors.accent,
+      letterSpacing: 1.5,
+      marginBottom: 8,
+      textTransform: 'uppercase',
+    },
+    card: {
+      padding: isMobile ? 12 : 16,
+      borderWidth: 2,
+      borderColor: colors.border,
+      backgroundColor: colors.surface,
+      ...shadows.bulletin,
+    },
+    cardText: {
+      fontSize: isMobile ? 12 : 13,
+      fontWeight: '700',
+      color: colors.text,
+      lineHeight: 18,
+      marginBottom: 10,
+    },
+    bulletRow: {
+      flexDirection: 'row',
+      alignItems: 'flex-start',
+      gap: 8,
+      marginVertical: 4,
+      paddingRight: 12,
+    },
+    bullet: {
+      fontSize: isMobile ? 13 : 14,
+      fontWeight: '900',
+      color: colors.text,
+    },
+    bulletText: {
+      fontSize: isMobile ? 12 : 13,
+      fontWeight: '700',
+      color: colors.text,
+      lineHeight: 18,
+    },
+    bold: {
+      fontWeight: '900',
+    },
+    alertBox: {
+      marginTop: 12,
+      padding: 10,
+      backgroundColor: colors.metric1Bg,
+      borderWidth: 1.5,
+      borderColor: colors.accent,
+      borderStyle: 'dashed',
+    },
+    alertText: {
+      fontSize: 11,
+      fontWeight: '900',
+      color: colors.metric1Text,
+      textAlign: 'center',
+    },
+    contactCard: {
+      margin: 16,
+      marginTop: 24,
+      padding: 20,
+      borderWidth: 2,
+      borderColor: colors.border,
+      backgroundColor: colors.surface,
+      ...shadows.bulletin,
+    },
+    contactTitle: {
+      fontSize: isMobile ? 13 : 14,
+      fontWeight: '900',
+      color: colors.text,
+      letterSpacing: 1,
+      marginBottom: 6,
+    },
+    contactText: {
+      fontSize: 12,
+      fontWeight: '700',
+      color: colors.muted,
+      lineHeight: 18,
+      marginBottom: 14,
+    },
+    badge: {
+      alignSelf: 'flex-start',
+      backgroundColor: colors.text,
+      paddingHorizontal: 12,
+      paddingVertical: 6,
+      borderWidth: 1.5,
+      borderColor: colors.border,
+    },
+    badgeText: {
+      fontSize: 11,
+      fontWeight: '900',
+      color: colors.surface,
+      letterSpacing: 0.5,
+    },
+  }), [colors]);
+
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       <ScrollView contentContainerStyle={styles.content}>
@@ -14,7 +152,6 @@ const PrivacyPolicyScreen = () => {
           subtitle="Your Data Rights & Security."
         />
 
-        {/* Header tape card */}
         <View style={styles.headerCard}>
           <Text style={styles.headerCardTitle}>PRIVACY POLICY</Text>
           <Text style={styles.headerCardText}>
@@ -23,7 +160,6 @@ const PrivacyPolicyScreen = () => {
           <Text style={styles.lastUpdated}>LAST UPDATED: MAY 16, 2026</Text>
         </View>
 
-        {/* Section 1 */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>1. INFORMATION WE COLLECT</Text>
           <View style={styles.card}>
@@ -51,7 +187,6 @@ const PrivacyPolicyScreen = () => {
           </View>
         </View>
 
-        {/* Section 2 */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>2. HOW WE USE YOUR DATA</Text>
           <View style={styles.card}>
@@ -84,7 +219,6 @@ const PrivacyPolicyScreen = () => {
           </View>
         </View>
 
-        {/* Section 3 */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>3. SECURITY & RETENTION</Text>
           <View style={styles.card}>
@@ -94,7 +228,6 @@ const PrivacyPolicyScreen = () => {
           </View>
         </View>
 
-        {/* Contact info card */}
         <View style={styles.contactCard}>
           <Text style={styles.contactTitle}>CONTACT PRIVACY TEAM</Text>
           <Text style={styles.contactText}>
@@ -108,136 +241,5 @@ const PrivacyPolicyScreen = () => {
     </SafeAreaView>
   );
 };
-
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.bg },
-  content: { paddingBottom: 40 },
-  headerCard: {
-    margin: 16,
-    padding: 20,
-    borderWidth: 2,
-    borderColor: colors.border,
-    backgroundColor: colors.noticeBg,
-    ...shadows.bulletin,
-  },
-  headerCardTitle: {
-    fontSize: 18,
-    fontWeight: '900',
-    textTransform: 'uppercase',
-    color: colors.text,
-    marginBottom: 8,
-  },
-  headerCardText: {
-    fontSize: 13,
-    fontWeight: '700',
-    color: colors.text,
-    lineHeight: 18,
-  },
-  lastUpdated: {
-    fontSize: 9,
-    fontWeight: '900',
-    color: colors.muted,
-    marginTop: 14,
-    letterSpacing: 1,
-  },
-  section: {
-    marginTop: 16,
-    paddingHorizontal: 16,
-  },
-  sectionTitle: {
-    fontSize: 12,
-    fontWeight: '900',
-    color: colors.accent,
-    letterSpacing: 1.5,
-    marginBottom: 8,
-    textTransform: 'uppercase',
-  },
-  card: {
-    padding: 16,
-    borderWidth: 2,
-    borderColor: colors.border,
-    backgroundColor: colors.surface,
-    ...shadows.bulletin,
-  },
-  cardText: {
-    fontSize: 13,
-    fontWeight: '700',
-    color: colors.text,
-    lineHeight: 18,
-    marginBottom: 10,
-  },
-  bulletRow: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: 8,
-    marginVertical: 4,
-    paddingRight: 12,
-  },
-  bullet: {
-    fontSize: 14,
-    fontWeight: '900',
-    color: colors.text,
-  },
-  bulletText: {
-    fontSize: 13,
-    fontWeight: '700',
-    color: colors.text,
-    lineHeight: 18,
-  },
-  bold: {
-    fontWeight: '900',
-  },
-  alertBox: {
-    marginTop: 12,
-    padding: 10,
-    backgroundColor: colors.metric1Bg,
-    borderWidth: 1.5,
-    borderColor: colors.accent,
-    borderStyle: 'dashed',
-  },
-  alertText: {
-    fontSize: 11,
-    fontWeight: '900',
-    color: colors.metric1Text,
-    textAlign: 'center',
-  },
-  contactCard: {
-    margin: 16,
-    marginTop: 24,
-    padding: 20,
-    borderWidth: 2,
-    borderColor: colors.border,
-    backgroundColor: colors.surface,
-    ...shadows.bulletin,
-  },
-  contactTitle: {
-    fontSize: 14,
-    fontWeight: '900',
-    color: colors.text,
-    letterSpacing: 1,
-    marginBottom: 6,
-  },
-  contactText: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: colors.muted,
-    lineHeight: 18,
-    marginBottom: 14,
-  },
-  badge: {
-    alignSelf: 'flex-start',
-    backgroundColor: colors.text,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderWidth: 1.5,
-    borderColor: colors.border,
-  },
-  badgeText: {
-    fontSize: 11,
-    fontWeight: '900',
-    color: colors.surface,
-    letterSpacing: 0.5,
-  },
-});
 
 export default PrivacyPolicyScreen;

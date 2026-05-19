@@ -106,6 +106,16 @@ const authService = {
     return response.data;
   },
 
+  sendEmailVerification: async () => {
+    const response = await api.post('/auth/send-verification-email');
+    return response.data;
+  },
+
+  verifyEmail: async (code: string) => {
+    const response = await api.post('/auth/verify-email', { code });
+    return response.data;
+  },
+
   logout: async () => {
     const response = await api.post('/auth/logout');
     return response.data;

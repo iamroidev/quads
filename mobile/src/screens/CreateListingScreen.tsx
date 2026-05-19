@@ -2,7 +2,9 @@ import React, { useEffect, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
+  FlatList,
   KeyboardAvoidingView,
+  Modal,
   Platform,
   ScrollView,
   StyleSheet,
@@ -11,14 +13,16 @@ import {
   TouchableOpacity,
   View,
   Image,
+  Dimensions,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import * as ImagePicker from "expo-image-picker";
 import { Ionicons } from "@expo/vector-icons";
 import api from "../services/api";
 import productService from "../services/product.service";
+import referenceService, { PickupSpot } from "../services/reference.service";
 import { useAuth } from "../context/AuthContext";
-import { colors, shadows } from "../theme";
+import { useColors } from "../theme/ThemeContext";
 import ScreenHeader from "../components/ScreenHeader";
 
 interface Category {
@@ -33,20 +37,11 @@ const DELIVERY_OPTIONS = [
   { value: "both", label: "Pickup & Delivery" },
 ] as const;
 
-const CAMPUS_LOCATIONS = [
-  "Main Gate",
-  "Esther Hall",
-  "Independence Hall",
-  "Unity Hall",
-  "Queens Hall",
-  "Engineering Block",
-  "Science Block",
-  "Library",
-  "Student Center",
-  "Cafeteria",
-];
 
 const CreateListingScreen = ({ navigation, route }: any) => {
+  const colors = useColors();
+  const { width: _sw } = Dimensions.get('window');
+  const isMobile = _sw < 640;
   const { user } = useAuth();
   const { productId, mode } = route.params ?? {};
   const isEditMode = mode === "edit" && !!productId;
@@ -63,11 +58,221 @@ const CreateListingScreen = ({ navigation, route }: any) => {
   const [condition, setCondition] = useState<string>("good");
   const [deliveryOption, setDeliveryOption] = useState<string>("pickup");
   const [pickupLocation, setPickupLocation] = useState("");
+  const [pickupSpots, setPickupSpots] = useState<PickupSpot[]>([]);
+  const [spotPickerVisible, setSpotPickerVisible] = useState(false);
+  const [spotSearch, setSpotSearch] = useState("");
+  const [customPickup, setCustomPickup] = useState("");
   const [tags, setTags] = useState("");
   const [status, setStatus] = useState<"active" | "draft">("active");
   const [images, setImages] = useState<
     Array<{ uri: string; type?: string; name?: string }>
   >([]);
+
+  const styles = React.useMemo(() => StyleSheet.create({
+    container: { flex: 1, backgroundColor: colors.bg },
+    content: { padding: isMobile ? 12 : 16, paddingBottom: 40 },
+    label: {
+      fontSize: 12,
+      fontWeight: "700",
+      color: colors.muted,
+      textTransform: "uppercase",
+      letterSpacing: 0.5,
+      marginTop: 18,
+      marginBottom: 6,
+    },
+    input: {
+      backgroundColor: colors.surface,
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: 0,
+      paddingHorizontal: 12,
+      paddingVertical: 11,
+      fontSize: isMobile ? 13 : 15,
+      color: colors.text,
+    },
+    textarea: { minHeight: 90, textAlignVertical: "top" },
+    chipScroll: { marginBottom: 4 },
+    chipRow: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
+    emptyCategoryBox: {
+      backgroundColor: colors.surfaceSecondary,
+      borderWidth: 1,
+      borderColor: colors.border,
+      padding: 12,
+    },
+    emptyCategoryText: {
+      color: colors.muted,
+      fontSize: 12,
+      fontWeight: "600",
+    },
+    chip: {
+      paddingHorizontal: 14,
+      paddingVertical: 7,
+      borderRadius: 0,
+      backgroundColor: colors.surface,
+      borderWidth: 1,
+      borderColor: colors.border,
+      marginRight: 8,
+      marginBottom: 8,
+    },
+    chipActive: { backgroundColor: colors.text, borderColor: colors.text },
+    chipText: { fontSize: isMobile ? 12 : 13, color: colors.textSecondary, fontWeight: "500" },
+    chipTextActive: { color: colors.background, fontWeight: "700" },
+    imagePickerBtn: {
+      borderWidth: 1,
+      borderColor: colors.border,
+      backgroundColor: colors.surface,
+      paddingVertical: 12,
+      alignItems: "center",
+    },
+    imagePickerBtnText: {
+      fontSize: 11,
+      color: colors.text,
+      fontWeight: "800",
+      textTransform: "uppercase",
+      letterSpacing: 1.1,
+    },
+    previewScroll: { marginTop: 8, marginBottom: 8 },
+    previewThumb: {
+      position: "relative" as const,
+      marginRight: 8,
+    },
+    previewImage: {
+      width: 90,
+      height: 90,
+      borderWidth: 2,
+      borderColor: colors.border,
+    },
+    coverBadge: {
+      position: "absolute" as const,
+      bottom: 0,
+      left: 0,
+      right: 0,
+      backgroundColor: colors.accent,
+      paddingVertical: 2,
+      alignItems: "center" as const,
+    },
+    coverBadgeText: { fontSize: 8, fontWeight: "900" as const, color: colors.primaryContent, textTransform: "uppercase" as const, letterSpacing: 0.5 },
+    deleteImgBtn: {
+      position: "absolute" as const,
+      top: -6,
+      right: -6,
+      width: 20,
+      height: 20,
+      borderRadius: 10,
+      backgroundColor: colors.danger,
+      borderWidth: 1.5,
+      borderColor: colors.primaryContent,
+      alignItems: "center" as const,
+      justifyContent: "center" as const,
+      zIndex: 10,
+    },
+    deleteImgBtnText: { color: colors.dangerContent, fontSize: 10, fontWeight: "900" as const, lineHeight: 12 },
+    submitBtn: {
+      marginTop: 28,
+      backgroundColor: colors.text,
+      paddingVertical: 14,
+      borderRadius: 0,
+      alignItems: "center",
+    },
+    submitBtnText: { color: colors.background, fontSize: isMobile ? 14 : 16, fontWeight: "700" },
+    pickerBtn: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+      backgroundColor: colors.surface,
+      borderWidth: 1,
+      borderColor: colors.border,
+      paddingHorizontal: 12,
+      paddingVertical: 11,
+    },
+    pickerBtnText: {
+      fontSize: isMobile ? 13 : 15,
+      color: colors.text,
+    },
+    pickerChevron: {
+      fontSize: 11,
+      color: colors.text,
+    },
+    // Gate styles
+    gateContent: {
+      flex: 1,
+      padding: 24,
+      alignItems: "center",
+      justifyContent: "center",
+      marginTop: 60,
+    },
+    gateIcon: {
+      width: 100,
+      height: 100,
+      backgroundColor: colors.surfaceSecondary,
+      alignItems: "center",
+      justifyContent: "center",
+      marginBottom: 24,
+    },
+    gateTitle: {
+      fontSize: isMobile ? 18 : 22,
+      fontWeight: "900",
+      textTransform: "uppercase",
+      marginBottom: 12,
+      color: colors.text,
+    },
+    gateText: {
+      fontSize: isMobile ? 12 : 13,
+      color: colors.muted,
+      textAlign: "center",
+      lineHeight: 20,
+      marginBottom: 32,
+    },
+    primaryBtn: {
+      width: "100%",
+      backgroundColor: colors.text,
+      paddingVertical: 18,
+      alignItems: "center",
+      borderWidth: 2,
+      borderColor: colors.boardBorder,
+      marginBottom: 12,
+    },
+    primaryBtnText: {
+      color: colors.background,
+      fontWeight: "900",
+      textTransform: "uppercase",
+      fontSize: 12,
+      letterSpacing: 1,
+    },
+    secondaryBtn: {
+      width: "100%",
+      backgroundColor: colors.surface,
+      paddingVertical: 18,
+      alignItems: "center",
+      borderWidth: 2,
+      borderColor: colors.boardBorder,
+    },
+    secondaryBtnText: {
+      color: colors.text,
+      fontWeight: "900",
+      textTransform: "uppercase",
+      fontSize: 12,
+      letterSpacing: 1,
+    },
+    // Modal styles
+    modalOverlay: { flex: 1, backgroundColor: colors.overlay, justifyContent: "flex-end" },
+    modalSheet: { backgroundColor: colors.surface, borderTopWidth: 3, borderColor: colors.boardBorder, maxHeight: "80%" },
+    modalHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", padding: isMobile ? 12 : 16, borderBottomWidth: 2, borderColor: colors.boardBorder },
+    modalHeaderTitle: { fontSize: 12, fontWeight: "900", textTransform: "uppercase", letterSpacing: 1.2, color: colors.text },
+    modalHeaderClose: { fontSize: 11, fontWeight: "800", color: colors.text, textTransform: "uppercase" },
+    modalSearchWrap: { padding: 12, borderBottomWidth: 2, borderColor: colors.boardBorder },
+    modalSearchInput: { borderWidth: 2, borderColor: colors.boardBorder, backgroundColor: colors.background, paddingHorizontal: 12, paddingVertical: 10, fontSize: isMobile ? 13 : 14, color: colors.text },
+    spotRow: { paddingHorizontal: isMobile ? 12 : 16, paddingVertical: 14, borderBottomWidth: 1, borderColor: colors.surfaceSecondary },
+    spotRowActive: { backgroundColor: colors.text },
+    spotRowText: { fontSize: isMobile ? 13 : 14, fontWeight: "700", color: colors.text },
+    spotRowTextActive: { color: colors.background },
+    spotRowArea: { fontSize: 11, color: colors.muted },
+    spotRowAreaActive: { color: colors.surfaceSecondary },
+  }), [colors]);
+
+  useEffect(() => {
+    referenceService.getPickupSpots().then(setPickupSpots).catch(() => {});
+  }, []);
 
   useEffect(() => {
     navigation.setOptions({
@@ -199,7 +404,7 @@ const CreateListingScreen = ({ navigation, route }: any) => {
           backgroundColor: colors.bg,
         }}
       >
-        <ActivityIndicator size="large" color="#000" />
+        <ActivityIndicator size="large" color={colors.text} />
       </View>
     );
   }
@@ -217,7 +422,7 @@ const CreateListingScreen = ({ navigation, route }: any) => {
             <Ionicons
               name="shield-checkmark-outline"
               size={60}
-              color="rgba(0,0,0,0.1)"
+              color={colors.border}
             />
           </View>
           <Text style={styles.gateTitle}>Verify to continue</Text>
@@ -230,7 +435,7 @@ const CreateListingScreen = ({ navigation, route }: any) => {
             style={styles.primaryBtn}
             onPress={() => navigation.navigate("Verification")}
           >
-            <Text style={styles.primaryBtnText}>Start Verification Now →</Text>
+            <Text style={styles.primaryBtnText}>Start Verification</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.secondaryBtn}
@@ -275,12 +480,30 @@ const CreateListingScreen = ({ navigation, route }: any) => {
               style={styles.previewScroll}
             >
               {images.map((img, idx) => (
-                <Image
-                  key={`${img.uri}-${idx}`}
-                  source={{ uri: img.uri }}
-                  style={styles.previewImage}
-                />
+                <View key={`${img.uri}-${idx}`} style={styles.previewThumb}>
+                  <Image
+                    source={{ uri: img.uri }}
+                    style={[styles.previewImage, idx === 0 && { borderColor: colors.accent, borderWidth: 2.5 }]}
+                  />
+                  {idx === 0 && (
+                    <View style={styles.coverBadge}>
+                      <Text style={styles.coverBadgeText}>Cover</Text>
+                    </View>
+                  )}
+                  <TouchableOpacity
+                    style={styles.deleteImgBtn}
+                    onPress={() => setImages(prev => prev.filter((_, i) => i !== idx))}
+                  >
+                    <Text style={styles.deleteImgBtnText}>×</Text>
+                  </TouchableOpacity>
+                </View>
               ))}
+              <TouchableOpacity
+                style={[styles.previewImage, { alignItems: 'center', justifyContent: 'center', backgroundColor: colors.surfaceSecondary, borderStyle: 'dashed' }]}
+                onPress={pickImages}
+              >
+                <Text style={{ fontSize: isMobile ? 18 : 22, color: colors.muted }}>+</Text>
+              </TouchableOpacity>
             </ScrollView>
           )}
 
@@ -288,6 +511,7 @@ const CreateListingScreen = ({ navigation, route }: any) => {
           <TextInput
             style={styles.input}
             placeholder="What are you selling?"
+            placeholderTextColor={colors.muted}
             value={title}
             onChangeText={setTitle}
             maxLength={120}
@@ -297,6 +521,7 @@ const CreateListingScreen = ({ navigation, route }: any) => {
           <TextInput
             style={[styles.input, styles.textarea]}
             placeholder="Describe your item..."
+            placeholderTextColor={colors.muted}
             value={description}
             onChangeText={setDescription}
             multiline
@@ -308,6 +533,7 @@ const CreateListingScreen = ({ navigation, route }: any) => {
           <TextInput
             style={styles.input}
             placeholder="0.00"
+            placeholderTextColor={colors.muted}
             value={price}
             onChangeText={setPrice}
             keyboardType="decimal-pad"
@@ -399,38 +625,69 @@ const CreateListingScreen = ({ navigation, route }: any) => {
           {(deliveryOption === "pickup" || deliveryOption === "both") && (
             <>
               <Text style={styles.label}>Pickup Location</Text>
-              <ScrollView
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                style={styles.chipScroll}
+              <TouchableOpacity
+                style={styles.pickerBtn}
+                onPress={() => setSpotPickerVisible(true)}
               >
-                {CAMPUS_LOCATIONS.map((loc) => (
-                  <TouchableOpacity
-                    key={loc}
-                    style={[
-                      styles.chip,
-                      pickupLocation === loc && styles.chipActive,
-                    ]}
-                    onPress={() => setPickupLocation(loc)}
-                  >
-                    <Text
-                      style={[
-                        styles.chipText,
-                        pickupLocation === loc && styles.chipTextActive,
-                      ]}
-                    >
-                      {loc}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
-              </ScrollView>
-              <TextInput
-                style={styles.input}
-                placeholder="Or enter custom pickup location"
-                placeholderTextColor="#9a8e7f"
-                value={pickupLocation}
-                onChangeText={setPickupLocation}
-              />
+                <Text style={[styles.pickerBtnText, !pickupLocation && { opacity: 0.35 }]} numberOfLines={1}>
+                  {pickupLocation || "Select a pickup spot…"}
+                </Text>
+                <Text style={styles.pickerChevron}>▼</Text>
+              </TouchableOpacity>
+
+              {pickupLocation === "Other (specify below)" && (
+                <TextInput
+                  style={[styles.input, { marginTop: 8 }]}
+                  placeholder="Describe your pickup location"
+                  placeholderTextColor={colors.muted}
+                  value={customPickup}
+                  onChangeText={setCustomPickup}
+                />
+              )}
+
+              <Modal
+                visible={spotPickerVisible}
+                animationType="slide"
+                transparent
+                onRequestClose={() => setSpotPickerVisible(false)}
+              >
+                <View style={styles.modalOverlay}>
+                  <View style={styles.modalSheet}>
+                    <View style={styles.modalHeader}>
+                      <Text style={styles.modalHeaderTitle}>Pickup Spot</Text>
+                      <TouchableOpacity onPress={() => { setSpotPickerVisible(false); setSpotSearch(""); }}>
+                        <Text style={styles.modalHeaderClose}>Close</Text>
+                      </TouchableOpacity>
+                    </View>
+                    <View style={styles.modalSearchWrap}>
+                      <TextInput
+                        style={styles.modalSearchInput}
+                        placeholder="Search spots..."
+                        placeholderTextColor={colors.muted}
+                        value={spotSearch}
+                        onChangeText={setSpotSearch}
+                        autoFocus
+                      />
+                    </View>
+                    <FlatList
+                      data={spotSearch.trim() ? pickupSpots.filter(s => s.name.toLowerCase().includes(spotSearch.toLowerCase())) : pickupSpots}
+                      keyExtractor={item => item.name}
+                      renderItem={({ item }) => (
+                        <TouchableOpacity
+                          style={[styles.spotRow, pickupLocation === item.name && styles.spotRowActive]}
+                          onPress={() => { setPickupLocation(item.name); setSpotSearch(""); setSpotPickerVisible(false); }}
+                        >
+                          <Text style={[styles.spotRowText, pickupLocation === item.name && styles.spotRowTextActive]}>{item.name}</Text>
+                          {item.area !== "Custom" && (
+                            <Text style={[styles.spotRowArea, pickupLocation === item.name && styles.spotRowAreaActive]}>{item.area}</Text>
+                          )}
+                        </TouchableOpacity>
+                      )}
+                      keyboardShouldPersistTaps="handled"
+                    />
+                  </View>
+                </View>
+              </Modal>
             </>
           )}
 
@@ -438,6 +695,7 @@ const CreateListingScreen = ({ navigation, route }: any) => {
           <TextInput
             style={styles.input}
             placeholder="phone, hostel, calculator"
+            placeholderTextColor={colors.muted}
             value={tags}
             onChangeText={setTags}
           />
@@ -474,7 +732,7 @@ const CreateListingScreen = ({ navigation, route }: any) => {
             disabled={loading}
           >
             {loading ? (
-              <ActivityIndicator color="#fff" />
+              <ActivityIndicator color={colors.background} />
             ) : (
               <Text style={styles.submitBtnText}>
                 {isEditMode ? "Update Listing" : "Create Listing"}
@@ -486,146 +744,5 @@ const CreateListingScreen = ({ navigation, route }: any) => {
     </KeyboardAvoidingView>
   );
 };
-
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.bg },
-  content: { padding: 16, paddingBottom: 40 },
-  label: {
-    fontSize: 12,
-    fontWeight: "700",
-    color: "#6f6559",
-    textTransform: "uppercase",
-    letterSpacing: 0.5,
-    marginTop: 18,
-    marginBottom: 6,
-  },
-  input: {
-    backgroundColor: colors.surface,
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: 0,
-    paddingHorizontal: 12,
-    paddingVertical: 11,
-    fontSize: 15,
-    color: colors.text,
-  },
-  textarea: { minHeight: 90, textAlignVertical: "top" },
-  chipScroll: { marginBottom: 4 },
-  chipRow: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
-  emptyCategoryBox: {
-    backgroundColor: "#fffacd",
-    borderWidth: 1,
-    borderColor: "#c8b48c",
-    padding: 12,
-  },
-  emptyCategoryText: {
-    color: "#7b5e1a",
-    fontSize: 12,
-    fontWeight: "600",
-  },
-  chip: {
-    paddingHorizontal: 14,
-    paddingVertical: 7,
-    borderRadius: 0,
-    backgroundColor: colors.surface,
-    borderWidth: 1,
-    borderColor: colors.border,
-    marginRight: 8,
-    marginBottom: 8,
-  },
-  chipActive: { backgroundColor: colors.text, borderColor: colors.text },
-  chipText: { fontSize: 13, color: "#374151", fontWeight: "500" },
-  chipTextActive: { color: "#fff", fontWeight: "700" },
-  imagePickerBtn: {
-    borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.surface,
-    paddingVertical: 12,
-    alignItems: "center",
-  },
-  imagePickerBtnText: {
-    fontSize: 11,
-    color: "#3e352b",
-    fontWeight: "800",
-    textTransform: "uppercase",
-    letterSpacing: 1.1,
-  },
-  previewScroll: { marginTop: 8, marginBottom: 8 },
-  previewImage: {
-    width: 90,
-    height: 90,
-    marginRight: 8,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  submitBtn: {
-    marginTop: 28,
-    backgroundColor: colors.text,
-    paddingVertical: 14,
-    borderRadius: 0,
-    alignItems: "center",
-  },
-  submitBtnText: { color: "#fff", fontSize: 16, fontWeight: "700" },
-  // Gate styles
-  gateContent: {
-    flex: 1,
-    padding: 24,
-    alignItems: "center",
-    justifyContent: "center",
-    marginTop: 60,
-  },
-  gateIcon: {
-    width: 100,
-    height: 100,
-    backgroundColor: "#f3f4f6",
-    alignItems: "center",
-    justifyContent: "center",
-    marginBottom: 24,
-  },
-  gateTitle: {
-    fontSize: 22,
-    fontWeight: "900",
-    textTransform: "uppercase",
-    marginBottom: 12,
-  },
-  gateText: {
-    fontSize: 13,
-    color: "#666",
-    textAlign: "center",
-    lineHeight: 20,
-    marginBottom: 32,
-  },
-  primaryBtn: {
-    width: "100%",
-    backgroundColor: "#000",
-    paddingVertical: 18,
-    alignItems: "center",
-    borderWidth: 2,
-    borderColor: "#000",
-    marginBottom: 12,
-  },
-  primaryBtnText: {
-    color: "#fff",
-    fontWeight: "900",
-    textTransform: "uppercase",
-    fontSize: 12,
-    letterSpacing: 1,
-  },
-  secondaryBtn: {
-    width: "100%",
-    backgroundColor: "#fff",
-    paddingVertical: 18,
-    alignItems: "center",
-    borderWidth: 2,
-    borderColor: "#000",
-  },
-  secondaryBtnText: {
-    color: "#000",
-    fontWeight: "900",
-    textTransform: "uppercase",
-    fontSize: 12,
-    letterSpacing: 1,
-  },
-});
 
 export default CreateListingScreen;
