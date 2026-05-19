@@ -31,6 +31,7 @@ export interface IProductDocument extends Document {
   availableUntil?: Date;
   flashSalePrice?: number;
   flashSaleEndsAt?: Date;
+  lastAlertedPrice?: number;
   views: number;
   isFeatured: boolean;
   isFlagged: boolean;
@@ -147,6 +148,9 @@ const productSchema = new Schema<IProductDocument>(
     },
     flashSaleEndsAt: {
       type: Date,
+    },
+    lastAlertedPrice: {
+      type: Number,
     },
     views: {
       type: Number,
