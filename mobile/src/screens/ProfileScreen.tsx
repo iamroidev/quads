@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View, Platform, Alert,
   Dimensions,
 } from 'react-native';
@@ -6,7 +6,6 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../theme/ThemeContext';
-import { shadows } from '../theme';
 import ScreenHeader from '../components/ScreenHeader';
 import api from '../services/api';
 
@@ -69,16 +68,16 @@ export const ProfileScreen = ({ navigation }: any) => {
       title: 'My Activity',
       items: [
         { label: 'Shopping Cart', icon: 'cart-outline', onPress: () => navigation.navigate('Cart') },
-        { label: 'My Purchases', icon: 'receipt-outline', onPress: () => navigation.navigate('OrdersTab') },
+        { label: 'My Purchases', icon: 'receipt-outline', onPress: () => navigation.navigate('Orders') },
         { label: 'Saved Items', icon: 'bookmark-outline', onPress: () => navigation.navigate('SavedItems') },
         { label: 'Alerts', icon: 'notifications-outline', onPress: () => navigation.navigate('Alerts') },
-        { label: 'Messages', icon: 'chatbubbles-outline', onPress: () => navigation.navigate('MessagesTab') },
+        { label: 'Messages', icon: 'chatbubbles-outline', onPress: () => navigation.navigate('MessagesCenter') },
       ],
     },
     {
       title: 'Campus & Support',
       items: [
-        { label: 'Campus Pulse', icon: 'pulse-outline', onPress: () => navigation.navigate('PulseTab') },
+        { label: 'Campus Pulse', icon: 'pulse-outline', onPress: () => navigation.navigate('Pulse') },
         { label: 'Following Feed', icon: 'people-outline', onPress: () => navigation.navigate('FollowingFeed') },
         { label: 'Lost & Found', icon: 'search-outline', onPress: () => navigation.navigate('LostFound') },
         { label: 'Support Desk', icon: 'help-circle-outline', onPress: () => navigation.navigate('Support') },
@@ -105,9 +104,9 @@ export const ProfileScreen = ({ navigation }: any) => {
         ] : []),
         { label: 'Edit Profile', icon: 'person-outline', onPress: () => navigation.navigate('ProfileEdit') },
         { label: 'Get Verified', icon: 'shield-checkmark-outline', onPress: () => navigation.navigate('Verification') },
-        { label: 'My Listings', icon: 'list-outline', onPress: () => navigation.navigate('InventoryTab', { screen: 'MyListings' }) },
-        { label: 'Sales Orders', icon: 'receipt-outline', onPress: () => navigation.navigate('SellerOrdersTab') },
-        { label: 'Growth Toolkit', icon: 'trending-up-outline', onPress: () => navigation.navigate('GrowthTab') },
+        { label: 'My Listings', icon: 'list-outline', onPress: () => navigation.navigate('MyListings') },
+        { label: 'Sales Orders', icon: 'receipt-outline', onPress: () => navigation.navigate('SellerOrders') },
+        { label: 'Growth Toolkit', icon: 'trending-up-outline', onPress: () => navigation.navigate('GrowthTools') },
       ],
     },
     {
@@ -115,7 +114,7 @@ export const ProfileScreen = ({ navigation }: any) => {
       items: [
         { label: 'Dispute Center', icon: 'shield-alert-outline', onPress: () => navigation.navigate('DisputeCenter') },
         { label: 'Lost & Found', icon: 'search-outline', onPress: () => navigation.navigate('LostFound') },
-        { label: 'Campus Pulse', icon: 'pulse-outline', onPress: () => navigation.navigate('PulseTab') },
+        { label: 'Campus Pulse', icon: 'pulse-outline', onPress: () => navigation.navigate('Pulse') },
         { label: 'Following Feed', icon: 'people-outline', onPress: () => navigation.navigate('FollowingFeed') },
       ],
     },
@@ -195,9 +194,9 @@ export const ProfileScreen = ({ navigation }: any) => {
         {(user?.role === 'seller' || user?.role === 'admin') && (
           <View style={styles.statsGrid}>
             {[
-              { label: 'Rating', value: '—', icon: '' },
-              { label: 'Response', value: `${user?.responseTimeMinutes ?? 15}m`, icon: '' },
-            ].map(({ label, value, icon }) => (
+              { label: 'Rating', value: '—' },
+              { label: 'Response', value: `${user?.responseTimeMinutes ?? 15}m` },
+            ].map(({ label, value }) => (
               <View key={label} style={styles.statBox}>
                 
                 <Text style={styles.statValue}>{value}</Text>
