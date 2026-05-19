@@ -63,7 +63,7 @@ class AutoPayoutService {
           // We need an admin user reference for the audit trail.
           // Use a system admin placeholder ID or find an admin.
           // Since this is automated, find any admin user to use as "processedBy"
-          const admin = await User.findOne({ role: 'admin' }).select('_id');
+          const admin = await User.findOne({ roles: 'admin' }).select('_id');
           if (!admin) {
             console.error('[AutoPayout] No admin user found in system - cannot process payout', payout._id.toString());
             failed++;
