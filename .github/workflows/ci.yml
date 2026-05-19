@@ -53,6 +53,8 @@ jobs:
     runs-on: ubuntu-latest
     needs: test-server
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    env:
+      EC2_SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
     steps:
       - uses: actions/checkout@v4
 
@@ -70,31 +72,31 @@ jobs:
         working-directory: server
         run: npm run build
 
-      # Write the SSH private key from GitHub secret
       - name: Configure SSH key
+        if: env.EC2_SSH_KEY != ''
         run: |
           mkdir -p ~/.ssh
-          echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/quads-key.pem
+          echo "$EC2_SSH_KEY" > ~/.ssh/quads-key.pem
           chmod 600 ~/.ssh/quads-key.pem
-          ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts 2>/dev/null || true
+          ssh-keyscan -H 54.167.221.2 >> ~/.ssh/known_hosts 2>/dev/null || true
 
-      # Sync compiled output + package manifests to EC2
       - name: Sync dist to EC2
+        if: env.EC2_SSH_KEY != ''
         run: |
           rsync -az --delete \
             -e "ssh -i ~/.ssh/quads-key.pem -o StrictHostKeyChecking=no" \
             server/dist/ \
-            ec2-user@${{ secrets.EC2_HOST }}:/home/ec2-user/quads/dist/
+            ec2-user@54.167.221.2:/home/ec2-user/quads/dist/
           rsync -az \
             -e "ssh -i ~/.ssh/quads-key.pem -o StrictHostKeyChecking=no" \
             server/package.json server/package-lock.json \
-            ec2-user@${{ secrets.EC2_HOST }}:/home/ec2-user/quads/
+            ec2-user@54.167.221.2:/home/ec2-user/quads/
 
-      # Install production deps (only runs if package-lock changed) and reload
       - name: Restart on EC2
+        if: env.EC2_SSH_KEY != ''
         run: |
           ssh -i ~/.ssh/quads-key.pem -o StrictHostKeyChecking=no \
-            ec2-user@${{ secrets.EC2_HOST }} << 'ENDSSH'
+            ec2-user@54.167.221.2 << 'ENDSSH'
               export NVM_DIR="$HOME/.nvm"
               [ -s "$NVM_DIR/nvm.sh" ] && source "$NVM_DIR/nvm.sh"
               cd /home/ec2-user/quads
