@@ -36,7 +36,14 @@ class EmailService {
     `;
   }
 
-  private wrapEmail(body: string): string {
+  private wrapEmail(body: string, headerContent?: string): string {
+    const defaultHeader = `
+      <div style="text-align: center; padding: 32px 0 16px;">
+        <div style="display: inline-block; transform: rotate(-3deg); border: 4px solid #ffffff; border-radius: 16px; padding: 8px 32px; background: #000000; margin: 10px 0;">
+          <span style="font-family: 'Arial', sans-serif; font-weight: 900; font-style: italic; font-size: 32px; color: #ff6b6b; letter-spacing: -1.5px; text-transform: uppercase;">QUADS</span>
+        </div>
+      </div>
+    `;
     return `
       <!DOCTYPE html>
       <html>
@@ -48,23 +55,24 @@ class EmailService {
       <body>
         <div class="container">
           <div class="header">
-            <!-- Brand Neobrutalist Logo Container -->
-            <div style="display: inline-block; transform: rotate(-3deg); border: 4px solid #ffffff; border-radius: 16px; padding: 8px 32px; background: #000000; margin: 10px 0;">
-              <span style="font-family: 'Arial', sans-serif; font-weight: 900; font-style: italic; font-size: 32px; color: #ff6b6b; letter-spacing: -1.5px; text-transform: uppercase;">QUADS</span>
-            </div>
+            ${headerContent || defaultHeader}
           </div>
           <div class="content">
             ${body}
           </div>
           <div class="footer">
-            <p><strong>QUADS Marketplace</strong> — Institutional Exchange</p>
-            <p><a href="${process.env.CLIENT_URL || 'https://quadsmarket.tech'}">quadsmarket.tech</a> · Support: support@quadsmarket.tech</p>
-            <p style="margin-top: 16px;">This is an official system transmission. Please do not reply directly to this address.</p>
+            <p><strong>QUADS Marketplace</strong> — The Official Institutional Exchange · UMaT, Tarkwa</p>
+            <p><a href="${process.env.CLIENT_URL || 'https://quadsmarket.tech'}">quadsmarket.tech</a> &nbsp;·&nbsp; support@quadsmarket.tech</p>
+            <p style="margin-top: 16px; opacity: 0.7;">Official system transmission. Do not reply to this address.</p>
           </div>
         </div>
       </body>
       </html>
     `;
+  }
+
+  private wrapEmailWithLogo(body: string, logoBlock: string): string {
+    return this.wrapEmail(body, logoBlock);
   }
 
   async sendEmail(options: EmailOptions): Promise<boolean> {
@@ -109,53 +117,159 @@ class EmailService {
 
   async sendWelcomeEmail(to: string, name: string, role: string = 'buyer'): Promise<boolean> {
     const isSeller = role === 'seller' || role === 'admin';
-    const subject = `Welcome to QUADS — Ready to ${isSeller ? 'Sell' : 'Shop'}? 🎉`;
 
-    const roleContent = isSeller
-      ? `
-        <div class="role-badge">💼 CAMPUS MERCHANT ACTIVATED</div>
-        <h2>Start Your Student Business Empire, ${name}!</h2>
-        <p>Your seller store is officially active. You are now fully unlocked to list products, accept secure campus payments, and reach thousands of potential UMaT buyers immediately.</p>
+    const subject = isSeller
+      ? `Your QUADS Seller Account is Active — ${name}`
+      : `Welcome to QUADS — Your Campus Marketplace Account is Ready`;
 
-        <div style="background: #fffacd; padding: 20px; border: 2px solid #000; margin: 24px 0;">
-          <p style="margin: 0; font-weight: 900; text-transform: uppercase; font-size: 14px; letter-spacing: 0.5px;">🚀 GETTING STARTED:</p>
-          <ul style="margin: 12px 0 0 0; padding-left: 20px; font-size: 14px; line-height: 1.8;">
-            <li><strong>Configure Payouts:</strong> Enter your Mobile Money details in your profile to receive funds directly.</li>
-            <li><strong>List with Care:</strong> Take clear photos in good lighting and set competitive student-friendly prices.</li>
-            <li><strong>Boost Conversions:</strong> Generate custom seller coupons or bundles to attract buyers to your listings.</li>
-          </ul>
+    // Q logo block rendered in email-safe HTML
+    const qLogo = `
+      <div style="text-align: center; padding: 36px 0 24px;">
+        <!-- Q Logo mark -->
+        <div style="display: inline-flex; align-items: flex-end; gap: 6px;">
+          <!-- Outer Q box -->
+          <div style="position: relative; width: 68px; height: 68px; border: 5px solid #ffffff; background: #000000; display: inline-block; vertical-align: bottom;">
+            <!-- Q circle frame -->
+            <div style="position: absolute; top: 14px; left: 14px; width: 28px; height: 28px; border: 7px solid #ffffff; background: transparent;"></div>
+            <!-- Q tail -->
+            <div style="position: absolute; bottom: 10px; right: 10px; width: 12px; height: 6px; background: #ff6b6b; transform: rotate(45deg);"></div>
+            <!-- Red pin accent -->
+            <div style="position: absolute; top: 5px; right: 5px; width: 10px; height: 10px; border-radius: 50%; background: #ff6b6b; border: 2px solid #ffffff;"></div>
+          </div>
+          <!-- U A D S tiles -->
+          ${['U','A','D','S'].map(c => `<div style="width: 24px; height: 24px; border: 2px solid #ffffff; background: #000000; display: inline-flex; align-items: center; justify-content: center; vertical-align: bottom; margin-bottom: 2px;"><span style="color: #ffffff; font-size: 12px; font-weight: 900; font-family: Arial, sans-serif;">${c}</span></div>`).join('')}
         </div>
-      `
-      : `
-        <div class="role-badge">🎉 CAMPUS ACCESS GRANTED</div>
-        <h2>Welcome to QUADS @ UMaT, ${name}!</h2>
-        <p>Your student credentials have been verified. You're now unlocked to browse, buy, and trade directly with fellow peers on campus. No shipping fees, no off-campus meetups, just pure convenience.</p>
+        <!-- Tagline -->
+        <div style="margin-top: 12px; font-size: 9px; font-weight: 900; letter-spacing: 2px; color: rgba(255,255,255,0.5); text-transform: uppercase; font-family: Arial, sans-serif; border-top: 1px solid rgba(255,255,255,0.15); padding-top: 10px; display: inline-block;">THE OFFICIAL INSTITUTIONAL MARKETPLACE</div>
+      </div>
+    `;
 
-        <div style="background: #fffacd; padding: 20px; border: 2px solid #000; margin: 24px 0;">
-          <p style="margin: 0; font-weight: 900; text-transform: uppercase; font-size: 14px; letter-spacing: 0.5px;">🔍 SHOPPING TIPS:</p>
-          <ul style="margin: 12px 0 0 0; padding-left: 20px; font-size: 14px; line-height: 1.8;">
-            <li><strong>Find Deals:</strong> Filter by categories to find textbook deals, tech gear, or dorm essentials.</li>
-            <li><strong>Escrow Protection:</strong> Pay securely via Mobile Money (MTN, Telecel, AirtelTigo). Funds are held safely in escrow until you verify the item!</li>
-            <li><strong>Handoff Safe:</strong> Meet the seller in broad daylight at popular campus spots like the library or campus cafeterias.</li>
-          </ul>
-        </div>
-      `;
+    const sellerBody = `
+      <div class="role-badge">CAMPUS MERCHANT — ACCOUNT ACTIVATED</div>
+      <h2>You Are Live on QUADS, ${name.split(' ')[0]}.</h2>
 
-    const body = `
-      ${roleContent}
+      <p style="font-size: 15px; line-height: 1.7; color: #333;">
+        Your seller account at <strong>UMaT's official campus marketplace</strong> is fully active.
+        You can now list products, receive verified orders, and collect payments directly to your Mobile Money account — all within campus.
+      </p>
+
+      <div style="background: #faf8f5; border-left: 6px solid #000; padding: 20px 24px; margin: 28px 0;">
+        <p style="margin: 0 0 14px; font-size: 11px; font-weight: 900; text-transform: uppercase; letter-spacing: 1.5px; color: #000;">YOUR FIRST THREE STEPS</p>
+        <table style="width: 100%; border-collapse: collapse;">
+          <tr>
+            <td style="padding: 10px 0; vertical-align: top; width: 28px;">
+              <div style="width: 22px; height: 22px; background: #000; display: flex; align-items: center; justify-content: center;">
+                <span style="color: #ff6b6b; font-size: 11px; font-weight: 900;">01</span>
+              </div>
+            </td>
+            <td style="padding: 10px 0 10px 12px; border-bottom: 1px solid #eee;">
+              <strong style="font-size: 13px;">Set Up Your Payout</strong><br>
+              <span style="font-size: 12px; color: #555; line-height: 1.6;">Go to <em>Profile &rarr; Seller Onboarding</em> and enter your MTN, Telecel, or AirtelTigo Mobile Money number so you can receive earnings automatically.</span>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 10px 0; vertical-align: top;">
+              <div style="width: 22px; height: 22px; background: #000; display: flex; align-items: center; justify-content: center;">
+                <span style="color: #ff6b6b; font-size: 11px; font-weight: 900;">02</span>
+              </div>
+            </td>
+            <td style="padding: 10px 0 10px 12px; border-bottom: 1px solid #eee;">
+              <strong style="font-size: 13px;">Create Your First Listing</strong><br>
+              <span style="font-size: 12px; color: #555; line-height: 1.6;">Use clear photos against a neutral background. Set a fair price. Add accurate tags so buyers find you in search.</span>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 10px 0; vertical-align: top;">
+              <div style="width: 22px; height: 22px; background: #000; display: flex; align-items: center; justify-content: center;">
+                <span style="color: #ff6b6b; font-size: 11px; font-weight: 900;">03</span>
+              </div>
+            </td>
+            <td style="padding: 10px 0 10px 12px;">
+              <strong style="font-size: 13px;">Grow With Tools</strong><br>
+              <span style="font-size: 12px; color: #555; line-height: 1.6;">Use the Growth Toolkit to create coupon codes, bundles, and smart pricing to attract more buyers and increase conversions.</span>
+            </td>
+          </tr>
+        </table>
+      </div>
+
+      <div style="background: #fff8e1; border: 2px solid #000; padding: 16px 20px; margin: 0 0 28px; font-size: 12px; line-height: 1.6;">
+        <strong>How payouts work:</strong> When a buyer completes an order and verifies receipt, QUADS releases your earnings (minus a small platform commission) directly to your registered Mobile Money account within one business day.
+      </div>
 
       <div style="text-align: center;">
-        <a href="${process.env.CLIENT_URL || 'https://quadsmarket.tech'}/dashboard" class="btn btn-primary" style="display: inline-block; background: #ff6b6b; color: #ffffff !important; text-decoration: none; padding: 16px 32px; font-weight: 900; text-transform: uppercase; font-size: 13px; letter-spacing: 1px; margin: 24px 0; border: 2px solid #000; box-shadow: 4px 4px 0 0 #000000;">Enter Dashboard</a>
+        <a href="${process.env.CLIENT_URL || 'https://quadsmarket.tech'}/seller/onboarding" style="display: inline-block; background: #ff6b6b; color: #ffffff !important; text-decoration: none; padding: 16px 36px; font-weight: 900; text-transform: uppercase; font-size: 12px; letter-spacing: 1.5px; border: 2px solid #000; box-shadow: 5px 5px 0 0 #000000; margin-bottom: 28px;">Complete Seller Setup</a>
       </div>
 
       <div class="divider"></div>
-
-      <p style="font-size: 13px; color: #666;">
-        <strong>Safety First:</strong> Never share sensitive personal info. Keep all coordination inside the campus platform for your peace of mind and protection.
+      <p style="font-size: 12px; color: #888; line-height: 1.7;">
+        Respond to buyers promptly. Honour orders you confirm. Coordinate pickup at visible, public campus locations. Your reputation score is visible to all buyers — keep it high.
       </p>
     `;
 
-    return this.sendEmail({ to, subject, html: this.wrapEmail(body) });
+    const buyerBody = `
+      <div class="role-badge">CAMPUS BUYER — ACCOUNT READY</div>
+      <h2>Welcome to QUADS, ${name.split(' ')[0]}.</h2>
+
+      <p style="font-size: 15px; line-height: 1.7; color: #333;">
+        You now have full access to <strong>UMaT's official campus marketplace</strong> — the only platform built exclusively for the University of Mines and Technology community in Tarkwa.
+        Browse thousands of listings from fellow students: textbooks, electronics, food, clothing, services, and more.
+      </p>
+
+      <div style="background: #faf8f5; border-left: 6px solid #000; padding: 20px 24px; margin: 28px 0;">
+        <p style="margin: 0 0 14px; font-size: 11px; font-weight: 900; text-transform: uppercase; letter-spacing: 1.5px; color: #000;">HOW BUYING ON QUADS WORKS</p>
+        <table style="width: 100%; border-collapse: collapse;">
+          <tr>
+            <td style="padding: 10px 0; vertical-align: top; width: 28px;">
+              <div style="width: 22px; height: 22px; background: #000; display: flex; align-items: center; justify-content: center;">
+                <span style="color: #ff6b6b; font-size: 11px; font-weight: 900;">01</span>
+              </div>
+            </td>
+            <td style="padding: 10px 0 10px 12px; border-bottom: 1px solid #eee;">
+              <strong style="font-size: 13px;">Browse and Add to Cart</strong><br>
+              <span style="font-size: 12px; color: #555; line-height: 1.6;">Search by category, condition, or keyword. Filter by price, location, or seller rating to find exactly what you need.</span>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 10px 0; vertical-align: top;">
+              <div style="width: 22px; height: 22px; background: #000; display: flex; align-items: center; justify-content: center;">
+                <span style="color: #ff6b6b; font-size: 11px; font-weight: 900;">02</span>
+              </div>
+            </td>
+            <td style="padding: 10px 0 10px 12px; border-bottom: 1px solid #eee;">
+              <strong style="font-size: 13px;">Pay Securely via Escrow</strong><br>
+              <span style="font-size: 12px; color: #555; line-height: 1.6;">Pay using MTN, Telecel, or AirtelTigo Mobile Money. Your funds are held in QUADS escrow — the seller receives nothing until you confirm receipt.</span>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 10px 0; vertical-align: top;">
+              <div style="width: 22px; height: 22px; background: #000; display: flex; align-items: center; justify-content: center;">
+                <span style="color: #ff6b6b; font-size: 11px; font-weight: 900;">03</span>
+              </div>
+            </td>
+            <td style="padding: 10px 0 10px 12px;">
+              <strong style="font-size: 13px;">Verify and Complete</strong><br>
+              <span style="font-size: 12px; color: #555; line-height: 1.6;">Meet the seller at a visible campus spot. Inspect the item, enter the handoff code from your order screen to confirm receipt and release payment.</span>
+            </td>
+          </tr>
+        </table>
+      </div>
+
+      <div style="background: #fff8e1; border: 2px solid #000; padding: 16px 20px; margin: 0 0 28px; font-size: 12px; line-height: 1.6;">
+        <strong>Buyer Protection:</strong> If an item is misrepresented or a seller fails to deliver, open a dispute from your order page. Our moderation team reviews all cases and funds are refunded where warranted.
+      </div>
+
+      <div style="text-align: center;">
+        <a href="${process.env.CLIENT_URL || 'https://quadsmarket.tech'}/products" style="display: inline-block; background: #ff6b6b; color: #ffffff !important; text-decoration: none; padding: 16px 36px; font-weight: 900; text-transform: uppercase; font-size: 12px; letter-spacing: 1.5px; border: 2px solid #000; box-shadow: 5px 5px 0 0 #000000; margin-bottom: 28px;">Browse Campus Listings</a>
+      </div>
+
+      <div class="divider"></div>
+      <p style="font-size: 12px; color: #888; line-height: 1.7;">
+        Save items you like. Message sellers directly. Check ratings before buying. Coordinate in safe, well-lit public areas on campus. Your security and satisfaction matter.
+      </p>
+    `;
+
+    const body = isSeller ? sellerBody : buyerBody;
+    return this.sendEmail({ to, subject, html: this.wrapEmailWithLogo(body, qLogo) });
   }
 
   async sendVerificationEmail(to: string, name: string, code: string): Promise<boolean> {
