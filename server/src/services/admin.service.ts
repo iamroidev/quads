@@ -68,6 +68,7 @@ class AdminService {
     role?: string;
     search?: string;
     isBanned?: string;
+    idVerificationStatus?: string;
   }): Promise<{ users: any[]; pagination: any }> {
     const page = Math.max(1, filters.page || 1);
     const limit = Math.min(100, Math.max(1, filters.limit || 20));
@@ -76,6 +77,7 @@ class AdminService {
     const query: Record<string, any> = {};
     if (filters.role) query.roles = filters.role;
     if (filters.isBanned !== undefined) query.isBanned = filters.isBanned === 'true';
+    if (filters.idVerificationStatus) query.idVerificationStatus = filters.idVerificationStatus;
     if (filters.search) {
       query.$or = [
         { name: { $regex: filters.search, $options: 'i' } },

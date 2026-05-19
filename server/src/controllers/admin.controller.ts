@@ -26,6 +26,7 @@ export const getUsers = async (
       role: req.query.role as string,
       search: req.query.search as string,
       isBanned: req.query.isBanned as string,
+      idVerificationStatus: req.query.idVerificationStatus as string,
     });
 
     res.status(200).json({
@@ -74,6 +75,40 @@ export const setSellerVerification = async (
     res.status(200).json({
       success: true,
       message: `Seller ${user.isVerified ? 'verified' : 'unverified'} successfully`,
+      data: { user },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const updateIdVerification = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const { status } = req.body;
+    if (!['verified', 'rejected'].includes(status)) {
+      res.status(400).json({ success: false, message: 'status must be verified or rejected' });
+      return;
+    }
+
+    const User = (await import('../models/User')).default;
+    const update: any = { idVerificationStatus: status };
+    if (status === 'verified') {
+      update.isVerified = true;
+    }
+
+    const user = await User.findByIdAndUpdate(req.params.id, { $set: update }, { new: true }).select('-password');
+    if (!user) {
+      res.status(404).json({ success: false, message: 'User not found' });
+      return;
+    }
+
+    res.status(200).json({
+      success: true,
+      message: `Student ID ${status}`,
       data: { user },
     });
   } catch (error) {

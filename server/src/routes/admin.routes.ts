@@ -4,6 +4,7 @@ import {
   getUsers,
   setUserBanStatus,
   setSellerVerification,
+  updateIdVerification,
   getProducts,
   updateProductModeration,
   getOrders,
@@ -25,6 +26,7 @@ router.get('/dashboard/stats', getDashboardStats);
 router.get('/users', getUsers);
 router.patch('/users/:id/ban', setUserBanStatus);
 router.patch('/users/:id/verify', setSellerVerification);
+router.patch('/users/:id/id-verification', updateIdVerification);
 
 router.get('/products', getProducts);
 router.patch('/products/:id/moderate', updateProductModeration);

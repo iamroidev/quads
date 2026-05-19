@@ -18,6 +18,9 @@ export interface User {
   emailVerified: boolean;
   phoneVerified: boolean;
   isBanned: boolean;
+  idCardImageUrl?: string;
+  idVerificationStatus?: 'not_submitted' | 'pending' | 'verified' | 'rejected';
+  idSubmittedAt?: string;
   location?: string;
   bio?: string;
   responseTimeMinutes?: number;
