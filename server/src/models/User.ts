@@ -5,7 +5,8 @@ export interface IUserDocument extends Document {
   _id: mongoose.Types.ObjectId;
   name: string;
   email: string;
-  supabaseId?: string;
+  supabaseId?: string;  // kept for migration — existing users may still have this
+  googleId?: string;
   phone: string;
   password: string;
   roles: ('buyer' | 'seller' | 'admin')[];
@@ -101,6 +102,11 @@ const userSchema = new Schema<IUserDocument>(
       match: [/^\S+@\S+\.\S+$/, 'Please provide a valid email'],
     },
     supabaseId: {
+      type: String,
+      trim: true,
+      index: { unique: true, sparse: true },
+    },
+    googleId: {
       type: String,
       trim: true,
       index: { unique: true, sparse: true },

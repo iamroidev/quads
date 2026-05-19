@@ -35,18 +35,8 @@ interface MeResponse {
 }
 
 const authService = {
-  login: async (payload: LoginPayload): Promise<AuthResponse> => {
-    const response = await api.post('/auth/login', payload);
-    return response.data;
-  },
-
   register: async (payload: RegisterPayload): Promise<AuthResponse> => {
     const response = await api.post('/auth/register', payload);
-    return response.data;
-  },
-
-  googleLogin: async (credential: string, role?: 'buyer' | 'seller'): Promise<AuthResponse> => {
-    const response = await api.post('/auth/google', { credential, role });
     return response.data;
   },
 
@@ -58,6 +48,16 @@ const authService = {
   switchRole: async (targetMode: 'buyer' | 'seller'): Promise<AuthResponse> => {
     const response = await api.put('/auth/switch-role', { targetMode });
     return response.data;
+  },
+
+  loginWithPassword: async (email: string, password: string): Promise<any> => {
+    const response = await api.post('/auth/login', { email, password });
+    return response;
+  },
+
+  googleLogin: async (idToken: string, role?: string, profileData?: any): Promise<any> => {
+    const response = await api.post('/auth/google', { credential: idToken, role, profileData });
+    return response;
   },
 
   sendOtp: async (email: string, purpose: 'login' | 'register'): Promise<any> => {

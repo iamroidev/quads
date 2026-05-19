@@ -2,7 +2,6 @@ import React, { createContext, useContext, useState, useEffect, useCallback } fr
 import authService, { RegisterData, UpdateProfileData, ChangePasswordData } from '../services/auth.service';
 import { User } from '../types';
 import toast from 'react-hot-toast';
-import { supabase, isSupabaseConfigured } from '../services/supabase';
 import notificationService from '../services/notification.service';
 
 // Subscribe to web push after login — silent, non-blocking
@@ -23,7 +22,7 @@ interface AuthContextType {
   isAuthenticated: boolean;
   // OTP registration flow
   sendRegistrationOtp: (email: string) => Promise<void>;
-  verifyOtpAndRegister: (email: string, otp: string, profile: Omit<RegisterData, 'supabaseAccessToken'>) => Promise<void>;
+  verifyOtpAndRegister: (email: string, otp: string, profile: RegisterData) => Promise<void>;
   // OTP login flow
   sendLoginOtp: (email: string) => Promise<void>;
   verifyOtpAndLogin: (email: string, otp: string) => Promise<void>;
@@ -96,7 +95,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const verifyOtpAndRegister = useCallback(async (
     email: string,
     otp: string,
-    profile: Omit<RegisterData, 'supabaseAccessToken'>,
+    profile: RegisterData,
   ) => {
     const response = await authService.verifyOtpRegister(email.toLowerCase(), otp.trim(), profile);
     const { user: newUser, token: newToken } = response.data;
@@ -119,70 +118,29 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // ── Password login (admin/support only) ─────────────────────────────────────
 
   const login = useCallback(async (data: { email: string; password: string }) => {
-    if (!isSupabaseConfigured) throw new Error('Authentication service offline.');
-    const { data: authData, error } = await supabase.auth.signInWithPassword({
-      email: data.email.toLowerCase(),
-      password: data.password,
-    });
-    if (error || !authData.session?.access_token) {
-      const msg = error?.message?.toLowerCase() || '';
-      if (msg.includes('invalid login credentials') || msg.includes('invalid credentials')) {
-        throw new Error('Incorrect email or password.');
-      }
-      throw new Error(error?.message || 'Login failed. Please try again.');
-    }
-    const response = await authService.login({ supabaseAccessToken: authData.session.access_token });
+    const response = await authService.login(data.email.toLowerCase(), data.password);
     const { user: newUser, token: newToken } = response.data;
     const sanitized = _persistUser(newUser, newToken);
     toast.success(`Welcome back, ${sanitized.name || newUser.name}!`, { duration: 1200 });
     trySubscribeWebPush();
   }, [_persistUser]);
 
+  // ── Google login — sends ID token directly to our server ────────────────────
+
   const googleLogin = useCallback(async (credential: string, role: 'buyer' | 'seller' | undefined = 'buyer', profileData?: Partial<User>) => {
-    // 1. Exchange Google ID token for Supabase session
-    const { data: { session }, error } = await supabase.auth.signInWithIdToken({
-      provider: 'google',
-      token: credential,
-    });
-
-    if (error || !session?.access_token) {
-      throw new Error(error?.message || 'Supabase Google sign in failed');
-    }
-
-    // 2. Send Supabase access token to our backend
-    const response = await authService.googleLogin(session.access_token, role, profileData);
+    const response = await authService.googleLogin(credential, role, profileData);
     const { user: newUser, token: newToken } = response.data;
-    const sanitizedUser = { 
-      ...newUser, 
-      roles: newUser.roles || [],
-      viewMode: newUser.viewMode || (newUser.roles?.includes('seller') ? 'seller' : 'buyer')
-    };
-
-    localStorage.setItem('token', newToken);
-    localStorage.setItem('user', JSON.stringify(sanitizedUser));
-    setToken(newToken);
-    setUser(sanitizedUser);
-    toast.success(`Welcome, ${newUser.name}!`, { duration: 1200 });
+    const sanitized = _persistUser(newUser, newToken);
+    toast.success(`Welcome, ${sanitized.name || newUser.name}!`, { duration: 1200 });
     trySubscribeWebPush();
-
     return {
       needsProfileCompletion: !!response.data?.needsProfileCompletion,
       isNewUser: !!response.data?.isNewUser,
     };
-  }, []);
-
+  }, [_persistUser]);
 
   const logout = useCallback(async () => {
-    try {
-      await authService.logout();
-    } catch {
-      // Ignore errors during logout
-    }
-    try {
-      await supabase.auth.signOut();
-    } catch {
-      // Ignore sign out errors
-    }
+    try { await authService.logout(); } catch { /* ignore */ }
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     setToken(null);

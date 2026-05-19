@@ -21,6 +21,9 @@ import {
   sendOtp,
   verifyOtpLogin,
   verifyOtpRegister,
+  forgotPassword,
+  resetPassword,
+  changePasswordDirect,
 } from '../controllers/auth.controller';
 import { authenticate } from '../middleware/auth';
 import { validate } from '../middleware/validate';
@@ -29,47 +32,11 @@ import { upload } from '../utils/imageUpload';
 
 const router = Router();
 
-// @route   POST /api/auth/register
-router.post(
-  '/register',
-  authLimiter,
-  [
-    body('name')
-      .trim()
-      .notEmpty()
-      .withMessage('Name is required')
-      .isLength({ min: 2, max: 50 })
-      .withMessage('Name must be between 2 and 50 characters'),
-    body('supabaseAccessToken')
-      .trim()
-      .notEmpty()
-      .withMessage('Supabase access token is required'),
-    body('phone')
-      .trim()
-      .notEmpty()
-      .withMessage('Phone number is required'),
-    body('role')
-      .optional()
-      .isIn(['buyer', 'seller'])
-      .withMessage('Role must be buyer or seller'),
-    validate,
-  ],
-  register
-);
+// @route   POST /api/auth/register  (legacy — new flow uses /otp/*)
+router.post('/register', authLimiter, register);
 
-// @route   POST /api/auth/login
-router.post(
-  '/login',
-  authLimiter,
-  [
-    body('supabaseAccessToken')
-      .trim()
-      .notEmpty()
-      .withMessage('Supabase access token is required'),
-    validate,
-  ],
-  login
-);
+// @route   POST /api/auth/login  (password login — admin/support only)
+router.post('/login', authLimiter, login);
 
 // @route   POST /api/auth/google
 router.post('/google', googleLogin);
@@ -174,9 +141,14 @@ router.post(
   verifyEmail
 );
 
-// OTP — our own system, no Supabase dependency
+// OTP auth — fully server-side, no Supabase
 router.post('/otp/send',            authLimiter, sendOtp);
 router.post('/otp/verify/login',    authLimiter, verifyOtpLogin);
 router.post('/otp/verify/register', authLimiter, verifyOtpRegister);
+
+// Password reset via OTP
+router.post('/forgot-password', authLimiter, forgotPassword);
+router.post('/reset-password',  authLimiter, resetPassword);
+router.put('/change-password',  authenticate, changePasswordDirect);
 
 export default router;

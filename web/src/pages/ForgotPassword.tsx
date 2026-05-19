@@ -4,7 +4,7 @@ import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ArrowLeft, Mail, Send, Check, ShieldAlert } from 'lucide-react';
-import { supabase } from '../services/supabase';
+import api from '../services/api';
 import BrandMark from '../components/layout/BrandMark';
 
 const schema = z.object({
@@ -31,14 +31,10 @@ const ForgotPasswordPage: React.FC = () => {
     setSubmitting(true);
     setErrorMsg('');
     try {
-      const { error } = await supabase.auth.resetPasswordForEmail(
-        data.email.toLowerCase(),
-        { redirectTo: `${window.location.origin}/reset-password` }
-      );
-      if (error) throw error;
+      await api.post('/auth/forgot-password', { email: data.email.toLowerCase() });
       setSent(true);
     } catch (err: any) {
-      setErrorMsg(err.message || 'Failed to send reset email. Please try again.');
+      setErrorMsg(err.response?.data?.message || err.message || 'Failed to send reset code. Please try again.');
     } finally {
       setSubmitting(false);
     }

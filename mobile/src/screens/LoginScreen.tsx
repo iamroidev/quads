@@ -15,13 +15,16 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import * as WebBrowser from "expo-web-browser";
-import * as Linking from "expo-linking";
+import * as Google from "expo-auth-session/providers/google";
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { useAuth } from "../context/AuthContext";
 import { useTheme } from "../theme/ThemeContext";
 import AppAlert from "../components/AppAlert";
-import { supabase } from "../services/supabase";
 
 WebBrowser.maybeCompleteAuthSession();
+
+const WEB_CLIENT_ID  = '912061029071-85lvqadits5rfpivqjmjlctp8dov4dte.apps.googleusercontent.com';
+const EXPO_CLIENT_ID = '904520092449-gnrmhr6h0ltvf74uqdh0s3pcflalljji.apps.googleusercontent.com';
 
 const extractOAuthParams = (redirectUrl: string) => {
   const result: Record<string, string> = {};
@@ -55,6 +58,11 @@ const extractOAuthParams = (redirectUrl: string) => {
 
 const LoginScreen = ({ navigation }: any) => {
   const { sendLoginOtp, verifyOtpAndLogin, googleLogin } = useAuth();
+
+  const [_googleRequest, googleResponse, promptGoogleAsync] = Google.useAuthRequest({
+    webClientId: WEB_CLIENT_ID,
+    clientId:    EXPO_CLIENT_ID,
+  });
   const { colors } = useTheme();
   const { width: _sw } = Dimensions.get('window');
   const isMobile = _sw < 640;
@@ -126,107 +134,36 @@ const LoginScreen = ({ navigation }: any) => {
     }
   };
 
-  const handleGooglePress = async () => {
-    setIsLoading(true);
-    try {
-      const redirectTo = Linking.createURL("auth/callback");
-
-      const { data, error } = await supabase.auth.signInWithOAuth({
-        provider: "google",
-        options: {
-          redirectTo,
-          skipBrowserRedirect: true,
-          queryParams: { prompt: "select_account" },
-        },
-      });
-
-      if (error || !data?.url) {
-        throw new Error(error?.message || "Unable to start Google sign-in.");
+  // Handle Google OAuth response
+  useEffect(() => {
+    if (googleResponse?.type === 'success') {
+      const idToken = googleResponse.authentication?.idToken;
+      if (!idToken) {
+        setAlertState({ visible: true, title: "Google sign-in failed", message: "No ID token received from Google." });
+        setIsLoading(false);
+        return;
       }
-
-      const authResult = await WebBrowser.openAuthSessionAsync(
-        data.url,
-        redirectTo,
-      );
-      if (authResult.type !== "success" || !authResult.url) {
-        if (authResult.type === "cancel") return;
-        throw new Error("Google sign-in did not complete.");
-      }
-
-      const parsed = Linking.parse(authResult.url);
-      const params = {
-        ...extractOAuthParams(authResult.url),
-        ...(parsed.queryParams as
-          | Record<string, string | undefined>
-          | undefined),
-      };
-
-      const code = typeof params.code === "string" ? params.code : undefined;
-      let accessToken: string | undefined;
-
-      if (code) {
-        const { data: exchangeData, error: exchangeError } =
-          await supabase.auth.exchangeCodeForSession(code);
-        accessToken = exchangeData.session?.access_token;
-        if (exchangeError || !accessToken) {
-          throw new Error(
-            exchangeError?.message || "Supabase Google session failed.",
-          );
+      googleLogin(idToken).then(result => {
+        if (result?.isNewUser) {
+          setAlertState({ visible: true, title: "Sign up first", message: "No account found. Please sign up with Google and choose a role." });
+          setTimeout(() => navigation.getParent()?.navigate("Register"), 500);
+        } else if (result?.needsProfileCompletion) {
+          setAlertState({ visible: true, title: "Profile incomplete", message: "Update phone/store details in your profile." });
         }
-      } else {
-        const oauthAccessToken =
-          typeof params.access_token === "string"
-            ? params.access_token
-            : undefined;
-        const oauthRefreshToken =
-          typeof params.refresh_token === "string"
-            ? params.refresh_token
-            : undefined;
-
-        if (!oauthAccessToken || !oauthRefreshToken) {
-          throw new Error("Missing OAuth code/tokens from Google redirect.");
-        }
-
-        const { data: sessionData, error: sessionError } =
-          await supabase.auth.setSession({
-            access_token: oauthAccessToken,
-            refresh_token: oauthRefreshToken,
-          });
-
-        accessToken = sessionData.session?.access_token;
-        if (sessionError || !accessToken) {
-          throw new Error(
-            sessionError?.message || "Supabase session setup failed.",
-          );
-        }
-      }
-
-      const result = await googleLogin(accessToken);
-      if (result?.isNewUser) {
-        setAlertState({
-          visible: true,
-          title: "Sign up first",
-          message:
-            "No account found. Please sign up with Google and choose a role.",
-        });
-        setTimeout(() => navigation.getParent()?.navigate("Register"), 500);
-      } else if (result?.needsProfileCompletion) {
-        setAlertState({
-          visible: true,
-          title: "Profile incomplete",
-          message: "Continue and update phone/store details in profile.",
-        });
-      }
-    } catch (error: any) {
-      const message =
-        error.response?.data?.message ||
-        error.userMessage ||
-        error.message ||
-        "Google sign-in failed";
-      setAlertState({ visible: true, title: "Google sign-in failed", message });
-    } finally {
+      }).catch((err: any) => {
+        setAlertState({ visible: true, title: "Google sign-in failed", message: err.response?.data?.message || err.message || "Google sign-in failed" });
+      }).finally(() => setIsLoading(false));
+    } else if (googleResponse?.type === 'error') {
+      setAlertState({ visible: true, title: "Google sign-in failed", message: googleResponse.error?.message || "Google sign-in failed" });
+      setIsLoading(false);
+    } else if (googleResponse?.type === 'dismiss' || googleResponse?.type === 'cancel') {
       setIsLoading(false);
     }
+  }, [googleResponse]);
+
+  const handleGooglePress = async () => {
+    setIsLoading(true);
+    await promptGoogleAsync();
   };
 
   return (

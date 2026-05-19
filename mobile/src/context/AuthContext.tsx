@@ -3,7 +3,6 @@ import * as SecureStore from 'expo-secure-store';
 import authService, { RegisterPayload } from '../services/auth.service';
 import { User } from '../types';
 import { syncPushSubscription, removePushSubscription } from '../services/push.service';
-import { supabase } from '../services/supabase';
 import chatService from '../services/chat.service';
 import notificationService from '../services/notification.service';
 
@@ -95,16 +94,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const login = useCallback(async (email: string, password: string) => {
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email: email.toLowerCase(),
-      password,
-    });
-
-    if (error || !data.session?.access_token) {
-      throw new Error(error?.message || 'Invalid email or password.');
-    }
-
-    const response = await authService.login({ supabaseAccessToken: data.session.access_token });
+    const response = await authService.loginWithPassword(email.toLowerCase(), password);
     const { user: newUser, token: newToken } = response.data;
     const normalized = normalizeUser(newUser);
     await SecureStore.setItemAsync('token', newToken);
@@ -224,12 +214,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [isAuthenticated, refreshUnreadCounts]);
 
   const logout = useCallback(async () => {
-    try {
-      await authService.logout();
-    } catch {}
-    try {
-      await supabase.auth.signOut();
-    } catch {}
+    try { await authService.logout(); } catch {}
     await SecureStore.deleteItemAsync('token');
     await SecureStore.deleteItemAsync('user');
     await SecureStore.deleteItemAsync('viewMode');

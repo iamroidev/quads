@@ -17,52 +17,9 @@ import userService from '../services/user.service';
  * @desc    Register a new user
  * @access  Public
  */
-export const register = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-): Promise<void> => {
-  try {
-    const { name, phone, roles, studentId, department, residenceHall, currentLevel, location, supabaseAccessToken } = req.body;
-
-    const { user, token } = await authService.register({
-      supabaseAccessToken,
-      name,
-      phone,
-      roles: roles || ['buyer'],
-      studentId,
-      department,
-      residenceHall,
-      currentLevel,
-      location,
-    });
-
-    // Send welcome email
-    emailService.sendWelcomeEmail(user.email, user.name, user.roles[0]).catch((err) => {
-      console.error('Welcome email failed:', err);
-    });
-
-    // Set cookie
-    res.cookie('token', token, {
-      httpOnly: true,
-      secure: env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-    });
-
-    res.status(201).json({
-      success: true,
-      message: 'Account created successfully.',
-      data: { user, token },
-    });
-
-    // Fire analytics asynchronously — don't block response or throw after headers sent
-    growthService.captureEvent(user._id.toString(), 'signup', { method: 'email' }).catch((err) => {
-      console.error('Analytics signup capture failed:', err);
-    });
-  } catch (error) {
-    next(error);
-  }
+// Legacy register endpoint — new flow uses POST /auth/otp/send + /auth/otp/verify/register
+export const register = async (_req: Request, res: Response): Promise<void> => {
+  res.status(410).json({ success: false, message: 'Use POST /auth/otp/send with purpose=register instead.' });
 };
 
 /**
@@ -76,28 +33,24 @@ export const login = async (
   next: NextFunction
 ): Promise<void> => {
   try {
-    const { supabaseAccessToken } = req.body;
+    const { email, password } = req.body;
+    if (!email || !password) {
+      res.status(400).json({ success: false, message: 'Email and password are required.' });
+      return;
+    }
 
-    const { user, token } = await authService.login({ supabaseAccessToken });
+    const { user, token } = await authService.loginWithPassword(email, password);
 
-    // Set cookie
     res.cookie('token', token, {
       httpOnly: true,
       secure: env.NODE_ENV === 'production',
       sameSite: 'lax',
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+      maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
-    res.status(200).json({
-      success: true,
-      message: 'Login successful.',
-      data: { user, token },
-    });
+    res.status(200).json({ success: true, message: 'Login successful.', data: { user, token } });
 
-    // Fire analytics asynchronously — don't block response or throw after headers sent
-    growthService.captureEvent(user._id.toString(), 'login', { method: 'email' }).catch((err) => {
-      console.error('Analytics login capture failed:', err);
-    });
+    growthService.captureEvent(user._id.toString(), 'login', { method: 'password' }).catch(() => {});
   } catch (error) {
     next(error);
   }
@@ -788,5 +741,109 @@ export const verifyOtpRegister = async (req: Request, res: Response, next: NextF
       await otpService.verifyOtp(email, code, 'register');
       res.status(200).json({ success: true, message: 'Email verified.' });
     }
+  } catch (error) { next(error); }
+};
+
+// ─── Password Reset via OTP ───────────────────────────────────────────────────
+
+export const forgotPassword = async (
+  req: Request, res: Response, next: NextFunction
+): Promise<void> => {
+  try {
+    const { email } = req.body;
+    if (!email) { res.status(400).json({ success: false, message: 'Email is required.' }); return; }
+
+    const normalised = email.toLowerCase().trim();
+
+    // Always respond 200 — don't leak whether email exists
+    const user = await User.findOne({ email: normalised }).select('_id name email');
+    if (user) {
+      const VerificationCode = (await import('../models/VerificationCode')).default;
+      const crypto = require('crypto');
+
+      await VerificationCode.deleteMany({ email: normalised, purpose: 'reset_password', verifiedAt: { $exists: false } });
+
+      const code = String(crypto.randomInt(100000, 999999));
+      await VerificationCode.create({
+        email: normalised,
+        code,
+        type: 'email',
+        purpose: 'reset_password',
+        expiresAt: new Date(Date.now() + 10 * 60 * 1000),
+        attempts: 0,
+        maxAttempts: 5,
+      });
+
+      emailService.sendOtpEmail(normalised, code).catch(() => {});
+    }
+
+    res.status(200).json({ success: true, message: 'If an account exists for that email, a reset code has been sent.' });
+  } catch (error) { next(error); }
+};
+
+export const resetPassword = async (
+  req: Request, res: Response, next: NextFunction
+): Promise<void> => {
+  try {
+    const { email, code, password } = req.body;
+    if (!email || !code || !password) {
+      res.status(400).json({ success: false, message: 'email, code, and password are required.' }); return;
+    }
+    if (password.length < 6) {
+      res.status(400).json({ success: false, message: 'Password must be at least 6 characters.' }); return;
+    }
+
+    const normalised = email.toLowerCase().trim();
+    const VerificationCode = (await import('../models/VerificationCode')).default;
+
+    const record = await VerificationCode.findOne({
+      email: normalised, purpose: 'reset_password', verifiedAt: { $exists: false },
+    }).sort({ createdAt: -1 });
+
+    if (!record) {
+      res.status(400).json({ success: false, message: 'No reset code found. Please request a new one.' }); return;
+    }
+    if (record.expiresAt < new Date()) {
+      await record.deleteOne();
+      res.status(400).json({ success: false, message: 'Code has expired. Please request a new one.' }); return;
+    }
+    if (record.attempts >= record.maxAttempts) {
+      await record.deleteOne();
+      res.status(400).json({ success: false, message: 'Too many attempts. Please request a new code.' }); return;
+    }
+    if (record.code !== code.trim()) {
+      record.attempts += 1;
+      await record.save();
+      const rem = record.maxAttempts - record.attempts;
+      res.status(400).json({ success: false, message: rem > 0 ? `Incorrect code. ${rem} attempt${rem===1?'':'s'} remaining.` : 'Too many attempts. Please request a new code.' });
+      return;
+    }
+
+    record.verifiedAt = new Date();
+    await record.save();
+
+    const user = await User.findOne({ email: normalised }).select('+password');
+    if (!user) { res.status(404).json({ success: false, message: 'Account not found.' }); return; }
+
+    user.password = password;
+    await user.save();
+
+    res.status(200).json({ success: true, message: 'Password updated successfully. You can now log in.' });
+  } catch (error) { next(error); }
+};
+
+export const changePasswordDirect = async (
+  req: Request, res: Response, next: NextFunction
+): Promise<void> => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+    if (!currentPassword || !newPassword) {
+      res.status(400).json({ success: false, message: 'currentPassword and newPassword are required.' }); return;
+    }
+    if (newPassword.length < 6) {
+      res.status(400).json({ success: false, message: 'New password must be at least 6 characters.' }); return;
+    }
+    await authService.changePassword(req.user!._id.toString(), currentPassword, newPassword);
+    res.status(200).json({ success: true, message: 'Password changed successfully.' });
   } catch (error) { next(error); }
 };

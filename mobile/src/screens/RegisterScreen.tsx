@@ -21,40 +21,13 @@ import * as Linking from "expo-linking";
 import { useAuth } from "../context/AuthContext";
 import { useTheme } from "../theme/ThemeContext";
 import AppAlert from "../components/AppAlert";
-import { supabase } from "../services/supabase";
+import * as Google from "expo-auth-session/providers/google";
 import referenceService, { Program, Hall } from "../services/reference.service";
 
 WebBrowser.maybeCompleteAuthSession();
 
-const extractOAuthParams = (redirectUrl: string) => {
-  const result: Record<string, string> = {};
-  try {
-    const url = new URL(redirectUrl);
-    const query = new URLSearchParams(url.search);
-    query.forEach((value, key) => {
-      result[key] = value;
-    });
-
-    const hash = url.hash.startsWith("#") ? url.hash.slice(1) : url.hash;
-    const fragment = new URLSearchParams(hash);
-    fragment.forEach((value, key) => {
-      result[key] = value;
-    });
-  } catch {
-    const [, queryPart = ""] = redirectUrl.split("?");
-    const [queryOnly = "", hashPart = ""] = queryPart.split("#");
-    const query = new URLSearchParams(queryOnly);
-    query.forEach((value, key) => {
-      result[key] = value;
-    });
-    const fragment = new URLSearchParams(hashPart);
-    fragment.forEach((value, key) => {
-      result[key] = value;
-    });
-  }
-
-  return result;
-};
+const WEB_CLIENT_ID  = '912061029071-85lvqadits5rfpivqjmjlctp8dov4dte.apps.googleusercontent.com';
+const EXPO_CLIENT_ID = '904520092449-gnrmhr6h0ltvf74uqdh0s3pcflalljji.apps.googleusercontent.com';
 
 // ── Picker modal ──────────────────────────────────────────────────────────────
 interface PickerModalProps {
@@ -119,6 +92,11 @@ const PickerModal: React.FC<PickerModalProps> = ({
 
 const RegisterScreen = ({ navigation }: any) => {
   const { sendRegistrationOtp, verifyOtpAndRegister, googleLogin } = useAuth();
+
+  const [_googleRequest, googleResponse, promptGoogleAsync] = Google.useAuthRequest({
+    webClientId: WEB_CLIENT_ID,
+    clientId:    EXPO_CLIENT_ID,
+  });
   const { colors } = useTheme();
   const { width: _sw } = Dimensions.get('window');
   const isMobile = _sw < 640;
@@ -331,111 +309,34 @@ const RegisterScreen = ({ navigation }: any) => {
     }
   };
 
+  // Handle Google OAuth response
+  useEffect(() => {
+    if (googleResponse?.type === 'success') {
+      const idToken = googleResponse.authentication?.idToken;
+      if (!idToken) {
+        setAlertState({ visible: true, title: "Google sign-up failed", message: "No ID token received from Google." });
+        setIsLoading(false);
+        return;
+      }
+      const selectedRole: "buyer" | "seller" = form.role === "seller" ? "seller" : "buyer";
+      googleLogin(idToken, selectedRole).catch((err: any) => {
+        setAlertState({ visible: true, title: "Google sign-up failed", message: err.response?.data?.message || err.message || "Google sign-up failed" });
+      }).finally(() => setIsLoading(false));
+    } else if (googleResponse?.type === 'error') {
+      setAlertState({ visible: true, title: "Google sign-up failed", message: googleResponse.error?.message || "Google sign-up failed" });
+      setIsLoading(false);
+    } else if (googleResponse?.type === 'dismiss' || googleResponse?.type === 'cancel') {
+      setIsLoading(false);
+    }
+  }, [googleResponse]);
+
   const handleGooglePress = () => {
     if (!isRoleChosen) {
-      setAlertState({
-        visible: true,
-        title: "Choose role first",
-        message: "Select Buy or Sell before continuing with Google.",
-      });
+      setAlertState({ visible: true, title: "Choose role first", message: "Select Buy or Sell before continuing with Google." });
       return;
     }
-
-    const run = async () => {
-      const selectedRole: "buyer" | "seller" =
-        form.role === "seller" ? "seller" : "buyer";
-      setIsLoading(true);
-      try {
-        const redirectTo = Linking.createURL("auth/callback");
-
-        const { data, error } = await supabase.auth.signInWithOAuth({
-          provider: "google",
-          options: {
-            redirectTo,
-            skipBrowserRedirect: true,
-            queryParams: { prompt: "select_account" },
-          },
-        });
-
-        if (error || !data?.url) {
-          throw new Error(error?.message || "Unable to start Google sign-up.");
-        }
-
-        const authResult = await WebBrowser.openAuthSessionAsync(
-          data.url,
-          redirectTo,
-        );
-        if (authResult.type !== "success" || !authResult.url) {
-          if (authResult.type === "cancel") return;
-          throw new Error("Google sign-up did not complete.");
-        }
-
-        const parsed = Linking.parse(authResult.url);
-        const params = {
-          ...extractOAuthParams(authResult.url),
-          ...(parsed.queryParams as
-            | Record<string, string | undefined>
-            | undefined),
-        };
-
-        const code = typeof params.code === "string" ? params.code : undefined;
-        let accessToken: string | undefined;
-
-        if (code) {
-          const { data: exchangeData, error: exchangeError } =
-            await supabase.auth.exchangeCodeForSession(code);
-          accessToken = exchangeData.session?.access_token;
-          if (exchangeError || !accessToken) {
-            throw new Error(
-              exchangeError?.message || "Supabase Google session failed.",
-            );
-          }
-        } else {
-          const oauthAccessToken =
-            typeof params.access_token === "string"
-              ? params.access_token
-              : undefined;
-          const oauthRefreshToken =
-            typeof params.refresh_token === "string"
-              ? params.refresh_token
-              : undefined;
-
-          if (!oauthAccessToken || !oauthRefreshToken) {
-            throw new Error("Missing OAuth code/tokens from Google redirect.");
-          }
-
-          const { data: sessionData, error: sessionError } =
-            await supabase.auth.setSession({
-              access_token: oauthAccessToken,
-              refresh_token: oauthRefreshToken,
-            });
-
-          accessToken = sessionData.session?.access_token;
-          if (sessionError || !accessToken) {
-            throw new Error(
-              sessionError?.message || "Supabase session setup failed.",
-            );
-          }
-        }
-
-        await googleLogin(accessToken, selectedRole);
-      } catch (error: any) {
-        const message =
-          error.response?.data?.message ||
-          error.userMessage ||
-          error.message ||
-          "Google sign-up failed";
-        setAlertState({
-          visible: true,
-          title: "Google sign-up failed",
-          message,
-        });
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    run();
+    setIsLoading(true);
+    promptGoogleAsync();
   };
 
   return (
