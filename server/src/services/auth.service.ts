@@ -1,15 +1,35 @@
 import crypto from 'crypto';
-import { OAuth2Client } from 'google-auth-library';
+import axios from 'axios';
 import User, { IUserDocument } from '../models/User';
 import Store from '../models/Store';
 import { generateToken } from '../utils/jwt';
 import ApiError from '../utils/ApiError';
 
-const googleClient = new OAuth2Client();
-
 // All allowed Google Client IDs (web + Android + iOS)
 const GOOGLE_CLIENT_IDS = (process.env.GOOGLE_CLIENT_IDS || process.env.GOOGLE_CLIENT_ID || '')
   .split(',').map(s => s.trim()).filter(Boolean);
+
+// Verify Google ID token using tokeninfo endpoint — works on Node 16 (no fetch/Headers needed)
+async function verifyGoogleIdToken(idToken: string): Promise<{
+  sub: string; email: string; email_verified: boolean;
+  name: string; picture: string; aud: string;
+}> {
+  try {
+    const { data } = await axios.get(
+      `https://oauth2.googleapis.com/tokeninfo?id_token=${idToken}`,
+      { timeout: 8000 }
+    );
+    // Verify the token was issued for one of our client IDs
+    if (GOOGLE_CLIENT_IDS.length > 0 && !GOOGLE_CLIENT_IDS.includes(data.aud)) {
+      throw new Error(`Token audience ${data.aud} not in allowed client IDs`);
+    }
+    return data;
+  } catch (err: any) {
+    const detail = err.response?.data?.error_description || err.message || 'unknown';
+    console.error('[GoogleLogin] Token verification failed:', detail);
+    throw ApiError.unauthorized('Invalid Google token.');
+  }
+}
 
 interface AuthResult {
   user: IUserDocument;
@@ -57,25 +77,12 @@ class AuthService {
     role?: 'buyer' | 'seller',
     profileData?: any
   ): Promise<AuthResult> {
-    // Verify the Google ID token against all allowed client IDs
-    let payload: any;
-    let lastErr: any;
-    for (const clientId of GOOGLE_CLIENT_IDS) {
-      try {
-        const ticket = await googleClient.verifyIdToken({ idToken, audience: clientId });
-        payload = ticket.getPayload();
-        if (payload) break;
-      } catch (err) { lastErr = err; }
-    }
-    if (!payload) {
-      console.error('[GoogleLogin] Token verification failed:', lastErr?.message);
-      throw ApiError.unauthorized('Invalid Google token.');
-    }
+    const payload = await verifyGoogleIdToken(idToken);
 
-    const email       = (payload.email || '').toLowerCase();
-    const googleId    = payload.sub;
-    const name        = payload.name || payload.given_name || 'Student';
-    const avatar      = payload.picture || '';
+    const email         = (payload.email || '').toLowerCase();
+    const googleId      = payload.sub;
+    const name          = payload.name || 'Student';
+    const avatar        = payload.picture || '';
     const emailVerified = !!payload.email_verified;
 
     if (!email || !googleId) throw ApiError.badRequest('Google token missing email or ID.');

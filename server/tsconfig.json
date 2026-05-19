@@ -8,6 +8,8 @@
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
+    "ignoreDeprecations": "5.0",
+    // suppress baseUrl deprecation on TS 5.9
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
     "declaration": true,
