@@ -118,7 +118,7 @@ const PickerModal: React.FC<PickerModalProps> = ({
 };
 
 const RegisterScreen = ({ navigation }: any) => {
-  const { register, googleLogin } = useAuth();
+  const { sendRegistrationOtp, verifyOtpAndRegister, googleLogin } = useAuth();
   const { colors } = useTheme();
   const { width: _sw } = Dimensions.get('window');
   const isMobile = _sw < 640;
@@ -133,7 +133,17 @@ const RegisterScreen = ({ navigation }: any) => {
     ]).start();
   }, []);
 
-  const [step, setStep] = useState<1 | 2 | 3>(1);
+  const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
+  const [otpCode, setOtpCode] = useState('');
+  const [otpError, setOtpError] = useState('');
+  const [resendCountdown, setResendCountdown] = useState(0);
+  const otpRefs = useRef<any[]>([]);
+
+  useEffect(() => {
+    if (resendCountdown <= 0) return;
+    const t = setTimeout(() => setResendCountdown(c => c - 1), 1000);
+    return () => clearTimeout(t);
+  }, [resendCountdown]);
   const [form, setForm] = useState({
     name: "",
     email: "",
@@ -267,19 +277,57 @@ const RegisterScreen = ({ navigation }: any) => {
       return;
     }
 
+    // Step 3 — send OTP and advance to step 4
     setIsLoading(true);
     try {
-      const { confirmPassword, ...registerData } = normalized;
-      await register({ ...registerData, password: normalized.password } as any);
+      await sendRegistrationOtp(normalized.email);
+      setResendCountdown(60);
+      setStep(4);
     } catch (error: any) {
-      const message =
-        error.response?.data?.message ||
-        error.userMessage ||
-        error.message ||
-        "Registration failed";
-      setAlertState({ visible: true, title: "Registration failed", message });
+      const message = error.response?.data?.message || error.message || "Failed to send verification code";
+      setAlertState({ visible: true, title: "Verification Failed", message });
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleVerifyOtp = async () => {
+    if (otpCode.length !== 6) { setOtpError('Enter the 6-digit code from your email.'); return; }
+    setOtpError('');
+    setIsLoading(true);
+    try {
+      const normalized = {
+        ...form,
+        name: form.name.trim(),
+        email: form.email.trim().toLowerCase(),
+        phone: form.phone.trim(),
+      };
+      await verifyOtpAndRegister(normalized.email, otpCode, {
+        name:          normalized.name,
+        phone:         normalized.phone,
+        role:          normalized.role as 'buyer' | 'seller',
+        studentId:     normalized.studentId,
+        department:    normalized.department,
+        residenceHall: normalized.residenceHall,
+        currentLevel:  normalized.currentLevel,
+        location:      normalized.location,
+      });
+      // AuthContext handles navigation via user state change
+    } catch (error: any) {
+      const message = error.response?.data?.message || error.message || "Verification failed";
+      setOtpError(message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleResendOtp = async () => {
+    if (resendCountdown > 0) return;
+    try {
+      await sendRegistrationOtp(form.email.trim().toLowerCase());
+      setResendCountdown(60);
+    } catch {
+      setAlertState({ visible: true, title: "Resend Failed", message: "Could not resend code. Please try again." });
     }
   };
 
@@ -471,7 +519,8 @@ const RegisterScreen = ({ navigation }: any) => {
             <Text style={styles.subtitle}>
               {step === 1 && "Step 1: choose your role."}
               {step === 2 && "Step 2: add your details."}
-              {step === 3 && "Step 3: secure your account."}
+              {step === 3 && "Step 3: confirm details."}
+              {step === 4 && "Step 4: verify your email."}
             </Text>
             <View style={styles.polaroidFrame}>
               <Image
@@ -485,12 +534,12 @@ const RegisterScreen = ({ navigation }: any) => {
             </View>
 
             <View style={styles.stepDots}>
-              {[1, 2, 3].map((s) => (
+              {[1, 2, 3, 4].map((s) => (
                 <View
                   key={s}
                   style={[
                     styles.stepDot,
-                    step >= (s as 1 | 2 | 3) && styles.stepDotActive,
+                    step >= (s as 1 | 2 | 3 | 4) && styles.stepDotActive,
                   ]}
                 />
               ))}
@@ -672,69 +721,105 @@ const RegisterScreen = ({ navigation }: any) => {
                   </TouchableOpacity>
                 </View>
               </>
-            ) : (
+            ) : step === 3 ? (
               <>
-                <View style={styles.inputGroup}>
-                  <Text style={styles.label}>Password *</Text>
-                  <View style={styles.passwordContainer}>
-                    <TextInput
-                      style={[styles.input, styles.passwordInput]}
-                      placeholder="At least 6 characters"
-                      placeholderTextColor={colors.textDisabled}
-                      value={form.password}
-                      onChangeText={(v) => updateForm("password", v)}
-                      secureTextEntry={!showPassword}
-                    />
-                    <TouchableOpacity
-                      style={styles.eyeButton}
-                      onPress={() => setShowPassword((prev) => !prev)}
-                    >
-                      <Text style={styles.eyeText}>
-                        {showPassword ? "Hide" : "Show"}
-                      </Text>
-                    </TouchableOpacity>
-                  </View>
+                {/* Step 3 — confirm details and send OTP */}
+                <View style={{ borderWidth: 2, borderColor: colors.border, padding: 16, marginBottom: 20, backgroundColor: colors.surfaceSecondary }}>
+                  <Text style={[styles.label, { marginBottom: 12 }]}>Confirm your details</Text>
+                  {[
+                    ['Name', form.name],
+                    ['Email', form.email],
+                    ['Phone', form.phone],
+                    ['Role', form.role.toUpperCase()],
+                    ['Program', form.department],
+                    ['Hall', form.residenceHall],
+                  ].filter(([, v]) => v).map(([k, v]) => (
+                    <View key={k} style={{ flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 6, borderBottomWidth: 1, borderBottomColor: colors.border }}>
+                      <Text style={{ fontSize: 11, fontWeight: '900', color: colors.muted, textTransform: 'uppercase', letterSpacing: 0.5 }}>{k}</Text>
+                      <Text style={{ fontSize: 12, fontWeight: '700', color: colors.text }}>{v}</Text>
+                    </View>
+                  ))}
                 </View>
-                <View style={styles.inputGroup}>
-                  <Text style={styles.label}>Confirm Password *</Text>
-                  <View style={styles.passwordContainer}>
-                    <TextInput
-                      style={[styles.input, styles.passwordInput]}
-                      placeholder="Re-enter your password"
-                      placeholderTextColor={colors.textDisabled}
-                      value={form.confirmPassword}
-                      onChangeText={(v) => updateForm("confirmPassword", v)}
-                      secureTextEntry={!showConfirmPassword}
-                    />
-                    <TouchableOpacity
-                      style={styles.eyeButton}
-                      onPress={() => setShowConfirmPassword((prev) => !prev)}
-                    >
-                      <Text style={styles.eyeText}>
-                        {showConfirmPassword ? "Hide" : "Show"}
-                      </Text>
-                    </TouchableOpacity>
-                  </View>
-                </View>
-
                 <View style={styles.rowActions}>
-                  <TouchableOpacity
-                    style={styles.secondaryBtn}
-                    onPress={() => setStep(2)}
-                  >
+                  <TouchableOpacity style={styles.secondaryBtn} onPress={() => setStep(2)}>
                     <Text style={styles.secondaryBtnText}>Back</Text>
                   </TouchableOpacity>
                   <TouchableOpacity
-                    style={[
-                      styles.button,
-                      isLoading && styles.buttonDisabled,
-                      { flex: 1 },
-                    ]}
+                    style={[styles.button, isLoading && styles.buttonDisabled, { flex: 1 }]}
                     onPress={handleRegister}
                     disabled={isLoading}
                   >
-                    <Text style={styles.buttonText}>
-                      {isLoading ? "Creating account..." : "Create account"}
+                    <Text style={styles.buttonText}>{isLoading ? 'Sending code...' : 'Send Verification Code'}</Text>
+                  </TouchableOpacity>
+                </View>
+              </>
+            ) : (
+              <>
+                {/* Step 4 — OTP entry */}
+                <View style={{ marginBottom: 24 }}>
+                  <Text style={[styles.label, { color: colors.accent, marginBottom: 6 }]}>VERIFY YOUR EMAIL</Text>
+                  <Text style={{ fontSize: isMobile ? 20 : 24, fontWeight: '900', color: colors.text, textTransform: 'uppercase', letterSpacing: -0.5 }}>Enter the code.</Text>
+                  <Text style={{ fontSize: 13, color: colors.muted, marginTop: 8, lineHeight: 20 }}>
+                    We sent a 6-digit code to {'\n'}<Text style={{ color: colors.text, fontWeight: '700' }}>{form.email}</Text>
+                  </Text>
+                </View>
+
+                {/* 6 OTP boxes */}
+                <View style={{ flexDirection: 'row', gap: 8, justifyContent: 'center', marginBottom: 8 }}>
+                  {Array.from({ length: 6 }).map((_, i) => (
+                    <TextInput
+                      key={i}
+                      ref={r => { otpRefs.current[i] = r; }}
+                      style={{
+                        width: 46, height: 56,
+                        borderWidth: 3,
+                        borderColor: otpError ? colors.danger : (otpCode[i] ? colors.text : colors.border),
+                        backgroundColor: colors.surface,
+                        textAlign: 'center',
+                        fontSize: 22, fontWeight: '900',
+                        color: colors.text,
+                      }}
+                      keyboardType="number-pad"
+                      maxLength={1}
+                      value={otpCode[i] || ''}
+                      // iOS autofill: textContentType="oneTimeCode" on first box
+                      textContentType={i === 0 ? 'oneTimeCode' : 'none'}
+                      autoComplete={i === 0 ? 'one-time-code' : 'off'}
+                      onChangeText={v => {
+                        const digit = v.replace(/\D/g, '').slice(-1);
+                        const arr = otpCode.split('');
+                        arr[i] = digit;
+                        const joined = arr.join('').slice(0, 6);
+                        setOtpCode(joined);
+                        setOtpError('');
+                        if (digit && i < 5) otpRefs.current[i + 1]?.focus();
+                      }}
+                      onKeyPress={({ nativeEvent }) => {
+                        if (nativeEvent.key === 'Backspace' && !otpCode[i] && i > 0) {
+                          otpRefs.current[i - 1]?.focus();
+                        }
+                      }}
+                    />
+                  ))}
+                </View>
+
+                {otpError ? <Text style={{ color: colors.danger, fontSize: 12, fontWeight: '900', textTransform: 'uppercase', letterSpacing: 0.5, textAlign: 'center', marginBottom: 12 }}>{otpError}</Text> : null}
+
+                <TouchableOpacity
+                  style={[styles.button, (isLoading || otpCode.length !== 6) && styles.buttonDisabled]}
+                  onPress={handleVerifyOtp}
+                  disabled={isLoading || otpCode.length !== 6}
+                >
+                  <Text style={styles.buttonText}>{isLoading ? 'Verifying...' : 'Confirm & Create Account'}</Text>
+                </TouchableOpacity>
+
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 16 }}>
+                  <TouchableOpacity onPress={() => { setStep(3); setOtpCode(''); setOtpError(''); }}>
+                    <Text style={{ fontSize: 12, fontWeight: '900', color: colors.muted, textTransform: 'uppercase', letterSpacing: 0.5 }}>← Back</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity onPress={handleResendOtp} disabled={resendCountdown > 0}>
+                    <Text style={{ fontSize: 12, fontWeight: '900', color: resendCountdown > 0 ? colors.muted : colors.text, textTransform: 'uppercase', letterSpacing: 0.5 }}>
+                      {resendCountdown > 0 ? `Resend in ${resendCountdown}s` : 'Resend Code'}
                     </Text>
                   </TouchableOpacity>
                 </View>

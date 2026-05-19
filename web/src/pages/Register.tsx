@@ -34,13 +34,14 @@ const registerSchema = z
   });
 
 type RegisterFormData = z.infer<typeof registerSchema>;
-type Step = 1 | 2 | 3 | 4;
+type Step = 1 | 2 | 3 | 4 | 5;
 
 const STEP_LABELS: Record<Step, string> = {
   1: 'Role',
   2: 'Account',
   3: 'Campus',
-  4: 'Password',
+  4: 'Security',
+  5: 'Verify',
 };
 
 const fieldBase = 'w-full border-4 border-[var(--bulletin-border)] bg-[var(--bulletin-bg)] px-4 py-4 text-[16px] font-black focus:outline-none focus:ring-2 focus:ring-[var(--bulletin-text)] text-[var(--bulletin-text)] placeholder:text-[var(--bulletin-text)] placeholder:opacity-30 shadow-[4px_4px_0_0_var(--bulletin-shadow)]';
@@ -182,7 +183,7 @@ const SearchCombobox: React.FC<SearchComboboxProps> = ({
 };
 
 const RegisterPage: React.FC = () => {
-  const { user, register: registerUser, googleLogin } = useAuth();
+  const { user, sendRegistrationOtp, verifyOtpAndRegister, googleLogin } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [searchParams] = useSearchParams();
@@ -215,6 +216,15 @@ const RegisterPage: React.FC = () => {
   });
 
   const isGoogleFlow = searchParams.get('google') === '1';
+  const [otpCode, setOtpCode] = useState('');
+  const [otpError, setOtpError] = useState('');
+  const [resendCountdown, setResendCountdown] = useState(0);
+
+  useEffect(() => {
+    if (resendCountdown <= 0) return;
+    const t = setTimeout(() => setResendCountdown(c => c - 1), 1000);
+    return () => clearTimeout(t);
+  }, [resendCountdown]);
 
   const {
     register,
@@ -346,19 +356,53 @@ const RegisterPage: React.FC = () => {
         return;
       }
 
-      const ok = await trigger(['password', 'confirmPassword']);
-      if (!ok) return;
-
-      const { confirmPassword, ...registerData } = data;
-      const registered = await registerUser(registerData as any);
-      // registerUser returns undefined when email confirmation is pending — don't navigate
-      if (registered !== 'pending') {
-        navigate(from, { replace: true });
-      }
+      // Step 4 — send OTP, advance to OTP entry step
+      await sendRegistrationOtp(data.email);
+      setResendCountdown(60);
+      setStep(5);
     } catch (error: any) {
-      toast.error(error.response?.data?.message || error.message || 'Registration failed. Please try again.');
+      toast.error(error.response?.data?.message || error.message || 'Failed to send verification code.');
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleVerifyOtp = async () => {
+    if (otpCode.length !== 6) { setOtpError('Enter the 6-digit code from your email.'); return; }
+    setOtpError('');
+    setIsSubmitting(true);
+    try {
+      const data = watch();
+      const { confirmPassword, password, ...profile } = data as any;
+      await verifyOtpAndRegister(data.email, otpCode, {
+        name:          profile.name,
+        phone:         profile.phone,
+        roles:         [profile.role],
+        studentId:     profile.studentId,
+        department:    profile.department,
+        residenceHall: profile.residenceHall,
+        currentLevel:  profile.currentLevel,
+        location:      profile.location,
+      });
+      sessionStorage.removeItem('reg_step');
+      sessionStorage.removeItem('reg_data');
+      sessionStorage.removeItem('reg_protocol');
+      navigate(from, { replace: true });
+    } catch (error: any) {
+      setOtpError(error.response?.data?.message || error.message || 'Incorrect code. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleResendOtp = async () => {
+    if (resendCountdown > 0) return;
+    try {
+      await sendRegistrationOtp(watch('email'));
+      setResendCountdown(60);
+      toast.success('New code sent — check your inbox.', { duration: 3000 });
+    } catch {
+      toast.error('Failed to resend code. Please try again.');
     }
   };
 
@@ -736,6 +780,75 @@ const RegisterPage: React.FC = () => {
                 )}
                 <div className="mt-8 text-center bg-[#fffacd] dark:bg-yellow-900/40 p-4 border-2 border-[var(--bulletin-border)] shadow-[4px_4px_0_0_var(--bulletin-shadow)]" style={{ transform: 'rotate(1deg)' }}>
                   <p className="text-[12px] font-bold text-[var(--bulletin-text)] uppercase tracking-widest">Already have an account? <Link to="/login" className="font-black underline decoration-2 underline-offset-4 hover:no-underline ml-2">Sign in</Link></p>
+                </div>
+              </div>
+            )}
+
+            {step === 5 && (
+              <div className="animate-in fade-in slide-in-from-right-4 duration-300">
+                <div className="mb-8">
+                  <p className="text-[11px] font-black uppercase tracking-[0.2em] text-[#ff6b6b] mb-3">Verify Your Email</p>
+                  <h1 className="text-3xl font-black uppercase tracking-tighter text-[var(--bulletin-text)]">Enter the code.</h1>
+                  <p className="text-[13px] font-bold opacity-60 mt-3 text-[var(--bulletin-text)]">
+                    We sent a 6-digit code to <span className="opacity-100 underline decoration-2 underline-offset-2">{watch('email')}</span>. Check your inbox.
+                  </p>
+                </div>
+
+                {/* 6-digit OTP boxes */}
+                <div className="flex gap-3 justify-center my-8">
+                  {Array.from({ length: 6 }).map((_, i) => (
+                    <input
+                      key={i}
+                      id={`otp-${i}`}
+                      type="text"
+                      inputMode="numeric"
+                      autoComplete={i === 0 ? 'one-time-code' : 'off'}
+                      maxLength={1}
+                      value={otpCode[i] || ''}
+                      className={`w-12 h-14 text-center text-[22px] font-black border-4 border-[var(--bulletin-border)] bg-[var(--bulletin-bg)] text-[var(--bulletin-text)] shadow-[4px_4px_0_0_var(--bulletin-shadow)] focus:outline-none focus:ring-2 focus:ring-[var(--bulletin-text)] transition-all ${otpError ? 'border-red-500' : ''}`}
+                      onChange={e => {
+                        const val = e.target.value.replace(/\D/g, '');
+                        const next = otpCode.split('');
+                        next[i] = val.slice(-1);
+                        const joined = next.join('').slice(0, 6);
+                        setOtpCode(joined);
+                        setOtpError('');
+                        if (val && i < 5) document.getElementById(`otp-${i + 1}`)?.focus();
+                      }}
+                      onKeyDown={e => {
+                        if (e.key === 'Backspace' && !otpCode[i] && i > 0) {
+                          document.getElementById(`otp-${i - 1}`)?.focus();
+                        }
+                      }}
+                      onPaste={e => {
+                        const pasted = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 6);
+                        if (pasted) { setOtpCode(pasted); setOtpError(''); e.preventDefault(); document.getElementById(`otp-${Math.min(pasted.length, 5)}`)?.focus(); }
+                      }}
+                    />
+                  ))}
+                </div>
+
+                {otpError && <p className="text-[12px] text-red-600 font-black uppercase tracking-widest text-center mb-4">{otpError}</p>}
+
+                <button
+                  type="button"
+                  onClick={handleVerifyOtp}
+                  disabled={isSubmitting || otpCode.length !== 6}
+                  className="w-full border-4 border-[var(--bulletin-border)] bg-[var(--bulletin-text)] px-4 py-4 text-[14px] font-black uppercase text-[var(--bulletin-bg)] shadow-[6px_6px_0_0_var(--bulletin-shadow)] hover:-translate-y-1 hover:shadow-[4px_4px_0_0_var(--bulletin-shadow)] disabled:opacity-40 transition-all tracking-widest"
+                >
+                  {isSubmitting ? 'Verifying...' : 'Confirm & Create Account'}
+                </button>
+
+                <div className="mt-6 flex items-center justify-between">
+                  <button type="button" onClick={() => { setStep(4); setOtpCode(''); setOtpError(''); }} className="text-[12px] font-black uppercase tracking-widest underline decoration-2 underline-offset-4 opacity-60 hover:opacity-100 text-[var(--bulletin-text)]">← Back</button>
+                  <button
+                    type="button"
+                    onClick={handleResendOtp}
+                    disabled={resendCountdown > 0}
+                    className="text-[12px] font-black uppercase tracking-widest underline decoration-2 underline-offset-4 disabled:opacity-40 text-[var(--bulletin-text)]"
+                  >
+                    {resendCountdown > 0 ? `Resend in ${resendCountdown}s` : 'Resend Code'}
+                  </button>
                 </div>
               </div>
             )}
