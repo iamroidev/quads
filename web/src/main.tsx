@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import ReactDOM from 'react-dom/client';
-import { BrowserRouter } from 'react-router-dom';
+import { BrowserRouter, useNavigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from 'react-hot-toast';
 import { AuthProvider } from './context/AuthContext';
@@ -14,13 +14,25 @@ if ('serviceWorker' in navigator) {
   window.addEventListener('load', async () => {
     if (import.meta.env.DEV) {
       const registrations = await navigator.serviceWorker.getRegistrations().catch(() => []);
-      await Promise.all(registrations.map((registration) => registration.unregister())).catch(() => {});
+      await Promise.all(registrations.map((r) => r.unregister())).catch(() => {});
       return;
     }
 
-    navigator.serviceWorker.register('/sw.js').catch(() => {
-      // Ignore registration errors in unsupported contexts.
-    });
+    // Main PWA service worker (caching)
+    navigator.serviceWorker.register('/sw.js').catch(() => {});
+
+    // Push notification service worker (separate scope for push events)
+    navigator.serviceWorker.register('/push-sw.js', { scope: '/' }).catch(() => {});
+  });
+
+  // Handle navigation messages from push-sw.js when user clicks a notification
+  navigator.serviceWorker.addEventListener('message', (event) => {
+    if (event.data?.type === 'NOTIFICATION_CLICK') {
+      const url = event.data.url;
+      if (url && url !== window.location.pathname) {
+        window.location.href = url;
+      }
+    }
   });
 }
 

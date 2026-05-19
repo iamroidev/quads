@@ -213,6 +213,61 @@ export const markAllAsRead = async (
 };
 
 /**
+ * @route   POST /api/notifications/broadcast
+ * @desc    Send a push notification to ALL users or a filtered subset (admin only)
+ *          Use for: promotions, system announcements, platform-wide alerts
+ * @body    { title, message, type: 'promotion'|'system', link?, filter?: { role? } }
+ * @access  Admin
+ */
+export const broadcastPush = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const { title, message, type = 'system', link, filter } = req.body;
+    if (!title || !message) {
+      res.status(400).json({ success: false, message: 'title and message are required' });
+      return;
+    }
+
+    // Build query — optionally filter by role (e.g. only sellers, only buyers)
+    const query: any = { 'pushSubscriptions.0': { $exists: true } };
+    if (filter?.role) query.roles = filter.role;
+
+    const users = await User.find(query).select('_id').lean();
+    const userIds = users.map((u: any) => u._id.toString());
+
+    // Fire-and-forget — save notification + send push to each user
+    let sent = 0;
+    const batchSize = 100;
+    for (let i = 0; i < userIds.length; i += batchSize) {
+      const batch = userIds.slice(i, i + batchSize);
+      await Promise.allSettled(
+        batch.map((userId) =>
+          notificationService.create(
+            userId,
+            type as any,
+            title,
+            message,
+            link,
+            { type, promotionBroadcast: true }
+          ).then(() => { sent++; })
+        )
+      );
+    }
+
+    res.status(200).json({
+      success: true,
+      message: `Broadcast sent to ${sent} users`,
+      data: { sent, total: userIds.length },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
  * @route   DELETE /api/notifications/:id
  * @desc    Delete a notification
  * @access  Private

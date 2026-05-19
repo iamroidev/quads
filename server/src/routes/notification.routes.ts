@@ -8,8 +8,9 @@ import {
   subscribeToPush,
   unsubscribeFromPush,
   sendTestPush,
+  broadcastPush,
 } from '../controllers/notification.controller';
-import { authenticate } from '../middleware/auth';
+import { authenticate, authorize } from '../middleware/auth';
 
 const router = Router();
 
@@ -20,6 +21,10 @@ router.use(authenticate);
 router.post('/push/subscribe', subscribeToPush);
 router.post('/push/unsubscribe', unsubscribeFromPush);
 router.post('/push/test', sendTestPush);
+
+// Admin broadcast — sends to all users (or filtered subset)
+// Body: { title, message, type: 'promotion'|'system', link?, filter?: { role? } }
+router.post('/push/broadcast', authorize('admin'), broadcastPush);
 
 // GET /api/notifications — get notifications
 router.get('/', getNotifications);

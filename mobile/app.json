@@ -28,6 +28,11 @@
       },
       "package": "com.quads.app"
     },
+    "notification": {
+      "icon": "./assets/icon.png",
+      "color": "#ff6b6b",
+      "iosDisplayInForeground": true
+    },
     "scheme": "quads",
     "extra": {
       "apiUrl": "https://api.quadsmarket.tech/api",

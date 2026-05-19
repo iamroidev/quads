@@ -18,14 +18,34 @@ if (process.env.VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY) {
 
 class NotificationService {
   private async sendExpoPushNotification(token: string, payload: any): Promise<void> {
+    // Map notification type to Android channel for differentiated delivery
+    const channelMap: Record<string, string> = {
+      new_message: 'messages',
+      order_placed: 'orders',
+      order_paid: 'orders',
+      order_confirmed: 'orders',
+      order_ready: 'orders',
+      order_completed: 'orders',
+      order_cancelled: 'orders',
+      promotion: 'promotions',
+    };
+    const notifType = payload.data?.type || payload.type;
+    const channelId = channelMap[notifType] || 'default';
+
     await axios.post(
       'https://exp.host/--/api/v2/push/send',
       {
         to: token,
-        sound: 'default',
+        sound: channelId === 'promotions' ? undefined : 'default',
         title: payload.title,
         body: payload.body,
-        data: payload.data || { url: payload.url || '/' },
+        // data includes all deep-link fields for navigation on tap
+        data: {
+          ...(payload.data || {}),
+          url: payload.url || payload.data?.url || '/',
+        },
+        channelId,
+        priority: channelId === 'promotions' ? 'normal' : 'high',
       },
       {
         headers: {
@@ -58,14 +78,26 @@ class NotificationService {
       metadata,
     });
 
-    // Send push notification asynchronously
+    // Send push notification asynchronously — include all deep-link data from metadata
     this.sendPushNotification(userId, {
       title,
       body: message,
       url: link || '/',
       icon: '/pwa-192x192.png',
-      badge: '/pwa-192x192.png',
-      data: { url: link || '/' },
+      badge: '/favicon.ico',
+      data: {
+        url: link || '/',
+        type,
+        // Deep-link IDs — allow notification tap to navigate directly
+        ...(metadata?.conversationId && { conversationId: metadata.conversationId }),
+        ...(metadata?.chatId && { chatId: metadata.chatId }),
+        ...(metadata?.orderId && { orderId: metadata.orderId }),
+        ...(metadata?.productId && { productId: metadata.productId }),
+        ...(metadata?.senderId && { senderId: metadata.senderId }),
+        ...(metadata?.senderName && { senderName: metadata.senderName }),
+        ...(metadata?.otherUser && { otherUser: metadata.otherUser }),
+        ...(metadata?.productTitle && { productTitle: metadata.productTitle }),
+      },
     }).catch((err) => {
       console.error('Failed to send push notification:', err);
     });

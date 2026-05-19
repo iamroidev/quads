@@ -3,6 +3,18 @@ import authService, { RegisterData, UpdateProfileData, ChangePasswordData } from
 import { User } from '../types';
 import toast from 'react-hot-toast';
 import { supabase, isSupabaseConfigured } from '../services/supabase';
+import notificationService from '../services/notification.service';
+
+// Subscribe to web push after login — silent, non-blocking
+const trySubscribeWebPush = async () => {
+  try {
+    if (!('serviceWorker' in navigator) || !('PushManager' in window)) return;
+    if (!import.meta.env.VITE_VAPID_PUBLIC_KEY) return;
+    await notificationService.subscribeToPush();
+  } catch {
+    // Non-critical — don't block login if push subscription fails
+  }
+};
 
 interface AuthContextType {
   user: User | null;
@@ -114,6 +126,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setToken(newToken);
     setUser(sanitizedUser);
     toast.success('Account created successfully!', { duration: 1400 });
+    trySubscribeWebPush();
   }, []);
 
   const login = useCallback(async (data: { email: string; password: string }) => {
@@ -144,6 +157,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setToken(newToken);
     setUser(sanitizedUser);
     toast.success(`Welcome back, ${newUser.name}!`, { duration: 1200 });
+    // Subscribe to web push non-blockingly after login
+    trySubscribeWebPush();
   }, []);
 
   const googleLogin = useCallback(async (credential: string, role: 'buyer' | 'seller' | undefined = 'buyer', profileData?: Partial<User>) => {
@@ -171,6 +186,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setToken(newToken);
     setUser(sanitizedUser);
     toast.success(`Welcome, ${newUser.name}!`, { duration: 1200 });
+    trySubscribeWebPush();
 
     return {
       needsProfileCompletion: !!response.data?.needsProfileCompletion,

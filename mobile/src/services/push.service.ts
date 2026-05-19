@@ -35,11 +35,12 @@ const PUSH_TOKEN_KEY = 'expo_push_token';
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
-    shouldShowAlert: true,
+    // shouldShowBanner: heads-up banner when app is in foreground
+    // shouldShowList: shows in notification centre / shade
     shouldShowBanner: true,
     shouldShowList: true,
     shouldPlaySound: true,
-    shouldSetBadge: false,
+    shouldSetBadge: true,
   }),
 });
 
@@ -72,11 +73,37 @@ const fetchExpoPushToken = async (): Promise<string | null> => {
   if (!isGranted) return null;
 
   if (Platform.OS === 'android') {
+    // Default / general channel
     await Notifications.setNotificationChannelAsync('default', {
-      name: 'default',
+      name: 'QUADS Alerts',
       importance: Notifications.AndroidImportance.MAX,
       vibrationPattern: [0, 250, 250, 250],
-      lightColor: '#2563eb',
+      lightColor: '#ff6b6b',
+      sound: 'default',
+    });
+    // Messages channel (chat from buyer/seller/AI)
+    await Notifications.setNotificationChannelAsync('messages', {
+      name: 'Messages',
+      importance: Notifications.AndroidImportance.MAX,
+      vibrationPattern: [0, 100, 50, 100],
+      lightColor: '#3498db',
+      sound: 'default',
+    });
+    // Orders channel
+    await Notifications.setNotificationChannelAsync('orders', {
+      name: 'Orders',
+      importance: Notifications.AndroidImportance.MAX,
+      vibrationPattern: [0, 250, 250, 250],
+      lightColor: '#27ae60',
+      sound: 'default',
+    });
+    // Promotions channel (lower priority — silent by default)
+    await Notifications.setNotificationChannelAsync('promotions', {
+      name: 'Promotions',
+      importance: Notifications.AndroidImportance.DEFAULT,
+      vibrationPattern: [0, 100],
+      lightColor: '#f1c40f',
+      sound: undefined, // silent
     });
   }
 
