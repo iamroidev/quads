@@ -54,7 +54,7 @@ const extractOAuthParams = (redirectUrl: string) => {
 };
 
 const LoginScreen = ({ navigation }: any) => {
-  const { login, googleLogin } = useAuth();
+  const { sendLoginOtp, verifyOtpAndLogin, googleLogin } = useAuth();
   const { colors } = useTheme();
   const { width: _sw } = Dimensions.get('window');
   const isMobile = _sw < 640;
@@ -70,41 +70,59 @@ const LoginScreen = ({ navigation }: any) => {
   }, []);
 
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [otpSent, setOtpSent] = useState(false);
+  const [otpCode, setOtpCode] = useState("");
+  const [otpError, setOtpError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
-  const [alertState, setAlertState] = useState<{
-    visible: boolean;
-    title: string;
-    message: string;
-  }>({
-    visible: false,
-    title: "",
-    message: "",
+  const [resendCountdown, setResendCountdown] = useState(0);
+  const otpRefs = useRef<any[]>([]);
+  const [alertState, setAlertState] = useState<{ visible: boolean; title: string; message: string }>({
+    visible: false, title: "", message: "",
   });
 
-  const handleLogin = async () => {
-    if (!email || !password) {
-      setAlertState({
-        visible: true,
-        title: "Missing fields",
-        message: "Please fill in all fields.",
-      });
+  useEffect(() => {
+    if (resendCountdown <= 0) return;
+    const t = setTimeout(() => setResendCountdown(c => c - 1), 1000);
+    return () => clearTimeout(t);
+  }, [resendCountdown]);
+
+  const handleSendOtp = async () => {
+    if (!email.trim() || !/\S+@\S+\.\S+/.test(email)) {
+      setAlertState({ visible: true, title: "Invalid email", message: "Please enter a valid email address." });
       return;
     }
-
     setIsLoading(true);
     try {
-      await login(email.toLowerCase(), password);
+      await sendLoginOtp(email.toLowerCase());
+      setOtpSent(true);
+      setResendCountdown(60);
     } catch (error: any) {
-      const message =
-        error.response?.data?.message ||
-        error.userMessage ||
-        error.message ||
-        "Login failed";
-      setAlertState({ visible: true, title: "Login failed", message });
+      setAlertState({ visible: true, title: "Failed", message: error.message || "Could not send code." });
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleVerifyOtp = async () => {
+    if (otpCode.length !== 6) { setOtpError("Enter the 6-digit code from your email."); return; }
+    setOtpError("");
+    setIsLoading(true);
+    try {
+      await verifyOtpAndLogin(email, otpCode);
+    } catch (error: any) {
+      setOtpError(error.message || "Incorrect code. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleResendOtp = async () => {
+    if (resendCountdown > 0) return;
+    try {
+      await sendLoginOtp(email.toLowerCase());
+      setResendCountdown(60);
+    } catch {
+      setAlertState({ visible: true, title: "Failed", message: "Could not resend code." });
     }
   };
 
@@ -297,41 +315,97 @@ const LoginScreen = ({ navigation }: any) => {
             </View>
           </View>
           <View style={styles.form}>
-            <View style={styles.inputGroup}>
-              <Text style={styles.label}>Email</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="you@st.umat.edu.gh"
-                placeholderTextColor={colors.textDisabled}
-                value={email}
-                onChangeText={setEmail}
-                keyboardType="email-address"
-                autoCapitalize="none"
-                autoCorrect={false}
-              />
-            </View>
-            <View style={styles.inputGroup}>
-              <Text style={styles.label}>Password</Text>
-              <View style={styles.passwordContainer}>
-                <TextInput
-                  style={[styles.input, styles.passwordInput]}
-                  placeholder="Enter your password"
-                  placeholderTextColor={colors.textDisabled}
-                  value={password}
-                  onChangeText={setPassword}
-                  secureTextEntry={!showPassword}
-                />
-                <TouchableOpacity style={styles.eyeButton} onPress={() => setShowPassword(!showPassword)}>
-                  <Text style={styles.eyeText}>{showPassword ? "Hide" : "Show"}</Text>
+            {!otpSent ? (
+              <>
+                <View style={styles.inputGroup}>
+                  <Text style={styles.label}>Email</Text>
+                  <TextInput
+                    style={styles.input}
+                    placeholder="you@email.com"
+                    placeholderTextColor={colors.textDisabled}
+                    value={email}
+                    onChangeText={setEmail}
+                    keyboardType="email-address"
+                    autoCapitalize="none"
+                    autoCorrect={false}
+                    onSubmitEditing={handleSendOtp}
+                    returnKeyType="send"
+                  />
+                </View>
+                <TouchableOpacity style={[styles.button, isLoading && styles.buttonDisabled]} onPress={handleSendOtp} disabled={isLoading}>
+                  <Text style={styles.buttonText}>{isLoading ? "Sending..." : "Send Login Code"}</Text>
                 </TouchableOpacity>
-              </View>
-            </View>
-            <TouchableOpacity style={[styles.button, isLoading && styles.buttonDisabled]} onPress={handleLogin} disabled={isLoading}>
-              <Text style={styles.buttonText}>{isLoading ? "Signing in..." : "Login"}</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.forgotBtn} onPress={() => navigation.navigate("ForgotPassword")}>
-              <Text style={styles.forgotText}>Forgot password?</Text>
-            </TouchableOpacity>
+              </>
+            ) : (
+              <>
+                <View style={{ marginBottom: 16 }}>
+                  <Text style={[styles.label, { color: colors.accent }]}>VERIFY YOUR EMAIL</Text>
+                  <Text style={{ fontSize: isMobile ? 18 : 22, fontWeight: '900', color: colors.text, textTransform: 'uppercase', letterSpacing: -0.5, marginTop: 4 }}>Enter the code.</Text>
+                  <Text style={{ fontSize: 13, color: colors.muted, marginTop: 8, lineHeight: 20 }}>
+                    Sent to <Text style={{ color: colors.text, fontWeight: '700' }}>{email}</Text>
+                  </Text>
+                </View>
+
+                {/* 6 OTP boxes */}
+                <View style={{ flexDirection: 'row', gap: 8, justifyContent: 'center', marginBottom: 8 }}>
+                  {Array.from({ length: 6 }).map((_, i) => (
+                    <TextInput
+                      key={i}
+                      ref={r => { otpRefs.current[i] = r; }}
+                      style={{
+                        width: 46, height: 56,
+                        borderWidth: 3,
+                        borderColor: otpError ? colors.danger : (otpCode[i] ? colors.text : colors.border),
+                        backgroundColor: colors.surface,
+                        textAlign: 'center',
+                        fontSize: 22, fontWeight: '900',
+                        color: colors.text,
+                      }}
+                      keyboardType="number-pad"
+                      maxLength={1}
+                      value={otpCode[i] || ''}
+                      textContentType={i === 0 ? 'oneTimeCode' : 'none'}
+                      autoComplete={i === 0 ? 'one-time-code' : 'off'}
+                      onChangeText={v => {
+                        const digit = v.replace(/\D/g, '').slice(-1);
+                        const arr = otpCode.split('');
+                        arr[i] = digit;
+                        const joined = arr.join('').slice(0, 6);
+                        setOtpCode(joined);
+                        setOtpError('');
+                        if (digit && i < 5) otpRefs.current[i + 1]?.focus();
+                      }}
+                      onKeyPress={({ nativeEvent }) => {
+                        if (nativeEvent.key === 'Backspace' && !otpCode[i] && i > 0) {
+                          otpRefs.current[i - 1]?.focus();
+                        }
+                      }}
+                    />
+                  ))}
+                </View>
+
+                {otpError ? <Text style={{ color: colors.danger, fontSize: 12, fontWeight: '900', textTransform: 'uppercase', letterSpacing: 0.5, textAlign: 'center', marginBottom: 12 }}>{otpError}</Text> : null}
+
+                <TouchableOpacity
+                  style={[styles.button, (isLoading || otpCode.length !== 6) && styles.buttonDisabled]}
+                  onPress={handleVerifyOtp}
+                  disabled={isLoading || otpCode.length !== 6}
+                >
+                  <Text style={styles.buttonText}>{isLoading ? "Verifying..." : "Sign In"}</Text>
+                </TouchableOpacity>
+
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 14 }}>
+                  <TouchableOpacity onPress={() => { setOtpSent(false); setOtpCode(''); setOtpError(''); }}>
+                    <Text style={{ fontSize: 12, fontWeight: '900', color: colors.muted, textTransform: 'uppercase', letterSpacing: 0.5 }}>← Change Email</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity onPress={handleResendOtp} disabled={resendCountdown > 0}>
+                    <Text style={{ fontSize: 12, fontWeight: '900', color: resendCountdown > 0 ? colors.muted : colors.text, textTransform: 'uppercase', letterSpacing: 0.5 }}>
+                      {resendCountdown > 0 ? `Resend in ${resendCountdown}s` : 'Resend Code'}
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              </>
+            )}
             <View style={styles.dividerRow}>
               <View style={styles.divider} />
               <Text style={styles.dividerText}>or</Text>
