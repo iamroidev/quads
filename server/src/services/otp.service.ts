@@ -45,7 +45,10 @@ class OtpService {
       maxAttempts: MAX_ATTEMPTS,
     });
 
-    await emailService.sendOtpEmail(normalised, code);
+    // Fire email non-blocking — code is already saved, don't let Resend latency block the response
+    emailService.sendOtpEmail(normalised, code).catch(err =>
+      console.error('[OtpService] Email send failed:', err?.message)
+    );
   }
 
   /**

@@ -57,7 +57,7 @@ const extractOAuthParams = (redirectUrl: string) => {
 };
 
 const LoginScreen = ({ navigation }: any) => {
-  const { sendLoginOtp, verifyOtpAndLogin, googleLogin } = useAuth();
+  const { sendLoginOtp, verifyOtpAndLogin, login, googleLogin } = useAuth();
 
   const [_googleRequest, googleResponse, promptGoogleAsync] = Google.useAuthRequest({
     webClientId: WEB_CLIENT_ID,
@@ -78,6 +78,9 @@ const LoginScreen = ({ navigation }: any) => {
   }, []);
 
   const [email, setEmail] = useState("");
+  const [usePassword, setUsePassword] = useState(false);
+  const [password, setPassword] = useState("");
+  const [showPw, setShowPw] = useState(false);
   const [otpSent, setOtpSent] = useState(false);
   const [otpCode, setOtpCode] = useState("");
   const [otpError, setOtpError] = useState("");
@@ -131,6 +134,21 @@ const LoginScreen = ({ navigation }: any) => {
       setResendCountdown(60);
     } catch {
       setAlertState({ visible: true, title: "Failed", message: "Could not resend code." });
+    }
+  };
+
+  const handlePasswordLogin = async () => {
+    if (!email.trim() || !password.trim()) {
+      setAlertState({ visible: true, title: "Missing fields", message: "Please enter your email and password." });
+      return;
+    }
+    setIsLoading(true);
+    try {
+      await login(email.toLowerCase(), password);
+    } catch (error: any) {
+      setAlertState({ visible: true, title: "Login failed", message: error.response?.data?.message || error.message || "Incorrect email or password." });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -265,12 +283,50 @@ const LoginScreen = ({ navigation }: any) => {
                     keyboardType="email-address"
                     autoCapitalize="none"
                     autoCorrect={false}
-                    onSubmitEditing={handleSendOtp}
-                    returnKeyType="send"
+                    onSubmitEditing={usePassword ? handlePasswordLogin : handleSendOtp}
+                    returnKeyType={usePassword ? "done" : "send"}
                   />
                 </View>
-                <TouchableOpacity style={[styles.button, isLoading && styles.buttonDisabled]} onPress={handleSendOtp} disabled={isLoading}>
-                  <Text style={styles.buttonText}>{isLoading ? "Sending..." : "Send Login Code"}</Text>
+
+                {usePassword && (
+                  <View style={styles.inputGroup}>
+                    <Text style={styles.label}>Password</Text>
+                    <View style={styles.passwordContainer}>
+                      <TextInput
+                        style={[styles.input, styles.passwordInput]}
+                        placeholder="Enter your password"
+                        placeholderTextColor={colors.textDisabled}
+                        value={password}
+                        onChangeText={setPassword}
+                        secureTextEntry={!showPw}
+                        autoComplete="current-password"
+                        onSubmitEditing={handlePasswordLogin}
+                        returnKeyType="done"
+                      />
+                      <TouchableOpacity style={styles.eyeButton} onPress={() => setShowPw(p => !p)}>
+                        <Text style={styles.eyeText}>{showPw ? "Hide" : "Show"}</Text>
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+                )}
+
+                <TouchableOpacity
+                  style={[styles.button, isLoading && styles.buttonDisabled]}
+                  onPress={usePassword ? handlePasswordLogin : handleSendOtp}
+                  disabled={isLoading}
+                >
+                  <Text style={styles.buttonText}>
+                    {isLoading ? "Please wait..." : usePassword ? "Sign In" : "Send Login Code"}
+                  </Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={{ marginTop: 12, alignItems: 'center' }}
+                  onPress={() => { setUsePassword(p => !p); setPassword(''); }}
+                >
+                  <Text style={{ fontSize: 11, fontWeight: '900', color: colors.muted, textTransform: 'uppercase', letterSpacing: 0.5 }}>
+                    {usePassword ? 'Use email code instead' : 'Sign in with password instead'}
+                  </Text>
                 </TouchableOpacity>
               </>
             ) : (
