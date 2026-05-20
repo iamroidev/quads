@@ -16,6 +16,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import * as WebBrowser from "expo-web-browser";
 import * as Google from "expo-auth-session/providers/google";
+import { makeRedirectUri } from "expo-auth-session";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { useAuth } from "../context/AuthContext";
 import { useTheme } from "../theme/ThemeContext";
@@ -64,6 +65,9 @@ const LoginScreen = ({ navigation }: any) => {
     webClientId:    WEB_CLIENT_ID,
     androidClientId: EXPO_CLIENT_ID,
     iosClientId:     IOS_CLIENT_ID,
+    redirectUri: makeRedirectUri({
+      native: 'com.googleusercontent.apps.912061029071-9cu0hecip5gl1qbkq6mmpm6bsk9nlfa7:/oauthredirect',
+    }),
   });
   const { colors } = useTheme();
   const { width: _sw } = Dimensions.get('window');
