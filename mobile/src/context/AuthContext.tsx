@@ -78,7 +78,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           if (storedViewMode === 'buyer' || storedViewMode === 'seller') {
             setViewModeState(storedViewMode);
           } else if (normalized) {
-            const defaultMode = normalized.role === 'seller' || normalized.role === 'admin' ? 'seller' : 'buyer';
+            const defaultMode = normalized.role === 'seller' ? 'seller' : 'buyer';
             await setViewMode(defaultMode);
           }
         }
@@ -106,7 +106,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (storedViewMode === 'buyer' || storedViewMode === 'seller') {
       setViewModeState(storedViewMode);
     } else if (normalized) {
-      const defaultMode = normalized.role === 'seller' || normalized.role === 'admin' ? 'seller' : 'buyer';
+      const defaultMode = normalized.role === 'seller' ? 'seller' : 'buyer';
       await setViewMode(defaultMode);
     }
     await syncPushSubscription();
@@ -125,7 +125,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (storedViewMode === 'buyer' || storedViewMode === 'seller') {
       setViewModeState(storedViewMode);
     } else if (normalized) {
-      const defaultMode = normalized.role === 'seller' || normalized.role === 'admin' ? 'seller' : 'buyer';
+      const defaultMode = normalized.role === 'seller' ? 'seller' : 'buyer';
       await setViewMode(defaultMode);
     }
     await syncPushSubscription();
@@ -155,7 +155,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (storedViewMode === 'buyer' || storedViewMode === 'seller') {
       setViewModeState(storedViewMode);
     } else if (normalized) {
-      const defaultMode = normalized.role === 'seller' || normalized.role === 'admin' ? 'seller' : 'buyer';
+      const defaultMode = normalized.role === 'seller' ? 'seller' : 'buyer';
       await setViewMode(defaultMode);
     }
     await syncPushSubscription();
@@ -177,7 +177,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (storedViewMode === 'buyer' || storedViewMode === 'seller') {
       setViewModeState(storedViewMode);
     } else if (normalized) {
-      const defaultMode = normalized.role === 'seller' || normalized.role === 'admin' ? 'seller' : 'buyer';
+      const defaultMode = normalized.role === 'seller' ? 'seller' : 'buyer';
       await setViewMode(defaultMode);
     }
     await syncPushSubscription();

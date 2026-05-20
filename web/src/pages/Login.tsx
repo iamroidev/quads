@@ -83,6 +83,17 @@ const LoginPage: React.FC = () => {
   }, [resendCountdown]);
 
   const from = (location.state as any)?.from || '/';
+  // Read latest user after login via localStorage since React state may not have flushed yet
+  const getRedirectAfterLogin = () => {
+    try {
+      const stored = localStorage.getItem('user');
+      if (stored) {
+        const u = JSON.parse(stored);
+        if (u?.roles?.includes('admin')) return '/admin';
+      }
+    } catch { /* ignore */ }
+    return from;
+  };
 
   const {
     register,
@@ -96,7 +107,7 @@ const LoginPage: React.FC = () => {
     setIsSubmitting(true);
     try {
       await login({ email: data.email.toLowerCase(), password: data.password });
-      navigate(from, { replace: true });
+      navigate(getRedirectAfterLogin(), { replace: true });
     } catch (error: any) {
       toast.error(error.response?.data?.message || error.message || 'Login failed. Please try again.');
     } finally {
@@ -128,7 +139,7 @@ const LoginPage: React.FC = () => {
     setIsSubmitting(true);
     try {
       await verifyOtpAndLogin(otpEmail, otpCode);
-      navigate(from, { replace: true });
+      navigate(getRedirectAfterLogin(), { replace: true });
     } catch (err: any) {
       setOtpError(err.message || 'Incorrect code. Please try again.');
     } finally {
@@ -160,7 +171,7 @@ const LoginPage: React.FC = () => {
         navigate('/register?google=1');
       } else {
         // Existing user with complete profile — login succeeded
-        navigate(from, { replace: true });
+        navigate(getRedirectAfterLogin(), { replace: true });
       }
     } catch (err: any) {
       // If googleLogin threw "No account found", redirect to register

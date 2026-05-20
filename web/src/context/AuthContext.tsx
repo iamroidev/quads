@@ -55,7 +55,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           const sanitizedUser = { 
             ...userData, 
             roles: userData.roles || [],
-            viewMode: userData.viewMode || (userData.roles?.includes('seller') ? 'seller' : 'buyer')
+            viewMode: userData.viewMode || (userData.roles?.includes('seller') && !userData.roles?.includes('admin') ? 'seller' : 'buyer')
           };
           setUser(sanitizedUser);
           localStorage.setItem('user', JSON.stringify(sanitizedUser));
@@ -188,7 +188,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const sanitizedUser = { 
         ...userData, 
         roles: userData.roles || [],
-        viewMode: userData.viewMode || (userData.roles?.includes('seller') ? 'seller' : 'buyer')
+        viewMode: userData.viewMode || (userData.roles?.includes('seller') && !userData.roles?.includes('admin') ? 'seller' : 'buyer')
       };
       setUser(sanitizedUser);
       localStorage.setItem('user', JSON.stringify(sanitizedUser));
