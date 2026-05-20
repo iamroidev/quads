@@ -29,7 +29,7 @@ class AdminService {
       User.countDocuments({ roles: 'seller' }),
       User.countDocuments({ roles: 'seller', isVerified: true }),
       User.countDocuments({ isBanned: true }),
-      Product.countDocuments(),
+      Product.countDocuments({ status: { $nin: ['removed'] } }),
       Product.countDocuments({ status: 'active' }),
       Product.countDocuments({ isFlagged: true }),
       Product.countDocuments({ isFeatured: true }),
