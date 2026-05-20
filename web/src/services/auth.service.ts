@@ -4,6 +4,7 @@ export interface RegisterData {
   name: string;
   phone: string;
   roles: ('buyer' | 'seller' | 'admin')[];
+  password?: string;
   studentId?: string;
   department?: string;
   residenceHall?: string;

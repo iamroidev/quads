@@ -123,6 +123,7 @@ class OtpService {
       name: string;
       phone: string;
       roles: ('buyer' | 'seller')[];
+      password?: string;
       studentId?: string;
       department?: string;
       residenceHall?: string;
@@ -172,7 +173,7 @@ class OtpService {
       emailVerified: true, // OTP counts as email verification
       phoneVerified: false,
       isBanned:      false,
-      password:      crypto.randomBytes(16).toString('hex'),
+      password:      profile.password || crypto.randomBytes(16).toString('hex'),
     });
 
     // Create store if seller

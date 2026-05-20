@@ -217,12 +217,13 @@ const RegisterScreen = ({ navigation }: any) => {
       !normalized.name ||
       !normalized.email ||
       !normalized.phone ||
+      !normalized.password ||
       !isRoleChosen
     ) {
       setAlertState({
         visible: true,
         title: "Missing fields",
-        message: "Role, name, email, and phone are required.",
+        message: "Role, name, email, phone, and password are required.",
       });
       return;
     }
@@ -233,6 +234,23 @@ const RegisterScreen = ({ navigation }: any) => {
         visible: true,
         title: "Invalid email",
         message: "Please enter a valid email address.",
+      });
+      return;
+    }
+
+    if (normalized.password.length < 6) {
+      setAlertState({
+        visible: true,
+        title: "Weak password",
+        message: "Password must be at least 6 characters.",
+      });
+      return;
+    }
+    if (normalized.password !== normalized.confirmPassword) {
+      setAlertState({
+        visible: true,
+        title: "Password mismatch",
+        message: "Passwords do not match.",
       });
       return;
     }
@@ -266,6 +284,7 @@ const RegisterScreen = ({ navigation }: any) => {
         name:          normalized.name,
         phone:         normalized.phone,
         role:          normalized.role as 'buyer' | 'seller',
+        password:      normalized.password,
         studentId:     normalized.studentId,
         department:    normalized.department,
         residenceHall: normalized.residenceHall,
@@ -614,6 +633,7 @@ const RegisterScreen = ({ navigation }: any) => {
                     ['Email', form.email],
                     ['Phone', form.phone],
                     ['Role', form.role.toUpperCase()],
+                    ['Password', form.password ? '•'.repeat(form.password.length) : ''],
                     ['Program', form.department],
                     ['Hall', form.residenceHall],
                   ].filter(([, v]) => v).map(([k, v]) => (

@@ -373,11 +373,12 @@ const RegisterPage: React.FC = () => {
     setIsSubmitting(true);
     try {
       const data = watch();
-      const { confirmPassword, password, ...profile } = data as any;
+      const { confirmPassword, ...profile } = data as any;
       await verifyOtpAndRegister(data.email, otpCode, {
         name:          profile.name,
         phone:         profile.phone,
         roles:         [profile.role],
+        password:      profile.password,
         studentId:     profile.studentId,
         department:    profile.department,
         residenceHall: profile.residenceHall,
