@@ -16,6 +16,8 @@ export interface PickupSpot {
   area: string;
   description: string;
   isActive: boolean;
+  lat?: number;
+  lng?: number;
 }
 
 export type Level = string;
