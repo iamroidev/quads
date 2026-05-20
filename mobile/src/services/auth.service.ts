@@ -6,6 +6,7 @@ export interface RegisterPayload {
   phone: string;
   role?: 'buyer' | 'seller';
   roles?: ('buyer' | 'seller')[];
+  password?: string;
   studentId?: string;
   department?: string;
   residenceHall?: string;
