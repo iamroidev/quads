@@ -94,8 +94,8 @@ const RegisterScreen = ({ navigation }: any) => {
   const { sendRegistrationOtp, verifyOtpAndRegister, googleLogin } = useAuth();
 
   const [_googleRequest, googleResponse, promptGoogleAsync] = Google.useAuthRequest({
-    webClientId: WEB_CLIENT_ID,
-    clientId:    EXPO_CLIENT_ID,
+    webClientId:    WEB_CLIENT_ID,
+    androidClientId: EXPO_CLIENT_ID,
   });
   const { colors } = useTheme();
   const { width: _sw } = Dimensions.get('window');
@@ -217,13 +217,12 @@ const RegisterScreen = ({ navigation }: any) => {
       !normalized.name ||
       !normalized.email ||
       !normalized.phone ||
-      !normalized.password ||
       !isRoleChosen
     ) {
       setAlertState({
         visible: true,
         title: "Missing fields",
-        message: "Role, name, email, phone and password are required.",
+        message: "Role, name, email, and phone are required.",
       });
       return;
     }
@@ -234,23 +233,6 @@ const RegisterScreen = ({ navigation }: any) => {
         visible: true,
         title: "Invalid email",
         message: "Please enter a valid email address.",
-      });
-      return;
-    }
-
-    if (normalized.password.length < 6) {
-      setAlertState({
-        visible: true,
-        title: "Weak password",
-        message: "Password must be at least 6 characters.",
-      });
-      return;
-    }
-    if (normalized.password !== normalized.confirmPassword) {
-      setAlertState({
-        visible: true,
-        title: "Password mismatch",
-        message: "Passwords do not match.",
       });
       return;
     }

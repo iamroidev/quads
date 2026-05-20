@@ -1,6 +1,7 @@
-import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { CartItem, ProductPopulated } from '../types';
 import toast from 'react-hot-toast';
+import api from '../services/api';
 
 interface CartContextType {
   items: CartItem[];
@@ -26,6 +27,24 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Save cart to local storage whenever it changes
   useEffect(() => {
     localStorage.setItem('quads_cart', JSON.stringify(items));
+  }, [items]);
+
+  // Validate cart items on load — remove products that no longer exist or are removed/sold
+  const validated = useRef(false);
+  useEffect(() => {
+    if (validated.current || items.length === 0) return;
+    validated.current = true;
+    const ids = items.map(i => i.productId);
+    api.get('/products', { params: { ids: ids.join(','), limit: ids.length } })
+      .then(res => {
+        const active = new Set((res.data?.data?.products || []).filter((p: any) => p.status === 'active').map((p: any) => p._id));
+        const removed = items.filter(i => !active.has(i.productId));
+        if (removed.length > 0) {
+          setItems(prev => prev.filter(i => active.has(i.productId)));
+          toast(`${removed.length} item${removed.length > 1 ? 's' : ''} removed from cart (no longer available)`, { icon: '🗑️' });
+        }
+      })
+      .catch(() => {});
   }, [items]);
 
   const addItem = useCallback((product: ProductPopulated, quantity: number = 1) => {

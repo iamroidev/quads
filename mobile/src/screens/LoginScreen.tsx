@@ -60,8 +60,8 @@ const LoginScreen = ({ navigation }: any) => {
   const { sendLoginOtp, verifyOtpAndLogin, login, googleLogin } = useAuth();
 
   const [_googleRequest, googleResponse, promptGoogleAsync] = Google.useAuthRequest({
-    webClientId: WEB_CLIENT_ID,
-    clientId:    EXPO_CLIENT_ID,
+    webClientId:    WEB_CLIENT_ID,
+    androidClientId: EXPO_CLIENT_ID,
   });
   const { colors } = useTheme();
   const { width: _sw } = Dimensions.get('window');
