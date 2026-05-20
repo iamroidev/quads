@@ -633,7 +633,7 @@ const AdminDashboard: React.FC = () => {
             
             <div className="border-4 border-black bg-[var(--bulletin-card)] divide-y-4 divide-black/5 shadow-[12px_12px_0_0_var(--bulletin-shadow)]">
               {users.map((user) => (
-                <div key={user._id} className="p-6 flex items-center justify-between gap-6 hover:bg-black/5 transition-colors">
+                <div key={user._id} className="p-4 md:p-6 flex flex-col md:flex-row md:items-center justify-between gap-3 md:gap-6 hover:bg-black/5 transition-colors">
                   <div className="flex items-center gap-4">
                     <div className="h-12 w-12 border-4 border-black bg-[#ff6b6b] flex items-center justify-center text-white text-xl font-black">
                       {user.name[0].toUpperCase()}
