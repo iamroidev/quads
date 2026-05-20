@@ -8,9 +8,6 @@ import { ThemeProvider, useTheme } from './src/theme/ThemeContext';
 import AppNavigator from './src/navigation/AppNavigator';
 import { initPushRuntime } from './src/services/push.service';
 import { handleInitialNotificationOpen } from './src/services/notificationNavigation.service';
-import initSentry from './src/services/sentry';
-
-initSentry();
 
 const queryClient = new QueryClient({
   defaultOptions: {
