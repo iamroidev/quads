@@ -30,6 +30,7 @@ export interface IUserDocument extends Document {
     savedAt: Date;
     priceWhenSaved: number;
   }[];
+  blockedUsers: mongoose.Types.ObjectId[];
   following: mongoose.Types.ObjectId[];
   followersCount: number;
   notificationPrefs: {
@@ -210,6 +211,10 @@ const userSchema = new Schema<IUserDocument>(
         },
       },
     ],
+    blockedUsers: [{
+      type: Schema.Types.ObjectId,
+      ref: 'User',
+    }],
     following: [
       {
         type: Schema.Types.ObjectId,

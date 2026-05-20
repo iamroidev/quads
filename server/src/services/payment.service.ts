@@ -147,6 +147,22 @@ class PaymentService {
           { $set: { status: 'paid' } }
         );
 
+        // Emit real-time payment confirmation to order rooms
+        try {
+          const { app } = require('../app');
+          const io = app.get('io');
+          if (io) {
+            for (const oid of orderIds) {
+              if (!oid) continue;
+              io.to(`order:${oid}`).emit('order:statusChanged', {
+                orderId: oid!.toString(),
+                status: 'paid',
+                updatedAt: new Date().toISOString(),
+              });
+            }
+          }
+        } catch {}
+
         // Notify and send receipts for all orders
         const populatedOrders = await Order.find({ _id: { $in: orderIds } })
           .populate('buyer', 'name avatar phone email')

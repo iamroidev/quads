@@ -27,6 +27,7 @@ export interface IOrderDocument extends Document {
   handoffStatus?: 'pending' | 'verified';
   cancelReason?: string;
   cancelledBy?: mongoose.Types.ObjectId;
+  estimatedReadyAt?: Date;
   completedAt?: Date;
   createdAt: Date;
   updatedAt: Date;
@@ -132,6 +133,7 @@ const orderSchema = new Schema<IOrderDocument>(
       type: Schema.Types.ObjectId,
       ref: 'User',
     },
+    estimatedReadyAt: Date,
     completedAt: Date,
   },
   {

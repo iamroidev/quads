@@ -66,4 +66,62 @@ router.post('/:id/cancel', cancelOrder);
 // POST /api/orders/:id/verify-handoff — verify pickup handoff
 router.post('/:id/verify-handoff', verifyHandoff);
 
+// PATCH /api/orders/:id/eta — seller sets estimated ready time
+router.patch('/:id/eta', async (req, res, next) => {
+  try {
+    const Order = (await import('../models/Order')).default;
+    const order = await Order.findById(req.params.id);
+    if (!order) return res.status(404).json({ success: false, message: 'Order not found' });
+    order.estimatedReadyAt = req.body.estimatedReadyAt ? new Date(req.body.estimatedReadyAt) : undefined;
+    await order.save();
+    // Emit real-time
+    try {
+      const { app } = require('../app');
+      const io = app.get('io');
+      if (io) io.to(`order:${order._id}`).emit('order:etaUpdated', { orderId: order._id.toString(), estimatedReadyAt: order.estimatedReadyAt });
+    } catch {}
+    res.status(200).json({ success: true, data: { order } });
+  } catch (error) { next(error); }
+});
+
+// GET /api/orders/:id/receipt — HTML receipt for print/PDF
+router.get('/:id/receipt', async (req, res, next) => {
+  try {
+    const Order = (await import('../models/Order')).default;
+    const order = await Order.findById(req.params.id)
+      .populate('buyer', 'name email phone')
+      .populate('seller', 'name')
+      .populate('items.product', 'title price');
+    if (!order) return res.status(404).json({ success: false, message: 'Order not found' });
+
+    const buyer = order.buyer as any;
+    const seller = order.seller as any;
+    const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Receipt #${order.orderNumber}</title>
+<style>body{font-family:sans-serif;max-width:600px;margin:40px auto;padding:20px;color:#111}
+h1{font-size:22px;text-transform:uppercase;letter-spacing:1px;border-bottom:3px solid #111;padding-bottom:12px}
+.row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #eee}
+.label{font-size:11px;text-transform:uppercase;letter-spacing:1px;opacity:.5;font-weight:900}
+.value{font-size:13px;font-weight:700}
+.total{font-size:20px;font-weight:900;margin-top:16px;padding-top:16px;border-top:3px solid #111}
+.items{margin:20px 0}
+.item{display:flex;justify-content:space-between;padding:6px 0}
+.footer{margin-top:32px;font-size:10px;opacity:.5;text-align:center;border-top:1px solid #eee;padding-top:16px}
+</style></head><body>
+<h1>QUADS Receipt</h1>
+<div class="row"><span class="label">Order</span><span class="value">#${order.orderNumber?.toUpperCase()}</span></div>
+<div class="row"><span class="label">Date</span><span class="value">${new Date(order.createdAt).toLocaleDateString('en-GB', { day:'numeric',month:'short',year:'numeric' })}</span></div>
+<div class="row"><span class="label">Buyer</span><span class="value">${buyer?.name || 'N/A'}</span></div>
+<div class="row"><span class="label">Seller</span><span class="value">${seller?.name || 'N/A'}</span></div>
+<div class="row"><span class="label">Status</span><span class="value">${order.status.toUpperCase()}</span></div>
+<div class="items"><p class="label">Items</p>
+${order.items.map((i: any) => `<div class="item"><span>${i.title} x${i.quantity}</span><span>GHS ${(i.price * i.quantity).toFixed(2)}</span></div>`).join('')}
+</div>
+<div class="total">Total: GHS ${order.totalAmount.toFixed(2)}</div>
+<div class="footer">QUADS Marketplace — University of Mines & Technology, Tarkwa<br>quadsmarket.tech</div>
+</body></html>`;
+    res.setHeader('Content-Type', 'text/html');
+    res.send(html);
+  } catch (error) { next(error); }
+});
+
 export default router;

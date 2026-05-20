@@ -77,6 +77,17 @@ export const setupSocketHandlers = (io: SocketServer): void => {
     socket.broadcast.emit('user:online', { userId });
 
     // ========================
+    // Join order room (for real-time status updates)
+    // ========================
+    socket.on('order:join', (orderId: string) => {
+      socket.join(`order:${orderId}`);
+    });
+
+    socket.on('order:leave', (orderId: string) => {
+      socket.leave(`order:${orderId}`);
+    });
+
+    // ========================
     // Join a conversation room
     // ========================
     socket.on('conversation:join', (conversationId: string) => {
