@@ -651,24 +651,26 @@ const AdminDashboard: React.FC = () => {
                       </div>
                     </div>
                   </div>
-                  <div className="flex gap-3">
-                    {user.roles?.includes('seller') && (
-                      <button 
-                        onClick={() => handleToggleVerifySeller(user)} 
-                        disabled={busyId === user._id} 
-                        className={`border-4 border-black px-4 py-2 text-[10px] font-black uppercase transition-all disabled:opacity-20 ${user.isVerified ? 'bg-white text-black' : 'bg-[#fffacd] text-black'}`}
+                  {!user.roles?.includes('admin') && (
+                    <div className="flex gap-3">
+                      {user.roles?.includes('seller') && (
+                        <button
+                          onClick={() => handleToggleVerifySeller(user)}
+                          disabled={busyId === user._id}
+                          className={`border-4 border-black px-4 py-2 text-[10px] font-black uppercase transition-all disabled:opacity-20 ${user.isVerified ? 'bg-white text-black' : 'bg-[#fffacd] text-black'}`}
+                        >
+                          {busyId === user._id ? '...' : user.isVerified ? 'Remove Verify' : 'Verify Shop'}
+                        </button>
+                      )}
+                      <button
+                        onClick={() => handleToggleBan(user)}
+                        disabled={busyId === user._id}
+                        className={`border-4 border-black px-4 py-2 text-[10px] font-black uppercase transition-all disabled:opacity-20 ${user.isBanned ? 'bg-black text-white' : 'bg-[#ff6b6b] text-white'}`}
                       >
-                        {busyId === user._id ? '...' : user.isVerified ? 'Remove Verify' : 'Verify Shop'}
+                        {busyId === user._id ? '...' : user.isBanned ? 'Lift Ban' : 'Suspend'}
                       </button>
-                    )}
-                    <button 
-                      onClick={() => handleToggleBan(user)} 
-                      disabled={busyId === user._id} 
-                      className={`border-4 border-black px-4 py-2 text-[10px] font-black uppercase transition-all disabled:opacity-20 ${user.isBanned ? 'bg-black text-white' : 'bg-[#ff6b6b] text-white'}`}
-                    >
-                      {busyId === user._id ? '...' : user.isBanned ? 'Lift Ban' : 'Suspend'}
-                    </button>
-                  </div>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
