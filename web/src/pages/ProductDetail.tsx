@@ -386,6 +386,16 @@ const ProductDetail: React.FC = () => {
                 <div className="absolute bottom-4 right-4 border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-text)] text-[var(--bulletin-bg)] text-[10px] font-black px-3 py-1 tracking-widest">
                   {currentImageIndex + 1} / {images.length}
                 </div>
+                {/* Dots for mobile */}
+                {images.length > 1 && (
+                  <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-1.5 md:hidden">
+                    {images.map((_, i) => (
+                      <button key={i} onClick={() => setCurrentImageIndex(i)}
+                        className={`w-2 h-2 border border-[var(--bulletin-border)] transition-all ${i === currentImageIndex ? 'bg-[#ff6b6b] scale-125' : 'bg-white/80'}`}
+                      />
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
 
