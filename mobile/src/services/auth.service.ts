@@ -48,12 +48,12 @@ const authService = {
 
   loginWithPassword: async (email: string, password: string): Promise<any> => {
     const response = await api.post('/auth/login', { email, password });
-    return response;
+    return { data: response.data.data };
   },
 
   googleLogin: async (idToken: string, role?: string, profileData?: any): Promise<any> => {
     const response = await api.post('/auth/google', { credential: idToken, role, profileData });
-    return response;
+    return { data: response.data.data };
   },
 
   sendOtp: async (email: string, purpose: 'login' | 'register'): Promise<any> => {
@@ -63,12 +63,12 @@ const authService = {
 
   verifyOtpLogin: async (email: string, code: string): Promise<any> => {
     const response = await api.post('/auth/otp/verify/login', { email, code });
-    return response;
+    return { data: response.data.data };
   },
 
   verifyOtpRegister: async (email: string, code: string, profile: any): Promise<any> => {
     const response = await api.post('/auth/otp/verify/register', { email, code, profile });
-    return response;
+    return { data: response.data.data };
   },
 
   logout: async (): Promise<void> => {

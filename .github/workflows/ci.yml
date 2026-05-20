@@ -96,16 +96,17 @@ jobs:
         if: env.EC2_SSH_KEY != ''
         run: |
           ssh -i ~/.ssh/quads-key.pem -o StrictHostKeyChecking=no \
-            ec2-user@54.167.221.2 << 'ENDSSH'
-              export NVM_DIR="$HOME/.nvm"
-              [ -s "$NVM_DIR/nvm.sh" ] && source "$NVM_DIR/nvm.sh"
+            ec2-user@54.167.221.2 'bash -lc "
+              export NVM_DIR=\"\$HOME/.nvm\"
+              [ -s \"\$NVM_DIR/nvm.sh\" ] && source \"\$NVM_DIR/nvm.sh\"
+              nvm use 16
               cd /home/ec2-user/quads
               npm install --production --prefer-offline --no-audit 2>&1 | tail -5
               pm2 reload quads-api --update-env
               pm2 save
-              echo "=== quads-api status ==="
-              pm2 show quads-api | grep -E 'status|uptime|restarts'
-          ENDSSH
+              echo === quads-api status ===
+              pm2 show quads-api | grep -E status\|uptime\|restarts
+            "'
 
 # ─────────────────────────────────────────────
 # JOB 3 — Web: type-check
