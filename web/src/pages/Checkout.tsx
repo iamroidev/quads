@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, lazy, Suspense } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import {
   ArrowLeft,
@@ -13,6 +13,8 @@ import {
   CheckCircle,
   Pin,
 } from 'lucide-react';
+
+const CampusMap = lazy(() => import('../components/map/CampusMap'));
 import toast from 'react-hot-toast';
 import productService from '../services/product.service';
 import orderService from '../services/order.service';
@@ -291,6 +293,17 @@ const Checkout: React.FC = () => {
                       ))}
                     </div>
                   )}
+                  {/* Campus map */}
+                  <Suspense fallback={<div className="h-[200px] border border-[var(--bulletin-border)] bg-[var(--bulletin-bg)] flex items-center justify-center text-[11px] font-bold opacity-40">Loading map...</div>}>
+                    <CampusMap
+                      spots={pickupSpots}
+                      selectedSpot={form.pickupLocation}
+                      onSelectSpot={(name) => { setForm(f => ({ ...f, pickupLocation: name })); setSpotQuery(''); }}
+                      height="200px"
+                      className="mt-3"
+                    />
+                  </Suspense>
+
                   {isManualPickup && (
                     <input
                       type="text"
