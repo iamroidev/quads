@@ -93,6 +93,7 @@ const AdminDashboard: React.FC = () => {
 
   // Payout management state
   const [payouts, setPayouts] = useState<any[]>([]);
+  const [removeModal, setRemoveModal] = useState<{ product: ProductPopulated; reason: string } | null>(null);
   const [payoutStats, setPayoutStats] = useState<{
     totalPending: number;
     totalProcessing: number;
@@ -252,9 +253,15 @@ const AdminDashboard: React.FC = () => {
     }
   };
 
-  const handleRemoveProduct = async (product: ProductPopulated) => {
-    const reason = window.prompt(`Reason for removing "${product.title}":`);
-    if (!reason) return;
+  const handleRemoveProduct = (product: ProductPopulated) => {
+    setRemoveModal({ product, reason: '' });
+  };
+
+  const confirmRemoveProduct = async () => {
+    if (!removeModal) return;
+    const { product, reason } = removeModal;
+    if (!reason.trim()) return;
+    setRemoveModal(null);
     setBusyId(product._id);
     try {
       const res = await adminService.removeProduct(product._id, reason);
@@ -1374,6 +1381,70 @@ const AdminDashboard: React.FC = () => {
                 className="border-4 border-black bg-black text-white px-8 py-3 text-[12px] font-black uppercase hover:bg-[#ff6b6b] transition-all disabled:opacity-20 shadow-[6px_6px_0_0_rgba(0,0,0,0.2)]"
               >
                 {busyId === 'dispute-update' ? '...' : 'Apply Verdict'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* ── Remove Product Modal ─────────────────────────────────────────── */}
+      {removeModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+          <div className="w-full max-w-md bg-[var(--bulletin-bg)] border-4 border-[var(--bulletin-border)] shadow-[12px_12px_0_0_rgba(0,0,0,1)] mx-4">
+            {/* Header */}
+            <div className="bg-black px-6 py-4 flex items-center gap-3">
+              <div style={{ position: 'relative', width: 32, height: 32, border: '3px solid #fff', background: '#000', flexShrink: 0 }}>
+                <div style={{ position: 'absolute', top: 6, left: 6, width: 13, height: 13, border: '4px solid #fff' }} />
+                <div style={{ position: 'absolute', bottom: 4, right: 4, width: 6, height: 3, background: '#fff', transform: 'rotate(45deg)' }} />
+                <div style={{ position: 'absolute', top: 2, right: 2, width: 5, height: 5, borderRadius: '50%', background: '#ff6b6b', border: '1px solid #fff' }} />
+              </div>
+              <div>
+                <p className="text-[9px] font-black uppercase tracking-[2px] text-[#ff6b6b]">Admin Action</p>
+                <p className="text-[13px] font-black uppercase tracking-tighter text-white leading-none">Remove Listing</p>
+              </div>
+            </div>
+
+            {/* Body */}
+            <div className="p-6">
+              <p className="text-[11px] font-black uppercase tracking-widest text-[var(--bulletin-text)] opacity-50 mb-2">
+                Product
+              </p>
+              <div className="border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] px-4 py-3 mb-6 shadow-[4px_4px_0_0_var(--bulletin-shadow)]">
+                <p className="text-[14px] font-black uppercase tracking-tight text-[var(--bulletin-text)]">
+                  {removeModal.product.title}
+                </p>
+                <p className="text-[11px] text-[var(--bulletin-text)] opacity-50 mt-1">
+                  GHS {removeModal.product.price?.toFixed(2)} · {typeof removeModal.product.seller === 'object' ? (removeModal.product.seller as any).name : 'Unknown Seller'}
+                </p>
+              </div>
+
+              <label className="block text-[11px] font-black uppercase tracking-[2px] text-[var(--bulletin-text)] opacity-50 mb-3">
+                Reason for removal <span className="text-[#ff6b6b]">*</span>
+              </label>
+              <textarea
+                autoFocus
+                rows={3}
+                value={removeModal.reason}
+                onChange={e => setRemoveModal({ ...removeModal, reason: e.target.value })}
+                placeholder="e.g. Prohibited item, misleading description, policy violation..."
+                className="w-full border-4 border-[var(--bulletin-border)] bg-[var(--bulletin-bg)] px-4 py-3 text-[14px] font-bold text-[var(--bulletin-text)] placeholder:text-[var(--bulletin-text)] placeholder:opacity-25 focus:outline-none focus:ring-0 resize-none shadow-[4px_4px_0_0_var(--bulletin-shadow)]"
+                onKeyDown={e => { if (e.key === 'Enter' && e.metaKey) confirmRemoveProduct(); if (e.key === 'Escape') setRemoveModal(null); }}
+              />
+            </div>
+
+            {/* Footer */}
+            <div className="px-6 pb-6 flex gap-3">
+              <button
+                onClick={() => setRemoveModal(null)}
+                className="flex-1 border-4 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] px-4 py-3 text-[12px] font-black uppercase tracking-widest text-[var(--bulletin-text)] hover:bg-[var(--bulletin-bg)] transition-all shadow-[4px_4px_0_0_var(--bulletin-shadow)] hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px]"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmRemoveProduct}
+                disabled={!removeModal.reason.trim()}
+                className="flex-[2] border-4 border-[#ff6b6b] bg-[#ff6b6b] px-4 py-3 text-[12px] font-black uppercase tracking-widest text-white shadow-[4px_4px_0_0_rgba(0,0,0,1)] hover:bg-[#c0392b] hover:border-[#c0392b] disabled:opacity-30 disabled:cursor-not-allowed transition-all hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px] disabled:translate-x-0 disabled:translate-y-0"
+              >
+                Remove Listing
               </button>
             </div>
           </div>
