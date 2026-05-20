@@ -7,11 +7,8 @@
     "preview": {
       "distribution": "internal",
       "env": {
-        "EXPO_PUBLIC_SUPABASE_URL": "https://dbxeaqwjihgppffdcbdd.supabase.co",
-        "EXPO_PUBLIC_SUPABASE_KEY": "sb_publishable_J-MSyIozalEGlIPvevfLow_FwN682H6",
         "EXPO_PUBLIC_API_URL": "https://api.quadsmarket.tech/api",
-        "EXPO_PUBLIC_SOCKET_URL": "https://api.quadsmarket.tech",
-        "SENTRY_DISABLE_AUTO_UPLOAD": "true"
+        "EXPO_PUBLIC_SOCKET_URL": "https://api.quadsmarket.tech"
       },
       "android": {
         "buildType": "apk"
@@ -21,9 +18,6 @@
       }
     },
     "production": {
-      "env": {
-        "SENTRY_DISABLE_AUTO_UPLOAD": "true"
-      },
       "android": {
         "buildType": "app-bundle"
       },

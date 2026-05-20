@@ -385,14 +385,12 @@ export const deleteAccount = async (
       return;
     }
 
-    // Standard password-based users must confirm deletion with their password.
-    // OAuth (Google/Supabase) users who don't have a local password bypass this check.
-    if (!user.supabaseId) {
+    // Google OAuth users skip password check — they authenticated via Google
+    if (!user.googleId && !user.supabaseId) {
       if (!password) {
         res.status(400).json({ success: false, message: 'Password is required to delete your account.' });
         return;
       }
-
       const isMatch = await user.comparePassword(password);
       if (!isMatch) {
         res.status(401).json({ success: false, message: 'Incorrect password.' });
@@ -400,19 +398,7 @@ export const deleteAccount = async (
       }
     }
 
-    const supabaseId = user.supabaseId;
     await User.findByIdAndDelete(req.user!._id);
-
-    // Also delete from Supabase auth so the email can't receive OTPs or log in again
-    if (supabaseId && process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_KEY) {
-      await fetch(`${process.env.SUPABASE_URL}/auth/v1/admin/users/${supabaseId}`, {
-        method: 'DELETE',
-        headers: {
-          'apikey': process.env.SUPABASE_SERVICE_KEY,
-          'Authorization': `Bearer ${process.env.SUPABASE_SERVICE_KEY}`,
-        },
-      }).catch(err => console.error('[deleteAccount] Supabase user delete failed:', err));
-    }
 
     res.cookie('token', '', { httpOnly: true, expires: new Date(0) });
     res.status(200).json({ success: true, message: 'Account deleted successfully.' });
