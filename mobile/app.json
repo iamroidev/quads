@@ -37,8 +37,6 @@
     "extra": {
       "apiUrl": "https://api.quadsmarket.tech/api",
       "socketUrl": "https://api.quadsmarket.tech",
-      "supabaseUrl": "https://dbxeaqwjihgppffdcbdd.supabase.co",
-      "supabaseKey": "sb_publishable_J-MSyIozalEGlIPvevfLow_FwN682H6",
       "eas": {
         "projectId": "59ecf4f8-6c74-4eca-b11f-e6e2b74c8619"
       }

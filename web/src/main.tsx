@@ -58,7 +58,7 @@ const AppRoot: React.FC = () => {
   }, []);
 
   return (
-    <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID || '904520092449-gnrmhr6h0ltvf74uqdh0s3pcflalljji.apps.googleusercontent.com'}>
+    <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID || '912061029071-85lvqadits5rfpivqjmjlctp8dov4dte.apps.googleusercontent.com'}>
       <BrowserRouter>
         <QueryClientProvider client={queryClient}>
           <AuthProvider>

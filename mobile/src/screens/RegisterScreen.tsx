@@ -17,7 +17,6 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import * as WebBrowser from "expo-web-browser";
-import * as Linking from "expo-linking";
 import { useAuth } from "../context/AuthContext";
 import { useTheme } from "../theme/ThemeContext";
 import AppAlert from "../components/AppAlert";
@@ -607,6 +606,40 @@ const RegisterScreen = ({ navigation }: any) => {
                   onClose={() => setActivePicker(null)}
                   colors={colors}
                 />
+
+                {/* Password fields */}
+                <View style={styles.inputGroup}>
+                  <Text style={styles.label}>Password *</Text>
+                  <View style={styles.passwordContainer}>
+                    <TextInput
+                      style={[styles.input, styles.passwordInput]}
+                      placeholder="At least 6 characters"
+                      placeholderTextColor={colors.textDisabled}
+                      value={form.password}
+                      onChangeText={(v) => updateForm("password", v)}
+                      secureTextEntry={!showPassword}
+                    />
+                    <TouchableOpacity style={styles.eyeButton} onPress={() => setShowPassword(p => !p)}>
+                      <Text style={styles.eyeText}>{showPassword ? "Hide" : "Show"}</Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+                <View style={styles.inputGroup}>
+                  <Text style={styles.label}>Confirm Password *</Text>
+                  <View style={styles.passwordContainer}>
+                    <TextInput
+                      style={[styles.input, styles.passwordInput]}
+                      placeholder="Re-enter your password"
+                      placeholderTextColor={colors.textDisabled}
+                      value={form.confirmPassword}
+                      onChangeText={(v) => updateForm("confirmPassword", v)}
+                      secureTextEntry={!showConfirmPassword}
+                    />
+                    <TouchableOpacity style={styles.eyeButton} onPress={() => setShowConfirmPassword(p => !p)}>
+                      <Text style={styles.eyeText}>{showConfirmPassword ? "Hide" : "Show"}</Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
 
                 <View style={styles.rowActions}>
                   <TouchableOpacity

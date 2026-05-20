@@ -87,12 +87,15 @@ const ForgotPasswordScreen = ({ navigation }: any) => {
         <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
           {sent ? (
             <View style={styles.successBox}>
-              
-              <Text style={styles.successTitle}>Reset link sent</Text>
+
+              <Text style={styles.successTitle}>Code Sent</Text>
               <Text style={styles.successBody}>
-                Check your inbox for <Text style={{ fontWeight: '800' }}>{email}</Text>.{'\n'}
-                Click the link to set a new password. It expires in 1 hour.
+                We sent a 6-digit code to <Text style={{ fontWeight: '800' }}>{email}</Text>.{'\n'}
+                Use it on the next screen to set your new password.
               </Text>
+              <TouchableOpacity style={styles.primaryBtn} onPress={() => navigation.navigate('ResetPassword', { email })}>
+                <Text style={styles.primaryBtnText}>Enter Code & Reset Password</Text>
+              </TouchableOpacity>
               <TouchableOpacity style={styles.backBtn} onPress={() => navigation.goBack()}>
                 <Text style={styles.backBtnText}>Back to Login</Text>
               </TouchableOpacity>
