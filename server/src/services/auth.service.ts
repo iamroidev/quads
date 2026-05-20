@@ -65,7 +65,13 @@ class AuthService {
     if (user.isBanned) throw ApiError.forbidden('Your account has been suspended.');
 
     const isMatch = await user.comparePassword(password);
-    if (!isMatch) throw ApiError.unauthorized('Incorrect password.');
+    if (!isMatch) {
+      // If this is a Google account, give a helpful message
+      if (user.googleId) {
+        throw ApiError.unauthorized('This account was created with Google. Use Google sign-in or email code instead.');
+      }
+      throw ApiError.unauthorized('Incorrect password.');
+    }
 
     return { user, token: this.buildToken(user) };
   }
