@@ -21,6 +21,7 @@ import { useAuth } from "../context/AuthContext";
 import { useTheme } from "../theme/ThemeContext";
 import AppAlert from "../components/AppAlert";
 import * as Google from "expo-auth-session/providers/google";
+import { makeRedirectUri } from "expo-auth-session";
 import referenceService, { Program, Hall } from "../services/reference.service";
 
 WebBrowser.maybeCompleteAuthSession();
@@ -97,6 +98,9 @@ const RegisterScreen = ({ navigation }: any) => {
     webClientId:    WEB_CLIENT_ID,
     androidClientId: EXPO_CLIENT_ID,
     iosClientId:     IOS_CLIENT_ID,
+    redirectUri: makeRedirectUri({
+      native: 'com.googleusercontent.apps.912061029071-9cu0hecip5gl1qbkq6mmpm6bsk9nlfa7:/oauthredirect',
+    }),
   });
   const { colors } = useTheme();
   const { width: _sw } = Dimensions.get('window');
