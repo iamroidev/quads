@@ -417,16 +417,11 @@ const LoginPage: React.FC = () => {
             </div>
 
             <div className="flex justify-center mb-6 md:mb-12">
-              <div 
-                className={`border-4 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] shadow-[6px_6px_0_0_var(--bulletin-shadow)] transition-all overflow-hidden ${!protocolAccepted ? 'opacity-40 grayscale cursor-not-allowed' : 'hover:-translate-y-1 hover:shadow-[10px_10px_0_0_var(--bulletin-shadow)]'}`} 
+              <div
+                className="border-4 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] shadow-[6px_6px_0_0_var(--bulletin-shadow)] transition-all overflow-hidden hover:-translate-y-1 hover:shadow-[10px_10px_0_0_var(--bulletin-shadow)]"
                 style={{ transform: 'rotate(-0.5deg)' }}
-                onClick={() => {
-                  if (!protocolAccepted) {
-                    toast.error('Please accept the Session Protocol first.');
-                  }
-                }}
               >
-                <div className={!protocolAccepted ? 'pointer-events-none' : ''}>
+                <div>
                   <GoogleLogin
                     onSuccess={handleGoogleSuccess}
                     onError={() => toast.error('Google sign-in could not start.')}

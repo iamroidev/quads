@@ -164,7 +164,7 @@ const Header: React.FC = () => {
           <div className="hidden items-center gap-1 md:flex">
             {isAuthenticated ? (
               <>
-                {(user?.roles?.includes('seller') || user?.roles?.includes('admin')) && (
+                {user?.roles?.includes('seller') && !user?.roles?.includes('admin') && (
                   <Link
                     to="/sell"
                     className="mr-3 text-xs font-bold uppercase tracking-[0.18em] text-earth-900 transition-opacity hover:opacity-60"
@@ -242,7 +242,7 @@ const Header: React.FC = () => {
                         {[
                           { to: '/profile', icon: <User className="h-3.5 w-3.5" />, label: 'Profile' },
                           { to: '/messages', icon: <MessageSquare className="h-3.5 w-3.5" />, label: 'Messages' },
-                          ...(user?.roles?.includes('seller') || user?.roles?.includes('admin') ? [
+                          ...(user?.roles?.includes('seller') && !user?.roles?.includes('admin') ? [
                             { to: '/my-listings', icon: <ShoppingBag className="h-3.5 w-3.5" />, label: 'My listings' },
                             { to: '/seller/orders', icon: <ClipboardList className="h-3.5 w-3.5" />, label: 'Seller orders' },
                           ] : []),
@@ -339,7 +339,7 @@ const Header: React.FC = () => {
             ))}
             {isAuthenticated ? (
               <div className="pt-3 flex flex-col gap-2">
-                {(user?.roles?.includes('seller') || user?.roles?.includes('admin')) && (
+                {user?.roles?.includes('seller') && !user?.roles?.includes('admin') && (
                   <Link
                     to="/sell"
                     className="block bg-earth-900 py-3 text-center text-xs font-black uppercase tracking-[0.18em] text-white"
