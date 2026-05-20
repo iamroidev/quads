@@ -19,6 +19,8 @@ import feedRoutes from './feed.routes';
 import offerRoutes from './offer.routes';
 import userRoutes from './user.routes';
 import referenceRoutes from './reference.routes';
+import reportRoutes from './report.routes';
+import storeRoutes from './store.routes';
 
 const router = Router();
 
@@ -50,7 +52,9 @@ router.use('/auto-payouts', autoPayoutRoutes);
 router.use('/support', supportRoutes);
 router.use('/feed', feedRoutes);
 router.use('/offers', offerRoutes);
-router.use('/users', userRoutes); // Added user routes
+router.use('/users', userRoutes);
 router.use('/reference', referenceRoutes);
+router.use('/reports', reportRoutes);
+router.use('/stores', storeRoutes);
 
 export default router;

@@ -29,7 +29,7 @@ const PaymentVerification: React.FC = () => {
       return;
     }
 
-    const verify = async () => {
+    const verify = async (attempt = 1): Promise<void> => {
       setVerifying(true);
       try {
         const res = await paymentService.verifyPayment(reference);
@@ -37,15 +37,25 @@ const PaymentVerification: React.FC = () => {
           setVerified(true);
           setOrder(res.data.order);
           setOrders(res.data.orders || (res.data.order ? [res.data.order] : []));
-        } else {
-          setVerified(false);
-          setError('Payment could not be verified. Please try again or contact support.');
+          setVerifying(false);
+          return;
         }
+        // Not verified yet — retry up to 5 times
+        if (attempt < 5) {
+          await new Promise(r => setTimeout(r, 3000));
+          return verify(attempt + 1);
+        }
+        setVerified(false);
+        setError('Payment could not be verified. It may still be processing — check your orders in a few minutes.');
       } catch (err: any) {
+        if (attempt < 5) {
+          await new Promise(r => setTimeout(r, 3000));
+          return verify(attempt + 1);
+        }
         setVerified(false);
         setError(err.response?.data?.message || 'Payment verification failed');
       } finally {
-        setVerifying(false);
+        if (attempt >= 5 || verified) setVerifying(false);
       }
     };
 

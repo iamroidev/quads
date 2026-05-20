@@ -406,6 +406,19 @@ class OrderService {
 
     await order.save();
 
+    // Emit real-time order status update via Socket.io
+    try {
+      const { app } = require('../app');
+      const io = app.get('io');
+      if (io) {
+        io.to(`order:${orderId}`).emit('order:statusChanged', {
+          orderId,
+          status: newStatus,
+          updatedAt: new Date().toISOString(),
+        });
+      }
+    } catch {}
+
     return order.populate([
       { path: 'buyer', select: 'name avatar phone email' },
       { path: 'seller', select: 'name avatar phone isVerified' },

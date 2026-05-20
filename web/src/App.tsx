@@ -91,6 +91,7 @@ const PrivacyPolicyPage      = lazyWithRetry(() => import('./pages/PrivacyPolicy
 const FAQPage                = lazyWithRetry(() => import('./pages/FAQ'), 'faq');
 const AboutUsPage            = lazyWithRetry(() => import('./pages/AboutUs'), 'about');
 const LostFoundPage          = lazyWithRetry(() => import('./pages/LostFound'), 'lost-found');
+const StorefrontPage         = lazyWithRetry(() => import('./pages/Storefront'), 'storefront');
 
 import { LoadingSpinner } from './components/ui';
 
@@ -289,6 +290,7 @@ const App: React.FC = () => {
         <Route path="/categories" element={<CategoriesPage />} />
         <Route path="/collections/:slug" element={<CollectionDetailPage />} />
         <Route path="/lost-found" element={<LostFoundPage />} />
+        <Route path="/store/:slug" element={<StorefrontPage />} />
 
         <Route
           path="/saved"

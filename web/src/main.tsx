@@ -8,6 +8,7 @@ import { CartProvider } from './context/CartContext';
 import { SocketProvider } from './context/SocketContext';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import App from './App';
+import Onboarding from './components/Onboarding';
 import './index.css';
 
 if ('serviceWorker' in navigator) {
@@ -64,6 +65,7 @@ const AppRoot: React.FC = () => {
           <AuthProvider>
             <CartProvider>
               <SocketProvider>
+                <Onboarding />
                 <App />
                 <Toaster
                   position={isMobile ? 'bottom-center' : 'bottom-right'}
