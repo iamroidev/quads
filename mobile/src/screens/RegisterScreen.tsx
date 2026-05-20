@@ -26,7 +26,8 @@ import referenceService, { Program, Hall } from "../services/reference.service";
 WebBrowser.maybeCompleteAuthSession();
 
 const WEB_CLIENT_ID  = '912061029071-85lvqadits5rfpivqjmjlctp8dov4dte.apps.googleusercontent.com';
-const EXPO_CLIENT_ID = '904520092449-gnrmhr6h0ltvf74uqdh0s3pcflalljji.apps.googleusercontent.com';
+const EXPO_CLIENT_ID = '912061029071-9cu0hecip5gl1qbkq6mmpm6bsk9nlfa7.apps.googleusercontent.com';
+const IOS_CLIENT_ID  = '912061029071-0jpqu35u6ir7oa537ufjfgdbkl74i2pb.apps.googleusercontent.com';
 
 // ── Picker modal ──────────────────────────────────────────────────────────────
 interface PickerModalProps {
@@ -95,6 +96,7 @@ const RegisterScreen = ({ navigation }: any) => {
   const [_googleRequest, googleResponse, promptGoogleAsync] = Google.useAuthRequest({
     webClientId:    WEB_CLIENT_ID,
     androidClientId: EXPO_CLIENT_ID,
+    iosClientId:     IOS_CLIENT_ID,
   });
   const { colors } = useTheme();
   const { width: _sw } = Dimensions.get('window');
