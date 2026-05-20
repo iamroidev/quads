@@ -10,6 +10,7 @@ import {
    WelcomeScreen,
    LoginScreen,
    RegisterScreen,
+   AdminScreen,
    HomeScreen,
    ProductsScreen,
    ProductDetailScreen,
@@ -379,7 +380,8 @@ const SellerTabs = () => {
 
 const MainTabsWrapper = () => {
   const { user, viewMode } = useAuth();
-  const isSellerMode = (user?.role === 'seller' || user?.role === 'admin') && viewMode === 'seller';
+  if (user?.role === 'admin') return <AdminScreen />;
+  const isSellerMode = user?.role === 'seller' && viewMode === 'seller';
   return isSellerMode ? <SellerTabs /> : <BuyerTabs />;
 };
 
