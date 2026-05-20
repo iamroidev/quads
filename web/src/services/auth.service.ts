@@ -103,12 +103,13 @@ const authService = {
 
   login: async (email: string, password: string) => {
     const response = await api.post('/auth/login', { email, password });
-    return response;
+    // server returns { success, data: { user, token } } — unwrap to { data: { user, token } }
+    return { data: response.data.data };
   },
 
   googleLogin: async (idToken: string, role?: string, profileData?: any) => {
     const response = await api.post('/auth/google', { credential: idToken, role, profileData });
-    return response;
+    return { data: response.data.data };
   },
 
   sendOtp: async (email: string, purpose: 'login' | 'register') => {
@@ -118,12 +119,12 @@ const authService = {
 
   verifyOtpLogin: async (email: string, code: string) => {
     const response = await api.post('/auth/otp/verify/login', { email, code });
-    return response;
+    return { data: response.data.data };
   },
 
   verifyOtpRegister: async (email: string, code: string, profile: any) => {
     const response = await api.post('/auth/otp/verify/register', { email, code, profile });
-    return response;
+    return { data: response.data.data };
   },
 
   logout: async () => {

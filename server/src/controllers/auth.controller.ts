@@ -2,6 +2,8 @@ import { Request, Response, NextFunction } from 'express';
 import mongoose from 'mongoose';
 import crypto from 'crypto';
 import authService from '../services/auth.service';
+import otpService from '../services/otp.service';
+import VerificationCode from '../models/VerificationCode';
 import env from '../config/env';
 import { emailService } from '../services/email.service';
 import User from '../models/User';
@@ -703,8 +705,6 @@ export const updateSellerOnboarding = async (
   }
 };
 
-import otpService from '../services/otp.service';
-
 export const sendOtp = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const { email, purpose } = req.body;
@@ -758,8 +758,6 @@ export const forgotPassword = async (
     // Always respond 200 — don't leak whether email exists
     const user = await User.findOne({ email: normalised }).select('_id name email');
     if (user) {
-      const VerificationCode = (await import('../models/VerificationCode')).default;
-      const crypto = require('crypto');
 
       await VerificationCode.deleteMany({ email: normalised, purpose: 'reset_password', verifiedAt: { $exists: false } });
 
@@ -794,7 +792,6 @@ export const resetPassword = async (
     }
 
     const normalised = email.toLowerCase().trim();
-    const VerificationCode = (await import('../models/VerificationCode')).default;
 
     const record = await VerificationCode.findOne({
       email: normalised, purpose: 'reset_password', verifiedAt: { $exists: false },
