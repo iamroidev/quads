@@ -33,7 +33,7 @@
       "color": "#ff6b6b",
       "iosDisplayInForeground": true
     },
-    "scheme": "quads",
+    "scheme": ["quads", "com.googleusercontent.apps.912061029071-9cu0hecip5gl1qbkq6mmpm6bsk9nlfa7"],
     "extra": {
       "apiUrl": "https://api.quadsmarket.tech/api",
       "socketUrl": "https://api.quadsmarket.tech",
