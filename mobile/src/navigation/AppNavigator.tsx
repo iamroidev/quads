@@ -1,10 +1,11 @@
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { Text, View, Platform } from 'react-native';
+import { Text, View, Platform, Dimensions } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAuth } from '../context/AuthContext';
+import OfflineBanner from '../components/OfflineBanner';
 
 import {
    WelcomeScreen,
@@ -207,15 +208,18 @@ const BuyerTabs = () => {
   const { unreadMessagesCount, unreadNotificationsCount } = useAuth();
   const insets = useSafeAreaInsets();
   const colors = useColors();
+  const screenWidth = Dimensions.get('window').width;
+  const isNarrow = screenWidth < 375;
 
   const commonOptions = {
     headerShown: false,
     tabBarActiveTintColor: colors.text,
     tabBarInactiveTintColor: colors.textSecondary,
+    tabBarShowLabel: !isNarrow,
     tabBarStyle: {
       borderTopColor: colors.border,
       backgroundColor: colors.surface,
-      height: 62 + (Platform.OS === 'ios' ? insets.bottom : 0),
+      height: (isNarrow ? 54 : 62) + (Platform.OS === 'ios' ? insets.bottom : 0),
       paddingTop: 8,
       paddingBottom: Math.max(insets.bottom, 8),
       paddingHorizontal: 0,
@@ -299,15 +303,18 @@ const SellerTabs = () => {
   const { unreadMessagesCount, unreadNotificationsCount } = useAuth();
   const insets = useSafeAreaInsets();
   const colors = useColors();
+  const screenWidth = Dimensions.get('window').width;
+  const isNarrow = screenWidth < 375;
 
   const commonOptions = {
     headerShown: false,
     tabBarActiveTintColor: colors.text,
     tabBarInactiveTintColor: colors.textSecondary,
+    tabBarShowLabel: !isNarrow,
     tabBarStyle: {
       borderTopColor: colors.border,
       backgroundColor: colors.surface,
-      height: 62 + (Platform.OS === 'ios' ? insets.bottom : 0),
+      height: (isNarrow ? 54 : 62) + (Platform.OS === 'ios' ? insets.bottom : 0),
       paddingTop: 8,
       paddingBottom: Math.max(insets.bottom, 8),
       paddingHorizontal: 0,
@@ -511,6 +518,7 @@ const AppNavigator = () => {
   return (
     <NavigationContainer ref={navigationRef}>
       <View style={{ flex: 1 }}>
+        <OfflineBanner />
         <Stack.Navigator screenOptions={{ headerShown: false }}>
           {isAuthenticated ? (
             <>
