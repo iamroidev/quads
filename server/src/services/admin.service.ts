@@ -107,6 +107,7 @@ class AdminService {
 
     const user = await User.findById(userId);
     if (!user) throw ApiError.notFound('User not found');
+    if (user.roles.includes('admin')) throw ApiError.badRequest('Admin accounts cannot be suspended');
 
     user.isBanned = isBanned;
     await user.save();
