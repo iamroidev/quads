@@ -10,6 +10,9 @@ concurrency:
   group: cicd-${{ github.ref }}
   cancel-in-progress: true
 
+permissions:
+  contents: read
+
 # ─────────────────────────────────────────────
 # JOB 1 — Server: type-check + test
 # ─────────────────────────────────────────────
