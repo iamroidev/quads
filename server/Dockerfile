@@ -1,5 +1,5 @@
 # ── Stage 1: build ────────────────────────────────────────────────────────────
-FROM node:20-alpine AS builder
+FROM node:20 AS builder
 
 WORKDIR /app
 
@@ -10,7 +10,7 @@ COPY src ./src
 RUN npm run build
 
 # ── Stage 2: production image ─────────────────────────────────────────────────
-FROM node:20-alpine AS runner
+FROM node:20 AS runner
 
 WORKDIR /app
 
