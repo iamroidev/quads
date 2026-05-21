@@ -52,6 +52,15 @@ function FlyToSpot({ spot }: { spot?: Spot }) {
 export default function CampusMap({ spots = [], selectedSpot, onSelectSpot, height = '300px', className = '' }: CampusMapProps) {
   const selected = spots.find(s => s.name === selectedSpot);
 
+  if (!MapContainer || !TileLayer) {
+    return (
+      <div className={className} style={{ height, width: '100%', border: '3px solid var(--bulletin-border, #1a1a1a)', padding: '12px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '8px', background: 'var(--bulletin-bg)' }}>
+        <strong className="text-[11px] uppercase font-black">Map system offline</strong>
+        <span className="text-[10px] font-bold opacity-60 text-center">Please select a pickup location from the list above.</span>
+      </div>
+    );
+  }
+
   return (
     <div className={className} style={{ height, width: '100%', border: '3px solid var(--bulletin-border, #1a1a1a)', boxShadow: '5px 5px 0 0 var(--bulletin-shadow, #1a1a1a)' }}>
       <MapContainer
