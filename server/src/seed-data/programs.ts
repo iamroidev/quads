@@ -58,7 +58,7 @@ export const UMaTHalls = [
   { name: 'Off-Campus', type: 'off-campus' },
 ];
 
-// UMaT Tarkwa Campus verified pickup spots (accurate coordinates for Main & Akoon Campuses)
+// UMaT Tarkwa Campus verified pickup spots (accurate coordinates)
 export const PickupSpots = [
   // Central Campus (Main Campus - Bogoso Road)
   { name: 'Main Library Entrance', area: 'Central Campus', description: 'Front of the main university library', lat: 5.2965, lng: -2.0011, isActive: true, isManual: false },
@@ -79,7 +79,7 @@ export const PickupSpots = [
   // On-Campus Halls
   { name: 'KT Hall Entrance', area: 'KT Hall', description: 'Entrance of KT Hall (Main Campus)', lat: 5.30616, lng: -1.99668, isActive: true, isManual: false },
   { name: 'Chambers of Mines Hall Entrance', area: 'Chambers of Mines Hall', description: 'Entrance of Chambers of Mines Hall (Main Campus)', lat: 5.29944, lng: -2.00306, isActive: true, isManual: false },
-  { name: 'Gold Refinery Hall Entrance', area: 'Gold Refinery Hall', description: 'Entrance of Gold Refinery Hall (Akoon Campus)', lat: 5.31917, lng: -1.98583, isActive: true, isManual: false },
+  { name: 'Gold Refinery Hall Entrance', area: 'Gold Refinery Hall', description: 'Entrance of Gold Refinery Hall', lat: 5.31917, lng: -1.98583, isActive: true, isManual: false },
 
   // Hostels (Main student housing corridors around Main Campus & Akyempim)
   { name: 'CK Hostel Entrance', area: 'Hostels', description: 'Entrance of CK Hostel', lat: 5.2968, lng: -1.9945, isActive: true, isManual: false },
