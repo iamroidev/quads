@@ -27,7 +27,7 @@ class VerificationService {
   /**
    * Check if email domain matches UMaT institutional domains
    */
-  private isInstitutionalEmail(email?: string): boolean {
+  public isInstitutionalEmail(email?: string): boolean {
     if (!email) return false;
     return /@(student\.)?umat\.edu\.gh$/i.test(email) || /@st\.umat\.edu\.gh$/i.test(email);
   }

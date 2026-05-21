@@ -3,6 +3,7 @@ import VerificationCode from '../models/VerificationCode';
 import User from '../models/User';
 import { emailService } from './email.service';
 import authService from './auth.service';
+import verificationService from './verification.service';
 import ApiError from '../utils/ApiError';
 import { generateToken } from '../utils/jwt';
 
@@ -169,7 +170,7 @@ class OtpService {
       residenceHall: profile.residenceHall || '',
       currentLevel:  profile.currentLevel || '',
       location:      profile.location || '',
-      isVerified:    false,
+      isVerified:    verificationService.isInstitutionalEmail(normalised),
       emailVerified: true, // OTP counts as email verification
       phoneVerified: false,
       isBanned:      false,

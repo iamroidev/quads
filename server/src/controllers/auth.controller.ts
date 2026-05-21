@@ -3,6 +3,7 @@ import mongoose from 'mongoose';
 import crypto from 'crypto';
 import authService from '../services/auth.service';
 import otpService from '../services/otp.service';
+import verificationService from '../services/verification.service';
 import VerificationCode from '../models/VerificationCode';
 import env from '../config/env';
 import { emailService } from '../services/email.service';
@@ -645,12 +646,17 @@ export const verifyEmail = async (
     user.emailVerified = true;
     user.emailVerificationToken = '';
     user.emailVerificationExpires = undefined;
+    
+    // Recalculate verification status
+    const isInstitutional = verificationService.isInstitutionalEmail(user.email);
+    user.isVerified = isInstitutional || user.idVerificationStatus === 'verified';
+    
     await user.save();
 
     res.status(200).json({
       success: true,
       message: 'Email verified successfully.',
-      data: { emailVerified: true },
+      data: { emailVerified: true, isVerified: user.isVerified },
     });
   } catch (error) {
     next(error);

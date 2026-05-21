@@ -54,88 +54,86 @@ export const ProfileScreen = ({ navigation }: any) => {
   const identityName = user?.storeName || user?.brandName || user?.name;
   const isSeller = user?.role === 'seller' || user?.role === 'admin';
 
-  // Define categorized menu lists for clean, structured rendering
+  // Categorized menus — Alerts and Chat are dedicated tabs so not repeated here
   const buyerGroups = [
     {
       title: 'Profile & Security',
       items: [
-        { label: 'Edit Profile', icon: 'person-outline', onPress: () => navigation.navigate('ProfileEdit') },
-        { label: 'Get Verified', icon: 'shield-checkmark-outline', onPress: () => navigation.navigate('Verification') },
-        { label: 'Settings', icon: 'settings-outline', onPress: () => navigation.navigate('Settings') },
+        { label: 'Edit Profile',      icon: 'person-outline',           onPress: () => navigation.navigate('ProfileEdit') },
+        { label: 'Get Verified',      icon: 'shield-checkmark-outline', onPress: () => navigation.navigate('Verification') },
+        { label: 'Settings',          icon: 'settings-outline',         onPress: () => navigation.navigate('Settings') },
       ],
     },
     {
       title: 'My Activity',
       items: [
-        { label: 'Shopping Cart', icon: 'cart-outline', onPress: () => navigation.navigate('Cart') },
-        { label: 'My Purchases', icon: 'receipt-outline', onPress: () => navigation.navigate('Orders') },
-        { label: 'Saved Items', icon: 'bookmark-outline', onPress: () => navigation.navigate('SavedItems') },
-        { label: 'Transaction History', icon: 'card-outline', onPress: () => navigation.navigate('TransactionHistory') },
-        { label: 'Alerts', icon: 'notifications-outline', onPress: () => navigation.navigate('Alerts') },
-        { label: 'Messages', icon: 'chatbubbles-outline', onPress: () => navigation.navigate('MessagesCenter') },
+        { label: 'Shopping Cart',       icon: 'cart-outline',     onPress: () => navigation.navigate('Cart') },
+        { label: 'My Purchases',        icon: 'receipt-outline',  onPress: () => navigation.navigate('Orders') },
+        { label: 'Saved Items',         icon: 'bookmark-outline', onPress: () => navigation.navigate('SavedItems') },
+        { label: 'Transaction History', icon: 'card-outline',     onPress: () => navigation.navigate('TransactionHistory') },
       ],
     },
     {
-      title: 'Campus & Support',
+      title: 'Campus & Community',
       items: [
-        { label: 'Campus Pulse', icon: 'pulse-outline', onPress: () => navigation.navigate('Pulse') },
+        { label: 'Campus Pulse',   icon: 'pulse-outline',  onPress: () => navigation.navigate('Pulse') },
         { label: 'Following Feed', icon: 'people-outline', onPress: () => navigation.navigate('FollowingFeed') },
-        { label: 'Lost & Found', icon: 'search-outline', onPress: () => navigation.navigate('LostFound') },
-        { label: 'Support Desk', icon: 'help-circle-outline', onPress: () => navigation.navigate('Support') },
-        { label: 'Contact Support', icon: 'mail-outline', onPress: () => navigation.navigate('Contact') },
+        { label: 'Lost & Found',   icon: 'search-outline', onPress: () => navigation.navigate('LostFound') },
       ],
     },
     {
-      title: 'About QUADS',
+      title: 'Help & Legal',
       items: [
-        { label: 'Frequently Asked Questions', icon: 'information-circle-outline', onPress: () => navigation.navigate('FAQ') },
-        { label: 'About QUADS', icon: 'school-outline', onPress: () => navigation.navigate('AboutUs') },
-        { label: 'Terms of Service', icon: 'document-text-outline', onPress: () => navigation.navigate('Terms') },
-        { label: 'Privacy Policy', icon: 'lock-closed-outline', onPress: () => navigation.navigate('PrivacyPolicy') },
+        { label: 'Support Desk',    icon: 'help-circle-outline',    onPress: () => navigation.navigate('Support') },
+        { label: 'Contact Support', icon: 'mail-outline',            onPress: () => navigation.navigate('Contact') },
+        { label: 'FAQ',             icon: 'information-circle-outline', onPress: () => navigation.navigate('FAQ') },
+        { label: 'About QUADS',     icon: 'school-outline',          onPress: () => navigation.navigate('AboutUs') },
+        { label: 'Terms of Service',icon: 'document-text-outline',   onPress: () => navigation.navigate('Terms') },
+        { label: 'Privacy Policy',  icon: 'lock-closed-outline',     onPress: () => navigation.navigate('PrivacyPolicy') },
       ],
     },
   ];
 
   const sellerGroups = [
     {
-      title: 'Store Operations',
+      title: 'Store & Identity',
       items: [
         ...(!sellerOnboardingDone ? [
           { label: 'Complete Onboarding', icon: 'alert-circle-outline', onPress: () => navigation.navigate('SellerOnboarding') }
         ] : []),
-        { label: 'Edit Profile', icon: 'person-outline', onPress: () => navigation.navigate('ProfileEdit') },
-        { label: 'Get Verified', icon: 'shield-checkmark-outline', onPress: () => navigation.navigate('Verification') },
-        { label: 'My Listings', icon: 'list-outline', onPress: () => navigation.navigate('MyListings') },
-        { label: 'Sales Orders', icon: 'receipt-outline', onPress: () => navigation.navigate('SellerOrders') },
-        { label: 'Growth Toolkit', icon: 'trending-up-outline', onPress: () => navigation.navigate('GrowthTools') },
+        { label: 'Edit Profile',      icon: 'person-outline',           onPress: () => navigation.navigate('ProfileEdit') },
+        { label: 'Get Verified',      icon: 'shield-checkmark-outline', onPress: () => navigation.navigate('Verification') },
+        { label: 'Earnings & Payouts',icon: 'wallet-outline',           onPress: () => navigation.navigate('SellerPayouts') },
+        { label: 'Settings',          icon: 'settings-outline',         onPress: () => navigation.navigate('Settings') },
       ],
     },
     {
-      title: 'Resolution & Feeds',
+      title: 'Buyer Activity',
+      items: [
+        { label: 'Shopping Cart',       icon: 'cart-outline',     onPress: () => navigation.navigate('Cart') },
+        { label: 'My Purchases',        icon: 'receipt-outline',  onPress: () => navigation.navigate('Orders') },
+        { label: 'Saved Items',         icon: 'bookmark-outline', onPress: () => navigation.navigate('SavedItems') },
+        { label: 'Transaction History', icon: 'card-outline',     onPress: () => navigation.navigate('TransactionHistory') },
+      ],
+    },
+    {
+      title: 'Disputes & Campus',
       items: [
         { label: 'Dispute Center', icon: 'shield-alert-outline', onPress: () => navigation.navigate('DisputeCenter') },
-        { label: 'Lost & Found', icon: 'search-outline', onPress: () => navigation.navigate('LostFound') },
-        { label: 'Campus Pulse', icon: 'pulse-outline', onPress: () => navigation.navigate('Pulse') },
-        { label: 'Following Feed', icon: 'people-outline', onPress: () => navigation.navigate('FollowingFeed') },
+        { label: 'Lost & Found',   icon: 'search-outline',       onPress: () => navigation.navigate('LostFound') },
+        { label: 'Campus Pulse',   icon: 'pulse-outline',        onPress: () => navigation.navigate('Pulse') },
+        { label: 'Following Feed', icon: 'people-outline',       onPress: () => navigation.navigate('FollowingFeed') },
       ],
     },
     {
-      title: 'Support & Settings',
+      title: 'Help & Legal',
       items: [
-        { label: 'Shopping Cart', icon: 'cart-outline', onPress: () => navigation.navigate('Cart') },
-        { label: 'Transaction History', icon: 'card-outline', onPress: () => navigation.navigate('TransactionHistory') },
-        { label: 'Settings', icon: 'settings-outline', onPress: () => navigation.navigate('Settings') },
-        { label: 'Support Desk', icon: 'help-circle-outline', onPress: () => navigation.navigate('Support') },
-        { label: 'Contact Support', icon: 'mail-outline', onPress: () => navigation.navigate('Contact') },
-      ],
-    },
-    {
-      title: 'About QUADS',
-      items: [
-        { label: 'Frequently Asked Questions', icon: 'information-circle-outline', onPress: () => navigation.navigate('FAQ') },
-        { label: 'About QUADS', icon: 'school-outline', onPress: () => navigation.navigate('AboutUs') },
-        { label: 'Terms of Service', icon: 'document-text-outline', onPress: () => navigation.navigate('Terms') },
-        { label: 'Privacy Policy', icon: 'lock-closed-outline', onPress: () => navigation.navigate('PrivacyPolicy') },
+        { label: 'Support Desk',    icon: 'help-circle-outline',       onPress: () => navigation.navigate('Support') },
+        { label: 'Contact Support', icon: 'mail-outline',               onPress: () => navigation.navigate('Contact') },
+        { label: 'FAQ',             icon: 'information-circle-outline', onPress: () => navigation.navigate('FAQ') },
+        { label: 'About QUADS',     icon: 'school-outline',             onPress: () => navigation.navigate('AboutUs') },
+        { label: 'Terms of Service',icon: 'document-text-outline',     onPress: () => navigation.navigate('Terms') },
+        { label: 'Privacy Policy',  icon: 'lock-closed-outline',       onPress: () => navigation.navigate('PrivacyPolicy') },
       ],
     },
   ];
@@ -304,6 +302,40 @@ export const ProfileScreen = ({ navigation }: any) => {
           </TouchableOpacity>
         )}
 
+        {/* Seller Quick-Action Grid */}
+        {isSellerMode && (
+          <View style={styles.quickGridWrap}>
+            {[
+              { label: 'My Listings',  icon: 'list-outline',      screen: 'MyListings' },
+              { label: 'Sales Orders', icon: 'receipt-outline',   screen: 'SellerOrders' },
+              { label: 'Analytics',   icon: 'analytics-outline', screen: 'SellerAnalytics' },
+              { label: 'Growth Tools',icon: 'rocket-outline',    screen: 'GrowthTools' },
+            ].map((a) => (
+              <TouchableOpacity
+                key={a.screen}
+                style={styles.quickCard}
+                onPress={() => navigation.navigate(a.screen)}
+                activeOpacity={0.7}
+              >
+                <Ionicons name={a.icon as any} size={22} color={colors.primary} />
+                <Text style={styles.quickCardLabel}>{a.label}</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        )}
+
+        {/* New Listing CTA for sellers */}
+        {isSellerMode && (
+          <TouchableOpacity
+            style={styles.createListingBtn}
+            onPress={() => navigation.navigate('CreateListing')}
+            activeOpacity={0.85}
+          >
+            <Ionicons name="add-outline" size={18} color={colors.primaryContent} style={{ marginRight: 6 }} />
+            <Text style={styles.createListingBtnText}>POST NEW LISTING</Text>
+          </TouchableOpacity>
+        )}
+
         {/* Categorized Menus */}
         {activeGroups.map((group, groupIdx) => (
           <View key={groupIdx} style={styles.menuContainer}>
@@ -321,11 +353,11 @@ export const ProfileScreen = ({ navigation }: any) => {
                 >
                   <View style={styles.menuLeft}>
                     <View style={styles.iconBox}>
-                      <Ionicons name={item.icon} size={18} color={colors.text} />
+                      <Ionicons name={item.icon} size={17} color={colors.text} />
                     </View>
                     <Text style={styles.menuLabel}>{item.label}</Text>
                   </View>
-                  <Ionicons name="chevron-forward-outline" size={16} color={colors.textSecondary} />
+                  <Ionicons name="chevron-forward-outline" size={14} color={colors.textSecondary} />
                 </TouchableOpacity>
               ))}
             </View>
@@ -563,49 +595,86 @@ const getStyles = (colors: any, isMobile = true) => StyleSheet.create({
     justifyContent: 'center',
     marginLeft: 10,
   },
-  menuContainer: {
+  quickGridWrap: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
     marginHorizontal: 16,
-    marginBottom: 16,
+    marginBottom: 10,
+    gap: 10,
   },
-  groupHeading: {
+  quickCard: {
+    width: '47.5%',
+    backgroundColor: colors.surface,
+    borderWidth: colors.boardBorderWidth,
+    borderColor: colors.boardBorder,
+    borderBottomWidth: 3,
+    borderRightWidth: 3,
+    padding: 14,
+    alignItems: 'center',
+    gap: 8,
+  },
+  quickCardLabel: {
     fontSize: 10,
     fontWeight: '900',
-    color: colors.textSecondary,
-    letterSpacing: 1.5,
+    color: colors.text,
     textTransform: 'uppercase',
-    marginBottom: 6,
+    letterSpacing: 0.5,
+    textAlign: 'center',
+  },
+  createListingBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.primary,
+    borderWidth: colors.boardBorderWidth,
+    borderColor: colors.boardBorder,
+    borderBottomWidth: 3,
+    borderRightWidth: 3,
+    paddingVertical: 13,
+    marginHorizontal: 16,
+    marginBottom: 20,
+  },
+  createListingBtnText: {
+    color: colors.primaryContent,
+    fontSize: 12,
+    fontWeight: '900',
+    letterSpacing: 1.2,
+  },
+  menuContainer: {
+    marginHorizontal: 16,
+    marginBottom: 14,
+  },
+  groupHeading: {
+    fontSize: 9,
+    fontWeight: '900',
+    color: colors.textSecondary,
+    letterSpacing: 1.8,
+    textTransform: 'uppercase',
+    marginBottom: 5,
     marginLeft: 2,
   },
   groupCard: {
     backgroundColor: colors.surface,
     borderWidth: colors.boardBorderWidth,
     borderColor: colors.boardBorder,
-    ...Platform.select({
-      ios: {
-        shadowColor: colors.boardShadow,
-        shadowOffset: { width: 3, height: 3 },
-        shadowOpacity: 1,
-        shadowRadius: 0,
-      },
-      android: {
-        elevation: 3,
-      },
-    }),
+    borderBottomWidth: 3,
+    borderRightWidth: 3,
   },
   menuRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingVertical: 13,
+    paddingVertical: 12,
     paddingHorizontal: 14,
   },
   menuRowBorder: { 
-    borderBottomWidth: 1.5, 
-    borderBottomColor: colors.border 
+    borderBottomWidth: 1, 
+    borderBottomColor: colors.border,
   },
   menuLeft: {
     flexDirection: 'row',
     alignItems: 'center',
+    flex: 1,
   },
   iconBox: {
     width: 26,
@@ -613,11 +682,12 @@ const getStyles = (colors: any, isMobile = true) => StyleSheet.create({
     justifyContent: 'center',
   },
   menuLabel: { 
-    fontSize: 12, 
+    fontSize: 11, 
     color: colors.text, 
     fontWeight: '700', 
     textTransform: 'uppercase', 
-    letterSpacing: 0.5 
+    letterSpacing: 0.4,
+    flex: 1,
   },
   logoutBtn: {
     backgroundColor: colors.surface,

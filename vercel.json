@@ -5,6 +5,21 @@
   "installCommand": "npm install",
   "rewrites": [
     {
+      "source": "/products/:id",
+      "has": [
+        {
+          "type": "header",
+          "key": "User-Agent",
+          "value": ".*(facebookexternalhit|WhatsApp|Twitterbot|LinkedInBot|telegrambot|Slackbot).*"
+        }
+      ],
+      "destination": "https://api.quadsmarket.tech/api/products/:id/share"
+    },
+    {
+      "source": "/api/:path*",
+      "destination": "https://api.quadsmarket.tech/api/:path*"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }

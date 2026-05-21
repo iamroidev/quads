@@ -1,0 +1,13 @@
+# Railway configuration
+# Tells Railway how to build and run the QUADS backend
+
+[build]
+builder = "dockerfile"
+dockerfilePath = "Dockerfile"
+
+[deploy]
+startCommand = "node dist/app.js"
+healthcheckPath = "/api/health"
+healthcheckTimeout = 30
+restartPolicyType = "on_failure"
+restartPolicyMaxRetries = 3
