@@ -174,6 +174,15 @@ app.get('/', (_req, res) => {
   });
 });
 
+// Self-healing health check paths to handle common Railway dashboard configuration typos
+app.get(['/health', '/api/health', '/api.quadsmarket.tech/health'], (_req, res) => {
+  res.status(200).json({
+    success: true,
+    message: 'QUADS API is running (compatibility health check)',
+    timestamp: new Date().toISOString(),
+  });
+});
+
 app.use('/api', routes);
 
 // ========================
