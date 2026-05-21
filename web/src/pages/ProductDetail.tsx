@@ -263,8 +263,9 @@ const ProductDetail: React.FC = () => {
   };
 
   const handleShare = async () => {
-    const apiBase = import.meta.env.VITE_API_URL || '/api';
-    const shareUrl = `${apiBase}/products/${product?._id}/share`;
+    // Construct an absolute URL using the current origin to ensure shared links work properly in other apps/browsers
+    const absoluteApiBase = window.location.origin + '/api';
+    const shareUrl = `${absoluteApiBase}/products/${product?._id}/share`;
     
     // Analytics: Track share
     growthService.captureEvent(user?._id, 'product_shared', {
