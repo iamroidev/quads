@@ -47,8 +47,11 @@ const authService = {
     return response.data;
   },
 
-  loginWithPassword: async (email: string, password: string): Promise<any> => {
-    const response = await api.post('/auth/login', { email, password });
+  loginWithPassword: async (email: string, password: string, totpCode?: string): Promise<any> => {
+    const response = await api.post('/auth/login', { email, password, totpCode });
+    if (response.data?.totpRequired) {
+      return { data: response.data };
+    }
     return { data: response.data.data };
   },
 
@@ -62,8 +65,11 @@ const authService = {
     return response.data;
   },
 
-  verifyOtpLogin: async (email: string, code: string): Promise<any> => {
-    const response = await api.post('/auth/otp/verify/login', { email, code });
+  verifyOtpLogin: async (email: string, code: string, totpCode?: string): Promise<any> => {
+    const response = await api.post('/auth/otp/verify/login', { email, code, totpCode });
+    if (response.data?.totpRequired) {
+      return { data: response.data };
+    }
     return { data: response.data.data };
   },
 

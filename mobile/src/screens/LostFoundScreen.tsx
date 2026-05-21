@@ -5,22 +5,13 @@ import {
   Dimensions,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useAuth } from '../context/AuthContext';
 import chatService from '../services/chat.service';
+import lostFoundService, { LostFoundItem } from '../services/lostFound.service';
 import { shadows } from '../theme';
 import { useColors } from '../theme/ThemeContext';
 import ScreenHeader from '../components/ScreenHeader';
 import EmptyState from '../components/EmptyState';
-
-const STORAGE_KEY = 'quads_lost_found';
-
-interface LostFoundItem {
-  id: string; type: 'lost' | 'found'; title: string; category: string;
-  date: string; location: string; description: string;
-  contactName: string; contactInfo: string; imageUrl?: string;
-  createdAt: string; userId?: string;
-}
 
 const CATEGORY_OPTIONS = [
   { label: 'Keys', value: 'keys' },
@@ -112,52 +103,83 @@ const LostFoundScreen = ({ navigation }: any) => {
   }), [colors]);
 
   const loadItems = useCallback(async () => {
-    const raw = await AsyncStorage.getItem(STORAGE_KEY);
-    if (raw) {
-      const parsed: LostFoundItem[] = JSON.parse(raw);
-      setItems(parsed.filter(i => i.id && i.id.length > 8));
+    try {
+      const res = await lostFoundService.getItems();
+      if (res.success) {
+        setItems(res.data);
+      } else {
+        Alert.alert('Error', res.message || 'Failed to load lost & found items.');
+      }
+    } catch (err) {
+      console.error(err);
+      Alert.alert('Error', 'Failed to load lost & found items.');
     }
   }, []);
 
   useEffect(() => { loadItems(); }, [loadItems]);
 
-  const saveItems = async (next: LostFoundItem[]) => {
-    setItems(next);
-    await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(next));
-  };
-
   const handleSubmit = async () => {
     if (!form.title.trim() || !form.location.trim() || !form.description.trim() || !form.contactInfo.trim()) {
       Alert.alert('Missing fields', 'Title, location, description, and contact info are required.'); return;
     }
-    const newItem: LostFoundItem = {
-      id: `lf-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
-      ...form, createdAt: new Date().toISOString(), userId: user?._id,
-    };
-    await saveItems([newItem, ...items]);
-    setShowAdd(false);
-    setForm({ type: 'lost', title: '', category: 'other', date: new Date().toISOString().split('T')[0], location: '', description: '', contactName: user?.name || '', contactInfo: '' });
-    Alert.alert('Pinned!', 'Your item has been posted to the Lost & Found board.');
+    try {
+      const payload = {
+        type: form.type,
+        title: form.title,
+        category: form.category,
+        date: form.date,
+        location: form.location,
+        description: form.description,
+        contactName: form.contactName,
+        contactInfo: form.contactInfo,
+      };
+      const res = await lostFoundService.createItem(payload);
+      if (res.success) {
+        setShowAdd(false);
+        setForm({ type: 'lost', title: '', category: 'other', date: new Date().toISOString().split('T')[0], location: '', description: '', contactName: user?.name || '', contactInfo: '' });
+        loadItems();
+        Alert.alert('Pinned!', 'Your item has been posted to the Lost & Found board.');
+      } else {
+        Alert.alert('Error', res.message || 'Failed to pin item.');
+      }
+    } catch (err) {
+      console.error(err);
+      Alert.alert('Error', 'Failed to pin item.');
+    }
   };
 
   const handleDelete = (id: string) => {
     Alert.alert('Remove Pin', 'Remove this item from the board?', [
       { text: 'Cancel', style: 'cancel' },
-      { text: 'Remove', style: 'destructive', onPress: () => saveItems(items.filter(i => i.id !== id)) },
+      { text: 'Remove', style: 'destructive', onPress: async () => {
+        try {
+          const res = await lostFoundService.deleteItem(id);
+          if (res.success) {
+            loadItems();
+            setDetail(null);
+            Alert.alert('Success', 'Item removed from the board.');
+          } else {
+            Alert.alert('Error', res.message || 'Failed to remove item.');
+          }
+        } catch (err) {
+          console.error(err);
+          Alert.alert('Error', 'Failed to remove item.');
+        }
+      } },
     ]);
   };
 
   const handleChat = async (item: LostFoundItem) => {
     if (!user) { Alert.alert('Login required', 'Please log in to message the poster.'); return; }
-    if (item.userId === user._id) { Alert.alert('Your own pin', "This is your item — you can't chat with yourself."); return; }
+    const posterId = typeof item.userId === 'object' && item.userId ? item.userId._id : item.userId;
+    if (posterId === user._id) { Alert.alert('Your own pin', "This is your item — you can't chat with yourself."); return; }
     try {
-      const targetUserId = item.userId;
-      if (!targetUserId) { Alert.alert('Unavailable', 'Cannot message — poster information is unavailable.'); return; }
-      const res = await chatService.getOrCreateConversation(targetUserId);
+      if (!posterId) { Alert.alert('Unavailable', 'Cannot message — poster information is unavailable.'); return; }
+      const res = await chatService.getOrCreateConversation(posterId);
       if (res.success) {
         try { await chatService.sendMessage(res.data.conversation._id, `Hi! I'm inquiring about the item on the Lost & Found Board: "${item.title}" (${item.type === 'lost' ? 'Lost' : 'Found'} at ${item.location}).`); } catch {}
         setDetail(null);
-        navigation.navigate('Chat', { conversationId: res.data.conversation._id, otherUser: { _id: targetUserId, name: item.contactName }, productTitle: item.title });
+        navigation.navigate('Chat', { conversationId: res.data.conversation._id, otherUser: { _id: posterId, name: item.contactName }, productTitle: item.title });
       }
     } catch { Alert.alert('Error', 'Could not start a conversation.'); }
   };
@@ -194,7 +216,7 @@ const LostFoundScreen = ({ navigation }: any) => {
       </View>
 
       <FlatList
-        data={filtered} keyExtractor={item => item.id} renderItem={renderItem}
+        data={filtered} keyExtractor={item => item._id || item.id || ''} renderItem={renderItem}
         numColumns={2} columnWrapperStyle={styles.grid} contentContainerStyle={styles.listContent}
         ListEmptyComponent={<EmptyState title="Board is empty" subtitle="Tap PIN ITEM above to post a lost or found item." />}
       />
@@ -221,8 +243,8 @@ const LostFoundScreen = ({ navigation }: any) => {
                   <TouchableOpacity style={styles.chatBtn} onPress={() => handleChat(detail)}>
                     <Text style={styles.chatBtnText}>MESSAGE POSTER</Text>
                   </TouchableOpacity>
-                  {detail.userId === user?._id && (
-                    <TouchableOpacity style={styles.deleteBtn} onPress={() => { handleDelete(detail.id); setDetail(null); }}>
+                  {(typeof detail.userId === 'object' && detail.userId ? detail.userId._id : detail.userId) === user?._id && (
+                    <TouchableOpacity style={styles.deleteBtn} onPress={() => { handleDelete(detail._id || detail.id || ''); }}>
                       <Text style={styles.deleteBtnText}>REMOVE</Text>
                     </TouchableOpacity>
                   )}

@@ -35,13 +35,56 @@ export const login = async (
   next: NextFunction
 ): Promise<void> => {
   try {
-    const { email, password } = req.body;
+    const { email, password, totpCode } = req.body;
     if (!email || !password) {
       res.status(400).json({ success: false, message: 'Email and password are required.' });
       return;
     }
 
-    const { user, token } = await authService.loginWithPassword(email, password);
+    const user = await User.findOne({ email: email.toLowerCase() }).select('+password');
+    if (!user) {
+      res.status(401).json({ success: false, message: 'No account found with that email address.' });
+      return;
+    }
+    if (user.isBanned) {
+      res.status(403).json({ success: false, message: 'Your account has been suspended.' });
+      return;
+    }
+
+    const isMatch = await user.comparePassword(password);
+    if (!isMatch) {
+      if (user.googleId) {
+        res.status(401).json({ success: false, message: 'This account was created with Google. Use Google sign-in instead.' });
+        return;
+      }
+      res.status(401).json({ success: false, message: 'Incorrect password.' });
+      return;
+    }
+
+    if (user.totpEnabled) {
+      if (!totpCode) {
+        res.status(200).json({ success: true, totpRequired: true, email: user.email });
+        return;
+      }
+
+      const OTPAuth = require('otpauth');
+      const totp = new OTPAuth.TOTP({
+        issuer: 'QUADS',
+        label: user.email,
+        algorithm: 'SHA1',
+        digits: 6,
+        period: 30,
+        secret: user.totpSecret,
+      });
+
+      const delta = totp.validate({ token: totpCode, window: 1 });
+      if (delta === null) {
+        res.status(401).json({ success: false, message: 'Invalid 2FA code.' });
+        return;
+      }
+    }
+
+    const { token } = await authService.loginWithPassword(email, password);
 
     res.cookie('token', token, {
       httpOnly: true,
@@ -705,8 +748,33 @@ export const sendOtp = async (req: Request, res: Response, next: NextFunction): 
 
 export const verifyOtpLogin = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
-    const { email, code } = req.body;
+    const { email, code, totpCode } = req.body;
     if (!email || !code) { res.status(400).json({ success: false, message: 'email and code required.' }); return; }
+
+    const user = await User.findOne({ email: email.toLowerCase() });
+    if (user && user.totpEnabled) {
+      if (!totpCode) {
+        res.status(200).json({ success: true, totpRequired: true, email: user.email });
+        return;
+      }
+
+      const OTPAuth = require('otpauth');
+      const totp = new OTPAuth.TOTP({
+        issuer: 'QUADS',
+        label: user.email,
+        algorithm: 'SHA1',
+        digits: 6,
+        period: 30,
+        secret: user.totpSecret,
+      });
+
+      const delta = totp.validate({ token: totpCode, window: 1 });
+      if (delta === null) {
+        res.status(401).json({ success: false, message: 'Invalid 2FA code.' });
+        return;
+      }
+    }
+
     const result = await otpService.verifyOtp(email, code, 'login');
     res.status(200).json({ success: true, data: { token: result.token, user: result.user } });
   } catch (error) { next(error); }
@@ -718,6 +786,10 @@ export const verifyOtpRegister = async (req: Request, res: Response, next: NextF
     if (!email || !code) { res.status(400).json({ success: false, message: 'email and code required.' }); return; }
 
     if (profile) {
+      if (!profile.tosAccepted) {
+        res.status(400).json({ success: false, message: 'You must accept the Terms of Service to register.' });
+        return;
+      }
       // Full register — verify + create account in one call
       await otpService.verifyOtp(email, code, 'register');
       const result = await otpService.completeRegistration(email, profile);
@@ -829,4 +901,137 @@ export const changePasswordDirect = async (
     await authService.changePassword(req.user!._id.toString(), currentPassword, newPassword);
     res.status(200).json({ success: true, message: 'Password changed successfully.' });
   } catch (error) { next(error); }
+};
+
+/**
+ * @route   POST /api/auth/totp/setup
+ * @desc    Generate TOTP secret and QR URI
+ * @access  Private
+ */
+export const setupTotp = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const user = await User.findById(req.user!._id);
+    if (!user) {
+      res.status(404).json({ success: false, message: 'User not found.' });
+      return;
+    }
+
+    const OTPAuth = require('otpauth');
+
+    // Generate a new TOTP secret if not already set or not enabled
+    let secretBase32 = user.totpSecret;
+    if (!secretBase32 || !user.totpEnabled) {
+      const secret = new OTPAuth.Secret({ size: 20 });
+      secretBase32 = secret.base32;
+      user.totpSecret = secretBase32;
+      await user.save();
+    }
+
+    const totp = new OTPAuth.TOTP({
+      issuer: 'QUADS',
+      label: user.email,
+      algorithm: 'SHA1',
+      digits: 6,
+      period: 30,
+      secret: secretBase32,
+    });
+
+    const qrCodeUrl = totp.toString();
+
+    res.status(200).json({
+      success: true,
+      data: {
+        secret: secretBase32,
+        qrCodeUrl,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * @route   POST /api/auth/totp/verify
+ * @desc    Verify TOTP code to enable 2FA
+ * @access  Private
+ */
+export const verifyTotpSetup = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const { token } = req.body;
+    if (!token) {
+      res.status(400).json({ success: false, message: '2FA code is required.' });
+      return;
+    }
+
+    const user = await User.findById(req.user!._id);
+    if (!user || !user.totpSecret) {
+      res.status(400).json({ success: false, message: '2FA setup has not been initiated.' });
+      return;
+    }
+
+    const OTPAuth = require('otpauth');
+    const totp = new OTPAuth.TOTP({
+      issuer: 'QUADS',
+      label: user.email,
+      algorithm: 'SHA1',
+      digits: 6,
+      period: 30,
+      secret: user.totpSecret,
+    });
+
+    const delta = totp.validate({ token, window: 1 });
+    if (delta === null) {
+      res.status(400).json({ success: false, message: 'Invalid 2FA code. Verification failed.' });
+      return;
+    }
+
+    user.totpEnabled = true;
+    await user.save();
+
+    res.status(200).json({
+      success: true,
+      message: 'Two-factor authentication enabled successfully.',
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * @route   POST /api/auth/totp/disable
+ * @desc    Disable TOTP 2FA
+ * @access  Private
+ */
+export const disableTotp = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const { password } = req.body;
+    const user = await User.findById(req.user!._id).select('+password');
+    if (!user) {
+      res.status(404).json({ success: false, message: 'User not found.' });
+      return;
+    }
+
+    if (!user.googleId && !user.supabaseId) {
+      if (!password) {
+        res.status(400).json({ success: false, message: 'Password is required to disable 2FA.' });
+        return;
+      }
+      const isMatch = await user.comparePassword(password);
+      if (!isMatch) {
+        res.status(401).json({ success: false, message: 'Incorrect password.' });
+        return;
+      }
+    }
+
+    user.totpEnabled = false;
+    user.totpSecret = undefined;
+    await user.save();
+
+    res.status(200).json({
+      success: true,
+      message: 'Two-factor authentication disabled successfully.',
+    });
+  } catch (error) {
+    next(error);
+  }
 };

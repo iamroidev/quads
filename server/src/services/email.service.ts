@@ -423,6 +423,30 @@ class EmailService {
     `;
     return this.sendEmail({ to, subject, html: this.wrapEmail(body) });
   }
+
+  async sendWebhookFailureAlertEmail(to: string, errorMsg: string, payload: any): Promise<boolean> {
+    const subject = `⚠️ CRITICAL: Webhook Failure Alert — QUADS`;
+    const body = `
+      <div style="font-size:10px;font-weight:900;color:#ff6b6b;text-transform:uppercase;letter-spacing:2px;margin-bottom:8px;">System Alert</div>
+      <h2 style="margin:0 0 12px;font-size:22px;font-weight:900;text-transform:uppercase;letter-spacing:-0.5px;color:#d32f2f;">Paystack Webhook Processing Failed</h2>
+      <p style="font-size:14px;line-height:1.7;color:#444;">A webhook event received from Paystack could not be processed successfully. The system has automatically logged an audit trail, but manual verification may be required.</p>
+
+      <div style="background:#ffebee;border:2px solid #d32f2f;padding:16px 20px;margin:24px 0;font-family:monospace;font-size:13px;line-height:1.6;color:#c62828;">
+        <strong>Error Message:</strong><br>
+        ${errorMsg}
+      </div>
+
+      <div style="background:#faf8f5;border:2px solid #000;padding:16px 20px;margin:24px 0;font-family:monospace;font-size:12px;line-height:1.6;overflow-x:auto;">
+        <strong>Webhook Payload Snapshot:</strong><br>
+        <pre style="margin:8px 0 0 0;font-family:monospace;font-size:11px;">${JSON.stringify(payload, null, 2)}</pre>
+      </div>
+
+      <div style="text-align: center;">
+        <a href="${process.env.CLIENT_URL || 'https://quadsmarket.tech'}/admin/ops" class="btn" style="background:#000;color:#fff;">Open Ops Dashboard</a>
+      </div>
+    `;
+    return this.sendEmail({ to, subject, html: this.wrapEmail(body) });
+  }
 }
 
 export const emailService = new EmailService();

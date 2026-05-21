@@ -110,15 +110,23 @@ const CheckoutScreen = ({ route, navigation }: any) => {
     if (!couponCode.trim()) return;
     setValidatingCoupon(true);
     try {
-      const res = await api.get(`/coupons/validate/${couponCode.trim().toUpperCase()}`);
+      const firstSeller = firstItem.seller?._id || firstItem.seller || '';
+      const res = await api.get('/orders/validate-coupon', {
+        params: {
+          code: couponCode.trim().toUpperCase(),
+          sellerId: firstSeller,
+          subtotal: subtotal,
+        },
+      });
       if (res.data.success) {
         setAppliedCoupon({ code: couponCode.trim().toUpperCase(), discount: res.data.data.discount });
         Alert.alert('Coupon Applied', `You saved GHS ${res.data.data.discount.toFixed(2)}!`);
       } else {
         Alert.alert('Invalid Code', res.data.message || 'This coupon is invalid or expired.');
       }
-    } catch {
-      Alert.alert('Error', 'Could not validate coupon. Please try again.');
+    } catch (err: any) {
+      const errMsg = err.response?.data?.message || 'Could not validate coupon. Please try again.';
+      Alert.alert('Error', errMsg);
     } finally {
       setValidatingCoupon(false);
     }

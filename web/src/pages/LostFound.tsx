@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { Link, useNavigate } from 'react-router-dom';
 import chatService from '../services/chat.service';
+import lostFoundService, { LostFoundItem } from '../services/lostFound.service';
 import { 
   Pin, 
   Plus, 
@@ -21,20 +22,7 @@ import { BulletinLayout, BulletinSection } from '../components/layout/BulletinLa
 import { soundEffects } from '../utils/sounds';
 import { useAuth } from '../context/AuthContext';
 
-interface PolaroidItem {
-  id: string;
-  type: 'lost' | 'found';
-  title: string;
-  category: 'keys' | 'id_card' | 'laptop' | 'phone' | 'bag' | 'books' | 'other';
-  date: string;
-  location: string;
-  description: string;
-  contactName: string;
-  contactInfo: string;
-  imageUrl?: string;
-  createdAt: string;
-  userId?: string;
-}
+type PolaroidItem = LostFoundItem;
 
 const CATEGORY_LABELS: Record<string, string> = {
   keys: '🔑 Keys',
@@ -46,22 +34,13 @@ const CATEGORY_LABELS: Record<string, string> = {
   other: '📦 General Item',
 };
 
-const initialItems: PolaroidItem[] = [];
-
 export const LostFound: React.FC = () => {
   const { user, isAuthenticated } = useAuth();
   const navigate = useNavigate();
   
   // State
-  const [items, setItems] = useState<PolaroidItem[]>(() => {
-    const cached = localStorage.getItem('quads_lost_found');
-    if (cached) {
-      const parsed = JSON.parse(cached) as PolaroidItem[];
-      // Filter out any legacy dummy/mock items that have simple short IDs (e.g. 'lf-1', 'lf-2')
-      return parsed.filter(item => item.id && item.id.length > 8);
-    }
-    return initialItems;
-  });
+  const [items, setItems] = useState<PolaroidItem[]>([]);
+  const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<'all' | 'lost' | 'found'>('all');
   const [activeItem, setActiveItem] = useState<PolaroidItem | null>(null);
   const [chatting, setChatting] = useState(false);
@@ -81,10 +60,29 @@ export const LostFound: React.FC = () => {
     imageUrl: '',
   });
 
-  // Sync to cache
+  const fetchItems = async () => {
+    try {
+      const res = await lostFoundService.getItems();
+      if (res.success) {
+        // Map _id to id if needed for compatibility
+        const mapped = res.data.map(item => ({
+          ...item,
+          id: item._id || item.id,
+        }));
+        setItems(mapped);
+      }
+    } catch (err) {
+      console.error('Failed to load lost/found items:', err);
+      toast.error('Could not load bulletin board items');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Sync to database
   useEffect(() => {
-    localStorage.setItem('quads_lost_found', JSON.stringify(items));
-  }, [items]);
+    fetchItems();
+  }, []);
 
   const handleFilterChange = (newFilter: typeof filter) => {
     soundEffects.playPinClick();
@@ -112,14 +110,15 @@ export const LostFound: React.FC = () => {
       return;
     }
 
-    if (item.userId === user._id) {
+    const itemUserId = typeof item.userId === 'object' ? item.userId?._id : item.userId;
+    if (itemUserId === user._id) {
       toast.error("This is your own pin! You can't chat with yourself.");
       return;
     }
 
     setChatting(true);
     try {
-      let targetUserId = item.userId;
+      let targetUserId = itemUserId;
 
       // Fallback to Support AI Bot if no userId is attached (mock items)
       if (!targetUserId) {
@@ -154,7 +153,7 @@ export const LostFound: React.FC = () => {
     }
   };
 
-  const handlePinSubmit = (e: React.FormEvent) => {
+  const handlePinSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!formData.title.trim() || !formData.location.trim() || !formData.description.trim() || !formData.contactInfo.trim()) {
@@ -162,40 +161,44 @@ export const LostFound: React.FC = () => {
       return;
     }
 
-    const newItem: PolaroidItem = {
-      id: `lf-${Date.now()}`,
-      type: formData.type,
-      title: formData.title,
-      category: formData.category,
-      date: formData.date,
-      location: formData.location,
-      description: formData.description,
-      contactName: formData.contactName || 'Anonymous Scholar',
-      contactInfo: formData.contactInfo,
-      imageUrl: formData.imageUrl.trim() || undefined,
-      createdAt: new Date().toISOString(),
-      userId: user?._id,
-    };
+    try {
+      // Synthesize eject/motor paper whirr!
+      soundEffects.playEject();
 
-    // Synthesize eject/motor paper whirr!
-    soundEffects.playEject();
-    
-    setItems([newItem, ...items]);
-    setShowAddModal(false);
-    toast.success(`${newItem.type === 'lost' ? 'Lost' : 'Found'} item pinned successfully!`);
+      const res = await lostFoundService.createItem({
+        type: formData.type,
+        title: formData.title,
+        category: formData.category,
+        date: formData.date,
+        location: formData.location,
+        description: formData.description,
+        contactName: formData.contactName || 'Anonymous Scholar',
+        contactInfo: formData.contactInfo,
+        imageUrl: formData.imageUrl.trim() || undefined,
+      });
 
-    // Reset Form
-    setFormData({
-      type: 'lost',
-      title: '',
-      category: 'other',
-      date: new Date().toISOString().split('T')[0],
-      location: '',
-      description: '',
-      contactName: user?.name || '',
-      contactInfo: '',
-      imageUrl: '',
-    });
+      if (res.success) {
+        setShowAddModal(false);
+        toast.success(`${formData.type === 'lost' ? 'Lost' : 'Found'} item pinned successfully!`);
+        fetchItems();
+
+        // Reset Form
+        setFormData({
+          type: 'lost',
+          title: '',
+          category: 'other',
+          date: new Date().toISOString().split('T')[0],
+          location: '',
+          description: '',
+          contactName: user?.name || '',
+          contactInfo: '',
+          imageUrl: '',
+        });
+      }
+    } catch (err: any) {
+      console.error('Failed to pin item:', err);
+      toast.error(err.response?.data?.message || 'Could not pin item to the board');
+    }
   };
 
   const handleDeleteItem = (id: string, e: React.MouseEvent) => {
@@ -203,10 +206,11 @@ export const LostFound: React.FC = () => {
     soundEffects.playPinClick();
     
     // Find item to verify permissions (extra safety)
-    const item = items.find(i => i.id === id);
+    const item = items.find(i => i.id === id || i._id === id);
     if (!item) return;
     
-    const isOwner = item.userId === user?._id;
+    const itemUserId = typeof item.userId === 'object' ? item.userId?._id : item.userId;
+    const isOwner = itemUserId === user?._id;
     const isAdmin = user?.roles?.includes('admin');
     if (!isOwner && !isAdmin) {
       toast.error('You do not have permission to unpin this item');
@@ -438,7 +442,7 @@ export const LostFound: React.FC = () => {
                       {/* User's Delete button (if authenticated and is owner or admin) */}
                       {isAuthenticated && (item.userId === user?._id || user?.roles?.includes('admin')) && (
                         <button
-                          onClick={(e) => handleDeleteItem(item.id, e)}
+                          onClick={(e) => handleDeleteItem(item.id || item._id || '', e)}
                           className="mt-3 opacity-0 group-hover:opacity-100 transition-opacity bg-red-100 dark:bg-red-950/40 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-900/50 hover:bg-red-600 hover:text-white px-2 py-1 text-[8px] font-black uppercase font-mono tracking-widest rounded"
                           title="Remove Pin"
                         >
@@ -750,11 +754,18 @@ export const LostFound: React.FC = () => {
               </button>
               <button
                 className="flex-1 border-2 border-black dark:border-white bg-[#ff6b6b] text-white py-3 text-[10px] font-black uppercase tracking-widest shadow-[4px_4px_0_0_var(--bulletin-shadow)] hover:translate-y-0.5 hover:shadow-none transition-all"
-                onClick={() => {
+                onClick={async () => {
                   soundEffects.playPinClick();
-                  setItems(items.filter(item => item.id !== itemToConfirmDelete));
-                  toast.success('Pin removed');
-                  setItemToConfirmDelete(null);
+                  try {
+                    await lostFoundService.deleteItem(itemToConfirmDelete);
+                    setItems(items.filter(item => (item.id || item._id) !== itemToConfirmDelete));
+                    toast.success('Pin removed');
+                  } catch (err) {
+                    console.error('Failed to unpin item:', err);
+                    toast.error('Could not remove pin from the board');
+                  } finally {
+                    setItemToConfirmDelete(null);
+                  }
                 }}
               >
                 Yes, Unpin

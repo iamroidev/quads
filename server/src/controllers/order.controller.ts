@@ -386,3 +386,71 @@ export const verifyHandoff = async (
     next(error);
   }
 };
+
+export const deleteCoupon = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    if (!req.user?.activeStore) {
+      res.status(400).json({ success: false, message: 'Active store not found.' });
+      return;
+    }
+    const coupon = await orderService.deleteCoupon(req.user.activeStore._id.toString(), req.params.id);
+    res.status(200).json({ success: true, message: 'Coupon deleted', data: { coupon } });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const toggleCouponStatus = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    if (!req.user?.activeStore) {
+      res.status(400).json({ success: false, message: 'Active store not found.' });
+      return;
+    }
+    const coupon = await orderService.toggleCouponStatus(req.user.activeStore._id.toString(), req.params.id);
+    res.status(200).json({ success: true, message: 'Coupon status toggled', data: { coupon } });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const deleteBundle = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    if (!req.user?.activeStore) {
+      res.status(400).json({ success: false, message: 'Active store not found.' });
+      return;
+    }
+    const bundle = await orderService.deleteBundle(req.user.activeStore._id.toString(), req.params.id);
+    res.status(200).json({ success: true, message: 'Bundle deleted', data: { bundle } });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const toggleBundleStatus = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    if (!req.user?.activeStore) {
+      res.status(400).json({ success: false, message: 'Active store not found.' });
+      return;
+    }
+    const bundle = await orderService.toggleBundleStatus(req.user.activeStore._id.toString(), req.params.id);
+    res.status(200).json({ success: true, message: 'Bundle status toggled', data: { bundle } });
+  } catch (error) {
+    next(error);
+  }
+};

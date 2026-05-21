@@ -15,3 +15,4 @@ export { default as TrustSignal } from './TrustSignal';
 export { default as AnalyticsEvent } from './AnalyticsEvent';
 export { default as OpsAuditLog } from './OpsAuditLog';
 export { default as RetryJob } from './RetryJob';
+export { default as LostFound } from './LostFound';

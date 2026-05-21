@@ -33,6 +33,7 @@ import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 import { ProductPopulated, ReviewPopulated, SellerRating } from '../types';
 import { BulletinLayout, BulletinSection, BulletinCard } from '../components/layout/BulletinLayout';
+import api from '../services/api';
 
 const conditionLabels: Record<string, string> = {
   'new': 'Brand New',
@@ -71,6 +72,12 @@ const ProductDetail: React.FC = () => {
   const [showReportModal, setShowReportModal] = useState(false);
   const [reportReason, setReportReason] = useState('');
   const [reporting, setReporting] = useState(false);
+  
+  // User Reporting States
+  const [showReportUserModal, setShowReportUserModal] = useState(false);
+  const [reportUserReason, setReportUserReason] = useState('inappropriate_behavior');
+  const [reportUserDescription, setReportUserDescription] = useState('');
+  const [reportingUser, setReportingUser] = useState(false);
   const [contacting, setContacting] = useState(false);
   const [reviews, setReviews] = useState<ReviewPopulated[]>([]);
   const [sellerRating, setSellerRating] = useState<SellerRating | null>(null);
@@ -227,6 +234,31 @@ const ProductDetail: React.FC = () => {
       toast.error('Failed to report product');
     } finally {
       setReporting(false);
+    }
+  };
+
+  const handleReportUser = async () => {
+    if (!product) return;
+    const seller = product.seller;
+    if (!reportUserDescription.trim()) {
+      toast.error('Please describe the reason for your report.');
+      return;
+    }
+    setReportingUser(true);
+    try {
+      await api.post('/reports', {
+        reportedUser: seller._id,
+        reason: reportUserReason,
+        description: reportUserDescription,
+        productId: product._id,
+      });
+      toast.success('Seller reported. Our team will investigate.');
+      setShowReportUserModal(false);
+      setReportUserDescription('');
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || 'Failed to report seller.');
+    } finally {
+      setReportingUser(false);
     }
   };
 
@@ -735,12 +767,22 @@ const ProductDetail: React.FC = () => {
                 </div>
               )}
             </div>
-            <Link
-              to={`/products?seller=${seller._id}`}
-              className="border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] px-8 py-3 text-[10px] font-black uppercase tracking-widest shadow-[4px_4px_0_0_var(--bulletin-shadow)] transition-all hover:translate-y-1 hover:shadow-none text-[var(--bulletin-text)]"
-            >
-              See All Items
-            </Link>
+            <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
+              <Link
+                to={`/products?seller=${seller._id}`}
+                className="border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] px-8 py-3 text-[10px] font-black uppercase tracking-widest shadow-[4px_4px_0_0_var(--bulletin-shadow)] transition-all hover:translate-y-1 hover:shadow-none text-[var(--bulletin-text)] text-center"
+              >
+                See All Items
+              </Link>
+              {!isOwner && user && (
+                <button
+                  onClick={() => setShowReportUserModal(true)}
+                  className="border-2 border-red-600 bg-[var(--bulletin-card)] px-8 py-3 text-[10px] font-black uppercase tracking-widest shadow-[4px_4px_0_0_var(--bulletin-shadow)] transition-all hover:bg-red-50 dark:hover:bg-red-900/10 hover:translate-y-1 hover:shadow-none text-red-600 text-center"
+                >
+                  Report Seller
+                </button>
+              )}
+            </div>
           </div>
 
           <div className="mt-10 grid gap-6 border-t-2 border-[var(--bulletin-border)] pt-8 md:grid-cols-2">
@@ -904,6 +946,83 @@ const ProductDetail: React.FC = () => {
                 disabled={reporting}
               >
                 {reporting ? 'Processing...' : 'Submit Report'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Report Seller Modal */}
+      {showReportUserModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
+          <div
+            className="w-full max-w-lg border-4 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] p-6 md:p-8 shadow-[12px_12px_0_0_var(--bulletin-shadow)]"
+            style={{ transform: 'rotate(-0.5deg)' }}
+          >
+            <div className="flex items-start justify-between gap-4 mb-6">
+              <div>
+                <div className="text-[10px] font-black uppercase tracking-widest opacity-40 text-[var(--bulletin-text)]">Trust & Safety</div>
+                <div className="text-2xl font-black uppercase tracking-tight mt-1 text-[var(--bulletin-text)]">Report Seller</div>
+              </div>
+              <button
+                onClick={() => {
+                  setShowReportUserModal(false);
+                  setReportUserDescription('');
+                }}
+                className="border-2 border-black dark:border-[var(--bulletin-border)] bg-[var(--bulletin-card)] p-2 shadow-[2px_2px_0_0_var(--bulletin-shadow)] hover:shadow-none transition-all text-[var(--bulletin-text)]"
+              >
+                <X className="h-6 w-6" />
+              </button>
+            </div>
+            
+            <div className="text-sm font-bold text-[var(--bulletin-text)] opacity-60 mb-6 italic leading-relaxed">
+              Help us maintain a safe campus marketplace. Your report will be reviewed by administrators.
+            </div>
+
+            <div className="mb-6">
+              <label className="block text-[11px] font-black uppercase tracking-wider text-[var(--bulletin-text)] opacity-70 mb-2">
+                Reason for report
+              </label>
+              <select
+                value={reportUserReason}
+                onChange={(e) => setReportUserReason(e.target.value)}
+                className="w-full border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-bg)] p-3 text-xs font-black uppercase tracking-wider text-[var(--bulletin-text)] focus:outline-none focus:ring-2 focus:ring-[#ff6b6b]"
+              >
+                <option value="inappropriate_behavior">Inappropriate Behavior</option>
+                <option value="scam">Scam / Fraud</option>
+                <option value="spam">Spam / Advertising</option>
+                <option value="harassment">Harassment / Abuse</option>
+              </select>
+            </div>
+
+            <div className="mb-8">
+              <label className="block text-[11px] font-black uppercase tracking-wider text-[var(--bulletin-text)] opacity-70 mb-2">
+                Provide details
+              </label>
+              <textarea
+                value={reportUserDescription}
+                onChange={(e) => setReportUserDescription(e.target.value)}
+                placeholder="Please describe exactly what happened..."
+                className="w-full border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-bg)] p-4 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-[#ff6b6b] resize-none h-32 text-[var(--bulletin-text)]"
+              />
+            </div>
+
+            <div className="flex flex-col sm:flex-row gap-4">
+              <button
+                className="flex-1 border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] py-4 text-[10px] font-black uppercase tracking-widest shadow-[4px_4px_0_0_var(--bulletin-shadow)] transition-all text-[var(--bulletin-text)]"
+                onClick={() => {
+                  setShowReportUserModal(false);
+                  setReportUserDescription('');
+                }}
+              >
+                Discard
+              </button>
+              <button
+                className="flex-1 border-2 border-[var(--bulletin-border)] bg-black dark:bg-white py-4 text-[10px] font-black uppercase tracking-widest text-white dark:text-black shadow-[4px_4px_0_0_var(--bulletin-shadow)] hover:bg-[#ff6b6b] hover:text-white transition-all"
+                onClick={handleReportUser}
+                disabled={reportingUser}
+              >
+                {reportingUser ? 'Processing...' : 'Submit Report'}
               </button>
             </div>
           </div>

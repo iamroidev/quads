@@ -58,6 +58,8 @@ export interface User {
   };
   createdAt: string;
   updatedAt: string;
+  totpEnabled?: boolean;
+  tosAcceptedAt?: string;
 }
 export interface Store {
   _id: string;

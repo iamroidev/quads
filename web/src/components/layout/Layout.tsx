@@ -1,5 +1,6 @@
 import React from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
+import { CookieConsent } from '../ui';
 
 const Layout: React.FC = () => {
   const { pathname } = useLocation();
@@ -19,6 +20,7 @@ const Layout: React.FC = () => {
       <main className="flex-1">
         <Outlet />
       </main>
+      <CookieConsent />
     </div>
   );
 };

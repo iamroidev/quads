@@ -10,8 +10,14 @@ import {
   TouchableOpacity,
   View,
   Dimensions,
+  Modal,
+  TextInput,
+  Alert,
+  Linking,
+  Share,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import api from "../services/api";
 
 const { width: SCREEN_W } = Dimensions.get("window");
 import productService from "../services/product.service";
@@ -40,6 +46,12 @@ const ProductDetailScreen = ({ route, navigation }: any) => {
   const [startingChat, setStartingChat] = useState(false);
   const [activeImageIdx, setActiveImageIdx] = useState(0);
   const imageScrollRef = useRef<ScrollView>(null);
+
+  // User Reporting States
+  const [showReportUserModal, setShowReportUserModal] = useState(false);
+  const [reportUserReason, setReportUserReason] = useState("harassment");
+  const [reportUserDescription, setReportUserDescription] = useState("");
+  const [reportingUser, setReportingUser] = useState(false);
 
   const styles = useMemo(() => StyleSheet.create({
     container: { flex: 1, backgroundColor: colors.bg },
@@ -374,6 +386,55 @@ const ProductDetailScreen = ({ route, navigation }: any) => {
     }
   };
 
+  const handleWhatsAppShare = async () => {
+    if (!product) return;
+    const shareText = `${product.title} - GHS ${product.price}: https://quadsmarket.tech/products/${product._id}`;
+    const url = `whatsapp://send?text=${encodeURIComponent(shareText)}`;
+    try {
+      const supported = await Linking.canOpenURL(url);
+      if (supported) {
+        await Linking.openURL(url);
+      } else {
+        // Fallback to standard share
+        await Share.share({
+          message: shareText,
+        });
+      }
+    } catch (err) {
+      console.warn("Error sharing to WhatsApp:", err);
+      try {
+        await Share.share({
+          message: shareText,
+        });
+      } catch (shareErr) {
+        Alert.alert("Error", "Could not share this product.");
+      }
+    }
+  };
+
+  const handleReportUser = async () => {
+    if (!reportUserDescription.trim()) {
+      Alert.alert("Error", "Please describe the reason for your report.");
+      return;
+    }
+    setReportingUser(true);
+    try {
+      await api.post("/reports", {
+        reportedUser: product?.seller?._id,
+        reason: reportUserReason,
+        description: reportUserDescription,
+        productId: product?._id,
+      });
+      Alert.alert("Success", "Seller reported. Our team will investigate.");
+      setShowReportUserModal(false);
+      setReportUserDescription("");
+    } catch (err: any) {
+      Alert.alert("Error", err.response?.data?.message || "Failed to report seller.");
+    } finally {
+      setReportingUser(false);
+    }
+  };
+
   const renderMiniProduct = ({ item }: { item: Product }) => (
     <TouchableOpacity
       style={styles.miniCard}
@@ -539,12 +600,68 @@ const ProductDetailScreen = ({ route, navigation }: any) => {
             </TouchableOpacity>
           )}
 
+          {/* WhatsApp Share Button */}
+          <TouchableOpacity
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 8,
+              backgroundColor: "#25D366",
+              borderWidth: 2,
+              borderColor: colors.boardBorder,
+              borderBottomWidth: 3,
+              borderRightWidth: 3,
+              paddingVertical: 12,
+              marginTop: 16,
+            }}
+            onPress={handleWhatsAppShare}
+          >
+            <Ionicons name="logo-whatsapp" size={18} color="#FFFFFF" />
+            <Text style={{ color: "#FFFFFF", fontSize: 11, fontWeight: "900", textTransform: "uppercase", letterSpacing: 1 }}>
+              Share on WhatsApp
+            </Text>
+          </TouchableOpacity>
+
           <View style={styles.section}>
             <Text style={styles.sectionLabel}>Seller</Text>
-            <Text style={styles.sellerName}>{sellerName}</Text>
-            {!!product.seller?.location && (
-              <Text style={styles.meta}>{product.seller.location}</Text>
-            )}
+            <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
+              <TouchableOpacity
+                style={{ flex: 1 }}
+                onPress={() => {
+                  if (product.seller?._id) {
+                    navigation.navigate("ProductsTab", {
+                      screen: "ProductsHome",
+                      params: {
+                        sellerId: product.seller._id,
+                        sellerName: sellerName,
+                      }
+                    });
+                  }
+                }}
+              >
+                <Text style={styles.sellerName}>{sellerName}</Text>
+                {!!product.seller?.location && (
+                  <Text style={styles.meta}>{product.seller.location}</Text>
+                )}
+              </TouchableOpacity>
+              {user && product && user._id !== product.seller?._id && (
+                <TouchableOpacity
+                  style={{
+                    borderWidth: 2,
+                    borderColor: colors.border,
+                    backgroundColor: colors.surface,
+                    paddingHorizontal: 12,
+                    paddingVertical: 6,
+                  }}
+                  onPress={() => setShowReportUserModal(true)}
+                >
+                  <Text style={{ fontSize: 10, fontWeight: "900", color: colors.text, textTransform: "uppercase" }}>
+                    Report Seller
+                  </Text>
+                </TouchableOpacity>
+              )}
+            </View>
           </View>
 
           {relatedProducts.length > 0 && (
@@ -604,6 +721,118 @@ const ProductDetailScreen = ({ route, navigation }: any) => {
           </TouchableOpacity>
         </View>
       )}
+
+      {/* Report Seller Modal */}
+      <Modal visible={showReportUserModal} transparent animationType="slide" onRequestClose={() => setShowReportUserModal(false)}>
+        <View style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.6)", justifyContent: "center", alignItems: "center", padding: 20 }}>
+          <View 
+            style={{ 
+              width: "100%", 
+              maxWidth: 380, 
+              backgroundColor: colors.surface, 
+              borderWidth: 3, 
+              borderColor: colors.boardBorder, 
+              padding: 24,
+            }}
+          >
+            {/* Red Thumbtack detail (Top Center) */}
+            <View style={{ position: "absolute", top: -10, left: "50%", marginLeft: -10, width: 20, height: 20, borderRadius: 10, backgroundColor: colors.pinRed, borderWidth: 2, borderColor: colors.boardBorder }} />
+            
+            <Text style={{ fontSize: 10, fontWeight: "900", color: colors.accent, textTransform: "uppercase", letterSpacing: 2, textAlign: "center", marginTop: 8 }}>
+              Integrity Report
+            </Text>
+            <Text style={{ fontSize: 20, fontWeight: "900", color: colors.text, textTransform: "uppercase", letterSpacing: -0.5, textAlign: "center", marginVertical: 8 }}>
+              Report Seller
+            </Text>
+            
+            <Text style={{ fontSize: 11, fontWeight: "900", color: colors.text, textTransform: "uppercase", marginBottom: 6 }}>
+              Reason
+            </Text>
+            <View style={{ borderWidth: 2, borderColor: colors.border, backgroundColor: colors.surfaceSecondary, marginBottom: 12 }}>
+              {(["harassment", "spam", "scam", "inappropriate", "fake_listing", "other"] as const).map((reasonOpt) => (
+                <TouchableOpacity
+                  key={reasonOpt}
+                  style={{
+                    paddingVertical: 10,
+                    paddingHorizontal: 12,
+                    borderBottomWidth: reasonOpt === "other" ? 0 : 1,
+                    borderBottomColor: colors.border,
+                    flexDirection: "row",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    backgroundColor: reportUserReason === reasonOpt ? colors.surface : "transparent",
+                  }}
+                  onPress={() => setReportUserReason(reasonOpt)}
+                >
+                  <Text style={{ fontSize: 12, fontWeight: "700", textTransform: "uppercase", color: colors.text }}>
+                    {reasonOpt.replace("_", " ")}
+                  </Text>
+                  {reportUserReason === reasonOpt && (
+                    <Text style={{ fontWeight: "900", color: colors.accent }}>✓</Text>
+                  )}
+                </TouchableOpacity>
+              ))}
+            </View>
+
+            <Text style={{ fontSize: 11, fontWeight: "900", color: colors.text, textTransform: "uppercase", marginBottom: 6 }}>
+              Description
+            </Text>
+            <TextInput
+              style={{
+                borderWidth: 2,
+                borderColor: colors.border,
+                backgroundColor: colors.surfaceSecondary,
+                padding: 12,
+                fontSize: 12,
+                fontWeight: "600",
+                color: colors.text,
+                minHeight: 80,
+                textAlignVertical: "top",
+                marginBottom: 20,
+              }}
+              placeholder="Describe the issue in detail..."
+              placeholderTextColor={colors.muted}
+              multiline
+              value={reportUserDescription}
+              onChangeText={setReportUserDescription}
+            />
+
+            <View style={{ flexDirection: "row", gap: 10 }}>
+              <TouchableOpacity
+                style={{
+                  flex: 1,
+                  borderWidth: 2,
+                  borderColor: colors.border,
+                  backgroundColor: colors.surfaceSecondary,
+                  paddingVertical: 12,
+                  alignItems: "center",
+                }}
+                onPress={() => setShowReportUserModal(false)}
+              >
+                <Text style={{ fontSize: 11, fontWeight: "900", color: colors.text, textTransform: "uppercase" }}>
+                  Cancel
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={{
+                  flex: 1,
+                  backgroundColor: colors.text,
+                  borderWidth: 2,
+                  borderColor: colors.boardBorder,
+                  paddingVertical: 12,
+                  alignItems: "center",
+                }}
+                onPress={handleReportUser}
+                disabled={reportingUser}
+              >
+                <Text style={{ fontSize: 11, fontWeight: "900", color: colors.bg, textTransform: "uppercase" }}>
+                  {reportingUser ? "Submitting..." : "Submit"}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 };

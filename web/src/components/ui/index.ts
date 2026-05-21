@@ -5,3 +5,4 @@ export * from './CategoryIcon';
 export * from './BulletinMarquee';
 export * from './BulletinEmptyState';
 export * from './BulletinSkeleton';
+export { default as CookieConsent } from './CookieConsent';

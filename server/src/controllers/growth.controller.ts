@@ -64,6 +64,16 @@ export const getOpsOverview = async (_req: Request, res: Response, next: NextFun
   }
 };
 
+export const getZeroResultsAnalytics = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const timeframeDays = req.query.days ? parseInt(req.query.days as string, 10) : 30;
+    const data = await growthService.getZeroResultsAnalytics(timeframeDays);
+    res.status(200).json({ success: true, message: 'Zero results search analytics retrieved', data });
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const captureEvent = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const { event, context } = req.body;

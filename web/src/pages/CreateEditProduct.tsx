@@ -8,6 +8,7 @@ import { ArrowLeft, ShieldOff, Video, X, Play, UploadCloud } from 'lucide-react'
 import productService from '../services/product.service';
 import growthService from '../services/growth.service';
 import categoryService from '../services/category.service';
+import referenceService, { PickupSpot } from '../services/reference.service';
 import { ImageUpload } from '../components/product';
 import { Category } from '../types';
 import { BulletinLayout, BulletinSection, BulletinCard } from '../components/layout/BulletinLayout';
@@ -38,9 +39,7 @@ const CreateEditProduct = () => {
   const isUnverifiedSeller =
     !isEdit &&
     user?.roles?.includes('seller') &&
-    !user?.isVerified &&
-    !user?.emailVerified &&
-    !user?.phoneVerified;
+    !user?.isVerified;
 
   const [currentStep, setCurrentStep] = useState(1);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -52,6 +51,24 @@ const CreateEditProduct = () => {
   const [loadingProduct, setLoadingProduct] = useState(isEdit);
   const [removedImageIds, setRemovedImageIds] = useState<string[]>([]);
   const [pricingInsights, setPricingInsights] = useState<any | null>(null);
+
+  const [pickupSpots, setPickupSpots] = useState<PickupSpot[]>([]);
+  const [isOtherSelected, setIsOtherSelected] = useState(false);
+
+  const fallbackSpots = [
+    'Unity Hall Entrance', 'Queens Hall Entrance', 'Independence Hall Entrance',
+    'CK Hostel Entrance', 'Corazon Hostel Entrance', 'Tovet Hostel Entrance',
+    'Hilda Hostel Entrance', 'Figenco Hostel Entrance', "Kabi's Hostel Entrance",
+    'Castle Gate Hostel Entrance', 'The White House Hostel Entrance', 'Platinum Hostel Entrance',
+    'RNM Hostel Entrance', 'Nhiraba Hostel Entrance', 'Osborne Hostel Entrance',
+    'Campus Library', 'Main Auditorium', 'Administration Block'
+  ];
+
+  useEffect(() => {
+    referenceService.getPickupSpots()
+      .then(setPickupSpots)
+      .catch((err) => console.error('Failed to load pickup spots:', err));
+  }, []);
 
   const {
     register,
@@ -72,7 +89,16 @@ const CreateEditProduct = () => {
 
   const deliveryOption = watch('deliveryOption');
   const selectedCategory = watch('category');
+  const pickupLocation = watch('pickupLocation');
   const isServiceOrAccommodation = selectedCategory === 'Services' || selectedCategory === 'Accommodation';
+  
+  const spotsList = pickupSpots.length > 0 ? pickupSpots.map(s => s.name) : fallbackSpots;
+
+  useEffect(() => {
+    if (pickupLocation && spotsList.length > 0 && !spotsList.includes(pickupLocation) && pickupLocation !== 'Other') {
+      setIsOtherSelected(true);
+    }
+  }, [pickupLocation, spotsList]);
 
   useEffect(() => {
     categoryService.getCategories().then((res) => {
@@ -477,13 +503,13 @@ const CreateEditProduct = () => {
                   {!isServiceOrAccommodation && (
                     <BulletinCard rotation={-0.5} bgColor="bg-[var(--bulletin-card)]" className="border-2 sm:border-4 border-[var(--bulletin-border)] p-4 sm:p-6 shadow-[6px_6px_0_0_var(--bulletin-accent)] sm:shadow-[8px_8px_0_0_var(--bulletin-accent)]">
                       <label className="block text-[9px] sm:text-[10px] font-black uppercase tracking-widest mb-2 sm:mb-3">CONDITION</label>
-                      <select className="w-full border-2 border-[var(--bulletin-border)] p-2 sm:p-3 text-[11px] sm:text-[12px] font-black uppercase focus:outline-none bg-transparent" {...register('condition')}>
-                        <option value="">SELECT CONDITION</option>
-                        <option value="new">BRAND NEW</option>
-                        <option value="like-new">LIKE NEW</option>
-                        <option value="good">GOOD</option>
-                        <option value="fair">FAIR</option>
-                        <option value="poor">POOR</option>
+                      <select className="w-full border-2 border-[var(--bulletin-border)] p-2 sm:p-3 text-[11px] sm:text-[12px] font-black uppercase focus:outline-none bg-[var(--bulletin-card)] text-[var(--bulletin-text)]" {...register('condition')}>
+                        <option value="" className="bg-white text-black dark:bg-zinc-800 dark:text-white">SELECT CONDITION</option>
+                        <option value="new" className="bg-white text-black dark:bg-zinc-800 dark:text-white">BRAND NEW</option>
+                        <option value="like-new" className="bg-white text-black dark:bg-zinc-800 dark:text-white">LIKE NEW</option>
+                        <option value="good" className="bg-white text-black dark:bg-zinc-800 dark:text-white">GOOD</option>
+                        <option value="fair" className="bg-white text-black dark:bg-zinc-800 dark:text-white">FAIR</option>
+                        <option value="poor" className="bg-white text-black dark:bg-zinc-800 dark:text-white">POOR</option>
                       </select>
                     </BulletinCard>
                   )}
@@ -560,22 +586,45 @@ const CreateEditProduct = () => {
                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
                   <BulletinCard rotation={-0.4} bgColor="bg-[var(--bulletin-card)]" className="border-2 sm:border-4 border-[var(--bulletin-border)] p-4 sm:p-6 shadow-[6px_6px_0_0_var(--bulletin-text)] sm:shadow-[12px_12px_0_0_var(--bulletin-text)]">
                     <label className="block text-[9px] sm:text-[10px] font-black uppercase tracking-widest mb-2 sm:mb-3">{isServiceOrAccommodation ? 'OFFERING METHOD' : 'DELIVERY'}</label>
-                    <select className="w-full border-2 border-[var(--bulletin-border)] p-2 sm:p-3 text-[11px] sm:text-[12px] font-black uppercase focus:outline-none bg-transparent" {...register('deliveryOption')}>
-                      <option value="pickup">{isServiceOrAccommodation ? 'AT SELLER LOCATION' : 'PICKUP'}</option>
-                      <option value="delivery">{isServiceOrAccommodation ? 'AT BUYER LOCATION / REMOTE' : 'DELIVERY'}</option>
-                      <option value="both">BOTH / FLEXIBLE</option>
+                    <select className="w-full border-2 border-[var(--bulletin-border)] p-2 sm:p-3 text-[11px] sm:text-[12px] font-black uppercase focus:outline-none bg-[var(--bulletin-card)] text-[var(--bulletin-text)]" {...register('deliveryOption')}>
+                      <option value="pickup" className="bg-white text-black dark:bg-zinc-800 dark:text-white">{isServiceOrAccommodation ? 'AT SELLER LOCATION' : 'PICKUP'}</option>
+                      <option value="delivery" className="bg-white text-black dark:bg-zinc-800 dark:text-white">{isServiceOrAccommodation ? 'AT BUYER LOCATION / REMOTE' : 'DELIVERY'}</option>
+                      <option value="both" className="bg-white text-black dark:bg-zinc-800 dark:text-white">BOTH / FLEXIBLE</option>
                     </select>
                   </BulletinCard>
 
                   {(deliveryOption === 'pickup' || deliveryOption === 'both') && (
                     <BulletinCard rotation={0.4} bgColor="bg-[var(--bulletin-card)]" className="border-2 sm:border-4 border-[var(--bulletin-border)] p-4 sm:p-6 shadow-[6px_6px_0_0_var(--bulletin-accent)] sm:shadow-[8px_8px_0_0_var(--bulletin-accent)]">
                       <label className="block text-[9px] sm:text-[10px] font-black uppercase tracking-widest mb-2 sm:mb-3">{isServiceOrAccommodation ? 'MEETING POINT' : 'CAMPUS LOCATION'}</label>
-                      <input
-                        type="text"
-                        placeholder="LOCATION"
-                        className="w-full border-2 border-[var(--bulletin-border)] bg-transparent p-2 sm:p-3 text-[11px] sm:text-[12px] font-black uppercase focus:outline-none"
-                        {...register('pickupLocation')}
-                      />
+                      <select
+                        className="w-full border-2 border-[var(--bulletin-border)] p-2 sm:p-3 text-[11px] sm:text-[12px] font-black uppercase focus:outline-none bg-[var(--bulletin-card)] text-[var(--bulletin-text)] mb-3"
+                        value={isOtherSelected ? 'Other' : (pickupLocation || '')}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          if (val === 'Other') {
+                            setIsOtherSelected(true);
+                            setValue('pickupLocation', '');
+                          } else {
+                            setIsOtherSelected(false);
+                            setValue('pickupLocation', val);
+                          }
+                        }}
+                      >
+                        <option value="" className="bg-white text-black dark:bg-zinc-800 dark:text-white">SELECT A SPOT</option>
+                        {spotsList.map(spot => (
+                          <option key={spot} value={spot} className="bg-white text-black dark:bg-zinc-800 dark:text-white">{spot}</option>
+                        ))}
+                        <option value="Other" className="bg-white text-black dark:bg-zinc-800 dark:text-white">OTHER (SPECIFY BELOW)</option>
+                      </select>
+                      {isOtherSelected && (
+                        <input
+                          type="text"
+                          placeholder="SPECIFY CUSTOM LOCATION"
+                          value={spotsList.includes(pickupLocation || '') ? '' : (pickupLocation || '')}
+                          className="w-full border-2 border-[var(--bulletin-border)] bg-transparent p-2 sm:p-3 text-[11px] sm:text-[12px] font-black uppercase focus:outline-none animate-fade-up-in"
+                          onChange={(e) => setValue('pickupLocation', e.target.value)}
+                        />
+                      )}
                     </BulletinCard>
                   )}
                 </div>

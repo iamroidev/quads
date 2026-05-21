@@ -229,6 +229,9 @@ const startServer = async () => {
 };
 
 registerProcessErrorHandlers();
-startServer();
+
+if (env.NODE_ENV !== 'test') {
+  startServer();
+}
 
 export { app, io };

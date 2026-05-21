@@ -692,6 +692,42 @@ class OrderService {
       .sort({ createdAt: -1 })
       .populate('productIds', 'title price images status');
   }
+
+  async deleteCoupon(sellerId: string, couponId: string) {
+    const coupon = await Coupon.findOneAndDelete({ _id: couponId, seller: sellerId });
+    if (!coupon) {
+      throw ApiError.notFound('Coupon not found or does not belong to you');
+    }
+    return coupon;
+  }
+
+  async toggleCouponStatus(sellerId: string, couponId: string) {
+    const coupon = await Coupon.findOne({ _id: couponId, seller: sellerId });
+    if (!coupon) {
+      throw ApiError.notFound('Coupon not found or does not belong to you');
+    }
+    coupon.isActive = !coupon.isActive;
+    await coupon.save();
+    return coupon;
+  }
+
+  async deleteBundle(sellerId: string, bundleId: string) {
+    const bundle = await Bundle.findOneAndDelete({ _id: bundleId, seller: sellerId });
+    if (!bundle) {
+      throw ApiError.notFound('Bundle not found or does not belong to you');
+    }
+    return bundle;
+  }
+
+  async toggleBundleStatus(sellerId: string, bundleId: string) {
+    const bundle = await Bundle.findOne({ _id: bundleId, seller: sellerId });
+    if (!bundle) {
+      throw ApiError.notFound('Bundle not found or does not belong to you');
+    }
+    bundle.isActive = !bundle.isActive;
+    await bundle.save();
+    return bundle;
+  }
 }
 
 export default new OrderService();

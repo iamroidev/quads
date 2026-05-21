@@ -4,7 +4,6 @@ import { ActivityIndicator, ScrollView, StyleSheet, Text, View, TouchableOpacity
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { shadows } from '../theme';
 import { useColors } from '../theme/ThemeContext';
 import ScreenHeader from '../components/ScreenHeader';
 import api from '../services/api';
@@ -36,7 +35,8 @@ const SellersScreen = ({ navigation }: any) => {
       padding: isMobile ? 12 : 16,
       marginBottom: 10,
       marginHorizontal: 16,
-      ...shadows.bulletin,
+      borderBottomWidth: 3,
+      borderRightWidth: 3,
     },
     avatar: {
       width: 40, height: 40,
@@ -69,7 +69,14 @@ const SellersScreen = ({ navigation }: any) => {
       <ScrollView contentContainerStyle={styles.content}>
         <ScreenHeader eyebrow="Marketplace" title="Top Sellers" subtitle="Browse verified sellers on campus." />
         {sellers.map(s => (
-          <TouchableOpacity key={s._id} style={styles.row} onPress={() => navigation.navigate('ProfileTab', { screen: 'ProfileHome' })}>
+          <TouchableOpacity
+            key={s._id}
+            style={styles.row}
+            onPress={() => navigation.navigate('ProductsTab', {
+              screen: 'ProductsHome',
+              params: { sellerId: s._id, sellerName: s.storeName || s.name }
+            })}
+          >
             <View style={styles.avatar}>
               <Text style={styles.avatarText}>{s.name[0]}</Text>
             </View>

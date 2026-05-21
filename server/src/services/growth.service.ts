@@ -142,6 +142,43 @@ class GrowthService {
       importAuditLogs: auditLogs,
     };
   }
+
+  async getZeroResultsAnalytics(timeframeDays = 30): Promise<any[]> {
+    const sinceDate = new Date();
+    sinceDate.setDate(sinceDate.getDate() - timeframeDays);
+
+    const zeroResults = await AnalyticsEvent.aggregate([
+      {
+        $match: {
+          event: 'search_zero',
+          createdAt: { $gte: sinceDate },
+        },
+      },
+      {
+        $group: {
+          _id: { $toLower: '$context.query' },
+          rawTerm: { $first: '$context.query' },
+          count: { $sum: 1 },
+          lastSearchedAt: { $max: '$createdAt' },
+          categories: { $addToSet: '$context.category' },
+        },
+      },
+      {
+        $sort: { count: -1 },
+      },
+      {
+        $project: {
+          _id: 0,
+          searchTerm: '$rawTerm',
+          count: 1,
+          lastSearchedAt: 1,
+          categories: 1,
+        },
+      },
+    ]);
+
+    return zeroResults;
+  }
 }
 
 export default new GrowthService();

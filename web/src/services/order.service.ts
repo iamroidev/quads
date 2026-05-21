@@ -186,6 +186,26 @@ const orderService = {
     const response = await api.get(`/orders/public/seller/${sellerId}/coupons`);
     return response.data;
   },
+
+  deleteCoupon: async (id: string): Promise<{ success: boolean }> => {
+    const response = await api.delete(`/orders/seller/coupons/${id}`);
+    return response.data;
+  },
+
+  toggleCouponStatus: async (id: string): Promise<{ success: boolean }> => {
+    const response = await api.patch(`/orders/seller/coupons/${id}/toggle`);
+    return response.data;
+  },
+
+  deleteBundle: async (id: string): Promise<{ success: boolean }> => {
+    const response = await api.delete(`/orders/seller/bundles/${id}`);
+    return response.data;
+  },
+
+  toggleBundleStatus: async (id: string): Promise<{ success: boolean }> => {
+    const response = await api.patch(`/orders/seller/bundles/${id}/toggle`);
+    return response.data;
+  },
 };
 
 export default orderService;

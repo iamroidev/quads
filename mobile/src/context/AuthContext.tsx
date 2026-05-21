@@ -11,13 +11,13 @@ interface AuthContextType {
   token: string | null;
   isLoading: boolean;
   isAuthenticated: boolean;
-  login: (email: string, password: string) => Promise<void>;
+  login: (email: string, password: string, totpCode?: string) => Promise<any>;
   googleLogin: (credential: string, role?: 'buyer' | 'seller') => Promise<{ isNewUser?: boolean; needsProfileCompletion?: boolean }>;
   register: (data: RegisterPayload & { email: string }) => Promise<void>;
   sendRegistrationOtp: (email: string) => Promise<void>;
   verifyOtpAndRegister: (email: string, otp: string, profile: RegisterPayload) => Promise<void>;
   sendLoginOtp: (email: string) => Promise<void>;
-  verifyOtpAndLogin: (email: string, otp: string) => Promise<void>;
+  verifyOtpAndLogin: (email: string, otp: string, totpCode?: string) => Promise<any>;
   logout: () => Promise<void>;
   refreshUser: () => Promise<void>;
   viewMode: 'buyer' | 'seller';
@@ -93,8 +93,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     loadAuth();
   }, []);
 
-  const login = useCallback(async (email: string, password: string) => {
-    const response = await authService.loginWithPassword(email.toLowerCase(), password);
+  const login = useCallback(async (email: string, password: string, totpCode?: string) => {
+    const response = await authService.loginWithPassword(email.toLowerCase(), password, totpCode);
+    if (response.data?.totpRequired) {
+      return response.data;
+    }
     const { user: newUser, token: newToken } = response.data;
     const normalized = normalizeUser(newUser);
     await SecureStore.setItemAsync('token', newToken);
@@ -165,8 +168,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     await authService.sendOtp(email.toLowerCase(), 'login');
   }, []);
 
-  const verifyOtpAndLogin = useCallback(async (email: string, otp: string) => {
-    const response = await authService.verifyOtpLogin(email.toLowerCase(), otp.trim());
+  const verifyOtpAndLogin = useCallback(async (email: string, otp: string, totpCode?: string) => {
+    const response = await authService.verifyOtpLogin(email.toLowerCase(), otp.trim(), totpCode);
+    if (response.data?.totpRequired) {
+      return response.data;
+    }
     const { user: newUser, token: newToken } = response.data;
     const normalized = normalizeUser(newUser);
     await SecureStore.setItemAsync('token', newToken);

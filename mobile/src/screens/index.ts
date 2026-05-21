@@ -42,4 +42,6 @@ export { default as FAQScreen } from './FAQScreen';
 export { default as PrivacyPolicyScreen } from './PrivacyPolicyScreen';
 export { default as AboutUsScreen } from './AboutUsScreen';
 export { default as FollowingFeedScreen } from './FollowingFeedScreen';
+export { default as TransactionHistoryScreen } from './TransactionHistoryScreen';
+
 

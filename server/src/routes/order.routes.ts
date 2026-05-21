@@ -10,8 +10,12 @@ import {
   getAbandonedCheckouts,
   createCoupon,
   getSellerCoupons,
+  deleteCoupon,
+  toggleCouponStatus,
   createBundle,
   getSellerBundles,
+  deleteBundle,
+  toggleBundleStatus,
   runAutomationSweep,
   verifyHandoff,
   validateCoupon,
@@ -44,11 +48,15 @@ router.post('/automation/run-sweep', isAdmin, runAutomationSweep);
 // Seller growth toolkit: coupons
 router.post('/seller/coupons', isSeller, createCoupon);
 router.get('/seller/coupons', isSeller, getSellerCoupons);
+router.delete('/seller/coupons/:id', isSeller, deleteCoupon);
+router.patch('/seller/coupons/:id/toggle', isSeller, toggleCouponStatus);
 router.get('/validate-coupon', ensureProfileComplete(), validateCoupon);
 
 // Seller growth toolkit: bundles
 router.post('/seller/bundles', isSeller, createBundle);
 router.get('/seller/bundles', isSeller, getSellerBundles);
+router.delete('/seller/bundles/:id', isSeller, deleteBundle);
+router.patch('/seller/bundles/:id/toggle', isSeller, toggleBundleStatus);
 
 
 // POST /api/orders — create a new order

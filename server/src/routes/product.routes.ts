@@ -26,6 +26,7 @@ import {
   getCollections,
   getCollectionBySlug,
   bulkUpdateProductDetails,
+  bulkProductAction,
   downloadImportErrorTemplate,
   renderProductSocialPreview,
 } from '../controllers/product.controller';
@@ -116,6 +117,9 @@ router.patch('/bulk/status', authenticate, isSeller, bulkUpdateProductStatus);
 
 // PATCH /api/products/bulk/details — advanced bulk operations
 router.patch('/bulk/details', authenticate, isSeller, bulkUpdateProductDetails);
+
+// POST /api/products/bulk-action — bulk relist, archive, price update
+router.post('/bulk-action', authenticate, isSeller, bulkProductAction);
 
 // GET /api/products/bulk/csv/errors-sample — template for error CSV export
 router.get('/bulk/csv/errors-sample', authenticate, isSeller, downloadImportErrorTemplate);

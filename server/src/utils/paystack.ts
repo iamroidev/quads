@@ -258,3 +258,28 @@ export const getPaystackBalance = async (): Promise<{ currency: string; balance:
     balance: item.amount / 100,
   }));
 };
+
+/**
+ * Initiate a refund on a transaction via Paystack
+ * @param transaction - Transaction reference or ID
+ * @param amount - Optional, amount in GHS (will be converted to pesewas)
+ * @param customerNote - Optional, note to customer / reason
+ */
+export const initiateRefund = async (
+  transaction: string,
+  amount?: number,
+  customerNote?: string
+): Promise<any> => {
+  const payload: Record<string, any> = {
+    transaction,
+  };
+  if (amount !== undefined) {
+    payload.amount = Math.round(amount * 100);
+  }
+  if (customerNote) {
+    payload.customer_note = customerNote;
+  }
+
+  const response = await paystackApi.post('/refund', payload);
+  return response.data;
+};

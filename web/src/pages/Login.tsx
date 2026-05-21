@@ -76,6 +76,11 @@ const LoginPage: React.FC = () => {
   const [otpError, setOtpError] = useState('');
   const [resendCountdown, setResendCountdown] = useState(0);
 
+  const [totpRequired, setTotpRequired] = useState(false);
+  const [totpCode, setTotpCode] = useState('');
+  const [totpError, setTotpError] = useState('');
+  const [loginMethod, setLoginMethod] = useState<'otp' | 'password'>('otp');
+
   useEffect(() => {
     if (resendCountdown <= 0) return;
     const t = setTimeout(() => setResendCountdown(c => c - 1), 1000);
@@ -98,6 +103,7 @@ const LoginPage: React.FC = () => {
   const {
     register,
     handleSubmit,
+    watch,
     formState: { errors },
   } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
@@ -105,8 +111,14 @@ const LoginPage: React.FC = () => {
 
   const onSubmit = async (data: LoginFormData) => {
     setIsSubmitting(true);
+    setLoginMethod('password');
     try {
-      await login({ email: data.email.toLowerCase(), password: data.password });
+      const res = await login({ email: data.email.toLowerCase(), password: data.password, totpCode });
+      if (res && res.totpRequired) {
+        setTotpRequired(true);
+        setIsSubmitting(false);
+        return;
+      }
       navigate(getRedirectAfterLogin(), { replace: true });
     } catch (error: any) {
       toast.error(error.response?.data?.message || error.message || 'Login failed. Please try again.');
@@ -137,11 +149,36 @@ const LoginPage: React.FC = () => {
     if (otpCode.length !== 6) { setOtpError('Enter the 6-digit code.'); return; }
     setOtpError('');
     setIsSubmitting(true);
+    setLoginMethod('otp');
     try {
-      await verifyOtpAndLogin(otpEmail, otpCode);
+      const res = await verifyOtpAndLogin(otpEmail, otpCode, totpCode);
+      if (res && res.totpRequired) {
+        setTotpRequired(true);
+        setIsSubmitting(false);
+        return;
+      }
       navigate(getRedirectAfterLogin(), { replace: true });
     } catch (err: any) {
       setOtpError(err.message || 'Incorrect code. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleVerifyTotp = async () => {
+    if (totpCode.length !== 6) { setTotpError('Enter the 6-digit 2FA code.'); return; }
+    setTotpError('');
+    setIsSubmitting(true);
+    try {
+      if (loginMethod === 'otp') {
+        await verifyOtpAndLogin(otpEmail, otpCode, totpCode);
+      } else {
+        const data = watch();
+        await login({ email: data.email.toLowerCase(), password: data.password, totpCode });
+      }
+      navigate(getRedirectAfterLogin(), { replace: true });
+    } catch (err: any) {
+      setTotpError(err.response?.data?.message || err.message || 'Invalid 2FA code. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
@@ -283,156 +320,213 @@ const LoginPage: React.FC = () => {
               <p className="text-[10px] md:text-[12px] font-bold opacity-60 mt-2 md:mt-4 text-[var(--bulletin-text)] uppercase tracking-widest">Sign in to your account.</p>
             </div>
 
-            {/* OTP Login (default) */}
-            {useOtp && !otpSent && (
-              <div className="space-y-8">
-                <div>
-                  <label className="block text-[11px] font-black uppercase tracking-[0.2em] opacity-40 mb-3 text-[var(--bulletin-text)]">Email</label>
-                  <input
-                    type="email"
-                    placeholder="you@example.com"
-                    autoComplete="email"
-                    className={fieldBase}
-                    value={otpEmail}
-                    onChange={e => { setOtpEmail(e.target.value); setOtpError(''); }}
-                    onKeyDown={e => e.key === 'Enter' && handleSendOtp()}
-                  />
-                  {otpError && <p className="mt-2 text-[12px] text-red-600 font-black uppercase tracking-widest">{otpError}</p>}
-                </div>
-                <button
-                  type="button"
-                  onClick={handleSendOtp}
-                  disabled={isSubmitting}
-                  className="w-full border-4 border-[var(--bulletin-border)] bg-[var(--bulletin-text)] px-6 py-4 text-[14px] font-black uppercase tracking-widest text-[var(--bulletin-bg)] shadow-[6px_6px_0_0_var(--bulletin-shadow)] hover:translate-y-1 hover:shadow-[4px_4px_0_0_var(--bulletin-shadow)] disabled:opacity-40 transition-all"
-                >
-                  {isSubmitting ? 'Sending...' : 'Send Login Code'}
-                </button>
-                <p className="text-center text-[11px] font-black uppercase tracking-widest opacity-50 text-[var(--bulletin-text)]">
-                  Use password instead?{' '}
-                  <button type="button" onClick={() => setUseOtp(false)} className="underline decoration-2 underline-offset-4 opacity-100 hover:text-[#ff6b6b]">
-                    Sign in with password
-                  </button>
-                </p>
-              </div>
-            )}
+            {!totpRequired ? (
+              <>
+                {/* OTP Login (default) */}
+                {useOtp && !otpSent && (
+                  <div className="space-y-8">
+                    <div>
+                      <label className="block text-[11px] font-black uppercase tracking-[0.2em] opacity-40 mb-3 text-[var(--bulletin-text)]">Email</label>
+                      <input
+                        type="email"
+                        placeholder="you@example.com"
+                        autoComplete="email"
+                        className={fieldBase}
+                        value={otpEmail}
+                        onChange={e => { setOtpEmail(e.target.value); setOtpError(''); }}
+                        onKeyDown={e => e.key === 'Enter' && handleSendOtp()}
+                      />
+                      {otpError && <p className="mt-2 text-[12px] text-red-600 font-black uppercase tracking-widest">{otpError}</p>}
+                    </div>
+                    <button
+                      type="button"
+                      onClick={handleSendOtp}
+                      disabled={isSubmitting}
+                      className="w-full border-4 border-[var(--bulletin-border)] bg-[var(--bulletin-text)] px-6 py-4 text-[14px] font-black uppercase tracking-widest text-[var(--bulletin-bg)] shadow-[6px_6px_0_0_var(--bulletin-shadow)] hover:translate-y-1 hover:shadow-[4px_4px_0_0_var(--bulletin-shadow)] disabled:opacity-40 transition-all"
+                    >
+                      {isSubmitting ? 'Sending...' : 'Send Login Code'}
+                    </button>
+                    <p className="text-center text-[11px] font-black uppercase tracking-widest opacity-50 text-[var(--bulletin-text)]">
+                      Use password instead?{' '}
+                      <button type="button" onClick={() => setUseOtp(false)} className="underline decoration-2 underline-offset-4 opacity-100 hover:text-[#ff6b6b]">
+                        Sign in with password
+                      </button>
+                    </p>
+                  </div>
+                )}
 
-            {useOtp && otpSent && (
-              <div className="space-y-6">
+                {useOtp && otpSent && (
+                  <div className="space-y-6">
+                    <div>
+                      <p className="text-[11px] font-black uppercase tracking-[0.2em] text-[#ff6b6b] mb-3">Verify Identity</p>
+                      <h2 className="text-2xl font-black uppercase tracking-tighter text-[var(--bulletin-text)]">Enter the code.</h2>
+                      <p className="text-[13px] font-bold opacity-60 mt-2 text-[var(--bulletin-text)]">
+                        6-digit code sent to <span className="opacity-100 underline decoration-2">{otpEmail}</span>
+                      </p>
+                    </div>
+                    <div className="flex gap-3 justify-center my-4">
+                      {Array.from({ length: 6 }).map((_, i) => (
+                        <input
+                          key={i}
+                          id={`login-otp-${i}`}
+                          type="text"
+                          inputMode="numeric"
+                          autoComplete={i === 0 ? 'one-time-code' : 'off'}
+                          maxLength={1}
+                          value={otpCode[i] || ''}
+                          className={`w-12 h-14 text-center text-[22px] font-black border-4 border-[var(--bulletin-border)] bg-[var(--bulletin-bg)] text-[var(--bulletin-text)] shadow-[4px_4px_0_0_var(--bulletin-shadow)] focus:outline-none focus:ring-2 focus:ring-[var(--bulletin-text)] ${otpError ? 'border-red-500' : ''}`}
+                          onChange={e => {
+                            const val = e.target.value.replace(/\D/g, '');
+                            const next = otpCode.split('');
+                            next[i] = val.slice(-1);
+                            const joined = next.join('').slice(0, 6);
+                            setOtpCode(joined);
+                            setOtpError('');
+                            if (val && i < 5) document.getElementById(`login-otp-${i + 1}`)?.focus();
+                          }}
+                          onKeyDown={e => {
+                            if (e.key === 'Backspace' && !otpCode[i] && i > 0) document.getElementById(`login-otp-${i - 1}`)?.focus();
+                            if (e.key === 'Enter' && otpCode.length === 6) handleVerifyLoginOtp();
+                          }}
+                          onPaste={e => {
+                            const pasted = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 6);
+                            if (pasted) { setOtpCode(pasted); setOtpError(''); e.preventDefault(); document.getElementById(`login-otp-${Math.min(pasted.length, 5)}`)?.focus(); }
+                          }}
+                        />
+                      ))}
+                    </div>
+                    {otpError && <p className="text-[12px] text-red-600 font-black uppercase tracking-widest text-center">{otpError}</p>}
+                    <button
+                      type="button"
+                      onClick={handleVerifyLoginOtp}
+                      disabled={isSubmitting || otpCode.length !== 6}
+                      className="w-full border-4 border-[var(--bulletin-border)] bg-[var(--bulletin-text)] px-6 py-4 text-[14px] font-black uppercase tracking-widest text-[var(--bulletin-bg)] shadow-[6px_6px_0_0_var(--bulletin-shadow)] hover:translate-y-1 hover:shadow-[4px_4px_0_0_var(--bulletin-shadow)] disabled:opacity-40 transition-all"
+                    >
+                      {isSubmitting ? 'Verifying...' : 'Sign In'}
+                    </button>
+                    <div className="flex items-center justify-between">
+                      <button type="button" onClick={() => { setOtpSent(false); setOtpCode(''); setOtpError(''); }} className="text-[12px] font-black uppercase tracking-widest underline decoration-2 underline-offset-4 opacity-60 hover:opacity-100 text-[var(--bulletin-text)]">← Back</button>
+                      <button type="button" onClick={handleResendLoginOtp} disabled={resendCountdown > 0} className="text-[12px] font-black uppercase tracking-widest underline decoration-2 underline-offset-4 disabled:opacity-40 text-[var(--bulletin-text)]">
+                        {resendCountdown > 0 ? `Resend in ${resendCountdown}s` : 'Resend Code'}
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {/* Password Login (fallback) */}
+                {!useOtp && (
+                  <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
+                    <div>
+                      <label className="block text-[11px] font-black uppercase tracking-[0.2em] opacity-40 mb-3 text-[var(--bulletin-text)]">Email</label>
+                      <input type="email" placeholder="you@example.com" autoComplete="email" className={fieldBase} {...register('email')} />
+                      {errors.email && <p className="mt-2 text-[12px] text-red-600 font-black uppercase tracking-widest">{errors.email.message}</p>}
+                    </div>
+                    <div>
+                      <label className="block text-[11px] font-black uppercase tracking-[0.2em] opacity-40 mb-3 text-[var(--bulletin-text)]">Password</label>
+                      <div className="relative flex items-center">
+                        <input type={showPassword ? 'text' : 'password'} placeholder="Your password" autoComplete="current-password" className={`flex-1 pr-16 ${fieldBase}`} {...register('password')} />
+                        <button type="button" onClick={() => setShowPassword((p) => !p)} className="absolute right-4 text-[var(--bulletin-text)] opacity-40 hover:opacity-100 transition-colors">
+                          {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                        </button>
+                      </div>
+                      {errors.password && <p className="mt-2 text-[12px] text-red-600 font-black uppercase tracking-widest">{errors.password.message}</p>}
+                      <div className="mt-4 flex justify-end">
+                        <Link to="/forgot-password" className="text-[11px] font-black uppercase tracking-widest text-[var(--bulletin-text)] opacity-60 hover:opacity-100 underline decoration-2 underline-offset-4">
+                          Forgot password?
+                        </Link>
+                      </div>
+                    </div>
+                    <button type="submit" disabled={isSubmitting}
+                      className="w-full border-4 border-[var(--bulletin-border)] bg-[var(--bulletin-text)] px-6 py-4 text-[14px] font-black uppercase tracking-widest text-[var(--bulletin-bg)] shadow-[6px_6px_0_0_var(--bulletin-shadow)] hover:translate-y-1 hover:shadow-[4px_4px_0_0_var(--bulletin-shadow)] disabled:opacity-40 transition-all">
+                      {isSubmitting ? 'Authenticating...' : 'Sign In'}
+                    </button>
+                    <p className="text-center text-[11px] font-black uppercase tracking-widest opacity-50 text-[var(--bulletin-text)]">
+                      Use email code instead?{' '}
+                      <button type="button" onClick={() => setUseOtp(true)} className="underline decoration-2 underline-offset-4 opacity-100 hover:text-[#ff6b6b]">
+                        Sign in with code
+                      </button>
+                    </p>
+                  </form>
+                )}
+
+                <div className="flex items-center gap-3 md:gap-4 my-6 md:my-12">
+                  <div className="flex-1 h-1 bg-[var(--bulletin-border)] opacity-20" />
+                  <span className="text-[10px] md:text-[12px] font-black uppercase tracking-widest opacity-40 text-[var(--bulletin-text)]">Or</span>
+                  <div className="flex-1 h-1 bg-[var(--bulletin-border)] opacity-20" />
+                </div>
+
+                <div className="flex justify-center mb-6 md:mb-12">
+                  <div
+                    className="border-4 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] shadow-[6px_6px_0_0_var(--bulletin-shadow)] transition-all overflow-hidden hover:-translate-y-1 hover:shadow-[10px_10px_0_0_var(--bulletin-shadow)]"
+                    style={{ transform: 'rotate(-0.5deg)' }}
+                  >
+                    <div>
+                      <GoogleLogin
+                        onSuccess={handleGoogleSuccess}
+                        onError={() => toast.error('Google sign-in could not start.')}
+                        useOneTap={false}
+                        shape="rectangular"
+                        theme="outline"
+                        size="large"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </>
+            ) : (
+              <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
                 <div>
-                  <p className="text-[11px] font-black uppercase tracking-[0.2em] text-[#ff6b6b] mb-3">Verify Identity</p>
-                  <h2 className="text-2xl font-black uppercase tracking-tighter text-[var(--bulletin-text)]">Enter the code.</h2>
-                  <p className="text-[13px] font-bold opacity-60 mt-2 text-[var(--bulletin-text)]">
-                    6-digit code sent to <span className="opacity-100 underline decoration-2">{otpEmail}</span>
+                  <p className="text-[11px] font-black uppercase tracking-[0.2em] text-[#ff6b6b] mb-3">Two-Factor Authentication</p>
+                  <h2 className="text-2xl font-black uppercase tracking-tighter text-[var(--bulletin-text)]">Enter 2FA Code.</h2>
+                  <p className="text-[13px] font-bold opacity-60 mt-2 text-[var(--bulletin-text)] leading-relaxed">
+                    Please open your authenticator app (like Google Authenticator or Duo) and enter the 6-digit security code.
                   </p>
                 </div>
-                <div className="flex gap-3 justify-center my-4">
+                <div className="flex gap-3 justify-center my-6">
                   {Array.from({ length: 6 }).map((_, i) => (
                     <input
                       key={i}
-                      id={`login-otp-${i}`}
+                      id={`login-totp-${i}`}
                       type="text"
                       inputMode="numeric"
-                      autoComplete={i === 0 ? 'one-time-code' : 'off'}
+                      autoComplete="one-time-code"
                       maxLength={1}
-                      value={otpCode[i] || ''}
-                      className={`w-12 h-14 text-center text-[22px] font-black border-4 border-[var(--bulletin-border)] bg-[var(--bulletin-bg)] text-[var(--bulletin-text)] shadow-[4px_4px_0_0_var(--bulletin-shadow)] focus:outline-none focus:ring-2 focus:ring-[var(--bulletin-text)] ${otpError ? 'border-red-500' : ''}`}
+                      value={totpCode[i] || ''}
+                      className={`w-12 h-14 text-center text-[22px] font-black border-4 border-[var(--bulletin-border)] bg-[var(--bulletin-bg)] text-[var(--bulletin-text)] shadow-[4px_4px_0_0_var(--bulletin-shadow)] focus:outline-none focus:ring-2 focus:ring-[var(--bulletin-text)] ${totpError ? 'border-red-500' : ''}`}
                       onChange={e => {
                         const val = e.target.value.replace(/\D/g, '');
-                        const next = otpCode.split('');
+                        const next = totpCode.split('');
                         next[i] = val.slice(-1);
                         const joined = next.join('').slice(0, 6);
-                        setOtpCode(joined);
-                        setOtpError('');
-                        if (val && i < 5) document.getElementById(`login-otp-${i + 1}`)?.focus();
+                        setTotpCode(joined);
+                        setTotpError('');
+                        if (val && i < 5) document.getElementById(`login-totp-${i + 1}`)?.focus();
                       }}
                       onKeyDown={e => {
-                        if (e.key === 'Backspace' && !otpCode[i] && i > 0) document.getElementById(`login-otp-${i - 1}`)?.focus();
-                        if (e.key === 'Enter' && otpCode.length === 6) handleVerifyLoginOtp();
+                        if (e.key === 'Backspace' && !totpCode[i] && i > 0) document.getElementById(`login-totp-${i - 1}`)?.focus();
+                        if (e.key === 'Enter' && totpCode.length === 6) handleVerifyTotp();
                       }}
                       onPaste={e => {
                         const pasted = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 6);
-                        if (pasted) { setOtpCode(pasted); setOtpError(''); e.preventDefault(); document.getElementById(`login-otp-${Math.min(pasted.length, 5)}`)?.focus(); }
+                        if (pasted) { setTotpCode(pasted); setTotpError(''); e.preventDefault(); document.getElementById(`login-totp-${Math.min(pasted.length, 5)}`)?.focus(); }
                       }}
                     />
                   ))}
                 </div>
-                {otpError && <p className="text-[12px] text-red-600 font-black uppercase tracking-widest text-center">{otpError}</p>}
+                {totpError && <p className="text-[12px] text-red-600 font-black uppercase tracking-widest text-center">{totpError}</p>}
                 <button
                   type="button"
-                  onClick={handleVerifyLoginOtp}
-                  disabled={isSubmitting || otpCode.length !== 6}
+                  onClick={handleVerifyTotp}
+                  disabled={isSubmitting || totpCode.length !== 6}
                   className="w-full border-4 border-[var(--bulletin-border)] bg-[var(--bulletin-text)] px-6 py-4 text-[14px] font-black uppercase tracking-widest text-[var(--bulletin-bg)] shadow-[6px_6px_0_0_var(--bulletin-shadow)] hover:translate-y-1 hover:shadow-[4px_4px_0_0_var(--bulletin-shadow)] disabled:opacity-40 transition-all"
                 >
-                  {isSubmitting ? 'Verifying...' : 'Sign In'}
+                  {isSubmitting ? 'Verifying...' : 'Verify & Sign In'}
                 </button>
                 <div className="flex items-center justify-between">
-                  <button type="button" onClick={() => { setOtpSent(false); setOtpCode(''); setOtpError(''); }} className="text-[12px] font-black uppercase tracking-widest underline decoration-2 underline-offset-4 opacity-60 hover:opacity-100 text-[var(--bulletin-text)]">← Back</button>
-                  <button type="button" onClick={handleResendLoginOtp} disabled={resendCountdown > 0} className="text-[12px] font-black uppercase tracking-widest underline decoration-2 underline-offset-4 disabled:opacity-40 text-[var(--bulletin-text)]">
-                    {resendCountdown > 0 ? `Resend in ${resendCountdown}s` : 'Resend Code'}
-                  </button>
+                  <button type="button" onClick={() => { setTotpRequired(false); setTotpCode(''); setTotpError(''); }} className="text-[12px] font-black uppercase tracking-widest underline decoration-2 underline-offset-4 opacity-60 hover:opacity-100 text-[var(--bulletin-text)]">← Cancel</button>
                 </div>
               </div>
             )}
-
-            {/* Password Login (fallback) */}
-            {!useOtp && (
-              <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
-                <div>
-                  <label className="block text-[11px] font-black uppercase tracking-[0.2em] opacity-40 mb-3 text-[var(--bulletin-text)]">Email</label>
-                  <input type="email" placeholder="you@example.com" autoComplete="email" className={fieldBase} {...register('email')} />
-                  {errors.email && <p className="mt-2 text-[12px] text-red-600 font-black uppercase tracking-widest">{errors.email.message}</p>}
-                </div>
-                <div>
-                  <label className="block text-[11px] font-black uppercase tracking-[0.2em] opacity-40 mb-3 text-[var(--bulletin-text)]">Password</label>
-                  <div className="relative flex items-center">
-                    <input type={showPassword ? 'text' : 'password'} placeholder="Your password" autoComplete="current-password" className={`flex-1 pr-16 ${fieldBase}`} {...register('password')} />
-                    <button type="button" onClick={() => setShowPassword((p) => !p)} className="absolute right-4 text-[var(--bulletin-text)] opacity-40 hover:opacity-100 transition-colors">
-                      {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
-                    </button>
-                  </div>
-                  {errors.password && <p className="mt-2 text-[12px] text-red-600 font-black uppercase tracking-widest">{errors.password.message}</p>}
-                  <div className="mt-4 flex justify-end">
-                    <Link to="/forgot-password" className="text-[11px] font-black uppercase tracking-widest text-[var(--bulletin-text)] opacity-60 hover:opacity-100 underline decoration-2 underline-offset-4">
-                      Forgot password?
-                    </Link>
-                  </div>
-                </div>
-                <button type="submit" disabled={isSubmitting}
-                  className="w-full border-4 border-[var(--bulletin-border)] bg-[var(--bulletin-text)] px-6 py-4 text-[14px] font-black uppercase tracking-widest text-[var(--bulletin-bg)] shadow-[6px_6px_0_0_var(--bulletin-shadow)] hover:translate-y-1 hover:shadow-[4px_4px_0_0_var(--bulletin-shadow)] disabled:opacity-40 transition-all">
-                  {isSubmitting ? 'Authenticating...' : 'Sign In'}
-                </button>
-                <p className="text-center text-[11px] font-black uppercase tracking-widest opacity-50 text-[var(--bulletin-text)]">
-                  Use email code instead?{' '}
-                  <button type="button" onClick={() => setUseOtp(true)} className="underline decoration-2 underline-offset-4 opacity-100 hover:text-[#ff6b6b]">
-                    Sign in with code
-                  </button>
-                </p>
-              </form>
-            )}
-
-            <div className="flex items-center gap-3 md:gap-4 my-6 md:my-12">
-              <div className="flex-1 h-1 bg-[var(--bulletin-border)] opacity-20" />
-              <span className="text-[10px] md:text-[12px] font-black uppercase tracking-widest opacity-40 text-[var(--bulletin-text)]">Or</span>
-              <div className="flex-1 h-1 bg-[var(--bulletin-border)] opacity-20" />
-            </div>
-
-            <div className="flex justify-center mb-6 md:mb-12">
-              <div
-                className="border-4 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] shadow-[6px_6px_0_0_var(--bulletin-shadow)] transition-all overflow-hidden hover:-translate-y-1 hover:shadow-[10px_10px_0_0_var(--bulletin-shadow)]"
-                style={{ transform: 'rotate(-0.5deg)' }}
-              >
-                <div>
-                  <GoogleLogin
-                    onSuccess={handleGoogleSuccess}
-                    onError={() => toast.error('Google sign-in could not start.')}
-                    useOneTap={false}
-                    shape="rectangular"
-                    theme="outline"
-                    size="large"
-                  />
-                </div>
-              </div>
-            </div>
 
             <div className="border-t-4 border-[var(--bulletin-border)] pt-6 md:pt-8 text-center bg-[var(--bulletin-card)] p-4 md:p-6 border-2 shadow-[4px_4px_0_0_var(--bulletin-shadow)] md:shadow-[8px_8px_0_0_var(--bulletin-shadow)]" style={{ transform: 'rotate(1deg)' }}>
               <p className="text-[10px] md:text-[12px] font-bold text-[var(--bulletin-text)] uppercase tracking-widest">

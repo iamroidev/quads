@@ -21,6 +21,10 @@ import userRoutes from './user.routes';
 import referenceRoutes from './reference.routes';
 import reportRoutes from './report.routes';
 import storeRoutes from './store.routes';
+import buyerRatingRoutes from './buyerRating.routes';
+import lostFoundRoutes from './lostFound.routes';
+import discoveryRoutes from './discovery.routes';
+import transactionRoutes from './transaction.routes';
 
 const router = Router();
 
@@ -56,5 +60,9 @@ router.use('/users', userRoutes);
 router.use('/reference', referenceRoutes);
 router.use('/reports', reportRoutes);
 router.use('/stores', storeRoutes);
+router.use('/buyer-ratings', buyerRatingRoutes);
+router.use('/lost-found', lostFoundRoutes);
+router.use('/discovery', discoveryRoutes);
+router.use('/transactions', transactionRoutes);
 
 export default router;

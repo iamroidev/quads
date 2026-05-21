@@ -4,8 +4,9 @@ import {
   verifyPayment,
   handleWebhook,
   getTransaction,
+  refundPayment,
 } from '../controllers/payment.controller';
-import { authenticate } from '../middleware/auth';
+import { authenticate, authorize } from '../middleware/auth';
 
 const router = Router();
 
@@ -93,5 +94,6 @@ router.get('/verify-success', (req, res) => {
 router.post('/initiate', authenticate, initiatePayment);
 router.get('/verify/:reference', authenticate, verifyPayment);
 router.get('/transaction/:reference', authenticate, getTransaction);
+router.post('/refund', authenticate, authorize('admin'), refundPayment);
 
 export default router;

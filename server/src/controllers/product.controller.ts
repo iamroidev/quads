@@ -1,12 +1,14 @@
 import { Request, Response, NextFunction } from 'express';
 import { parse } from 'csv-parse/sync';
 import axios from 'axios';
+import mongoose from 'mongoose';
 import productService from '../services/product.service';
 import ApiError from '../utils/ApiError';
 import { uploadToCloudinary } from '../utils/imageUpload';
 import growthService from '../services/growth.service';
 import feedService from '../services/feed.service';
 import Store from '../models/Store';
+import User from '../models/User';
 
 const resolveSellerStoreId = async (req: Request): Promise<string> => {
   if (!req.user) {
@@ -48,10 +50,10 @@ export const createProduct = async (
     const sellerStoreId = await resolveSellerStoreId(req);
 
     // Check seller is verified before listing
-    if (!req.user!.isVerified && !req.user!.emailVerified && !req.user!.phoneVerified) {
+    if (!req.user!.isVerified) {
       res.status(403).json({
         success: false,
-        message: 'You must verify your email or phone before creating a listing. Go to Profile > Verification.',
+        message: 'You must verify your UMaT student status before creating a listing. Go to Profile > Verification.',
       });
       return;
     }
@@ -141,6 +143,22 @@ export const getProducts = async (
       data: result.products,
       pagination: result.pagination,
     });
+
+    if (req.query.search) {
+      const searchTerm = (req.query.search as string).trim();
+      if (searchTerm) {
+        const isZero = result.pagination.total === 0;
+        await growthService.captureEvent(
+          req.user?._id?.toString(),
+          isZero ? 'search_zero' : 'search',
+          {
+            query: searchTerm,
+            category: req.query.category,
+            resultCount: result.pagination.total,
+          }
+        );
+      }
+    }
 
     await growthService.captureEvent(req.user?._id?.toString(), 'view', {
       route: 'products_list',
@@ -252,6 +270,24 @@ export const getProductById = async (
       message: 'Product retrieved',
       data: { product },
     });
+
+    if (req.user) {
+      const user = await User.findById(req.user._id);
+      if (user) {
+        if (!user.recentlyViewed) user.recentlyViewed = [];
+        user.recentlyViewed = user.recentlyViewed.filter(
+          (item: any) => item.productId.toString() !== req.params.id
+        );
+        user.recentlyViewed.unshift({
+          productId: new mongoose.Types.ObjectId(req.params.id) as any,
+          viewedAt: new Date(),
+        });
+        if (user.recentlyViewed.length > 50) {
+          user.recentlyViewed = user.recentlyViewed.slice(0, 50);
+        }
+        await user.save();
+      }
+    }
 
     await growthService.captureEvent(req.user?._id?.toString(), 'view', {
       route: 'product_detail',
@@ -1012,6 +1048,75 @@ export const bulkUpdateProductDetails = async (
     next(error);
   }
 };
+
+/**
+ * @route   POST /api/products/bulk-action
+ * @desc    Bulk relist, archive, or price update
+ * @access  Private (Seller/Admin)
+ */
+export const bulkProductAction = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const { productIds, action, percent } = req.body as {
+      productIds?: string[];
+      action?: 'relist' | 'archive' | 'price_update';
+      percent?: number;
+    };
+
+    if (!Array.isArray(productIds) || productIds.length === 0) {
+      throw ApiError.badRequest('productIds is required');
+    }
+    if (!action) {
+      throw ApiError.badRequest('action is required');
+    }
+
+    const sellerId = req.user!._id.toString();
+    const safeIds = productIds.slice(0, 100);
+    const baseQuery = { _id: { $in: safeIds }, seller: sellerId };
+
+    let modifiedCount = 0;
+
+    if (action === 'relist') {
+      const result = await (await import('../models/Product')).default.updateMany(baseQuery, {
+        $set: { status: 'active' },
+      });
+      modifiedCount = result.modifiedCount;
+    } else if (action === 'archive') {
+      const result = await (await import('../models/Product')).default.updateMany(baseQuery, {
+        $set: { status: 'removed' },
+      });
+      modifiedCount = result.modifiedCount;
+    } else if (action === 'price_update') {
+      if (percent === undefined || !Number.isFinite(percent)) {
+        throw ApiError.badRequest('percent is required for price_update');
+      }
+      const Product = (await import('../models/Product')).default;
+      const products = await Product.find(baseQuery).select('price');
+      for (const p of products) {
+        const nextPrice = Math.max(0.5, Number((p.price * (1 + percent / 100)).toFixed(2)));
+        if (nextPrice !== p.price) {
+          p.price = nextPrice;
+          await p.save();
+          modifiedCount++;
+        }
+      }
+    } else {
+      throw ApiError.badRequest('Invalid action. Must be relist, archive, or price_update');
+    }
+
+    res.status(200).json({
+      success: true,
+      message: 'Bulk action completed',
+      data: { modifiedCount },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 
 /**
  * @route   GET /api/products/recommendations

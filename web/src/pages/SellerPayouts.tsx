@@ -1,5 +1,5 @@
 import React from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { 
   DollarSign, 
   Clock, 
@@ -7,17 +7,32 @@ import {
   AlertCircle, 
   ArrowUpRight,
   TrendingUp,
-  CreditCard
+  CreditCard,
+  RefreshCw
 } from 'lucide-react';
 import adminService from '../services/admin.service';
 import { BulletinLayout, BulletinSection, BulletinCard } from '../components/layout/BulletinLayout';
 import { useAuth } from '../context/AuthContext';
+import toast from 'react-hot-toast';
 
 const SellerPayouts: React.FC = () => {
   const { user } = useAuth();
+  const queryClient = useQueryClient();
+
   const { data: payoutsData, isLoading } = useQuery({
     queryKey: ['sellerPayouts'],
     queryFn: () => adminService.getSellerPayouts({ limit: 50 }),
+  });
+
+  const retryMutation = useMutation({
+    mutationFn: (payoutId: string) => adminService.retryPayout(payoutId),
+    onSuccess: () => {
+      toast.success('Payout retry triggered successfully!');
+      queryClient.invalidateQueries({ queryKey: ['sellerPayouts'] });
+    },
+    onError: (err: any) => {
+      toast.error(err.response?.data?.message || 'Failed to retry payout');
+    }
   });
 
   const payouts = payoutsData?.data?.payouts ?? [];
@@ -116,9 +131,26 @@ const SellerPayouts: React.FC = () => {
                           <div className="text-[9px] opacity-40 uppercase font-bold mt-0.5">{new Date(payout.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
                         </td>
                         <td className="px-6 py-5">
-                          <span className={`px-2 py-1 border-2 border-black text-[8px] font-black uppercase tracking-widest ${getStatusStyle(payout.status)}`}>
-                            {payout.status}
-                          </span>
+                          <div className="flex items-center gap-2">
+                            <span className={`px-2 py-1 border-2 border-black text-[8px] font-black uppercase tracking-widest ${getStatusStyle(payout.status)}`}>
+                              {payout.status}
+                            </span>
+                            {payout.status === 'failed' && (
+                              <button
+                                onClick={() => retryMutation.mutate(payout._id)}
+                                disabled={retryMutation.isPending}
+                                className="flex items-center gap-1 bg-[#1f1a14] hover:bg-[#ff6b6b] text-white disabled:bg-gray-400 px-2 py-1 border border-black text-[8px] font-black uppercase transition-colors"
+                              >
+                                <RefreshCw className={`h-2.5 w-2.5 ${retryMutation.isPending && retryMutation.variables === payout._id ? 'animate-spin' : ''}`} />
+                                Retry
+                              </button>
+                            )}
+                          </div>
+                          {payout.failureReason && (
+                            <div className="text-[9px] text-red-500 font-bold mt-1 max-w-[200px] truncate" title={payout.failureReason}>
+                              {payout.failureReason}
+                            </div>
+                          )}
                         </td>
                         <td className="px-6 py-5 text-right">
                           <div className="text-sm font-black">GHS {payout.amount.toFixed(2)}</div>
