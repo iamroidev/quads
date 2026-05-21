@@ -25,6 +25,14 @@ const sns = new SNSClient(snsConfig);
 
 class VerificationService {
   /**
+   * Check if email domain matches UMaT institutional domains
+   */
+  private isInstitutionalEmail(email?: string): boolean {
+    if (!email) return false;
+    return /@(student\.)?umat\.edu\.gh$/i.test(email) || /@st\.umat\.edu\.gh$/i.test(email);
+  }
+
+  /**
    * Generate a 6-digit OTP code
    */
   private generateCode(): string {
@@ -186,12 +194,14 @@ class VerificationService {
       update.phoneVerified = true;
     }
 
-    // If user now has at least one verification, mark isVerified
+    // A user is only verified if they verify an institutional email OR their ID card is verified.
     const user = await User.findById(userId);
     if (user) {
       const newEmailVerified = type === 'email' ? true : user.emailVerified;
-      const newPhoneVerified = type === 'phone' ? true : user.phoneVerified;
-      update.isVerified = newEmailVerified || newPhoneVerified;
+      const emailToCheck = type === 'email' && record.email ? record.email : user.email;
+      const isInstitutional = this.isInstitutionalEmail(emailToCheck);
+      
+      update.isVerified = (newEmailVerified && isInstitutional) || user.idVerificationStatus === 'verified';
 
       if (type === 'email' && record.email) {
         // If the user signed up with a different email and is verifying their student email,
@@ -246,7 +256,8 @@ class VerificationService {
 
       user.phone = phoneNumber;
       user.phoneVerified = true;
-      user.isVerified = user.emailVerified || true; // At least one verification
+      // Phone verification alone does not set isVerified. Only institutional email or ID verification does.
+      user.isVerified = (user.emailVerified && this.isInstitutionalEmail(user.email)) || user.idVerificationStatus === 'verified';
       
       await user.save();
     } catch (error: any) {

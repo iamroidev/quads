@@ -24,6 +24,9 @@ import {
   forgotPassword,
   resetPassword,
   changePasswordDirect,
+  setupTotp,
+  verifyTotpSetup,
+  disableTotp,
 } from '../controllers/auth.controller';
 import { authenticate } from '../middleware/auth';
 import { validate } from '../middleware/validate';
@@ -108,6 +111,15 @@ router.put('/settings/notifications', authenticate, updateNotificationSettings);
 
 // @route   PUT /api/auth/settings/privacy
 router.put('/settings/privacy', authenticate, updatePrivacySettings);
+
+// @route   POST /api/auth/totp/setup
+router.post('/totp/setup', authenticate, setupTotp);
+
+// @route   POST /api/auth/totp/verify
+router.post('/totp/verify', authenticate, verifyTotpSetup);
+
+// @route   POST /api/auth/totp/disable
+router.post('/totp/disable', authenticate, disableTotp);
 
 // @route   DELETE /api/auth/account
 router.delete('/account', authenticate, deleteAccount);

@@ -384,6 +384,7 @@ const RegisterPage: React.FC = () => {
         residenceHall: profile.residenceHall,
         currentLevel:  profile.currentLevel,
         location:      profile.location,
+        tosAccepted:   true,
       });
       sessionStorage.removeItem('reg_step');
       sessionStorage.removeItem('reg_data');

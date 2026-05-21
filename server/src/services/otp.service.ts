@@ -174,6 +174,7 @@ class OtpService {
       phoneVerified: false,
       isBanned:      false,
       password:      profile.password || crypto.randomBytes(16).toString('hex'),
+      tosAcceptedAt: new Date(),
     });
 
     // Create store if seller

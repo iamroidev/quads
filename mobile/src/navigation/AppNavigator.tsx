@@ -52,6 +52,7 @@ import {
    PrivacyPolicyScreen,
    AboutUsScreen,
    FollowingFeedScreen,
+   TransactionHistoryScreen,
  } from '../screens';
 import { navigationRef } from './navigationRef';
 import { useColors } from '../theme/ThemeContext';
@@ -161,6 +162,7 @@ const ProfileStackScreen = () => {
       <ProfileStack.Screen name="Scanner" component={ScannerScreen} options={{ ...dsh, title: 'Scanner', headerShown: false }} />
       <ProfileStack.Screen name="LostFound" component={LostFoundScreen} options={{ ...dsh, title: 'Lost & Found' }} />
       <ProfileStack.Screen name="SellerPayouts" component={SellerPayoutsScreen} options={{ ...dsh, title: 'Earnings' }} />
+      <ProfileStack.Screen name="TransactionHistory" component={TransactionHistoryScreen} options={{ ...dsh, title: 'Transaction Ledger' }} />
       <ProfileStack.Screen name="DisputeCenter" component={DisputeCenterScreen} options={{ ...dsh, title: 'Disputes' }} />
       <ProfileStack.Screen name="GrowthTools" component={GrowthToolsScreen} options={{ ...dsh, title: 'Growth Tools' }} />
       <ProfileStack.Screen name="Maintenance" component={MaintenanceScreen} options={{ ...dsh, title: 'Maintenance' }} />

@@ -259,6 +259,16 @@ const adminService = {
     const response = await api.post('/notifications/push/broadcast', data);
     return response.data;
   },
+
+  retryPayout: async (payoutId: string) => {
+    const response = await api.post(`/payouts/${payoutId}/retry`);
+    return response.data;
+  },
+
+  adminRefund: async (orderId: string, amount?: number, reason?: string) => {
+    const response = await api.post('/payments/refund', { orderId, amount, reason });
+    return response.data;
+  },
 };
 
 export default adminService;

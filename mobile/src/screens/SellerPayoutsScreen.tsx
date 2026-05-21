@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, ScrollView, StyleSheet, Text, View,
-  Dimensions,
+  Dimensions, TouchableOpacity, Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { shadows } from '../theme';
@@ -24,6 +24,7 @@ const SellerPayoutsScreen = () => {
   const isMobile = _sw < 640;
   const [payouts, setPayouts] = useState<Payout[]>([]);
   const [loading, setLoading] = useState(true);
+  const [retryingId, setRetryingId] = useState<string | null>(null);
   const [stats, setStats] = useState({ totalPending: 0, totalCompleted: 0, totalAmount: 0 });
 
   const styles = React.useMemo(() => StyleSheet.create({
@@ -49,7 +50,12 @@ const SellerPayoutsScreen = () => {
     payoutAmount: { fontSize: isMobile ? 12 : 13, fontWeight: '900', marginRight: 12, color: colors.text },
     statusBadge: { paddingHorizontal: 8, paddingVertical: 4 },
     statusText: { fontSize: 9, fontWeight: '900' },
-  }), [colors]);
+    retryBtn: {
+      borderWidth: 2, borderColor: colors.danger, backgroundColor: colors.surface,
+      paddingHorizontal: 10, paddingVertical: 4, marginLeft: 8,
+    },
+    retryBtnText: { fontSize: 8, fontWeight: '900', color: colors.danger },
+  }), [colors, isMobile]);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -60,8 +66,9 @@ const SellerPayoutsScreen = () => {
     }
   };
 
-  useEffect(() => {
-    api.get('/payouts/seller').then(r => r.data).then((payoutRes) => {
+  const fetchPayouts = async () => {
+    try {
+      const payoutRes = await api.get('/payouts/seller').then(r => r.data);
       if (payoutRes.success) {
         const list: Payout[] = payoutRes.data.payouts || [];
         setPayouts(list);
@@ -71,8 +78,33 @@ const SellerPayoutsScreen = () => {
           totalAmount: list.filter(p => p.status === 'completed').reduce((sum, p) => sum + (p.netAmount || 0), 0),
         });
       }
-    }).finally(() => setLoading(false));
+    } catch (error) {
+      console.error('Failed to fetch payouts:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchPayouts();
   }, []);
+
+  const handleRetryPayout = async (payoutId: string) => {
+    setRetryingId(payoutId);
+    try {
+      const res = await api.post(`/payouts/${payoutId}/retry`);
+      if (res.data.success) {
+        await fetchPayouts();
+        Alert.alert('Success', 'Payout retry succeeded!');
+      } else {
+        Alert.alert('Retry Failed', res.data.message || 'The retry was unsuccessful.');
+      }
+    } catch (err: any) {
+      Alert.alert('Error', err.response?.data?.message || 'Failed to retry payout.');
+    } finally {
+      setRetryingId(null);
+    }
+  };
 
   if (loading) {
     return (
@@ -119,6 +151,17 @@ const SellerPayoutsScreen = () => {
                     {p.status.toUpperCase()}
                   </Text>
                 </View>
+                {p.status === 'failed' && (
+                  <TouchableOpacity
+                    onPress={() => handleRetryPayout(p._id)}
+                    style={styles.retryBtn}
+                    disabled={retryingId === p._id}
+                  >
+                    <Text style={styles.retryBtnText}>
+                      {retryingId === p._id ? '...' : 'RETRY'}
+                    </Text>
+                  </TouchableOpacity>
+                )}
               </View>
             ))
           )}
@@ -129,3 +172,4 @@ const SellerPayoutsScreen = () => {
 };
 
 export default SellerPayoutsScreen;
+

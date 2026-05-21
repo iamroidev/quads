@@ -135,7 +135,7 @@ const VerificationPage: React.FC = () => {
     }
   };
 
-  const isVerified = user?.emailVerified && user?.phoneVerified;
+  const isVerified = user?.isVerified;
 
   return (
     <BulletinLayout title="Verify Me" subtitle="Security" section="05">

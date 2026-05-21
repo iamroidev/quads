@@ -7,6 +7,8 @@ import { LoadingSpinner } from '../components/ui';
 import { ProductPopulated, Category, PaginationInfo, ProductCondition, DeliveryOption } from '../types';
 import { BulletinLayout, BulletinSection } from '../components/layout/BulletinLayout';
 import { ProductCardSkeleton } from '../components/ui/BulletinSkeleton';
+import { useAuth } from '../context/AuthContext';
+import api from '../services/api';
 
 const conditionOptions = [
   { value: '', label: 'All Conditions' },
@@ -62,6 +64,9 @@ const Products: React.FC = () => {
   const [pagination, setPagination] = useState<PaginationInfo | null>(null);
   const [loading, setLoading] = useState(true);
   const [showFilters, setShowFilters] = useState(false);
+  const [savingSearch, setSavingSearch] = useState(false);
+  const [saveMessage, setSaveMessage] = useState('');
+  const { isAuthenticated } = useAuth();
 
   // Read filters from URL
   const category = searchParams.get('category') || '';
@@ -132,6 +137,35 @@ const Products: React.FC = () => {
 
   const hasActiveFilters = category || condition || minPrice || maxPrice || deliveryOption || pickupLocation;
 
+  const handleSaveSearch = async () => {
+    setSavingSearch(true);
+    setSaveMessage('');
+    try {
+      const res = await api.post('/discovery/saved-searches', {
+        query: search || '',
+        category: category || undefined,
+        filters: {
+          condition: condition || undefined,
+          minPrice: minPrice ? parseFloat(minPrice) : undefined,
+          maxPrice: maxPrice ? parseFloat(maxPrice) : undefined,
+          deliveryOption: deliveryOption || undefined,
+          pickupLocation: pickupLocation || undefined,
+        },
+        alertEnabled: true
+      });
+      if (res.data?.success) {
+        setSaveMessage('Search saved! You will receive notifications for new matches.');
+        setTimeout(() => setSaveMessage(''), 5000);
+      } else {
+        setSaveMessage(res.data?.message || 'Failed to save search.');
+      }
+    } catch (err: any) {
+      setSaveMessage(err.response?.data?.message || 'Error saving search.');
+    } finally {
+      setSavingSearch(false);
+    }
+  };
+
   return (
     <BulletinLayout 
       title={search ? `Results: "${search}"` : 'All Items'}
@@ -166,6 +200,23 @@ const Products: React.FC = () => {
               Showing results for: <span className="opacity-100">"{search}"</span>
             </p>
           )}
+          <div className="flex flex-wrap items-center gap-4 mt-4">
+            {isAuthenticated && (search || category || hasActiveFilters) && (
+              <button
+                type="button"
+                onClick={handleSaveSearch}
+                disabled={savingSearch}
+                className="border-4 border-black bg-[#ffd700] hover:bg-[#ffd700]/80 text-black px-6 py-3 text-[12px] font-black uppercase tracking-widest shadow-[4px_4px_0_0_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px] transition-all"
+              >
+                {savingSearch ? 'Saving...' : '★ Save This Search'}
+              </button>
+            )}
+            {saveMessage && (
+              <span className="text-[11px] font-bold uppercase tracking-widest text-[#ff6b6b]">
+                {saveMessage}
+              </span>
+            )}
+          </div>
         </div>
 
         <div className="mb-12 flex flex-col md:flex-row md:items-center justify-between gap-6 border-b-4 border-black pb-8">

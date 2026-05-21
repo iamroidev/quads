@@ -3,7 +3,7 @@ import mongoose, { Document, Schema } from 'mongoose';
 export interface IAnalyticsEventDocument extends Document {
   _id: mongoose.Types.ObjectId;
   user?: mongoose.Types.ObjectId;
-  event: 'view' | 'chat' | 'order' | 'signup' | 'login';
+  event: 'view' | 'chat' | 'order' | 'signup' | 'login' | 'search' | 'search_zero';
   context?: Record<string, any>;
   cohort?: string;
   createdAt: Date;
@@ -13,7 +13,7 @@ export interface IAnalyticsEventDocument extends Document {
 const analyticsEventSchema = new Schema<IAnalyticsEventDocument>(
   {
     user: { type: Schema.Types.ObjectId, ref: 'User' },
-    event: { type: String, enum: ['view', 'chat', 'order', 'signup', 'login'], required: true },
+    event: { type: String, enum: ['view', 'chat', 'order', 'signup', 'login', 'search', 'search_zero'], required: true },
     context: { type: Schema.Types.Mixed, default: {} },
     cohort: { type: String, default: '' },
   },

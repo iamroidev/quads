@@ -125,6 +125,56 @@ const GrowthTools: React.FC = () => {
     }
   };
 
+  const deleteCoupon = async (id: string) => {
+    if (!window.confirm('Are you sure you want to delete this coupon?')) return;
+    try {
+      const res = await orderService.deleteCoupon(id);
+      if (res.success) {
+        toast.success('Coupon deleted');
+        refetchCoupons();
+      }
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || 'Failed to delete coupon');
+    }
+  };
+
+  const toggleCoupon = async (id: string) => {
+    try {
+      const res = await orderService.toggleCouponStatus(id);
+      if (res.success) {
+        toast.success('Coupon status updated');
+        refetchCoupons();
+      }
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || 'Failed to update coupon status');
+    }
+  };
+
+  const deleteBundle = async (id: string) => {
+    if (!window.confirm('Are you sure you want to delete this bundle?')) return;
+    try {
+      const res = await orderService.deleteBundle(id);
+      if (res.success) {
+        toast.success('Bundle deleted');
+        refetchBundles();
+      }
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || 'Failed to delete bundle');
+    }
+  };
+
+  const toggleBundle = async (id: string) => {
+    try {
+      const res = await orderService.toggleBundleStatus(id);
+      if (res.success) {
+        toast.success('Bundle status updated');
+        refetchBundles();
+      }
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || 'Failed to update bundle status');
+    }
+  };
+
   return (
     <BulletinLayout title="Growth Toolkit" subtitle="Marketplace Optimization" section="09">
       <BulletinSection bgColor="bg-[#faf8f5] dark:bg-black/20">
@@ -217,12 +267,33 @@ const GrowthTools: React.FC = () => {
 
             {coupons.length > 0 && (
               <div className="border-4 border-black bg-[#fffacd] dark:bg-yellow-950/10 p-6 shadow-[4px_4px_0_0_#000] text-black dark:text-white">
-                 <div className="text-[10px] font-black uppercase tracking-widest opacity-30 mb-4">Your Active Codes</div>
-                 <div className="grid grid-cols-2 gap-3">
+                 <div className="text-[10px] font-black uppercase tracking-widest opacity-30 mb-4">Your Promo Codes</div>
+                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                    {coupons.map((c: any) => (
                      <div key={c._id} className="border-2 border-black p-3 bg-white dark:bg-black/40 flex justify-between items-center">
-                        <div className="text-xs font-black">{c.code}</div>
-                        <div className="text-[10px] font-black opacity-60">{c.type === 'percentage' ? `${c.value}%` : `GHS ${c.value}`}</div>
+                        <div>
+                          <div className="text-xs font-black flex items-center gap-2">
+                            {c.code}
+                            <span className={`text-[8px] px-1 py-0.5 border border-black font-black uppercase ${c.isActive ? 'bg-green-500/20 text-green-700 dark:text-green-300' : 'bg-red-500/20 text-red-700 dark:text-red-300'}`}>
+                              {c.isActive ? 'Active' : 'Inactive'}
+                            </span>
+                          </div>
+                          <div className="text-[10px] font-black opacity-60 mt-1">{c.type === 'percentage' ? `${c.value}%` : `GHS ${c.value}`}</div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={() => toggleCoupon(c._id)}
+                            className="text-[9px] font-black uppercase px-2 py-1 border-2 border-black bg-white dark:bg-black hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-colors"
+                          >
+                            Toggle
+                          </button>
+                          <button
+                            onClick={() => deleteCoupon(c._id)}
+                            className="p-1 border-2 border-black bg-red-500/10 text-red-700 hover:bg-red-500 hover:text-white transition-colors"
+                          >
+                            <Trash2 size={12} />
+                          </button>
+                        </div>
                      </div>
                    ))}
                  </div>
@@ -345,13 +416,34 @@ const GrowthTools: React.FC = () => {
             {bundles.length > 0 && (
               <div className="grid md:grid-cols-3 gap-6 text-black dark:text-white">
                  {bundles.map((b: any) => (
-                   <div key={b._id} className="border-4 border-black bg-white dark:bg-black/20 p-6 shadow-[4px_4px_0_0_#000]">
-                      <div className="text-lg font-black uppercase tracking-tight mb-1">{b.name}</div>
-                      <div className="text-[10px] font-black text-[#ff6b6b] mb-4">{b.discountPercent}% BUNDLE DISCOUNT</div>
+                   <div key={b._id} className="border-4 border-black bg-white dark:bg-black/20 p-6 shadow-[4px_4px_0_0_#000] relative">
+                      <div className="absolute top-4 right-4 flex items-center gap-2">
+                        <button
+                          onClick={() => toggleBundle(b._id)}
+                          className="text-[8px] font-black uppercase px-1.5 py-0.5 border border-black bg-white dark:bg-black hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-colors"
+                        >
+                          Toggle
+                        </button>
+                        <button
+                          onClick={() => deleteBundle(b._id)}
+                          className="p-1 border border-black bg-red-500/10 text-red-700 hover:bg-red-500 hover:text-white transition-colors"
+                        >
+                          <Trash2 size={10} />
+                        </button>
+                      </div>
+                      <div className="text-lg font-black uppercase tracking-tight mb-1 pr-16">{b.name}</div>
+                      <div className="flex items-center gap-2 mb-4">
+                        <span className="text-[10px] font-black text-[#ff6b6b]">{b.discountPercent}% BUNDLE DISCOUNT</span>
+                        <span className={`text-[8px] px-1 py-0.5 border border-black font-black uppercase ${b.isActive ? 'bg-green-500/20 text-green-700 dark:text-green-300' : 'bg-red-500/20 text-red-700 dark:text-red-300'}`}>
+                          {b.isActive ? 'Active' : 'Inactive'}
+                        </span>
+                      </div>
                       <div className="space-y-1">
                         <div className="text-[8px] font-black uppercase opacity-40">Includes:</div>
-                        {b.productIds?.slice(0, 3).map((pid: string) => (
-                          <div key={pid} className="text-[9px] font-bold opacity-60 truncate">Product ID: {pid.slice(-6)}</div>
+                        {b.productIds?.slice(0, 3).map((p: any) => (
+                          <div key={p._id || p} className="text-[9px] font-bold opacity-60 truncate">
+                            {p.title || `Product ID: ${String(p).slice(-6)}`}
+                          </div>
                         ))}
                       </div>
                    </div>

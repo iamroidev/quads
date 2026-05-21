@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useState } from "react";
 import {
   ActivityIndicator,
+  Alert,
   FlatList,
   Image,
   RefreshControl,
@@ -10,14 +11,18 @@ import {
   TextInput,
   TouchableOpacity,
   View,
+  Modal,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import productService from "../services/product.service";
 import categoryService from "../services/category.service";
 import { Product } from "../types";
 import { useTheme } from "../theme/ThemeContext";
+import { useAuth } from "../context/AuthContext";
 import ScreenHeader from "../components/ScreenHeader";
+import api from "../services/api";
 import FloatingCart from "../components/FloatingCart";
 import { BulletinCard } from "../components/BulletinCard";
 import { useResponsive } from "../hooks/useResponsive";
@@ -34,6 +39,7 @@ const DELIVERY_OPTIONS = [
 
 const ProductsScreen = ({ navigation, route }: any) => {
   const { colors } = useTheme();
+  const { user } = useAuth();
   const { width, isMobile, isTablet } = useResponsive();
   const typography = getTypography(width);
   const styles = getStyles(colors, width);
@@ -41,6 +47,66 @@ const ProductsScreen = ({ navigation, route }: any) => {
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
+  const [savingSearch, setSavingSearch] = useState(false);
+
+  const [sellerId, setSellerId] = useState(route?.params?.sellerId || "");
+  const [sellerName, setSellerName] = useState(route?.params?.sellerName || "");
+  const [showReportUserModal, setShowReportUserModal] = useState(false);
+  const [reportUserReason, setReportUserReason] = useState<"harassment" | "spam" | "scam" | "inappropriate" | "fake_listing" | "other">("spam");
+  const [reportUserDescription, setReportUserDescription] = useState("");
+  const [reportingUser, setReportingUser] = useState(false);
+
+  const handleReportUser = async () => {
+    if (!reportUserDescription.trim()) {
+      Alert.alert("Error", "Please describe the reason for your report.");
+      return;
+    }
+    if (!sellerId) return;
+    setReportingUser(true);
+    try {
+      await api.post("/reports", {
+        reportedUser: sellerId,
+        reason: reportUserReason,
+        description: reportUserDescription.trim(),
+      });
+      Alert.alert("Success", "Seller reported. Our team will investigate.");
+      setShowReportUserModal(false);
+      setReportUserDescription("");
+    } catch (err: any) {
+      Alert.alert("Error", err.response?.data?.message || "Failed to report seller.");
+    } finally {
+      setReportingUser(false);
+    }
+  };
+
+  const handleClearSellerFilter = () => {
+    setSellerId("");
+    setSellerName("");
+    navigation.setParams({ sellerId: undefined, sellerName: undefined });
+  };
+
+  const handleSaveSearch = async () => {
+    setSavingSearch(true);
+    try {
+      const res = await api.post("/discovery/saved-searches", {
+        query: search || "",
+        category: category || undefined,
+        filters: {
+          deliveryOption: deliveryOption || undefined,
+        },
+        alertEnabled: true,
+      });
+      if (res.data?.success) {
+        Alert.alert("Success", "Search saved! You'll be notified of new listings matching your filters.");
+      } else {
+        Alert.alert("Error", res.data?.message || "Failed to save search.");
+      }
+    } catch (err: any) {
+      Alert.alert("Error", err.response?.data?.message || "Something went wrong.");
+    } finally {
+      setSavingSearch(false);
+    }
+  };
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [search, setSearch] = useState("");
@@ -83,6 +149,7 @@ const ProductsScreen = ({ navigation, route }: any) => {
         sort,
         category: category || undefined,
         deliveryOption: deliveryOption || undefined,
+        seller: sellerId || undefined,
       });
       if (res.success) {
         const nextProducts = append ? [...products, ...res.data] : res.data;
@@ -107,21 +174,28 @@ const ProductsScreen = ({ navigation, route }: any) => {
       setLoadingMore(false);
       setRefreshing(false);
     }
-  }, [search, sort, category, deliveryOption]);
+  }, [search, sort, category, deliveryOption, sellerId]);
 
   useEffect(() => {
     const incomingSearch =
       typeof route?.params?.search === "string" ? route.params.search : "";
     const incomingCategory =
       typeof route?.params?.category === "string" ? route.params.category : "";
+    const incomingSellerId =
+      typeof route?.params?.sellerId === "string" ? route.params.sellerId : "";
+    const incomingSellerName =
+      typeof route?.params?.sellerName === "string" ? route.params.sellerName : "";
+
     if (incomingSearch) setSearch(incomingSearch);
     if (incomingCategory) setCategory(incomingCategory);
+    setSellerId(incomingSellerId);
+    setSellerName(incomingSellerName);
     setTimeout(() => fetchProducts(true, 1, false), 0);
-  }, [route?.params?.search, route?.params?.category]);
+  }, [route?.params?.search, route?.params?.category, route?.params?.sellerId, route?.params?.sellerName]);
 
   useEffect(() => {
     setTimeout(() => fetchProducts(true, 1, false), 0);
-  }, [sort, category, deliveryOption]);
+  }, [sort, category, deliveryOption, sellerId]);
 
   const loadMore = () => {
     if (loadingMore || loading || !hasMore) return;
@@ -203,6 +277,85 @@ const ProductsScreen = ({ navigation, route }: any) => {
         subtitle="Find verified deals by category and latest posts."
       />
 
+      {/* Seller storefront details card */}
+      {!!sellerId && (
+        <View
+          style={{
+            marginHorizontal: hPadding,
+            marginTop: 12,
+            marginBottom: 4,
+            padding: 14,
+            backgroundColor: colors.surface,
+            borderWidth: 2,
+            borderColor: colors.boardBorder,
+            borderBottomWidth: 3,
+            borderRightWidth: 3,
+            flexDirection: "row",
+            alignItems: "center",
+          }}
+        >
+          {/* Seller Avatar */}
+          <View
+            style={{
+              width: 38,
+              height: 38,
+              backgroundColor: colors.accent,
+              alignItems: "center",
+              justifyContent: "center",
+              marginRight: 12,
+            }}
+          >
+            <Text style={{ color: colors.primaryContent, fontWeight: "900", fontSize: 16 }}>
+              {sellerName ? sellerName[0].toUpperCase() : "S"}
+            </Text>
+          </View>
+
+          {/* Seller details */}
+          <View style={{ flex: 1 }}>
+            <Text style={{ fontSize: 9, fontWeight: "900", color: colors.accent, textTransform: "uppercase", letterSpacing: 1 }}>
+              Seller Storefront
+            </Text>
+            <Text style={{ fontSize: 13, fontWeight: "900", color: colors.text, textTransform: "uppercase" }} numberOfLines={1}>
+              {sellerName}
+            </Text>
+          </View>
+
+          {/* Report / Exit buttons */}
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+            {user && user._id !== sellerId && (
+              <TouchableOpacity
+                style={{
+                  borderWidth: 1.5,
+                  borderColor: colors.border,
+                  backgroundColor: colors.surfaceSecondary,
+                  paddingHorizontal: 10,
+                  paddingVertical: 6,
+                }}
+                onPress={() => setShowReportUserModal(true)}
+              >
+                <Text style={{ fontSize: 9, fontWeight: "900", color: colors.danger, textTransform: "uppercase" }}>
+                  Report
+                </Text>
+              </TouchableOpacity>
+            )}
+            <TouchableOpacity
+              style={{
+                borderWidth: 1.5,
+                borderColor: colors.boardBorder,
+                backgroundColor: colors.text,
+                paddingHorizontal: 10,
+                paddingVertical: 6,
+              }}
+              onPress={handleClearSellerFilter}
+            >
+              <Text style={{ fontSize: 9, fontWeight: "900", color: colors.bg, textTransform: "uppercase" }}>
+                Exit
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      )}
+
       <View style={[styles.searchWrap, { paddingHorizontal: hPadding }]}>
         <TextInput
           style={styles.searchInput}
@@ -220,6 +373,29 @@ const ProductsScreen = ({ navigation, route }: any) => {
           <Text style={styles.searchBtnText}>Search</Text>
         </TouchableOpacity>
       </View>
+
+      {user && (search || category || deliveryOption) ? (
+        <View style={{ paddingHorizontal: hPadding, paddingBottom: 10, paddingTop: 10, backgroundColor: colors.surface, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', borderBottomWidth: colors.boardBorderWidth, borderBottomColor: colors.boardBorder }}>
+          <Text style={{ fontSize: 10, fontWeight: '700', color: colors.textSecondary }}>
+            ACTIVE FILTERS APPLIED
+          </Text>
+          <TouchableOpacity
+            style={{
+              backgroundColor: colors.pinYellow,
+              borderWidth: 1.5,
+              borderColor: colors.boardBorder,
+              paddingHorizontal: 10,
+              paddingVertical: 5,
+            }}
+            onPress={handleSaveSearch}
+            disabled={savingSearch}
+          >
+            <Text style={{ fontSize: 9, fontWeight: '900', color: colors.text, textTransform: 'uppercase' }}>
+              {savingSearch ? 'Saving...' : '★ Save Search'}
+            </Text>
+          </TouchableOpacity>
+        </View>
+      ) : null}
 
       <View style={styles.filterRow}>
         {(["newest", "popular", "featured"] as const).map((option) => (
@@ -343,6 +519,118 @@ const ProductsScreen = ({ navigation, route }: any) => {
           }
         />
       )}
+
+      {/* Report Seller Modal */}
+      <Modal visible={showReportUserModal} transparent animationType="slide" onRequestClose={() => setShowReportUserModal(false)}>
+        <View style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.6)", justifyContent: "center", alignItems: "center", padding: 20 }}>
+          <View 
+            style={{ 
+              width: "100%", 
+              maxWidth: 380, 
+              backgroundColor: colors.surface, 
+              borderWidth: 3, 
+              borderColor: colors.boardBorder, 
+              padding: 24,
+            }}
+          >
+            {/* Red Thumbtack detail (Top Center) */}
+            <View style={{ position: "absolute", top: -10, left: "50%", marginLeft: -10, width: 20, height: 20, borderRadius: 10, backgroundColor: colors.pinRed, borderWidth: 2, borderColor: colors.boardBorder }} />
+            
+            <Text style={{ fontSize: 10, fontWeight: "900", color: colors.accent, textTransform: "uppercase", letterSpacing: 2, textAlign: "center", marginTop: 8 }}>
+              Integrity Report
+            </Text>
+            <Text style={{ fontSize: 20, fontWeight: "900", color: colors.text, textTransform: "uppercase", letterSpacing: -0.5, textAlign: "center", marginVertical: 8 }}>
+              Report Seller
+            </Text>
+            
+            <Text style={{ fontSize: 11, fontWeight: "900", color: colors.text, textTransform: "uppercase", marginBottom: 6 }}>
+              Reason
+            </Text>
+            <View style={{ borderWidth: 2, borderColor: colors.border, backgroundColor: colors.surfaceSecondary, marginBottom: 12 }}>
+              {(["harassment", "spam", "scam", "inappropriate", "fake_listing", "other"] as const).map((reasonOpt) => (
+                <TouchableOpacity
+                  key={reasonOpt}
+                  style={{
+                    paddingVertical: 10,
+                    paddingHorizontal: 12,
+                    borderBottomWidth: reasonOpt === "other" ? 0 : 1,
+                    borderBottomColor: colors.border,
+                    flexDirection: "row",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    backgroundColor: reportUserReason === reasonOpt ? colors.surface : "transparent",
+                  }}
+                  onPress={() => setReportUserReason(reasonOpt)}
+                >
+                  <Text style={{ fontSize: 12, fontWeight: "700", textTransform: "uppercase", color: colors.text }}>
+                    {reasonOpt.replace("_", " ")}
+                  </Text>
+                  {reportUserReason === reasonOpt && (
+                    <Text style={{ fontWeight: "900", color: colors.accent }}>✓</Text>
+                  )}
+                </TouchableOpacity>
+              ))}
+            </View>
+
+            <Text style={{ fontSize: 11, fontWeight: "900", color: colors.text, textTransform: "uppercase", marginBottom: 6 }}>
+              Description
+            </Text>
+            <TextInput
+              style={{
+                borderWidth: 2,
+                borderColor: colors.border,
+                backgroundColor: colors.surfaceSecondary,
+                padding: 12,
+                fontSize: 12,
+                fontWeight: "600",
+                color: colors.text,
+                minHeight: 80,
+                textAlignVertical: "top",
+                marginBottom: 20,
+              }}
+              placeholder="Describe the issue in detail..."
+              placeholderTextColor={colors.muted}
+              multiline
+              value={reportUserDescription}
+              onChangeText={setReportUserDescription}
+            />
+
+            <View style={{ flexDirection: "row", gap: 10 }}>
+              <TouchableOpacity
+                style={{
+                  flex: 1,
+                  borderWidth: 2,
+                  borderColor: colors.border,
+                  backgroundColor: colors.surfaceSecondary,
+                  paddingVertical: 12,
+                  alignItems: "center",
+                }}
+                onPress={() => setShowReportUserModal(false)}
+              >
+                <Text style={{ fontSize: 11, fontWeight: "900", color: colors.text, textTransform: "uppercase" }}>
+                  Cancel
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={{
+                  flex: 1,
+                  backgroundColor: colors.text,
+                  borderWidth: 2,
+                  borderColor: colors.boardBorder,
+                  paddingVertical: 12,
+                  alignItems: "center",
+                }}
+                onPress={handleReportUser}
+                disabled={reportingUser}
+              >
+                <Text style={{ fontSize: 11, fontWeight: "900", color: colors.bg, textTransform: "uppercase" }}>
+                  {reportingUser ? "Submitting..." : "Submit"}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 };

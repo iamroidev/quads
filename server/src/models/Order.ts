@@ -89,7 +89,7 @@ const orderSchema = new Schema<IOrderDocument>(
     },
     status: {
       type: String,
-      enum: ['pending', 'paid', 'confirmed', 'ready', 'completed', 'cancelled', 'disputed'],
+      enum: ['pending', 'paid', 'confirmed', 'ready', 'completed', 'cancelled', 'disputed', 'refunded'],
       default: 'pending',
     },
     deliveryMethod: {

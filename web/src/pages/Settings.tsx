@@ -7,12 +7,17 @@ import {
   AlertTriangle,
   Lock,
   Smartphone,
+  Download,
+  Check,
+  QrCode,
+  RefreshCw,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
 import notificationService from '../services/notification.service';
 import toast from 'react-hot-toast';
 import { BulletinLayout, BulletinSection, BulletinCard } from '../components/layout/BulletinLayout';
+import { QRCodeSVG } from 'qrcode.react';
 
 type Tab = 'notifications' | 'privacy' | 'account';
 
@@ -53,7 +58,7 @@ interface NotifPrefs {
 }
 
 const SettingsPage: React.FC = () => {
-  const { user } = useAuth();
+  const { user, refreshUser } = useAuth();
   const [activeTab, setActiveTab] = useState<Tab>('notifications');
   const [notifPrefs, setNotifPrefs] = useState<NotifPrefs>({
     orderUpdates: true,
@@ -72,11 +77,104 @@ const SettingsPage: React.FC = () => {
   const [deletePassword, setDeletePassword] = useState('');
   const [deleting, setDeleting] = useState(false);
 
+  // 2FA TOTP State
+  const [totpEnabled, setTotpEnabled] = useState(user?.totpEnabled || false);
+  const [wizardStep, setWizardStep] = useState<'none' | 'setup' | 'verify'>('none');
+  const [qrCodeUrl, setQrCodeUrl] = useState('');
+  const [totpSecret, setTotpSecret] = useState('');
+  const [totpToken, setTotpToken] = useState('');
+  const [totpSetupError, setTotpSetupError] = useState('');
+  const [setupLoading, setSetupLoading] = useState(false);
+  const [verifyLoading, setVerifyLoading] = useState(false);
+  const [totpDisablePassword, setTotpDisablePassword] = useState('');
+  const [showDisableConfirm, setShowDisableConfirm] = useState(false);
+  const [totpDisableError, setTotpDisableError] = useState('');
+  const [disableLoading, setDisableLoading] = useState(false);
+  const [downloadingData, setDownloadingData] = useState(false);
+
   useEffect(() => {
     if (user?.notificationPrefs) {
       setNotifPrefs(user.notificationPrefs);
     }
+    if (user) {
+      setTotpEnabled(user.totpEnabled || false);
+    }
   }, [user]);
+
+  const handleStartTotpSetup = async () => {
+    setSetupLoading(true);
+    setTotpSetupError('');
+    try {
+      const res = await api.post('/auth/totp/setup');
+      setQrCodeUrl(res.data.qrCodeUrl);
+      setTotpSecret(res.data.secret);
+      setWizardStep('setup');
+    } catch (err: any) {
+      setTotpSetupError(err.response?.data?.message || 'Failed to start 2FA setup');
+      toast.error('Failed to initialize 2FA');
+    } finally {
+      setSetupLoading(false);
+    }
+  };
+
+  const handleVerifyTotpSetup = async () => {
+    if (totpToken.trim().length !== 6) {
+      setTotpSetupError('Please enter a 6-digit verification code');
+      return;
+    }
+    setVerifyLoading(true);
+    setTotpSetupError('');
+    try {
+      await api.post('/auth/totp/verify', { token: totpToken.trim() });
+      toast.success('Two-factor authentication enabled!');
+      setWizardStep('none');
+      setTotpToken('');
+      await refreshUser();
+    } catch (err: any) {
+      setTotpSetupError(err.response?.data?.message || 'Invalid verification code');
+    } finally {
+      setVerifyLoading(false);
+    }
+  };
+
+  const handleDisableTotp = async () => {
+    if (!totpDisablePassword) {
+      setTotpDisableError('Please enter your password to disable 2FA');
+      return;
+    }
+    setDisableLoading(true);
+    setTotpDisableError('');
+    try {
+      await api.post('/auth/totp/disable', { password: totpDisablePassword });
+      toast.success('Two-factor authentication disabled');
+      setShowDisableConfirm(false);
+      setTotpDisablePassword('');
+      await refreshUser();
+    } catch (err: any) {
+      setTotpDisableError(err.response?.data?.message || 'Failed to disable 2FA');
+    } finally {
+      setDisableLoading(false);
+    }
+  };
+
+  const handleDownloadData = async () => {
+    setDownloadingData(true);
+    try {
+      const res = await api.get('/users/data-export', { responseType: 'blob' });
+      const url = window.URL.createObjectURL(new Blob([res.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `quads-data-export-${user?._id || 'user'}.json`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      toast.success('Your data export has downloaded successfully!');
+    } catch (err: any) {
+      toast.error('Failed to download user data. Please try again.');
+    } finally {
+      setDownloadingData(false);
+    }
+  };
 
   const isAdmin = user?.roles?.includes('admin');
   const isSeller = user?.roles?.includes('seller');
@@ -312,7 +410,198 @@ const SettingsPage: React.FC = () => {
             </div>
 
             <div className="max-w-2xl space-y-8">
-              <BulletinCard rotation={-0.5} bgColor="bg-[#fffacd] dark:bg-yellow-900/20" className="border-2 border-[var(--bulletin-border)] shadow-[8px_8px_0_0_var(--bulletin-shadow)] p-6">
+              {/* ── Two-Factor Authentication Card ── */}
+              <BulletinCard rotation={0.5} bgColor="bg-[var(--bulletin-card)]" className="border-2 border-[var(--bulletin-border)] shadow-[8px_8px_0_0_var(--bulletin-shadow)] p-6 relative">
+                {/* Vintage Tape Accent */}
+                <div className="absolute -top-3 left-6 h-6 w-24 bg-[#ff6b6b]/40 rotate-2 pointer-events-none animate-pulse" />
+                
+                <div className="flex items-start gap-4">
+                  <div className="h-10 w-10 border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-bg)] flex items-center justify-center flex-shrink-0">
+                    <Shield className="h-5 w-5 text-[var(--bulletin-text)]" />
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex items-center gap-3">
+                      <h3 className="text-[16px] font-black uppercase tracking-tight text-[var(--bulletin-text)]">Two-Factor Authentication</h3>
+                      {totpEnabled ? (
+                        <span className="bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 border border-green-500 text-[9px] font-black uppercase px-2 py-0.5 shadow-[2px_2px_0_0_rgba(0,0,0,0.1)]">
+                          ACTIVE
+                        </span>
+                      ) : (
+                        <span className="bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400 border border-yellow-500 text-[9px] font-black uppercase px-2 py-0.5 shadow-[2px_2px_0_0_rgba(0,0,0,0.1)]">
+                          DISABLED
+                        </span>
+                      )}
+                    </div>
+                    
+                    <p className={descBase}>
+                      Secure your account using a time-based one-time password (TOTP) generated by apps like Google Authenticator, Authy, or 1Password.
+                    </p>
+
+                    {/* Wizard Setup Step */}
+                    {wizardStep === 'setup' && (
+                      <div className="mt-6 border-2 border-dashed border-[var(--bulletin-border)] p-5 bg-[var(--bulletin-bg)] space-y-5">
+                        <p className="text-[11px] font-black uppercase tracking-widest text-[#ff6b6b]">2FA Wizard Setup</p>
+                        
+                        <div className="flex flex-col sm:flex-row items-center gap-6">
+                          {/* QR Code Container styled like a pinned polaroid */}
+                          <div className="bg-white p-4 border-2 border-[var(--bulletin-border)] shadow-[4px_4px_0_0_var(--bulletin-shadow)] flex flex-col items-center">
+                            {qrCodeUrl ? (
+                              <QRCodeSVG value={qrCodeUrl} size={140} fgColor="#000000" bgColor="#ffffff" />
+                            ) : (
+                              <div className="w-[140px] h-[140px] flex items-center justify-center">
+                                <RefreshCw className="h-6 w-6 animate-spin opacity-40 text-black" />
+                              </div>
+                            )}
+                            <div className="text-[9px] font-bold text-gray-500 mt-2 tracking-tighter">Scan with authenticator app</div>
+                          </div>
+
+                          <div className="flex-1 space-y-3">
+                            <p className="text-[12px] font-bold text-[var(--bulletin-text)]">
+                              Or enter this secret key manually in your app:
+                            </p>
+                            <div className="bg-[var(--bulletin-card)] p-3 border-2 border-[var(--bulletin-border)] font-mono text-[13px] font-bold select-all break-all text-center">
+                              {totpSecret}
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="space-y-2 border-t-2 border-[var(--bulletin-border)]/20 pt-4">
+                          <label className="block text-[11px] font-black uppercase tracking-widest text-[var(--bulletin-text)]">
+                            Enter 6-Digit Authenticator Code
+                          </label>
+                          <div className="flex gap-4">
+                            <input
+                              type="text"
+                              value={totpToken}
+                              onChange={(e) => setTotpToken(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                              placeholder="000000"
+                              className="w-40 border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] p-3 text-[16px] font-black text-center tracking-[0.3em] focus:outline-none focus:ring-2 focus:ring-[var(--bulletin-text)] placeholder:opacity-30"
+                            />
+                            <button
+                              onClick={handleVerifyTotpSetup}
+                              disabled={verifyLoading || totpToken.length !== 6}
+                              className="flex-1 border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-text)] text-[var(--bulletin-bg)] px-4 py-3 text-[11px] font-black uppercase tracking-widest shadow-[4px_4px_0_0_var(--bulletin-shadow)] hover:translate-y-0.5 hover:shadow-[2px_2px_0_0_var(--bulletin-shadow)] disabled:opacity-40 transition-all"
+                            >
+                              {verifyLoading ? 'Verifying...' : 'Verify & Enable'}
+                            </button>
+                          </div>
+                          {totpSetupError && (
+                            <p className="text-[11px] font-black text-red-600 dark:text-red-400 uppercase tracking-widest">{totpSetupError}</p>
+                          )}
+                        </div>
+
+                        <div className="flex justify-end mt-4">
+                          <button
+                            onClick={() => setWizardStep('none')}
+                            className="text-[10px] font-black uppercase tracking-widest text-[var(--bulletin-text)] hover:underline text-xs"
+                          >
+                            Cancel Setup
+                          </button>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Enable / Disable Buttons */}
+                    {wizardStep === 'none' && !totpEnabled && (
+                      <div className="mt-4">
+                        <button
+                          onClick={handleStartTotpSetup}
+                          disabled={setupLoading}
+                          className="border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-text)] px-5 py-2.5 text-[10px] font-black uppercase tracking-widest text-[var(--bulletin-bg)] shadow-[4px_4px_0_0_var(--bulletin-shadow)] hover:translate-y-0.5 hover:shadow-[2px_2px_0_0_var(--bulletin-shadow)] transition-all disabled:opacity-50"
+                        >
+                          {setupLoading ? 'Initializing Setup...' : 'Setup Authenticator app →'}
+                        </button>
+                      </div>
+                    )}
+
+                    {totpEnabled && !showDisableConfirm && (
+                      <div className="mt-4">
+                        <button
+                          onClick={() => { setShowDisableConfirm(true); setTotpDisableError(''); }}
+                          className="border-2 border-red-600 dark:border-red-400 bg-transparent px-5 py-2.5 text-[10px] font-black uppercase tracking-widest text-red-600 dark:text-red-400 hover:bg-red-600 hover:text-white transition-all shadow-[4px_4px_0_0_rgba(220,38,38,0.2)]"
+                        >
+                          Disable 2FA
+                        </button>
+                      </div>
+                    )}
+
+                    {showDisableConfirm && (
+                      <div className="mt-6 border-2 border-red-500/20 bg-red-500/5 p-5 space-y-4">
+                        <p className="text-[11px] font-black uppercase tracking-widest text-red-600 dark:text-red-400">
+                          Confirm password to disable 2FA
+                        </p>
+                        <div className="flex flex-col sm:flex-row gap-4">
+                          <input
+                            type="password"
+                            value={totpDisablePassword}
+                            onChange={(e) => setTotpDisablePassword(e.target.value)}
+                            placeholder="Confirm Password"
+                            className="flex-1 border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] p-3 text-[12px] font-black focus:outline-none focus:ring-2 focus:ring-[var(--bulletin-text)] placeholder:opacity-30 text-[var(--bulletin-text)]"
+                          />
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() => { setShowDisableConfirm(false); setTotpDisablePassword(''); }}
+                              className="border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] text-[var(--bulletin-text)] px-4 py-3 text-[10px] font-black uppercase tracking-widest"
+                            >
+                              Abort
+                            </button>
+                            <button
+                              onClick={handleDisableTotp}
+                              disabled={disableLoading || !totpDisablePassword}
+                              className="border-2 border-red-600 bg-red-600 text-white px-4 py-3 text-[10px] font-black uppercase tracking-widest shadow-[4px_4px_0_0_rgba(220,38,38,0.3)] disabled:opacity-40"
+                            >
+                              {disableLoading ? 'Disabling...' : 'Confirm Disable'}
+                            </button>
+                          </div>
+                        </div>
+                        {totpDisableError && (
+                          <p className="text-[11px] font-black text-red-600 dark:text-red-400 uppercase tracking-widest">{totpDisableError}</p>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </BulletinCard>
+
+              {/* ── Download My Data Card ── */}
+              <BulletinCard rotation={-0.5} bgColor="bg-[#fffacd] dark:bg-yellow-900/20" className="border-2 border-[var(--bulletin-border)] shadow-[8px_8px_0_0_var(--bulletin-shadow)] p-6 relative">
+                {/* Yellow tape decoration */}
+                <div className="absolute -top-3 right-8 h-6 w-20 bg-[#ffd700]/40 -rotate-3 pointer-events-none" />
+
+                <div className="flex items-start gap-4">
+                  <div className="h-10 w-10 border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-bg)] flex items-center justify-center flex-shrink-0">
+                    <Download className="h-5 w-5 text-[var(--bulletin-text)]" />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="text-[16px] font-black uppercase tracking-tight text-[var(--bulletin-text)]">Download My Data</h3>
+                    <p className={descBase}>
+                      Export all stored account data, listings, order history, and preferences under GDPR compliance rules as a structured JSON backup.
+                    </p>
+                    
+                    <div className="mt-4">
+                      <button
+                        onClick={handleDownloadData}
+                        disabled={downloadingData}
+                        className="border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-text)] px-5 py-2.5 text-[10px] font-black uppercase tracking-widest text-[var(--bulletin-bg)] shadow-[4px_4px_0_0_var(--bulletin-shadow)] hover:translate-y-0.5 hover:shadow-[2px_2px_0_0_var(--bulletin-shadow)] disabled:opacity-40 transition-all flex items-center gap-2"
+                      >
+                        {downloadingData ? (
+                          <>
+                            <RefreshCw className="h-3.5 w-3.5 animate-spin" />
+                            Compiling Data Export...
+                          </>
+                        ) : (
+                          <>
+                            <Download className="h-3.5 w-3.5" />
+                            Download My Data
+                          </>
+                        )}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </BulletinCard>
+
+              <BulletinCard rotation={-0.5} bgColor="bg-[var(--bulletin-card)]" className="border-2 border-[var(--bulletin-border)] shadow-[8px_8px_0_0_var(--bulletin-shadow)] p-6">
                 <div className="flex items-start gap-4">
                   <div className="h-10 w-10 border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-bg)] flex items-center justify-center flex-shrink-0">
                     <Lock className="h-5 w-5 text-[var(--bulletin-text)]" />

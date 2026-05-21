@@ -17,6 +17,7 @@ import api from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { shadows } from '../theme';
 import { useColors } from '../theme/ThemeContext';
+import AppRatingPrompt, { maybePromptRating } from '../components/AppRatingPrompt';
 
 const STATUS_STEPS = ['pending', 'paid', 'confirmed', 'ready', 'completed'] as const;
 const STEP_LABELS: Record<string, string> = {
@@ -50,6 +51,7 @@ const OrderDetailScreen = ({ route, navigation }: any) => {
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
   const [paying, setPaying] = useState(false);
+  const [showRatingPrompt, setShowRatingPrompt] = useState(false);
 
   const styles = React.useMemo(() => StyleSheet.create({
     container: { flex: 1, backgroundColor: colors.bg },
@@ -317,6 +319,11 @@ const OrderDetailScreen = ({ route, navigation }: any) => {
       if (res.data.success) {
         Alert.alert('Success', 'Handoff verified! Transaction completed.');
         setOrder(res.data.data.order);
+        // Trigger app rating prompt for buyers after Nth completed order
+        const shouldPrompt = await maybePromptRating();
+        if (shouldPrompt) {
+          setShowRatingPrompt(true);
+        }
       }
     } catch (err: any) {
       Alert.alert('Error', err?.response?.data?.message || 'Verification failed.');
@@ -598,6 +605,11 @@ const OrderDetailScreen = ({ route, navigation }: any) => {
           )}
         </View>
       )}
+
+      <AppRatingPrompt
+        visible={showRatingPrompt}
+        onClose={() => setShowRatingPrompt(false)}
+      />
     </ScrollView>
   );
 };

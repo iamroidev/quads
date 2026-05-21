@@ -119,6 +119,7 @@ class AuthService {
         currentLevel:  profileData?.currentLevel  || '',
         location:      profileData?.location      || '',
         password:      this.randomPassword(),
+        tosAcceptedAt: new Date(),
       });
       isNewUser = true;
     } else {

@@ -78,6 +78,7 @@ const productService = {
     category?: string;
     deliveryOption?: string;
     sort?: string;
+    seller?: string;
   }): Promise<ProductListResponse> => {
     const response = await api.get('/products', { params });
     return response.data;

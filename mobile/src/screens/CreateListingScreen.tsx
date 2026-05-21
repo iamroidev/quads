@@ -390,9 +390,7 @@ const CreateListingScreen = ({ navigation, route }: any) => {
   const isUnverifiedSeller =
     !isEditMode &&
     user?.role === "seller" &&
-    !user?.isVerified &&
-    !user?.emailVerified &&
-    !user?.phoneVerified;
+    !user?.isVerified;
 
   if (prefilling || loading) {
     return (

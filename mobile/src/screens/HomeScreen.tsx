@@ -29,6 +29,9 @@ import categoryService, {
 } from "../services/category.service";
 import { useResponsive } from "../hooks/useResponsive";
 import { getTypography } from "../theme/typography";
+import api from "../services/api";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import OnboardingTour from "../components/OnboardingTour";
 
 // Washi tape divider component
 const WashiTapeDivider = ({ color, bgColor }: { color: string; bgColor: string }) => (
@@ -141,6 +144,40 @@ const ProductCard = ({
   );
 };
 
+const RecentlyViewedCard = ({
+  item,
+  onPress,
+  colors,
+}: {
+  item: Product;
+  onPress: () => void;
+  colors: any;
+}) => {
+  const image = item.images?.[0]?.url;
+  
+  return (
+    <BulletinCard style={{ width: 140, borderWidth: 2, borderColor: colors.boardBorder, backgroundColor: colors.surface }} size="sm">
+      <TouchableOpacity onPress={onPress} activeOpacity={0.88}>
+        <View style={{ width: "100%", height: 100, backgroundColor: colors.surfaceSecondary, overflow: "hidden", borderBottomWidth: 1.5, borderBottomColor: colors.boardBorder }}>
+          <Image
+            source={image ? { uri: image } : require("../../assets/icon.png")}
+            style={{ width: "100%", height: "100%" }}
+            resizeMode="cover"
+          />
+        </View>
+        <View style={{ padding: 8 }}>
+          <Text style={{ fontSize: 12, fontWeight: "900", color: colors.successTintText }} numberOfLines={1}>
+            {formatPrice(item.price)}
+          </Text>
+          <Text style={{ fontSize: 10, fontWeight: "900", color: colors.text, marginTop: 2, textTransform: "uppercase", height: 28 }} numberOfLines={2}>
+            {item.title}
+          </Text>
+        </View>
+      </TouchableOpacity>
+    </BulletinCard>
+  );
+};
+
 const HomeScreen = ({ navigation }: any) => {
   const { user, setViewMode } = useAuth();
   const { colors, isDark } = useTheme();
@@ -158,7 +195,23 @@ const HomeScreen = ({ navigation }: any) => {
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [recentlyViewed, setRecentlyViewed] = useState<any[]>([]);
+  const [showOnboarding, setShowOnboarding] = useState(false);
   const fadeAnim = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    const checkOnboarding = async () => {
+      try {
+        const hasSeen = await AsyncStorage.getItem("hasSeenOnboarding");
+        if (!hasSeen) {
+          setShowOnboarding(true);
+        }
+      } catch (err) {
+        console.warn("Failed to read onboarding state:", err);
+      }
+    };
+    checkOnboarding();
+  }, []);
 
   const columns = isMobile ? 2 : isTablet ? 2 : 3;
 
@@ -182,11 +235,20 @@ const HomeScreen = ({ navigation }: any) => {
       if (trendingRes?.success) setTrending(trendingRes.data);
       if (categoryRes?.success)
         setCategories(categoryRes.data.categories.slice(0, 8));
+
+      if (user) {
+        const rvRes = await api.get('/discovery/recently-viewed');
+        if (rvRes.data?.success) {
+          setRecentlyViewed(rvRes.data.data || []);
+        }
+      }
+    } catch (e) {
+      console.log("Error fetching home data:", e);
     } finally {
       setLoading(false);
       setRefreshing(false);
     }
-  }, []);
+  }, [user]);
 
   useEffect(() => {
     fetchData();
@@ -378,6 +440,30 @@ const HomeScreen = ({ navigation }: any) => {
 
         <WashiTapeDivider color={colors.primary} bgColor={colors.background} />
 
+        {user && recentlyViewed.length > 0 && (
+          <View style={styles.quickSection}>
+            <View style={[styles.sectionHeader, { paddingHorizontal: hPadding }]}>
+              <Text style={styles.sectionLabel}>RECENTLY VIEWED</Text>
+              <Text style={styles.sectionTitle}>Pick up where you left off</Text>
+            </View>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={[styles.hScroll, { paddingHorizontal: hPadding }]}
+            >
+              {recentlyViewed.map((item) => (
+                <RecentlyViewedCard
+                  key={item.product._id}
+                  item={item.product}
+                  onPress={() => goToProduct(item.product._id)}
+                  colors={colors}
+                />
+              ))}
+            </ScrollView>
+            <WashiTapeDivider color={colors.pinYellow} bgColor={colors.background} />
+          </View>
+        )}
+
         {categories.length > 0 && (
           <View style={[styles.section, { paddingTop: sectionVSpace }]}>
             <View style={[styles.sectionHeader, { paddingHorizontal: hPadding }]}>
@@ -566,6 +652,9 @@ const HomeScreen = ({ navigation }: any) => {
           </TouchableOpacity>
         )}
       </ScrollView>
+      {showOnboarding && (
+        <OnboardingTour onComplete={() => setShowOnboarding(false)} />
+      )}
     </SafeAreaView>
   );
 };

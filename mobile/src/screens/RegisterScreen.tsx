@@ -117,6 +117,7 @@ const RegisterScreen = ({ navigation }: any) => {
   }, []);
 
   const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
+  const [tosAccepted, setTosAccepted] = useState(false);
   const [otpCode, setOtpCode] = useState('');
   const [otpError, setOtpError] = useState('');
   const [resendCountdown, setResendCountdown] = useState(0);
@@ -173,6 +174,15 @@ const RegisterScreen = ({ navigation }: any) => {
   );
 
   const goToPasswordStep = () => {
+    if (!tosAccepted) {
+      setAlertState({
+        visible: true,
+        title: "Terms of Service",
+        message: "You must accept the Terms of Service and Privacy Policy to register.",
+      });
+      return;
+    }
+
     const trimmedName = form.name.trim();
     const trimmedEmail = form.email.trim().toLowerCase();
     const trimmedPhone = form.phone.trim();
@@ -646,6 +656,52 @@ const RegisterScreen = ({ navigation }: any) => {
                     </TouchableOpacity>
                   </View>
                 </View>
+                {/* ToS Checkbox */}
+                <TouchableOpacity
+                  style={{
+                    flexDirection: "row",
+                    alignItems: "center",
+                    gap: 10,
+                    marginVertical: 18,
+                    padding: 10,
+                    borderWidth: 2,
+                    borderColor: colors.border,
+                    backgroundColor: colors.surfaceSecondary,
+                  }}
+                  onPress={() => setTosAccepted(p => !p)}
+                >
+                  <View
+                    style={{
+                      width: 20,
+                      height: 20,
+                      borderWidth: 2,
+                      borderColor: colors.text,
+                      backgroundColor: tosAccepted ? colors.text : "transparent",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
+                    {tosAccepted && (
+                      <Text style={{ color: colors.surface, fontSize: 11, fontWeight: "900" }}>✓</Text>
+                    )}
+                  </View>
+                  <Text style={{ flex: 1, fontSize: 11, fontWeight: "700", color: colors.text }}>
+                    I agree to the{" "}
+                    <Text
+                      style={{ color: colors.primary, textDecorationLine: "underline" }}
+                      onPress={() => WebBrowser.openBrowserAsync("https://quads.app/terms")}
+                    >
+                      Terms of Service
+                    </Text>{" "}
+                    and{" "}
+                    <Text
+                      style={{ color: colors.primary, textDecorationLine: "underline" }}
+                      onPress={() => WebBrowser.openBrowserAsync("https://quads.app/privacy")}
+                    >
+                      Privacy Policy
+                    </Text>
+                  </Text>
+                </TouchableOpacity>
 
                 <View style={styles.rowActions}>
                   <TouchableOpacity

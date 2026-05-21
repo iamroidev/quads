@@ -70,6 +70,7 @@ export const ProfileScreen = ({ navigation }: any) => {
         { label: 'Shopping Cart', icon: 'cart-outline', onPress: () => navigation.navigate('Cart') },
         { label: 'My Purchases', icon: 'receipt-outline', onPress: () => navigation.navigate('Orders') },
         { label: 'Saved Items', icon: 'bookmark-outline', onPress: () => navigation.navigate('SavedItems') },
+        { label: 'Transaction History', icon: 'card-outline', onPress: () => navigation.navigate('TransactionHistory') },
         { label: 'Alerts', icon: 'notifications-outline', onPress: () => navigation.navigate('Alerts') },
         { label: 'Messages', icon: 'chatbubbles-outline', onPress: () => navigation.navigate('MessagesCenter') },
       ],
@@ -122,6 +123,7 @@ export const ProfileScreen = ({ navigation }: any) => {
       title: 'Support & Settings',
       items: [
         { label: 'Shopping Cart', icon: 'cart-outline', onPress: () => navigation.navigate('Cart') },
+        { label: 'Transaction History', icon: 'card-outline', onPress: () => navigation.navigate('TransactionHistory') },
         { label: 'Settings', icon: 'settings-outline', onPress: () => navigation.navigate('Settings') },
         { label: 'Support Desk', icon: 'help-circle-outline', onPress: () => navigation.navigate('Support') },
         { label: 'Contact Support', icon: 'mail-outline', onPress: () => navigation.navigate('Contact') },

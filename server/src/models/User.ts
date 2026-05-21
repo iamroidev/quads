@@ -80,6 +80,20 @@ export interface IUserDocument extends Document {
     message?: string;
     returnDate?: Date;
   };
+  tosAcceptedAt?: Date;
+  totpSecret?: string;
+  totpEnabled?: boolean;
+  recentlyViewed?: {
+    productId: mongoose.Types.ObjectId;
+    viewedAt: Date;
+  }[];
+  savedSearches?: {
+    query: string;
+    category?: string;
+    filters?: Record<string, any>;
+    alertEnabled: boolean;
+    createdAt: Date;
+  }[];
   createdAt: Date;
   updatedAt: Date;
   comparePassword(candidatePassword: string): Promise<boolean>;
@@ -301,6 +315,24 @@ const userSchema = new Schema<IUserDocument>(
       message: { type: String, default: '' },
       returnDate: { type: Date },
     },
+    tosAcceptedAt: { type: Date },
+    totpSecret: { type: String },
+    totpEnabled: { type: Boolean, default: false },
+    recentlyViewed: [
+      {
+        productId: { type: Schema.Types.ObjectId, ref: 'Product', required: true },
+        viewedAt: { type: Date, default: Date.now },
+      },
+    ],
+    savedSearches: [
+      {
+        query: { type: String, required: true },
+        category: { type: String },
+        filters: { type: Schema.Types.Mixed },
+        alertEnabled: { type: Boolean, default: true },
+        createdAt: { type: Date, default: Date.now },
+      },
+    ],
   },
   {
     timestamps: true,

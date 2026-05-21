@@ -1,6 +1,10 @@
 import { Request, Response, NextFunction } from 'express';
 import Dispute from '../models/Dispute';
 import Order from '../models/Order';
+import Transaction from '../models/Transaction';
+import OpsAuditLog from '../models/OpsAuditLog';
+import notificationService from '../services/notification.service';
+import { initiateRefund } from '../utils/paystack';
 
 /**
  * @route   POST /api/disputes
@@ -141,20 +145,97 @@ export const updateDisputeStatus = async (
   try {
     const { status, adminNote } = req.body;
 
-    const dispute = await Dispute.findByIdAndUpdate(
-      req.params.id,
-      {
-        status,
-        adminNote,
-        ...(status === 'resolved' ? { resolvedAt: new Date() } : {}),
-      },
-      { new: true, runValidators: true }
-    );
-
+    const dispute = await Dispute.findById(req.params.id);
     if (!dispute) {
       res.status(404).json({ success: false, message: 'Dispute not found.' });
       return;
     }
+
+    const isAlreadyResolved = dispute.status === 'resolved';
+
+    dispute.status = status;
+    if (adminNote !== undefined) dispute.adminNote = adminNote;
+
+    if (status === 'resolved' && !isAlreadyResolved) {
+      dispute.resolvedAt = new Date();
+
+      const order = await Order.findById(dispute.order).populate('payment');
+      if (order && order.status !== 'refunded') {
+        order.status = 'refunded';
+        await order.save();
+
+        let paystackResponse = undefined;
+        if (order.payment && (order.payment as any).reference && (order.payment as any).status === 'success') {
+          try {
+            const paystackRefund = await initiateRefund(
+              (order.payment as any).reference,
+              order.totalAmount,
+              `Refund for disputed order ${order.orderNumber}`
+            );
+            paystackResponse = paystackRefund;
+          } catch (paystackErr: any) {
+            console.error('Paystack refund failed:', paystackErr.message);
+            await OpsAuditLog.create({
+              action: 'PAYMENT_REFUND_FAILED',
+              userId: req.user?._id,
+              details: {
+                orderId: order._id,
+                reference: (order.payment as any).reference,
+                error: paystackErr.response?.data || paystackErr.message,
+              },
+            });
+          }
+        }
+
+        await Transaction.create({
+          order: order._id,
+          reference: `REFUND-${order.orderNumber}-${Date.now()}`.toUpperCase(),
+          amount: order.totalAmount,
+          currency: 'GHS',
+          paymentMethod: (order.payment as any)?.paymentMethod || 'momo',
+          status: 'refunded',
+          paystackResponse,
+          paidAt: new Date(),
+        });
+
+        const populatedOrder = await order.populate('seller');
+        const sellerUserId = (populatedOrder.seller as any).ownerId;
+
+        await notificationService.create(
+          order.buyer.toString(),
+          'order_cancelled',
+          'Dispute Resolved - Refunded',
+          `Your dispute on order #${order.orderNumber} was resolved in your favor and GHS ${order.totalAmount} has been refunded.`,
+          `/orders/${order._id}`,
+          { orderId: order._id.toString() }
+        );
+
+        if (sellerUserId) {
+          await notificationService.create(
+            sellerUserId.toString(),
+            'order_cancelled',
+            'Dispute Resolved - Order Refunded',
+            `The dispute on order #${order.orderNumber} was resolved. The order has been refunded.`,
+            `/seller/orders`,
+            { orderId: order._id.toString() }
+          );
+        }
+
+        try {
+          const { app } = require('../app');
+          const io = app.get('io');
+          if (io) {
+            io.to(`order:${order._id}`).emit('order:statusChanged', {
+              orderId: order._id.toString(),
+              status: 'refunded',
+              updatedAt: new Date().toISOString(),
+            });
+          }
+        } catch {}
+      }
+    }
+
+    await dispute.save();
 
     res.status(200).json({ success: true, message: 'Dispute updated.', data: { dispute } });
   } catch (error) {

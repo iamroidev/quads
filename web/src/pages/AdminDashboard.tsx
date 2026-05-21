@@ -94,6 +94,7 @@ const AdminDashboard: React.FC = () => {
   // Payout management state
   const [payouts, setPayouts] = useState<any[]>([]);
   const [removeModal, setRemoveModal] = useState<{ product: ProductPopulated; reason: string } | null>(null);
+  const [refundModal, setRefundModal] = useState<{ order: any; amount: number; reason: string } | null>(null);
   const [payoutStats, setPayoutStats] = useState<{
     totalPending: number;
     totalProcessing: number;
@@ -272,6 +273,29 @@ const AdminDashboard: React.FC = () => {
       }
     } catch {
       toast.error('Failed to remove product');
+    } finally {
+      setBusyId(null);
+    }
+  };
+
+  const handleInitiateRefund = (order: any) => {
+    setRefundModal({ order, amount: order.totalAmount, reason: '' });
+  };
+
+  const confirmRefund = async () => {
+    if (!refundModal) return;
+    const { order, amount, reason } = refundModal;
+    setRefundModal(null);
+    setBusyId(order._id);
+    try {
+      const res = await adminService.adminRefund(order._id, amount, reason);
+      if (res.success) {
+        toast.success(`Refund of GHS ${amount.toFixed(2)} processed successfully!`);
+        fetchOrders();
+        fetchStats();
+      }
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || 'Failed to process refund');
     } finally {
       setBusyId(null);
     }
@@ -881,9 +905,20 @@ const AdminDashboard: React.FC = () => {
                       <span className="opacity-40">{new Date(order.createdAt).toLocaleDateString()}</span>
                     </div>
                   </div>
-                  <Link to={`/orders/${order._id}`} className="border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-text)] text-[var(--bulletin-bg)] px-4 py-2 text-[10px] font-black uppercase hover:bg-[#ff6b6b] transition-all whitespace-nowrap">
-                    View
-                  </Link>
+                  <div className="flex gap-2 shrink-0 items-center">
+                    <Link to={`/orders/${order._id}`} className="border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-text)] text-[var(--bulletin-bg)] px-4 py-2 text-[10px] font-black uppercase hover:bg-[#ff6b6b] transition-all whitespace-nowrap">
+                      View
+                    </Link>
+                    {['paid', 'confirmed', 'ready', 'completed'].includes(order.status) && (
+                      <button
+                        onClick={() => handleInitiateRefund(order)}
+                        disabled={busyId === order._id}
+                        className="border-2 border-[#ff6b6b] text-[#ff6b6b] px-4 py-2 text-[10px] font-black uppercase hover:bg-[#ff6b6b] hover:text-white transition-all whitespace-nowrap"
+                      >
+                        {busyId === order._id ? '...' : 'Refund'}
+                      </button>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>
@@ -1269,20 +1304,32 @@ const AdminDashboard: React.FC = () => {
                   </div>
                   <div className="divide-y-2 divide-black/5 max-h-[500px] overflow-auto">
                     {retryJobs.map((job) => (
-                      <div key={job._id} className="p-6 flex items-center justify-between gap-4">
-                        <div>
-                          <p className="text-[13px] font-black uppercase text-[var(--bulletin-text)]">{job.type}</p>
-                          <p className="text-[11px] font-bold opacity-40 text-[var(--bulletin-text)] mt-1">
-                            Status: <span className="text-sky-600">{job.status}</span> · Attempts {job.attempts}/{job.maxAttempts}
-                          </p>
+                      <div key={job._id} className="p-6 hover:bg-black/5 transition-colors">
+                        <div className="flex items-center justify-between gap-4">
+                          <div className="flex-1 min-w-0">
+                            <p className="text-[13px] font-black uppercase text-[var(--bulletin-text)] truncate">{job.type}</p>
+                            <p className="text-[11px] font-bold opacity-40 text-[var(--bulletin-text)] mt-1">
+                              Status: <span className="text-sky-600">{job.status}</span> · Attempts {job.attempts}/{job.maxAttempts}
+                            </p>
+                            {job.lastError && (
+                              <p className="text-[10px] text-red-500 font-bold mt-1 max-w-md truncate" title={job.lastError}>
+                                Error: {job.lastError}
+                              </p>
+                            )}
+                            {job.payload && (
+                              <pre className="mt-2 p-2 bg-black/5 dark:bg-white/5 border border-black/10 text-[9px] font-mono overflow-x-auto max-w-full">
+                                {JSON.stringify(job.payload)}
+                              </pre>
+                            )}
+                          </div>
+                          <button 
+                            onClick={() => runRetry(job._id)} 
+                            disabled={busyId === job._id} 
+                            className="border-2 border-black bg-black text-white px-4 py-2 text-[9px] font-black uppercase hover:bg-[#ff6b6b] transition-all disabled:opacity-20 shrink-0 align-self-start"
+                          >
+                            {busyId === job._id ? '...' : 'Force Run'}
+                          </button>
                         </div>
-                        <button 
-                          onClick={() => runRetry(job._id)} 
-                          disabled={busyId === job._id} 
-                          className="border-2 border-black bg-black text-white px-4 py-2 text-[9px] font-black uppercase hover:bg-[#ff6b6b] transition-all disabled:opacity-20"
-                        >
-                          {busyId === job._id ? '...' : 'Force Run'}
-                        </button>
                       </div>
                     ))}
                   </div>
@@ -1306,6 +1353,11 @@ const AdminDashboard: React.FC = () => {
                         <p className="text-[11px] font-bold opacity-40 text-[var(--bulletin-text)] mt-2">
                           Scope: {log.scope} · {new Date(log.createdAt).toLocaleString()}
                         </p>
+                        {log.details && (
+                          <pre className="mt-3 p-3 bg-black text-[#a6e22e] text-[10px] font-mono overflow-x-auto border-2 border-black max-w-full">
+                            {JSON.stringify(log.details, null, 2)}
+                          </pre>
+                        )}
                       </div>
                     ))}
                   </div>
@@ -1447,6 +1499,83 @@ const AdminDashboard: React.FC = () => {
                 className="flex-[2] border-4 border-[#ff6b6b] bg-[#ff6b6b] px-4 py-3 text-[12px] font-black uppercase tracking-widest text-white shadow-[4px_4px_0_0_rgba(0,0,0,1)] hover:bg-[#c0392b] hover:border-[#c0392b] disabled:opacity-30 disabled:cursor-not-allowed transition-all hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px] disabled:translate-x-0 disabled:translate-y-0"
               >
                 Remove Listing
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Refund Payment Modal ─────────────────────────────────────────── */}
+      {refundModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+          <div className="w-full max-w-md bg-[var(--bulletin-bg)] border-4 border-[var(--bulletin-border)] shadow-[12px_12px_0_0_rgba(0,0,0,1)] mx-4">
+            {/* Header */}
+            <div className="bg-black px-6 py-4 flex items-center gap-3">
+              <div style={{ position: 'relative', width: 32, height: 32, border: '3px solid #fff', background: '#000', flexShrink: 0 }}>
+                <div style={{ position: 'absolute', top: 6, left: 6, width: 13, height: 13, border: '4px solid #fff' }} />
+                <div style={{ position: 'absolute', bottom: 4, right: 4, width: 6, height: 3, background: '#fff', transform: 'rotate(45deg)' }} />
+                <div style={{ position: 'absolute', top: 2, right: 2, width: 5, height: 5, borderRadius: '50%', background: '#ff6b6b', border: '1px solid #fff' }} />
+              </div>
+              <div>
+                <p className="text-[9px] font-black uppercase tracking-[2px] text-[#ff6b6b]">Admin Action</p>
+                <p className="text-[13px] font-black uppercase tracking-tighter text-white leading-none">Process Refund</p>
+              </div>
+            </div>
+
+            {/* Body */}
+            <div className="p-6 space-y-4">
+              <div className="border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] px-4 py-3 shadow-[4px_4px_0_0_var(--bulletin-shadow)]">
+                <p className="text-[14px] font-black uppercase tracking-tight text-[var(--bulletin-text)]">
+                  Order #{refundModal.order.orderNumber}
+                </p>
+                <p className="text-[11px] text-[var(--bulletin-text)] opacity-50 mt-1">
+                  Total Paid: GHS {refundModal.order.totalAmount?.toFixed(2)} · Buyer: {refundModal.order.buyer?.name}
+                </p>
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-black uppercase tracking-[2px] text-[var(--bulletin-text)] opacity-50 mb-2">
+                  Refund Amount (GHS) <span className="text-[#ff6b6b]">*</span>
+                </label>
+                <input
+                  type="number"
+                  step="0.01"
+                  min="0.01"
+                  max={refundModal.order.totalAmount}
+                  value={refundModal.amount}
+                  onChange={e => setRefundModal({ ...refundModal, amount: Number(e.target.value) })}
+                  className="w-full border-4 border-[var(--bulletin-border)] bg-[var(--bulletin-bg)] px-4 py-3 text-[14px] font-bold text-[var(--bulletin-text)] focus:outline-none focus:ring-0 shadow-[4px_4px_0_0_var(--bulletin-shadow)]"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-black uppercase tracking-[2px] text-[var(--bulletin-text)] opacity-50 mb-2">
+                  Reason for Refund <span className="text-[#ff6b6b]">*</span>
+                </label>
+                <textarea
+                  rows={2}
+                  value={refundModal.reason}
+                  onChange={e => setRefundModal({ ...refundModal, reason: e.target.value })}
+                  placeholder="e.g. Dispute resolved, item unavailable, double charge..."
+                  className="w-full border-4 border-[var(--bulletin-border)] bg-[var(--bulletin-bg)] px-4 py-3 text-[14px] font-bold text-[var(--bulletin-text)] placeholder:text-[var(--bulletin-text)] placeholder:opacity-25 focus:outline-none focus:ring-0 resize-none shadow-[4px_4px_0_0_var(--bulletin-shadow)]"
+                />
+              </div>
+            </div>
+
+            {/* Footer */}
+            <div className="px-6 pb-6 flex gap-3">
+              <button
+                onClick={() => setRefundModal(null)}
+                className="flex-1 border-4 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] px-4 py-3 text-[12px] font-black uppercase tracking-widest text-[var(--bulletin-text)] hover:bg-[var(--bulletin-bg)] transition-all shadow-[4px_4px_0_0_var(--bulletin-shadow)] hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px]"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmRefund}
+                disabled={!refundModal.reason.trim() || refundModal.amount <= 0 || refundModal.amount > refundModal.order.totalAmount}
+                className="flex-[2] border-4 border-[#ff6b6b] bg-[#ff6b6b] px-4 py-3 text-[12px] font-black uppercase tracking-widest text-white shadow-[4px_4px_0_0_rgba(0,0,0,1)] hover:bg-[#c0392b] hover:border-[#c0392b] disabled:opacity-30 disabled:cursor-not-allowed transition-all hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px] disabled:translate-x-0 disabled:translate-y-0"
+              >
+                Confirm Refund
               </button>
             </div>
           </div>

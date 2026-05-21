@@ -12,6 +12,8 @@ import {
   Image,
   Animated,
   Dimensions,
+  Modal,
+  Alert,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import * as WebBrowser from "expo-web-browser";
@@ -21,6 +23,8 @@ import { makeRedirectUri } from "expo-auth-session";
 import { useAuth } from "../context/AuthContext";
 import { useTheme } from "../theme/ThemeContext";
 import AppAlert from "../components/AppAlert";
+import * as LocalAuthentication from 'expo-local-authentication';
+import * as SecureStore from 'expo-secure-store';
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -90,12 +94,67 @@ const LoginScreen = ({ navigation }: any) => {
   const [otpSent, setOtpSent] = useState(false);
   const [otpCode, setOtpCode] = useState("");
   const [otpError, setOtpError] = useState("");
+  const [totpRequired, setTotpRequired] = useState(false);
+  const [totpCodeInput, setTotpCodeInput] = useState("");
+  const [totpErrorMsg, setTotpErrorMsg] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [resendCountdown, setResendCountdown] = useState(0);
   const otpRefs = useRef<any[]>([]);
   const [alertState, setAlertState] = useState<{ visible: boolean; title: string; message: string }>({
     visible: false, title: "", message: "",
   });
+
+  const [biometricsAvailable, setBiometricsAvailable] = useState(false);
+  const [hasBiometricCreds, setHasBiometricCreds] = useState(false);
+
+  useEffect(() => {
+    const checkBiometrics = async () => {
+      const hasHardware = await LocalAuthentication.hasHardwareAsync();
+      const isEnrolled = await LocalAuthentication.isEnrolledAsync();
+      setBiometricsAvailable(hasHardware && isEnrolled);
+
+      const stored = await SecureStore.getItemAsync('biometric_credentials');
+      setHasBiometricCreds(!!stored);
+
+      if (hasHardware && isEnrolled && stored) {
+        setTimeout(() => {
+          handleBiometricLogin();
+        }, 600);
+      }
+    };
+    checkBiometrics();
+  }, []);
+
+  const handleBiometricLogin = async () => {
+    setIsLoading(true);
+    try {
+      const stored = await SecureStore.getItemAsync('biometric_credentials');
+      if (!stored) {
+        setIsLoading(false);
+        return;
+      }
+      const { email: savedEmail, password: savedPassword } = JSON.parse(stored);
+
+      const result = await LocalAuthentication.authenticateAsync({
+        promptMessage: 'Sign in to QUADS with biometrics',
+      });
+
+      if (result.success) {
+        const res = await login(savedEmail.toLowerCase(), savedPassword);
+        if (res?.totpRequired) {
+          setTotpRequired(true);
+        }
+      }
+    } catch (error: any) {
+      setAlertState({
+        visible: true,
+        title: "Biometric Login Failed",
+        message: error.response?.data?.message || error.message || "Failed to authenticate.",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
     if (resendCountdown <= 0) return;
@@ -120,12 +179,15 @@ const LoginScreen = ({ navigation }: any) => {
     }
   };
 
-  const handleVerifyOtp = async () => {
+  const handleVerifyOtp = async (totp?: string) => {
     if (otpCode.length !== 6) { setOtpError("Enter the 6-digit code from your email."); return; }
     setOtpError("");
     setIsLoading(true);
     try {
-      await verifyOtpAndLogin(email, otpCode);
+      const res = await verifyOtpAndLogin(email, otpCode, totp);
+      if (res?.totpRequired) {
+        setTotpRequired(true);
+      }
     } catch (error: any) {
       setOtpError(error.message || "Incorrect code. Please try again.");
     } finally {
@@ -143,16 +205,93 @@ const LoginScreen = ({ navigation }: any) => {
     }
   };
 
-  const handlePasswordLogin = async () => {
+  const handlePasswordLogin = async (totp?: string) => {
     if (!email.trim() || !password.trim()) {
       setAlertState({ visible: true, title: "Missing fields", message: "Please enter your email and password." });
       return;
     }
     setIsLoading(true);
     try {
-      await login(email.toLowerCase(), password);
+      const res = await login(email.toLowerCase(), password, totp);
+      if (res?.totpRequired) {
+        setTotpRequired(true);
+      } else {
+        // Prompt for biometrics if available and not set up yet
+        const hasHardware = await LocalAuthentication.hasHardwareAsync();
+        const isEnrolled = await LocalAuthentication.isEnrolledAsync();
+        if (hasHardware && isEnrolled) {
+          const stored = await SecureStore.getItemAsync('biometric_credentials');
+          if (!stored) {
+            Alert.alert(
+              'Enable Biometrics',
+              'Would you like to enable Face ID / fingerprint login for your next sign in?',
+              [
+                { text: 'No' },
+                {
+                  text: 'Yes',
+                  onPress: async () => {
+                    await SecureStore.setItemAsync(
+                      'biometric_credentials',
+                      JSON.stringify({ email: email.toLowerCase(), password })
+                    );
+                    Alert.alert('Success', 'Biometric login has been enabled!');
+                  }
+                }
+              ]
+            );
+          }
+        }
+      }
     } catch (error: any) {
       setAlertState({ visible: true, title: "Login failed", message: error.response?.data?.message || error.message || "Incorrect email or password." });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleVerifyTotpCode = async () => {
+    if (totpCodeInput.length !== 6) {
+      setTotpErrorMsg("Enter the 6-digit code from your authenticator app.");
+      return;
+    }
+    setTotpErrorMsg("");
+    setIsLoading(true);
+    try {
+      if (usePassword) {
+        await login(email.toLowerCase(), password, totpCodeInput);
+        
+        // Prompt for biometrics if available and not set up yet
+        const hasHardware = await LocalAuthentication.hasHardwareAsync();
+        const isEnrolled = await LocalAuthentication.isEnrolledAsync();
+        if (hasHardware && isEnrolled) {
+          const stored = await SecureStore.getItemAsync('biometric_credentials');
+          if (!stored) {
+            Alert.alert(
+              'Enable Biometrics',
+              'Would you like to enable Face ID / fingerprint login for your next sign in?',
+              [
+                { text: 'No' },
+                {
+                  text: 'Yes',
+                  onPress: async () => {
+                    await SecureStore.setItemAsync(
+                      'biometric_credentials',
+                      JSON.stringify({ email: email.toLowerCase(), password })
+                    );
+                    Alert.alert('Success', 'Biometric login has been enabled!');
+                  }
+                }
+              ]
+            );
+          }
+        }
+      } else {
+        await verifyOtpAndLogin(email, otpCode, totpCodeInput);
+      }
+      setTotpRequired(false);
+      setTotpCodeInput("");
+    } catch (error: any) {
+      setTotpErrorMsg(error.response?.data?.message || error.message || "Invalid 2FA code. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -289,7 +428,7 @@ const LoginScreen = ({ navigation }: any) => {
                     keyboardType="email-address"
                     autoCapitalize="none"
                     autoCorrect={false}
-                    onSubmitEditing={usePassword ? handlePasswordLogin : handleSendOtp}
+                    onSubmitEditing={usePassword ? () => handlePasswordLogin() : handleSendOtp}
                     returnKeyType={usePassword ? "done" : "send"}
                   />
                 </View>
@@ -306,7 +445,7 @@ const LoginScreen = ({ navigation }: any) => {
                         onChangeText={setPassword}
                         secureTextEntry={!showPw}
                         autoComplete="current-password"
-                        onSubmitEditing={handlePasswordLogin}
+                        onSubmitEditing={() => handlePasswordLogin()}
                         returnKeyType="done"
                       />
                       <TouchableOpacity style={styles.eyeButton} onPress={() => setShowPw(p => !p)}>
@@ -318,13 +457,23 @@ const LoginScreen = ({ navigation }: any) => {
 
                 <TouchableOpacity
                   style={[styles.button, isLoading && styles.buttonDisabled]}
-                  onPress={usePassword ? handlePasswordLogin : handleSendOtp}
+                  onPress={usePassword ? () => handlePasswordLogin() : handleSendOtp}
                   disabled={isLoading}
                 >
                   <Text style={styles.buttonText}>
                     {isLoading ? "Please wait..." : usePassword ? "Sign In" : "Send Login Code"}
                   </Text>
                 </TouchableOpacity>
+
+                {biometricsAvailable && hasBiometricCreds && (
+                  <TouchableOpacity
+                    style={[styles.button, { marginTop: 12, backgroundColor: colors.accent, borderColor: colors.boardBorder }]}
+                    onPress={handleBiometricLogin}
+                    disabled={isLoading}
+                  >
+                    <Text style={[styles.buttonText, { color: colors.bg || '#fff' }]}>Sign in with Biometrics</Text>
+                  </TouchableOpacity>
+                )}
 
                 <TouchableOpacity
                   style={{ marginTop: 12, alignItems: 'center' }}
@@ -387,7 +536,7 @@ const LoginScreen = ({ navigation }: any) => {
 
                 <TouchableOpacity
                   style={[styles.button, (isLoading || otpCode.length !== 6) && styles.buttonDisabled]}
-                  onPress={handleVerifyOtp}
+                  onPress={() => handleVerifyOtp()}
                   disabled={isLoading || otpCode.length !== 6}
                 >
                   <Text style={styles.buttonText}>{isLoading ? "Verifying..." : "Sign In"}</Text>
@@ -427,6 +576,116 @@ const LoginScreen = ({ navigation }: any) => {
           </View>
         </Animated.ScrollView>
         <AppAlert visible={alertState.visible} title={alertState.title} message={alertState.message} onClose={() => setAlertState({ visible: false, title: "", message: "" })} />
+
+        {/* 2FA TOTP Code Entry Modal */}
+        <Modal visible={totpRequired} transparent animationType="slide" onRequestClose={() => setTotpRequired(false)}>
+          <View style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.6)", justifyContent: "center", alignItems: "center", padding: 20 }}>
+            <View 
+              style={{ 
+                width: "100%", 
+                maxWidth: 380, 
+                backgroundColor: colors.surface, 
+                borderWidth: colors.boardBorderWidth || 4, 
+                borderColor: colors.boardBorder, 
+                padding: 24,
+                shadowColor: colors.text,
+                shadowOffset: { width: 8, height: 8 },
+                shadowOpacity: 1,
+                shadowRadius: 0,
+                elevation: 10,
+                transform: [{ rotate: "-0.5deg" }]
+              }}
+            >
+              {/* Pin Accent */}
+              <View style={{ position: "absolute", top: -10, left: "50%", marginLeft: -10, width: 20, height: 20, borderRadius: 10, backgroundColor: colors.pinRed, borderWidth: 2, borderColor: colors.boardBorder }} />
+              
+              <Text style={{ fontSize: 10, fontWeight: "900", color: colors.primary, textTransform: "uppercase", letterSpacing: 2, textAlign: "center", marginTop: 8 }}>
+                Security Verification
+              </Text>
+              <Text style={{ fontSize: 20, fontWeight: "900", color: colors.text, textTransform: "uppercase", letterSpacing: -0.5, textAlign: "center", marginVertical: 8 }}>
+                Two-Factor Auth
+              </Text>
+              <Text style={{ fontSize: 12, fontWeight: "600", color: colors.textSecondary, textAlign: "center", marginBottom: 20, lineHeight: 18 }}>
+                Enter the 6-digit verification code from your authenticator app to access your account.
+              </Text>
+
+              <TextInput
+                style={{
+                  borderWidth: colors.boardBorderWidth || 3,
+                  borderColor: totpErrorMsg ? colors.danger : colors.boardBorder,
+                  paddingHorizontal: 16,
+                  paddingVertical: 14,
+                  fontSize: 22,
+                  fontWeight: "900",
+                  textAlign: "center",
+                  letterSpacing: 8,
+                  color: colors.text,
+                  backgroundColor: colors.surfaceSecondary,
+                  marginBottom: 12,
+                }}
+                placeholder="000000"
+                placeholderTextColor={colors.textDisabled}
+                value={totpCodeInput}
+                onChangeText={(v) => {
+                  setTotpCodeInput(v.replace(/\D/g, "").slice(0, 6));
+                  setTotpErrorMsg("");
+                }}
+                keyboardType="number-pad"
+                maxLength={6}
+                autoFocus
+              />
+
+              {totpErrorMsg ? (
+                <Text style={{ color: colors.danger, fontSize: 11, fontWeight: "900", textTransform: "uppercase", letterSpacing: 0.5, textAlign: "center", marginBottom: 16 }}>
+                  {totpErrorMsg}
+                </Text>
+              ) : null}
+
+              <View style={{ flexDirection: "row", gap: 12, marginTop: 8 }}>
+                <TouchableOpacity
+                  style={{
+                    flex: 1,
+                    borderWidth: 2,
+                    borderColor: colors.boardBorder,
+                    backgroundColor: colors.surface,
+                    paddingVertical: 12,
+                    alignItems: "center",
+                  }}
+                  onPress={() => {
+                    setTotpRequired(false);
+                    setTotpCodeInput("");
+                    setTotpErrorMsg("");
+                  }}
+                >
+                  <Text style={{ color: colors.text, fontSize: 11, fontWeight: "900", textTransform: "uppercase", letterSpacing: 1.2 }}>
+                    Cancel
+                  </Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={{
+                    flex: 1,
+                    backgroundColor: colors.primary,
+                    borderWidth: 2,
+                    borderColor: colors.boardBorder,
+                    paddingVertical: 12,
+                    alignItems: "center",
+                  }}
+                  onPress={handleVerifyTotpCode}
+                  disabled={isLoading || totpCodeInput.length !== 6}
+                >
+                  {isLoading ? (
+                    <ActivityIndicator color={colors.primaryContent} size="small" />
+                  ) : (
+                    <Text style={{ color: colors.primaryContent, fontSize: 11, fontWeight: "900", textTransform: "uppercase", letterSpacing: 1.2 }}>
+                      Verify
+                    </Text>
+                  )}
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        </Modal>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );

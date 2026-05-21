@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { Star, MapPin, Clock, ShoppingBag, MessageCircle } from 'lucide-react';
+import { Star, MapPin, Clock, ShoppingBag, MessageCircle, Flag, X } from 'lucide-react';
 import api from '../services/api';
 import { LoadingSpinner } from '../components/ui';
 import { BulletinLayout } from '../components/layout/BulletinLayout';
+import { useAuth } from '../context/AuthContext';
+import toast from 'react-hot-toast';
 
 interface StoreData {
   store: any;
@@ -13,8 +15,15 @@ interface StoreData {
 
 export default function StorefrontPage() {
   const { slug } = useParams<{ slug: string }>();
+  const { user } = useAuth();
   const [data, setData] = useState<StoreData | null>(null);
   const [loading, setLoading] = useState(true);
+
+  // Reporting states
+  const [showReportModal, setShowReportModal] = useState(false);
+  const [reportReason, setReportReason] = useState('inappropriate_behavior');
+  const [reportDescription, setReportDescription] = useState('');
+  const [reporting, setReporting] = useState(false);
 
   useEffect(() => {
     if (!slug) return;
@@ -22,6 +31,29 @@ export default function StorefrontPage() {
       if (res.data.success) setData(res.data.data);
     }).catch(() => {}).finally(() => setLoading(false));
   }, [slug]);
+
+  const handleReportUser = async () => {
+    if (!reportDescription.trim()) {
+      toast.error('Please describe the reason for your report.');
+      return;
+    }
+    if (!data?.store?.ownerId?._id) return;
+    setReporting(true);
+    try {
+      await api.post('/reports', {
+        reportedUser: data.store.ownerId._id,
+        reason: reportReason,
+        description: reportDescription,
+      });
+      toast.success('Seller reported. Our team will investigate.');
+      setShowReportModal(false);
+      setReportDescription('');
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || 'Failed to report seller.');
+    } finally {
+      setReporting(false);
+    }
+  };
 
   if (loading) return <LoadingSpinner fullScreen text="Loading store..." />;
   if (!data) return (
@@ -66,6 +98,16 @@ export default function StorefrontPage() {
                 </div>
               )}
             </div>
+            {user && owner && user._id !== owner._id && (
+              <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto self-center md:self-start md:mt-2">
+                <button
+                  onClick={() => setShowReportModal(true)}
+                  className="border-2 border-red-600 bg-[var(--bulletin-card)] px-6 py-2.5 text-[10px] font-black uppercase tracking-widest shadow-[4px_4px_0_0_var(--bulletin-shadow)] transition-all hover:bg-red-50 dark:hover:bg-red-900/10 hover:translate-y-1 hover:shadow-none text-red-600 text-center flex items-center justify-center gap-2"
+                >
+                  <Flag className="h-4 w-4" /> Report Seller
+                </button>
+              </div>
+            )}
           </div>
         </div>
 
@@ -120,6 +162,83 @@ export default function StorefrontPage() {
           </div>
         )}
       </div>
+
+      {/* Report Seller Modal */}
+      {showReportModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
+          <div
+            className="w-full max-w-lg border-4 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] p-6 md:p-8 shadow-[12px_12px_0_0_var(--bulletin-shadow)]"
+            style={{ transform: 'rotate(-0.5deg)' }}
+          >
+            <div className="flex items-start justify-between gap-4 mb-6">
+              <div>
+                <div className="text-[10px] font-black uppercase tracking-widest opacity-40 text-[var(--bulletin-text)]">Trust & Safety</div>
+                <div className="text-2xl font-black uppercase tracking-tight mt-1 text-[var(--bulletin-text)]">Report Seller</div>
+              </div>
+              <button
+                onClick={() => {
+                  setShowReportModal(false);
+                  setReportDescription('');
+                }}
+                className="border-2 border-black dark:border-[var(--bulletin-border)] bg-[var(--bulletin-card)] p-2 shadow-[2px_2px_0_0_var(--bulletin-shadow)] hover:shadow-none transition-all text-[var(--bulletin-text)]"
+              >
+                <X className="h-6 w-6" />
+              </button>
+            </div>
+            
+            <div className="text-sm font-bold text-[var(--bulletin-text)] opacity-60 mb-6 italic leading-relaxed">
+              Help us maintain a safe campus marketplace. Your report will be reviewed by administrators.
+            </div>
+
+            <div className="mb-6">
+              <label className="block text-[11px] font-black uppercase tracking-wider text-[var(--bulletin-text)] opacity-70 mb-2">
+                Reason for report
+              </label>
+              <select
+                value={reportReason}
+                onChange={(e) => setReportReason(e.target.value)}
+                className="w-full border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-bg)] p-3 text-xs font-black uppercase tracking-wider text-[var(--bulletin-text)] focus:outline-none focus:ring-2 focus:ring-[#ff6b6b]"
+              >
+                <option value="inappropriate_behavior">Inappropriate Behavior</option>
+                <option value="scam">Scam / Fraud</option>
+                <option value="spam">Spam / Advertising</option>
+                <option value="harassment">Harassment / Abuse</option>
+              </select>
+            </div>
+
+            <div className="mb-8">
+              <label className="block text-[11px] font-black uppercase tracking-wider text-[var(--bulletin-text)] opacity-70 mb-2">
+                Provide details
+              </label>
+              <textarea
+                value={reportDescription}
+                onChange={(e) => setReportDescription(e.target.value)}
+                placeholder="Please describe exactly what happened..."
+                className="w-full border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-bg)] p-4 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-[#ff6b6b] resize-none h-32 text-[var(--bulletin-text)]"
+              />
+            </div>
+
+            <div className="flex flex-col sm:flex-row gap-4">
+              <button
+                className="flex-1 border-2 border-[var(--bulletin-border)] bg-[var(--bulletin-card)] py-4 text-[10px] font-black uppercase tracking-widest shadow-[4px_4px_0_0_var(--bulletin-shadow)] transition-all text-[var(--bulletin-text)]"
+                onClick={() => {
+                  setShowReportModal(false);
+                  setReportDescription('');
+                }}
+              >
+                Discard
+              </button>
+              <button
+                className="flex-1 border-2 border-[var(--bulletin-border)] bg-black dark:bg-white py-4 text-[10px] font-black uppercase tracking-widest text-white dark:text-black shadow-[4px_4px_0_0_var(--bulletin-shadow)] hover:bg-[#ff6b6b] hover:text-white transition-all"
+                onClick={handleReportUser}
+                disabled={reporting}
+              >
+                {reporting ? 'Processing...' : 'Submit Report'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </BulletinLayout>
   );
 }

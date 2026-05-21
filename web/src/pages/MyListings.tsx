@@ -34,9 +34,7 @@ const MyListings: React.FC = () => {
   const isSeller = user?.roles?.includes('seller') || user?.roles?.includes('admin');
   const isUnverifiedSeller =
     user?.roles?.includes('seller') &&
-    !user?.isVerified &&
-    !user?.emailVerified &&
-    !user?.phoneVerified;
+    !user?.isVerified;
 
   const [products, setProducts] = useState<ProductPopulated[]>([]);
   const [pagination, setPagination] = useState<PaginationInfo | null>(null);

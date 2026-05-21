@@ -10,6 +10,7 @@ export interface RegisterData {
   residenceHall?: string;
   currentLevel?: string;
   location?: string;
+  tosAccepted?: boolean;
 }
 
 export interface UpdateProfileData {
@@ -102,8 +103,11 @@ const authService = {
     return response.data;
   },
 
-  login: async (email: string, password: string) => {
-    const response = await api.post('/auth/login', { email, password });
+  login: async (email: string, password: string, totpCode?: string) => {
+    const response = await api.post('/auth/login', { email, password, totpCode });
+    if (response.data && response.data.totpRequired) {
+      return { totpRequired: true, email: response.data.email };
+    }
     // server returns { success, data: { user, token } } — unwrap to { data: { user, token } }
     return { data: response.data.data };
   },
@@ -118,8 +122,11 @@ const authService = {
     return response.data;
   },
 
-  verifyOtpLogin: async (email: string, code: string) => {
-    const response = await api.post('/auth/otp/verify/login', { email, code });
+  verifyOtpLogin: async (email: string, code: string, totpCode?: string) => {
+    const response = await api.post('/auth/otp/verify/login', { email, code, totpCode });
+    if (response.data && response.data.totpRequired) {
+      return { totpRequired: true, email: response.data.email };
+    }
     return { data: response.data.data };
   },
 

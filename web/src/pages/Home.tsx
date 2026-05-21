@@ -21,6 +21,7 @@ const HomePage: React.FC = () => {
   const [totalProducts, setTotalProducts] = useState(0);
   const [totalSellers, setTotalSellers] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [recentlyViewed, setRecentlyViewed] = useState<any[]>([]);
 
   useEffect(() => {
     Promise.all([
@@ -43,7 +44,17 @@ const HomePage: React.FC = () => {
       if (total) setTotalProducts(total);
       setLoading(false);
     });
-  }, []);
+
+    if (isAuthenticated) {
+      api.get('/discovery/recently-viewed')
+        .then(res => {
+          if (res.data?.success) {
+            setRecentlyViewed(res.data.data || []);
+          }
+        })
+        .catch(() => {});
+    }
+  }, [isAuthenticated]);
 
   const getImage = (p: ProductPopulated) => p.images[0]?.url || 'https://placehold.co/400x500/ddd/666?text=Item';
 
@@ -154,6 +165,17 @@ const HomePage: React.FC = () => {
           </div>
         )}
       </BulletinSection>
+
+      {/* ── Recently Viewed ── */}
+      {isAuthenticated && recentlyViewed.length > 0 && (
+        <BulletinSection title="Recently Viewed" subtitle="History" bgColor="bg-white dark:bg-[#111]">
+          <div className="grid gap-6 grid-cols-2 md:grid-cols-4 lg:grid-cols-6">
+            {recentlyViewed.map(item => (
+              <ProductCard key={item.product._id} product={item.product} />
+            ))}
+          </div>
+        </BulletinSection>
+      )}
 
       {/* ── Campus Pulse ── */}
       <BulletinSection

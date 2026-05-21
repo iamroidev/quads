@@ -32,6 +32,7 @@ export interface User {
     payoutAccountName?: string;
     payoutAccountNumber?: string;
   };
+  totpEnabled?: boolean;
 }
 
 export interface ProductImage {

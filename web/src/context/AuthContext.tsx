@@ -25,9 +25,9 @@ interface AuthContextType {
   verifyOtpAndRegister: (email: string, otp: string, profile: RegisterData) => Promise<void>;
   // OTP login flow
   sendLoginOtp: (email: string) => Promise<void>;
-  verifyOtpAndLogin: (email: string, otp: string) => Promise<void>;
+  verifyOtpAndLogin: (email: string, otp: string, totpCode?: string) => Promise<{ totpRequired?: boolean; email?: string } | void>;
   // Password login (kept for admin/support)
-  login: (data: { email: string; password: string }) => Promise<void>;
+  login: (data: { email: string; password: string; totpCode?: string }) => Promise<{ totpRequired?: boolean; email?: string } | void>;
   googleLogin: (credential: string, role?: 'buyer' | 'seller', profileData?: Partial<User>) => Promise<{ needsProfileCompletion: boolean; isNewUser?: boolean }>;
   logout: () => Promise<void>;
   updateProfile: (data: UpdateProfileData) => Promise<void>;
@@ -107,8 +107,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     await authService.sendOtp(email.toLowerCase(), 'login');
   }, []);
 
-  const verifyOtpAndLogin = useCallback(async (email: string, otp: string) => {
-    const response = await authService.verifyOtpLogin(email.toLowerCase(), otp.trim());
+  const verifyOtpAndLogin = useCallback(async (email: string, otp: string, totpCode?: string) => {
+    const response = await authService.verifyOtpLogin(email.toLowerCase(), otp.trim(), totpCode);
+    if (response.totpRequired) {
+      return { totpRequired: true, email: response.email };
+    }
     const { user: newUser, token: newToken } = response.data;
     const sanitized = _persistUser(newUser, newToken);
     toast.success(`Welcome back, ${sanitized.name || newUser.name}!`, { duration: 1200 });
@@ -117,8 +120,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // ── Password login (admin/support only) ─────────────────────────────────────
 
-  const login = useCallback(async (data: { email: string; password: string }) => {
-    const response = await authService.login(data.email.toLowerCase(), data.password);
+  const login = useCallback(async (data: { email: string; password: string; totpCode?: string }) => {
+    const response = await authService.login(data.email.toLowerCase(), data.password, data.totpCode);
+    if (response.totpRequired) {
+      return { totpRequired: true, email: response.email };
+    }
     const { user: newUser, token: newToken } = response.data;
     const sanitized = _persistUser(newUser, newToken);
     toast.success(`Welcome back, ${sanitized.name || newUser.name}!`, { duration: 1200 });

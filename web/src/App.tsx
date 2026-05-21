@@ -92,6 +92,7 @@ const FAQPage                = lazyWithRetry(() => import('./pages/FAQ'), 'faq')
 const AboutUsPage            = lazyWithRetry(() => import('./pages/AboutUs'), 'about');
 const LostFoundPage          = lazyWithRetry(() => import('./pages/LostFound'), 'lost-found');
 const StorefrontPage         = lazyWithRetry(() => import('./pages/Storefront'), 'storefront');
+const TransactionHistoryPage = lazyWithRetry(() => import('./pages/TransactionHistory'), 'transaction-history');
 
 import { LoadingSpinner } from './components/ui';
 
@@ -212,6 +213,14 @@ const App: React.FC = () => {
           element={
             <ProtectedRoute>
               <OrdersPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/transactions"
+          element={
+            <ProtectedRoute>
+              <TransactionHistoryPage />
             </ProtectedRoute>
           }
         />

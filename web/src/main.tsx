@@ -10,6 +10,7 @@ import { GoogleOAuthProvider } from '@react-oauth/google';
 import App from './App';
 import Onboarding from './components/Onboarding';
 import './index.css';
+import 'leaflet/dist/leaflet.css';
 
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', async () => {
