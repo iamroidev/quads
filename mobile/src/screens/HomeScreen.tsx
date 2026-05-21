@@ -201,6 +201,10 @@ const HomeScreen = ({ navigation }: any) => {
 
   useEffect(() => {
     const checkOnboarding = async () => {
+      if (!user) {
+        setShowOnboarding(false);
+        return;
+      }
       try {
         const hasSeen = await AsyncStorage.getItem("hasSeenOnboarding");
         if (!hasSeen) {
@@ -211,7 +215,7 @@ const HomeScreen = ({ navigation }: any) => {
       }
     };
     checkOnboarding();
-  }, []);
+  }, [user]);
 
   const columns = isMobile ? 2 : isTablet ? 2 : 3;
 
