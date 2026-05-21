@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { X, ShoppingBag, Shield, MessageCircle, MapPin } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 
 const STEPS = [
   {
@@ -25,14 +26,19 @@ const STEPS = [
 ];
 
 export default function Onboarding() {
+  const { user, isAuthenticated } = useAuth();
   const [visible, setVisible] = useState(false);
   const [step, setStep] = useState(0);
 
   useEffect(() => {
+    if (!user || !isAuthenticated) {
+      setVisible(false);
+      return;
+    }
     if (!localStorage.getItem('quads_onboarded')) {
       setVisible(true);
     }
-  }, []);
+  }, [user, isAuthenticated]);
 
   const dismiss = () => {
     setVisible(false);
