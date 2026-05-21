@@ -4,6 +4,7 @@ import User, { IUserDocument } from '../models/User';
 import Store from '../models/Store';
 import { generateToken } from '../utils/jwt';
 import ApiError from '../utils/ApiError';
+import verificationService from './verification.service';
 
 // All allowed Google Client IDs (web + Android + iOS)
 const GOOGLE_CLIENT_IDS = (process.env.GOOGLE_CLIENT_IDS || process.env.GOOGLE_CLIENT_ID || '')
@@ -109,7 +110,7 @@ class AuthService {
         email,
         phone:         profileData?.phone         || '',
         roles:         [normalizedRole],
-        isVerified:    false,
+        isVerified:    emailVerified && verificationService.isInstitutionalEmail(email),
         emailVerified,
         phoneVerified: false,
         avatar:        avatar || fallbackAvatar,
@@ -137,6 +138,15 @@ class AuthService {
           if (profileData[f] && !(user as any)[f]) { (user as any)[f] = profileData[f]; dirty = true; }
         }
       }
+      
+      const emailVerifiedToCheck = !user.emailVerified && emailVerified ? true : user.emailVerified;
+      const isInstitutional = verificationService.isInstitutionalEmail(email);
+      const isVerified = (emailVerifiedToCheck && isInstitutional) || user.idVerificationStatus === 'verified';
+      if (user.isVerified !== isVerified) {
+        user.isVerified = isVerified;
+        dirty = true;
+      }
+      
       if (dirty) await user.save();
     }
 

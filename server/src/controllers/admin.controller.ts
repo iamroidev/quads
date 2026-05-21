@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import adminService from '../services/admin.service';
+import verificationService from '../services/verification.service';
 
 export const getDashboardStats = async (
   _req: Request,
@@ -95,16 +96,18 @@ export const updateIdVerification = async (
     }
 
     const User = (await import('../models/User')).default;
-    const update: any = { idVerificationStatus: status };
-    if (status === 'verified') {
-      update.isVerified = true;
-    }
-
-    const user = await User.findByIdAndUpdate(req.params.id, { $set: update }, { new: true }).select('-password');
+    const user = await User.findById(req.params.id);
     if (!user) {
       res.status(404).json({ success: false, message: 'User not found' });
       return;
     }
+
+    const isInstitutional = verificationService.isInstitutionalEmail(user.email);
+    const isVerified = (user.emailVerified && isInstitutional) || status === 'verified';
+
+    user.idVerificationStatus = status as 'verified' | 'rejected';
+    user.isVerified = isVerified;
+    await user.save();
 
     res.status(200).json({
       success: true,

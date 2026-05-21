@@ -362,11 +362,20 @@ const HomeScreen = ({ navigation }: any) => {
         />
         
         <Animated.View style={[styles.premiumHeader, { opacity: fadeAnim }]}>
-          <View style={styles.headerGreetingBlock}>
-            <Text style={[styles.premiumGreeting]}>
-              {user ? `Hey, ${user.name.split(" ")[0]}` : "WELCOME TO QUADS"}
-            </Text>
-            <Text style={styles.premiumSubtitle}>Find great deals verified on campus.</Text>
+          <View style={styles.headerTopRow}>
+            <View style={styles.headerGreetingBlock}>
+              <Text style={[styles.premiumGreeting]}>
+                {user ? `Hey, ${user.name.split(" ")[0]}` : "WELCOME TO QUADS"}
+              </Text>
+              <Text style={styles.premiumSubtitle}>Find great deals verified on campus.</Text>
+            </View>
+            <TouchableOpacity
+              style={styles.headerIconBtn}
+              onPress={() => navigation.navigate('Cart')}
+              activeOpacity={0.7}
+            >
+              <Ionicons name="cart-outline" size={19} color={colors.text} />
+            </TouchableOpacity>
           </View>
           
           <View style={styles.premiumSearchBox}>
@@ -682,8 +691,27 @@ const getStyles = (colors: any, width: number, fontsLoaded = false) => {
       borderBottomWidth: colors.boardBorderWidth,
       borderBottomColor: colors.boardBorder,
     },
-    headerGreetingBlock: {
+    headerTopRow: {
+      flexDirection: 'row',
+      alignItems: 'flex-start',
+      justifyContent: 'space-between',
       marginBottom: 16,
+      gap: 12,
+    },
+    headerGreetingBlock: {
+      flex: 1,
+    },
+    headerIconBtn: {
+      width: 38,
+      height: 38,
+      borderWidth: colors.boardBorderWidth,
+      borderColor: colors.boardBorder,
+      borderBottomWidth: 3,
+      borderRightWidth: 3,
+      backgroundColor: colors.surface,
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginTop: 2,
     },
     premiumGreeting: {
       fontSize: isMobile ? 20 : typography.h1,

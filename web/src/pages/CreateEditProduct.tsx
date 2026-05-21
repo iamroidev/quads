@@ -84,6 +84,7 @@ const CreateEditProduct = () => {
     defaultValues: {
       deliveryOption: 'pickup',
       status: 'active',
+      pickupLocation: '',
     },
   });
 
@@ -93,6 +94,10 @@ const CreateEditProduct = () => {
   const isServiceOrAccommodation = selectedCategory === 'Services' || selectedCategory === 'Accommodation';
   
   const spotsList = pickupSpots.length > 0 ? pickupSpots.map(s => s.name) : fallbackSpots;
+
+  useEffect(() => {
+    register('pickupLocation');
+  }, [register]);
 
   useEffect(() => {
     if (pickupLocation && spotsList.length > 0 && !spotsList.includes(pickupLocation) && pickupLocation !== 'Other') {
