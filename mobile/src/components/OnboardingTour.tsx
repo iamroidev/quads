@@ -72,6 +72,7 @@ export default function OnboardingTour({ onComplete }: OnboardingTourProps) {
 
   const handleFinish = async () => {
     try {
+      await AsyncStorage.removeItem('quads_is_new_user');
       await AsyncStorage.setItem('hasSeenOnboarding', 'true');
     } catch (err) {
       console.warn('Failed to save onboarding preference:', err);

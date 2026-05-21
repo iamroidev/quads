@@ -206,9 +206,14 @@ const HomeScreen = ({ navigation }: any) => {
         return;
       }
       try {
-        const hasSeen = await AsyncStorage.getItem("hasSeenOnboarding");
-        if (!hasSeen) {
+        const [isNewUser, hasSeen] = await Promise.all([
+          AsyncStorage.getItem("quads_is_new_user"),
+          AsyncStorage.getItem("hasSeenOnboarding"),
+        ]);
+        if (isNewUser && !hasSeen) {
           setShowOnboarding(true);
+        } else {
+          setShowOnboarding(false);
         }
       } catch (err) {
         console.warn("Failed to read onboarding state:", err);

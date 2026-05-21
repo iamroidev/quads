@@ -35,7 +35,9 @@ export default function Onboarding() {
       setVisible(false);
       return;
     }
-    if (!localStorage.getItem('quads_onboarded')) {
+    // Only show the tour if the user is newly registered ('quads_is_new_user' flag exists)
+    // AND they have not completed/dismissed it yet ('quads_onboarded' doesn't exist).
+    if (localStorage.getItem('quads_is_new_user') && !localStorage.getItem('quads_onboarded')) {
       setVisible(true);
     }
   }, [user, isAuthenticated]);
@@ -43,6 +45,7 @@ export default function Onboarding() {
   const dismiss = () => {
     setVisible(false);
     localStorage.setItem('quads_onboarded', '1');
+    localStorage.removeItem('quads_is_new_user');
   };
 
   if (!visible) return null;

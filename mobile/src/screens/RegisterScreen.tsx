@@ -23,6 +23,7 @@ import AppAlert from "../components/AppAlert";
 import * as Google from "expo-auth-session/providers/google";
 import { makeRedirectUri } from "expo-auth-session";
 import referenceService, { Program, Hall } from "../services/reference.service";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -306,6 +307,7 @@ const RegisterScreen = ({ navigation }: any) => {
         currentLevel:  normalized.currentLevel,
         location:      normalized.location,
       });
+      await AsyncStorage.setItem('quads_is_new_user', '1');
       // AuthContext handles navigation via user state change
     } catch (error: any) {
       const message = error.response?.data?.message || error.message || "Verification failed";
@@ -335,7 +337,11 @@ const RegisterScreen = ({ navigation }: any) => {
         return;
       }
       const selectedRole: "buyer" | "seller" = form.role === "seller" ? "seller" : "buyer";
-      googleLogin(idToken, selectedRole).catch((err: any) => {
+      googleLogin(idToken, selectedRole).then(async (res) => {
+        if (res?.isNewUser) {
+          await AsyncStorage.setItem('quads_is_new_user', '1');
+        }
+      }).catch((err: any) => {
         setAlertState({ visible: true, title: "Google sign-up failed", message: err.response?.data?.message || err.message || "Google sign-up failed" });
       }).finally(() => setIsLoading(false));
     } else if (googleResponse?.type === 'error') {
