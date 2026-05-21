@@ -180,6 +180,7 @@ export const BulletinLayout: React.FC<BulletinLayoutProps> = ({
       const targetMode = user?.viewMode === 'seller' ? 'buyer' : 'seller';
       await switchRole(targetMode);
       setIsProfileOpen(false);
+      navigate('/dashboard');
     } catch (err) {
       console.error('Failed to switch role', err);
     } finally {

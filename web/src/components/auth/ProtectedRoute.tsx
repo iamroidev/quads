@@ -26,7 +26,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, roles }) => {
 
   if (
     user &&
-    user.roles?.includes('seller') &&
+    user.viewMode === 'seller' &&
     !user.roles?.includes('admin') &&
     location.pathname !== '/seller/onboarding' &&
     !user?.sellerOnboarding?.completed
