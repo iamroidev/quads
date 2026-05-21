@@ -2,6 +2,7 @@ import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import BrandMark from './BrandMark';
+import { Smartphone } from 'lucide-react';
 
 const Footer: React.FC = () => {
   const year = new Date().getFullYear();
@@ -234,16 +235,41 @@ const Footer: React.FC = () => {
         </div>
 
         {/* Bottom Part: Massive Brand Title with Brand-Colored Emblems */}
-        <div className="mt-16 pt-8 border-t border-white/5 flex flex-col md:flex-row items-end justify-between gap-6">
+        <div className="mt-16 pt-8 border-t border-white/5 flex flex-col md:flex-row items-center md:items-end justify-between gap-6">
           <div className="flex items-end gap-3 text-white">
             <BrandMark className="h-16 w-16 text-[#ff6b6b] mb-2 sm:mb-3" />
             <span className="text-[4rem] sm:text-[6.5rem] font-black tracking-tighter leading-none uppercase select-none opacity-90">
               QUADS
             </span>
           </div>
-          
-          <div className="text-[9px] font-black uppercase tracking-[0.25em] text-[#ff6b6b] text-right md:max-w-xs leading-relaxed mb-1">
-            BUILT FOR THE UNIVERSITY OF MINES AND TECHNOLOGY CORRIDORS
+
+          <div className="flex flex-col items-center md:items-end gap-2">
+            <a
+              href="/quads.zip"
+              download="quads.zip"
+              className="group/dl relative border-4 border-white bg-gradient-to-br from-[#0b0c10] to-[#171923] p-4 flex items-center gap-4 shadow-[6px_6px_0_0_#ff6b6b] hover:shadow-[8px_8px_0_0_#00e5ff] hover:-translate-y-1 hover:translate-x-[-2px] transition-all select-none max-w-xs text-white"
+            >
+              {/* Pinned ZIP Tag badge */}
+              <div className="absolute -top-3.5 right-4 bg-[#00e5ff] border-2 border-white text-black text-[8px] font-black uppercase tracking-wider px-2 py-0.5 shadow-[2px_2px_0_0_#000]">
+                ZIP Archive
+              </div>
+
+              {/* Smartphone Icon Box */}
+              <div className="flex-shrink-0 bg-white/5 border-2 border-white/20 p-2 group-hover/dl:border-[#00e5ff] group-hover/dl:bg-[#00e5ff]/5 transition-all rounded-sm">
+                <Smartphone className="h-7 w-7 text-[#00e5ff] group-hover/dl:animate-bounce transition-transform" />
+              </div>
+
+              <div className="text-left">
+                <div className="text-[10px] font-black uppercase tracking-widest text-[#00e5ff]">Get the Android App</div>
+                <div className="text-sm font-black uppercase tracking-wide text-white mt-0.5">Download v1.0.3</div>
+                <div className="text-[8px] font-bold text-white/50 uppercase tracking-widest mt-1">
+                  ~48MB &bull; Extract & Install APK
+                </div>
+              </div>
+            </a>
+            <div className="text-[9px] font-black uppercase tracking-[0.25em] text-[#ff6b6b] text-right md:max-w-xs leading-relaxed mt-2 mb-1">
+              BUILT FOR THE UNIVERSITY OF MINES AND TECHNOLOGY CORRIDORS
+            </div>
           </div>
         </div>
 
