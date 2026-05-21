@@ -382,7 +382,7 @@ const HomeScreen = ({ navigation }: any) => {
                 const catCardWidth = (width - hPadding * 2 - catGap * (catCols - 1)) / catCols;
 
                 return (
-                  <BulletinCard key={cat._id} style={[styles.categoryTile, { width: catCardWidth }]} size="sm">
+                  <View key={cat._id} style={[styles.categoryTile, { width: catCardWidth }]}>
                     <TouchableOpacity
                       onPress={() =>
                         navigation.navigate("ProductsTab", {
@@ -391,22 +391,22 @@ const HomeScreen = ({ navigation }: any) => {
                         })
                       }
                       activeOpacity={0.8}
+                      style={styles.categoryTileInner}
                     >
-                      <View style={[styles.categoryTileHeader]}>
+                      <View style={styles.categoryTileHeader}>
                         <View style={styles.categoryIconBox}>
-                          <Ionicons name={mapSlugToIcon(cat.slug) as any} size={18} color={colors.textSecondary} />
+                          <Ionicons name={mapSlugToIcon(cat.slug) as any} size={20} color={colors.primary} />
                         </View>
-                        <View style={styles.categoryBadge}>
-                          <Text style={styles.categoryBadgeText}>
-                            {cat.productCount} {cat.productCount === 1 ? 'item' : 'items'}
-                          </Text>
-                        </View>
+                        <View style={styles.categoryDot} />
                       </View>
                       <Text style={styles.categoryTileTitle} numberOfLines={1} ellipsizeMode="tail">
                         {cat.name}
                       </Text>
+                      <Text style={styles.categoryCountText}>
+                        {cat.productCount} {cat.productCount === 1 ? 'item' : 'items'}
+                      </Text>
                     </TouchableOpacity>
-                  </BulletinCard>
+                  </View>
                 );
               })}
             </View>
@@ -691,9 +691,16 @@ const getStyles = (colors: any, width: number) => {
       flexDirection: "row",
       flexWrap: "wrap",
       paddingHorizontal: hPadding,
-      gap: 12,
+      gap: 10,
     },
     categoryTile: {
+      backgroundColor: colors.surface,
+      borderWidth: 2,
+      borderColor: colors.boardBorder,
+      borderBottomWidth: 3,
+      borderRightWidth: 3,
+    },
+    categoryTileInner: {
       paddingVertical: 14,
       paddingHorizontal: 12,
     },
@@ -701,32 +708,35 @@ const getStyles = (colors: any, width: number) => {
       flexDirection: "row",
       justifyContent: "space-between",
       alignItems: "center",
-      marginBottom: 12,
+      marginBottom: 10,
     },
     categoryIconBox: {
-      width: 30,
-      height: 30,
+      width: 34,
+      height: 34,
+      backgroundColor: colors.surfaceSecondary,
+      borderWidth: 1.5,
+      borderColor: colors.boardBorder,
       justifyContent: "center",
       alignItems: "center",
     },
+    categoryDot: {
+      width: 8,
+      height: 8,
+      borderRadius: 4,
+      backgroundColor: colors.primary,
+    },
     categoryTileTitle: {
-      fontSize: isMobile ? 10 : typography.label,
+      fontSize: isMobile ? 11 : typography.label,
       fontWeight: "900",
       color: colors.text,
       textTransform: "uppercase",
-      letterSpacing: 0.5,
+      letterSpacing: 0.8,
     },
-    categoryBadge: {
-      backgroundColor: colors.surfaceSecondary,
-      borderWidth: 1,
-      borderColor: colors.boardBorder,
-      paddingHorizontal: 8,
-      paddingVertical: 3,
-    },
-    categoryBadgeText: {
-      fontSize: isMobile ? 7 : typography.tag,
-      fontWeight: "900",
-      color: colors.primary,
+    categoryCountText: {
+      fontSize: isMobile ? 9 : typography.tag,
+      fontWeight: "700",
+      color: colors.textSecondary,
+      marginTop: 3,
       letterSpacing: 0.5,
     },
     featuredCard: {
