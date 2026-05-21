@@ -19,7 +19,7 @@ import {
   Settings,
   Package,
 } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import toast from 'react-hot-toast';
 import authService, { UserStats } from '../services/auth.service';
@@ -68,6 +68,7 @@ const errorBase = 'mt-1 text-[11px] text-[#ff6b6b] font-black uppercase tracking
 
 const ProfilePage: React.FC = () => {
   const { user, updateProfile, changePassword, refreshUser, switchRole } = useAuth();
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<Tab>('profile');
   const [isUpdating, setIsUpdating] = useState(false);
   const [isChangingPassword, setIsChangingPassword] = useState(false);
@@ -216,6 +217,7 @@ const ProfilePage: React.FC = () => {
     try {
       await switchRole(otherRole);
       setShowRoleModal(false);
+      navigate('/dashboard');
     } catch (err: any) {
       toast.error(err.response?.data?.message || 'Failed to switch role');
     } finally {
