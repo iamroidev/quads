@@ -1,7 +1,7 @@
 import React from 'react';
 import { Dimensions, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useColors } from '../theme/ThemeContext';
-import { shadows } from '../theme';
+
 
 interface EmptyStateProps {
   title: string;
@@ -23,7 +23,8 @@ const EmptyState: React.FC<EmptyStateProps> = ({ title, subtitle, action }) => {
       backgroundColor: colors.surface,
       padding: isMobile ? 24 : 32,
       alignItems: 'center',
-      ...shadows.bulletin,
+      borderBottomWidth: 3,
+      borderRightWidth: 3,
     },
     rule: {
       width: 28,
@@ -54,7 +55,8 @@ const EmptyState: React.FC<EmptyStateProps> = ({ title, subtitle, action }) => {
       borderColor: colors.boardBorder,
       paddingHorizontal: 18,
       paddingVertical: 10,
-      ...shadows.bulletin,
+      borderBottomWidth: 2,
+      borderRightWidth: 2,
     },
     btnText: {
       fontSize: isMobile ? 10 : 11,

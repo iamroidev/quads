@@ -15,6 +15,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
+import { useFonts, Caveat_700Bold } from "@expo-google-fonts/caveat";
 import productService from "../services/product.service";
 import { Product } from "../types";
 import { useAuth } from "../context/AuthContext";
@@ -28,6 +29,18 @@ import categoryService, {
 } from "../services/category.service";
 import { useResponsive } from "../hooks/useResponsive";
 import { getTypography } from "../theme/typography";
+
+// Washi tape divider component
+const WashiTapeDivider = ({ color, bgColor }: { color: string; bgColor: string }) => (
+  <View style={{ paddingHorizontal: 12, paddingVertical: 6 }}>
+    <View style={{
+      height: 6,
+      backgroundColor: color,
+      opacity: 0.25,
+      borderRadius: 1,
+    }} />
+  </View>
+);
 
 const CURATED_HERO_CARDS = [
   {
@@ -93,8 +106,8 @@ const ProductCard = ({
             </View>
           )}
 
-          {/* Top-right: condition pill */}
-          <View style={[styles.conditionTag, { backgroundColor: conditionColor }]}>
+          {/* Top-right: sticker-style condition badge */}
+          <View style={[styles.conditionTag, { backgroundColor: conditionColor, transform: [{ rotate: '3deg' }] }]}>
             <Text style={styles.conditionTagText}>{item.condition.replace('-', ' ')}</Text>
           </View>
 
@@ -133,7 +146,8 @@ const HomeScreen = ({ navigation }: any) => {
   const { colors, isDark } = useTheme();
   const { width, isMobile, isTablet } = useResponsive();
   const typography = getTypography(width);
-  const styles = getStyles(colors, width);
+  const [fontsLoaded] = useFonts({ Caveat_700Bold });
+  const styles = getStyles(colors, width, fontsLoaded);
   const [featured, setFeatured] = useState<Product[]>([]);
   const [recent, setRecent] = useState<Product[]>([]);
   const [trending, setTrending] = useState<Product[]>([]);
@@ -272,6 +286,10 @@ const HomeScreen = ({ navigation }: any) => {
               setRefreshing(true);
               fetchData(false);
             }}
+            tintColor={colors.primary}
+            colors={[colors.primary, colors.pinYellow, colors.pinBlue]}
+            title="📌 Refreshing..."
+            titleColor={colors.textSecondary}
           />
         }
       >
@@ -337,6 +355,8 @@ const HomeScreen = ({ navigation }: any) => {
                     }
                     activeOpacity={0.8}
                   >
+                    {/* Diagonal tape strip */}
+                    <View style={styles.tapeStrip} pointerEvents="none" />
                     <View style={[styles.curatedTopRow, { padding: curatedCardPad }]}>
                       <View style={styles.curatedIconBox}>
                         <Ionicons name={cardIcon} size={20} color={colors.primary} />
@@ -355,6 +375,8 @@ const HomeScreen = ({ navigation }: any) => {
             })}
           </ScrollView>
         </View>
+
+        <WashiTapeDivider color={colors.primary} bgColor={colors.background} />
 
         {categories.length > 0 && (
           <View style={[styles.section, { paddingTop: sectionVSpace }]}>
@@ -413,6 +435,8 @@ const HomeScreen = ({ navigation }: any) => {
           </View>
         )}
 
+        <WashiTapeDivider color={colors.pinYellow} bgColor={colors.background} />
+
         {featured.length > 0 && (
           <View style={[styles.section, { paddingTop: sectionVSpace }]}>
             <View style={[styles.sectionHeader, { paddingHorizontal: hPadding }]}>
@@ -454,6 +478,8 @@ const HomeScreen = ({ navigation }: any) => {
           </View>
         )}
 
+        <WashiTapeDivider color={colors.pinBlue} bgColor={colors.background} />
+
         <View style={[styles.section, { paddingTop: sectionVSpace }]}>
           <View style={[styles.sectionHeader, { paddingHorizontal: hPadding }]}>
             <Text style={styles.sectionLabel}>LATEST LISTINGS</Text>
@@ -488,6 +514,8 @@ const HomeScreen = ({ navigation }: any) => {
             }
           />
         </View>
+
+        <WashiTapeDivider color={colors.pinGreen} bgColor={colors.background} />
 
         <View style={[styles.section, { paddingTop: sectionVSpace }]}>
           <View style={[styles.sectionHeader, { paddingHorizontal: hPadding }]}>
@@ -542,11 +570,12 @@ const HomeScreen = ({ navigation }: any) => {
   );
 };
 
-const getStyles = (colors: any, width: number) => {
+const getStyles = (colors: any, width: number, fontsLoaded = false) => {
   const isMobile = width < 640;
   const typography = getTypography(width);
   const hPadding = isMobile ? 12 : 16;
   const gap = isMobile ? 10 : 16;
+  const handwrittenFont = fontsLoaded ? 'Caveat_700Bold' : undefined;
 
   return StyleSheet.create({
     container: { flex: 1, backgroundColor: colors.background },
@@ -637,16 +666,28 @@ const getStyles = (colors: any, width: number) => {
       textTransform: "uppercase",
     },
     sectionTitle: {
-      fontSize: isMobile ? 18 : typography.h2,
+      fontSize: isMobile ? 22 : typography.h2 + 4,
       fontWeight: "900",
       color: colors.text,
       marginTop: 2,
-      textTransform: "uppercase",
       letterSpacing: 0.5,
+      ...(handwrittenFont ? { fontFamily: handwrittenFont, textTransform: undefined } : { textTransform: "uppercase" }),
     },
     hScroll: { paddingHorizontal: hPadding, paddingRight: isMobile ? 24 : 32, gap: gap, paddingBottom: 10 },
     curatedCard: {
       padding: 0,
+      overflow: 'hidden',
+    },
+    tapeStrip: {
+      position: 'absolute',
+      top: -8,
+      right: 10,
+      width: 20,
+      height: 40,
+      backgroundColor: colors.pinYellow,
+      opacity: 0.35,
+      transform: [{ rotate: '15deg' }],
+      zIndex: 10,
     },
     curatedTopRow: {
       flexDirection: "row",
@@ -802,8 +843,19 @@ const getStyles = (colors: any, width: number) => {
       right: 6,
       paddingHorizontal: 6,
       paddingVertical: 2,
-      borderRadius: 3,
+      borderRadius: 2,
       zIndex: 5,
+      borderWidth: 0.5,
+      borderColor: 'rgba(0,0,0,0.15)',
+      ...Platform.select({
+        ios: {
+          shadowColor: '#000',
+          shadowOffset: { width: 1, height: 1 },
+          shadowOpacity: 0.2,
+          shadowRadius: 1,
+        },
+        android: { elevation: 2 },
+      }),
     },
     conditionTagText: {
       fontSize: 8,
@@ -889,16 +941,13 @@ const getStyles = (colors: any, width: number) => {
       marginBottom: 28,
       borderWidth: colors.boardBorderWidth,
       borderColor: colors.boardBorder,
+      borderBottomWidth: 3,
+      borderRightWidth: 3,
       backgroundColor: colors.surface,
       padding: isMobile ? 14 : 18,
       flexDirection: "row",
       alignItems: "center",
       gap: 12,
-      shadowColor: colors.boardShadow,
-      shadowOffset: { width: 4, height: 4 },
-      shadowOpacity: 1,
-      shadowRadius: 0,
-      elevation: 4,
     },
     buyerCtaIcon: {
       fontSize: 28,

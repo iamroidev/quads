@@ -12,7 +12,6 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import notificationService, { Notification } from '../services/notification.service';
-import { shadows } from '../theme';
 import { useColors } from '../theme/ThemeContext';
 
 const TYPE_LABELS: Record<string, string> = {
@@ -88,15 +87,8 @@ const NotificationsScreen = () => {
       borderColor: colors.boardBorder,
       paddingHorizontal: 8,
       paddingVertical: 4,
-      ...Platform.select({
-        ios: {
-          shadowColor: colors.boardShadow,
-          shadowOffset: { width: 2, height: 2 },
-          shadowOpacity: 1,
-          shadowRadius: 0,
-        },
-        android: { elevation: 2 },
-      }),
+      borderBottomWidth: 2,
+      borderRightWidth: 2,
     },
     markAllText: { fontSize: 10, color: colors.text, fontWeight: '900', textTransform: 'uppercase', letterSpacing: 0.5 },
     centered: { flex: 1, justifyContent: 'center', alignItems: 'center' },
@@ -109,7 +101,8 @@ const NotificationsScreen = () => {
       borderColor: colors.boardBorder,
       backgroundColor: colors.surface,
       marginBottom: 10,
-      ...shadows.bulletin,
+      borderBottomWidth: 3,
+      borderRightWidth: 3,
     },
     rowUnread: { backgroundColor: colors.metric1Bg },
     iconWrap: {
@@ -147,7 +140,8 @@ const NotificationsScreen = () => {
       borderColor: colors.boardBorder,
       backgroundColor: colors.surface,
       marginTop: 20,
-      ...shadows.bulletin,
+      borderBottomWidth: 3,
+      borderRightWidth: 3,
     },
     emptyIcon: { fontSize: 44, marginBottom: 12 },
     emptyText: { fontSize: isMobile ? 13 : 14, fontWeight: '900', color: colors.text, textTransform: 'uppercase' },
