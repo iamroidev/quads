@@ -1,7 +1,9 @@
 import axios from 'axios';
 import toast from 'react-hot-toast';
 
-const API_URL = import.meta.env.VITE_API_URL || '/api';
+// Always use relative /api path to route through Vercel's rewrites in production and Vite proxy in dev.
+// This bypasses any misconfigured env variables in the Vercel dashboard.
+const API_URL = '/api';
 
 const api = axios.create({
   baseURL: API_URL,
