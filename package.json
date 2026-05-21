@@ -19,6 +19,7 @@
     "price-check": "node server/src/scripts/price-check.cron.js",
     "predev": "npm run sync-env",
     "dev": "concurrently \"npm run dev:server\" \"npm run dev:web\"",
+    "start": "npm start --workspace=server",
     "lint": "eslint . --ext .ts,.tsx,.js --quiet && prettier --check .",
     "lint:fix": "eslint . --ext .ts,.tsx,.js --fix && prettier --write .",
     "test": "npm run test --workspace=server"
