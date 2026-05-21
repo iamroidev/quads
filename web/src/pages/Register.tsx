@@ -348,6 +348,7 @@ const RegisterPage: React.FC = () => {
         }
         const { confirmPassword, ...registerData } = data;
         await googleLogin(googleCredential, data.role, registerData as any);
+        localStorage.setItem('quads_is_new_user', '1');
         sessionStorage.removeItem('google_credential');
         sessionStorage.removeItem('reg_step');
         sessionStorage.removeItem('reg_data');
@@ -386,6 +387,7 @@ const RegisterPage: React.FC = () => {
         location:      profile.location,
         tosAccepted:   true,
       });
+      localStorage.setItem('quads_is_new_user', '1');
       sessionStorage.removeItem('reg_step');
       sessionStorage.removeItem('reg_data');
       sessionStorage.removeItem('reg_protocol');
