@@ -4,7 +4,7 @@ import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
 // UMaT Tarkwa campus center
-const UMAT_CENTER: [number, number] = [5.2948, -1.9870];
+const UMAT_CENTER: [number, number] = [5.2986, -2.0006];
 const DEFAULT_ZOOM = 16;
 
 // Fix default marker icons in Leaflet + bundlers

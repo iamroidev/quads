@@ -107,7 +107,7 @@ const seedTestProducts = async () => {
         condition: 'like-new' as const,
         status: 'active' as const,
         deliveryOption: 'both' as const,
-        pickupLocation: 'Tarkwa Main Campus Lib',
+        pickupLocation: 'Main Library Entrance',
         stock: 5,
         images: [
           {
@@ -127,7 +127,7 @@ const seedTestProducts = async () => {
         condition: 'good' as const,
         status: 'active' as const,
         deliveryOption: 'pickup' as const,
-        pickupLocation: 'Kenyasi Hall Lobby',
+        pickupLocation: 'KT Hall Entrance',
         stock: 10,
         images: [
           {
@@ -147,7 +147,7 @@ const seedTestProducts = async () => {
         condition: 'new' as const,
         status: 'active' as const,
         deliveryOption: 'delivery' as const,
-        pickupLocation: 'Student Center Cafeteria',
+        pickupLocation: 'Cafeteria',
         stock: 8,
         images: [
           {

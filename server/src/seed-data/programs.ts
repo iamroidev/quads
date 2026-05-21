@@ -58,50 +58,52 @@ export const UMaTHalls = [
   { name: 'Off-Campus', type: 'off-campus' },
 ];
 
-// UMaT Tarkwa Campus verified pickup spots (coordinates approximate — UMaT campus area)
+// UMaT Tarkwa Campus verified pickup spots (accurate coordinates for Main & Akoon Campuses)
 export const PickupSpots = [
-  // Central Campus
-  { name: 'Main Library Entrance', area: 'Central Campus', description: 'Front of the main university library', lat: 5.2955, lng: -1.9868, isActive: true, isManual: false },
-  { name: 'Administration Block', area: 'Central Campus', description: 'Main admin building entrance', lat: 5.2960, lng: -1.9875, isActive: true, isManual: false },
-  { name: 'IT Centre', area: 'Central Campus', description: 'ICT centre near the library complex', lat: 5.2952, lng: -1.9863, isActive: true, isManual: false },
-  { name: "Students' Centre", area: 'Central Campus', description: 'Student centre building', lat: 5.2945, lng: -1.9870, isActive: true, isManual: false },
-  { name: 'Canteen / Chop Bar Area', area: 'Central Campus', description: 'Main campus canteen area', lat: 5.2940, lng: -1.9867, isActive: true, isManual: false },
+  // Central Campus (Main Campus - Bogoso Road)
+  { name: 'Main Library Entrance', area: 'Central Campus', description: 'Front of the main university library', lat: 5.2965, lng: -2.0011, isActive: true, isManual: false },
+  { name: 'Administration Block', area: 'Central Campus', description: 'Main admin building entrance', lat: 5.2971, lng: -2.0018, isActive: true, isManual: false },
+  { name: 'IT Centre', area: 'Central Campus', description: 'ICT centre near the library complex', lat: 5.2966, lng: -2.0008, isActive: true, isManual: false },
+  { name: "Students' Centre", area: 'Central Campus', description: 'Student centre building', lat: 5.2960, lng: -2.0005, isActive: true, isManual: false },
+  { name: 'Cafeteria', area: 'Central Campus', description: 'Main campus cafeteria area', lat: 5.2958, lng: -2.0008, isActive: true, isManual: false },
+  { name: 'Main Auditorium', area: 'Central Campus', description: 'Main university auditorium entrance', lat: 5.2968, lng: -2.0014, isActive: true, isManual: false },
+  { name: 'Mini Auditorium', area: 'Central Campus', description: 'Mini auditorium entrance', lat: 5.2970, lng: -2.0011, isActive: true, isManual: false },
 
-  // Academic Blocks
-  { name: 'Engineering Block Entrance', area: 'Academic', description: 'Main entrance to the Engineering faculty block', lat: 5.2963, lng: -1.9855, isActive: true, isManual: false },
-  { name: 'Petroleum Studies Block', area: 'Academic', description: 'GNPC School of Petroleum Studies building', lat: 5.2958, lng: -1.9848, isActive: true, isManual: false },
-  { name: 'Geosciences Block Entrance', area: 'Academic', description: 'Geosciences & Environmental Studies block', lat: 5.2967, lng: -1.9862, isActive: true, isManual: false },
-  { name: 'Computing & Maths Block', area: 'Academic', description: 'Faculty of Computing & Mathematical Sciences', lat: 5.2950, lng: -1.9852, isActive: true, isManual: false },
-  { name: 'Management Science Block', area: 'Academic', description: 'Faculty of Integrated Management Science', lat: 5.2943, lng: -1.9858, isActive: true, isManual: false },
+  // Academic Blocks (Main Campus - Bogoso Road)
+  { name: 'Engineering Block Entrance', area: 'Academic', description: 'Main entrance to the Engineering faculty block', lat: 5.2978, lng: -1.9995, isActive: true, isManual: false },
+  { name: 'Petroleum Studies Block', area: 'Academic', description: 'GNPC School of Petroleum Studies building', lat: 5.2990, lng: -1.9985, isActive: true, isManual: false },
+  { name: 'Geosciences Block Entrance', area: 'Academic', description: 'Geosciences & Environmental Studies block', lat: 5.2982, lng: -2.0020, isActive: true, isManual: false },
+  { name: 'Computing & Maths Block', area: 'Academic', description: 'Faculty of Computing & Mathematical Sciences', lat: 5.2974, lng: -2.0002, isActive: true, isManual: false },
+  { name: 'Management Science Block', area: 'Academic', description: 'Faculty of Integrated Management Science', lat: 5.2962, lng: -2.0015, isActive: true, isManual: false },
 
   // On-Campus Halls
-  { name: 'KT Hall Gate', area: 'KT Hall', description: 'Main gate of KT Hall', lat: 5.2935, lng: -1.9880, isActive: true, isManual: false },
-  { name: 'Chambers of Mines Hall Gate', area: 'Chambers of Mines Hall', description: 'Main gate of Chambers of Mines Hall', lat: 5.2930, lng: -1.9890, isActive: true, isManual: false },
-  { name: 'Gold Refinery Hall Gate', area: 'Gold Refinery Hall', description: 'Main gate of Gold Refinery Hall', lat: 5.2928, lng: -1.9875, isActive: true, isManual: false },
+  { name: 'KT Hall Entrance', area: 'KT Hall', description: 'Entrance of KT Hall (Main Campus)', lat: 5.30616, lng: -1.99668, isActive: true, isManual: false },
+  { name: 'Chambers of Mines Hall Entrance', area: 'Chambers of Mines Hall', description: 'Entrance of Chambers of Mines Hall (Main Campus)', lat: 5.29944, lng: -2.00306, isActive: true, isManual: false },
+  { name: 'Gold Refinery Hall Entrance', area: 'Gold Refinery Hall', description: 'Entrance of Gold Refinery Hall (Akoon Campus)', lat: 5.31917, lng: -1.98583, isActive: true, isManual: false },
 
-  // Hostels
-  { name: 'CK Hostel Entrance', area: 'Hostels', description: 'Entrance of CK Hostel', lat: 5.2920, lng: -1.9860, isActive: true, isManual: false },
-  { name: 'Corazon Hostel Entrance', area: 'Hostels', description: 'Entrance of Corazon Hostel', lat: 5.2918, lng: -1.9855, isActive: true, isManual: false },
-  { name: 'Tovet Hostel Entrance', area: 'Hostels', description: 'Entrance of Tovet Hostel', lat: 5.2915, lng: -1.9850, isActive: true, isManual: false },
-  { name: 'Hilda Hostel Entrance', area: 'Hostels', description: 'Entrance of Hilda Hostel', lat: 5.2912, lng: -1.9845, isActive: true, isManual: false },
-  { name: 'Figenco Hostel Entrance', area: 'Hostels', description: 'Entrance of Figenco Hostel', lat: 5.2908, lng: -1.9840, isActive: true, isManual: false },
-  { name: "Kabi's Hostel Entrance", area: 'Hostels', description: "Entrance of Kabi's Hostel", lat: 5.2905, lng: -1.9835, isActive: true, isManual: false },
-  { name: 'Castle Gate Hostel Entrance', area: 'Hostels', description: 'Entrance of Castle Gate Hostel', lat: 5.2902, lng: -1.9830, isActive: true, isManual: false },
-  { name: 'The White House Hostel Entrance', area: 'Hostels', description: 'Entrance of The White House Hostel', lat: 5.2898, lng: -1.9825, isActive: true, isManual: false },
-  { name: 'Platinum Hostel Entrance', area: 'Hostels', description: 'Entrance of Platinum Hostel', lat: 5.2895, lng: -1.9820, isActive: true, isManual: false },
-  { name: 'RNM Hostel Entrance', area: 'Hostels', description: 'Entrance of RNM Hostel', lat: 5.2892, lng: -1.9815, isActive: true, isManual: false },
-  { name: 'Nhiraba Hostel Entrance', area: 'Hostels', description: 'Entrance of Nhiraba Hostel', lat: 5.2888, lng: -1.9810, isActive: true, isManual: false },
-  { name: 'Osborne Hostel Entrance', area: 'Hostels', description: 'Entrance of Osborne Hostel', lat: 5.2885, lng: -1.9805, isActive: true, isManual: false },
+  // Hostels (Main student housing corridors around Main Campus & Akyempim)
+  { name: 'CK Hostel Entrance', area: 'Hostels', description: 'Entrance of CK Hostel', lat: 5.2968, lng: -1.9945, isActive: true, isManual: false },
+  { name: 'Corazon Hostel Entrance', area: 'Hostels', description: 'Entrance of Corazon Hostel', lat: 5.2982, lng: -1.9930, isActive: true, isManual: false },
+  { name: 'Tovet Hostel Entrance', area: 'Hostels', description: 'Entrance of Tovet Hostel', lat: 5.3015, lng: -1.9940, isActive: true, isManual: false },
+  { name: 'Hilda Hostel Entrance', area: 'Hostels', description: 'Entrance of Hilda Hostel', lat: 5.3110, lng: -1.9920, isActive: true, isManual: false },
+  { name: 'Figenco Hostel Entrance', area: 'Hostels', description: 'Entrance of Figenco Hostel', lat: 5.2995, lng: -1.9915, isActive: true, isManual: false },
+  { name: "Kabi's Hostel Entrance", area: 'Hostels', description: "Entrance of Kabi's Hostel", lat: 5.2975, lng: -1.9928, isActive: true, isManual: false },
+  { name: 'Castle Gate Hostel Entrance', area: 'Hostels', description: 'Entrance of Castle Gate Hostel', lat: 5.3025, lng: -1.9950, isActive: true, isManual: false },
+  { name: 'The White House Hostel Entrance', area: 'Hostels', description: 'Entrance of The White House Hostel', lat: 5.2990, lng: -1.9938, isActive: true, isManual: false },
+  { name: 'Platinum Hostel Entrance', area: 'Hostels', description: 'Entrance of Platinum Hostel', lat: 5.3032, lng: -1.9955, isActive: true, isManual: false },
+  { name: 'RNM Hostel Entrance', area: 'Hostels', description: 'Entrance of RNM Hostel', lat: 5.3050, lng: -1.9960, isActive: true, isManual: false },
+  { name: 'Nhiraba Hostel Entrance', area: 'Hostels', description: 'Entrance of Nhiraba Hostel', lat: 5.3045, lng: -1.9952, isActive: true, isManual: false },
+  { name: 'Osborne Hostel Entrance', area: 'Hostels', description: 'Entrance of Osborne Hostel', lat: 5.3055, lng: -1.9972, isActive: true, isManual: false },
 
   // Campus Gates
-  { name: 'Main Gate (UMaT Entrance)', area: 'Campus Gates', description: 'Main entrance gate of UMaT', lat: 5.2970, lng: -1.9895, isActive: true, isManual: false },
-  { name: 'Back Gate', area: 'Campus Gates', description: 'Back/side gate of UMaT campus', lat: 5.2925, lng: -1.9840, isActive: true, isManual: false },
+  { name: 'Main Gate (UMaT Entrance)', area: 'Campus Gates', description: 'Main entrance gate of UMaT on Bogoso Road', lat: 5.2952, lng: -2.0040, isActive: true, isManual: false },
+  { name: 'Back Gate', area: 'Campus Gates', description: 'Back/side gate of UMaT campus', lat: 5.3015, lng: -1.9980, isActive: true, isManual: false },
 
   // Tarkwa Town
-  { name: 'Fijai Junction', area: 'Tarkwa Town', description: 'Fijai junction near campus', lat: 5.2980, lng: -1.9920, isActive: true, isManual: false },
-  { name: 'Akyempim Junction', area: 'Tarkwa Town', description: 'Akyempim junction landmark', lat: 5.3010, lng: -1.9940, isActive: true, isManual: false },
-  { name: 'Tarkwa Market', area: 'Tarkwa Town', description: 'Tarkwa main market area', lat: 5.3020, lng: -1.9950, isActive: true, isManual: false },
-  { name: 'Ghana Post - Tarkwa', area: 'Tarkwa Town', description: 'Ghana Post office in Tarkwa town', lat: 5.3015, lng: -1.9945, isActive: true, isManual: false },
+  { name: 'Fijai Junction', area: 'Tarkwa Town', description: 'Fijai junction near campus', lat: 5.3040, lng: -1.9910, isActive: true, isManual: false },
+  { name: 'Akyempim Junction', area: 'Tarkwa Town', description: 'Akyempim junction landmark', lat: 5.3130, lng: -1.9970, isActive: true, isManual: false },
+  { name: 'Tarkwa Market', area: 'Tarkwa Town', description: 'Tarkwa main market area', lat: 5.3012, lng: -1.9880, isActive: true, isManual: false },
+  { name: 'Ghana Post - Tarkwa', area: 'Tarkwa Town', description: 'Ghana Post office in Tarkwa town', lat: 5.3005, lng: -1.9890, isActive: true, isManual: false },
 
   // Manual entry - always last
   { name: 'Other (specify below)', area: 'Custom', description: 'Enter a custom pickup location manually', isActive: true, isManual: true },

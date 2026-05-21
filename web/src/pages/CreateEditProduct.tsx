@@ -56,12 +56,16 @@ const CreateEditProduct = () => {
   const [isOtherSelected, setIsOtherSelected] = useState(false);
 
   const fallbackSpots = [
-    'Unity Hall Entrance', 'Queens Hall Entrance', 'Independence Hall Entrance',
-    'CK Hostel Entrance', 'Corazon Hostel Entrance', 'Tovet Hostel Entrance',
-    'Hilda Hostel Entrance', 'Figenco Hostel Entrance', "Kabi's Hostel Entrance",
-    'Castle Gate Hostel Entrance', 'The White House Hostel Entrance', 'Platinum Hostel Entrance',
-    'RNM Hostel Entrance', 'Nhiraba Hostel Entrance', 'Osborne Hostel Entrance',
-    'Campus Library', 'Main Auditorium', 'Administration Block'
+    'Main Library Entrance', 'Administration Block', 'IT Centre', "Students' Centre",
+    'Cafeteria', 'Main Auditorium', 'Mini Auditorium', 'Engineering Block Entrance',
+    'Petroleum Studies Block', 'Geosciences Block Entrance', 'Computing & Maths Block',
+    'Management Science Block', 'KT Hall Entrance', 'Chambers of Mines Hall Entrance',
+    'Gold Refinery Hall Entrance', 'CK Hostel Entrance', 'Corazon Hostel Entrance',
+    'Tovet Hostel Entrance', 'Hilda Hostel Entrance', 'Figenco Hostel Entrance',
+    "Kabi's Hostel Entrance", 'Castle Gate Hostel Entrance', 'The White House Hostel Entrance',
+    'Platinum Hostel Entrance', 'RNM Hostel Entrance', 'Nhiraba Hostel Entrance',
+    'Osborne Hostel Entrance', 'Main Gate (UMaT Entrance)', 'Back Gate',
+    'Fijai Junction', 'Akyempim Junction', 'Tarkwa Market', 'Ghana Post - Tarkwa'
   ];
 
   useEffect(() => {
