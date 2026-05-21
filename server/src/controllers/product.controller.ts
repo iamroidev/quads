@@ -122,7 +122,17 @@ export const getProducts = async (
   next: NextFunction
 ): Promise<void> => {
   try {
+    let ids: string[] | undefined = undefined;
+    if (req.query.ids) {
+      if (typeof req.query.ids === 'string') {
+        ids = req.query.ids.split(',').map((id: string) => id.trim()).filter(Boolean);
+      } else if (Array.isArray(req.query.ids)) {
+        ids = (req.query.ids as any[]).map(id => String(id).trim()).filter(Boolean);
+      }
+    }
+
     const result = await productService.getProducts({
+      ids,
       category: req.query.category as string,
       condition: req.query.condition as string,
       status: req.query.status as string,
@@ -136,6 +146,7 @@ export const getProducts = async (
       page: req.query.page ? parseInt(req.query.page as string, 10) : undefined,
       limit: req.query.limit ? parseInt(req.query.limit as string, 10) : undefined,
     });
+
 
     res.status(200).json({
       success: true,

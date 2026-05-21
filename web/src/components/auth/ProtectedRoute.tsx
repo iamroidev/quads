@@ -8,6 +8,19 @@ interface ProtectedRouteProps {
   roles?: ('buyer' | 'seller' | 'admin')[];
 }
 
+// Pages where we should NOT redirect a seller to onboarding —
+// these are critical buyer flows that must work regardless of onboarding state.
+const ONBOARDING_EXEMPT_PATHS = [
+  '/seller/onboarding',
+  '/checkout',
+  '/cart',
+  '/payment',
+  '/orders',
+  '/messages',
+  '/profile',
+  '/settings',
+];
+
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, roles }) => {
   const { isAuthenticated, isLoading, user } = useAuth();
   const location = useLocation();
@@ -24,11 +37,18 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, roles }) => {
     return <Navigate to="/" replace />;
   }
 
+  // Only redirect to onboarding if:
+  // - User has the seller role AND is in seller viewMode
+  // - Not an admin
+  // - Hasn't completed onboarding
+  // - Not already on an exempt page (checkout, cart, orders, etc.)
+  const isExemptPath = ONBOARDING_EXEMPT_PATHS.some(p => location.pathname.startsWith(p));
   if (
     user &&
+    user.roles?.includes('seller') &&
     user.viewMode === 'seller' &&
     !user.roles?.includes('admin') &&
-    location.pathname !== '/seller/onboarding' &&
+    !isExemptPath &&
     !user?.sellerOnboarding?.completed
   ) {
     return <Navigate to="/seller/onboarding" replace />;
@@ -38,3 +58,4 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, roles }) => {
 };
 
 export default ProtectedRoute;
+
