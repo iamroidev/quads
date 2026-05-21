@@ -110,6 +110,7 @@ class AuthService {
         email,
         phone:         profileData?.phone         || '',
         roles:         [normalizedRole],
+        viewMode:      normalizedRole === 'seller' ? 'seller' : 'buyer',
         isVerified:    emailVerified && verificationService.isInstitutionalEmail(email),
         emailVerified,
         phoneVerified: false,

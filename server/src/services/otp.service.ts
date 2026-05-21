@@ -165,6 +165,7 @@ class OtpService {
       email:         normalised,
       phone:         profile.phone || '',
       roles:         profile.roles || ['buyer'],
+      viewMode:      profile.roles?.includes('seller') ? 'seller' : 'buyer',
       studentId:     profile.studentId || '',
       department:    profile.department || '',
       residenceHall: profile.residenceHall || '',
