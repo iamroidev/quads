@@ -6,68 +6,74 @@ import { useResponsive } from '../hooks/useResponsive';
 
 type Size = 'sm' | 'md' | 'lg';
 
-const BASE_OFFSET: Record<Size, number> = {
-  sm: 2,
-  md: 4,
-  lg: 5,
-};
+// Pin colors cycle through for visual variety
+const PIN_COLORS = ['#FF6B6B', '#F1C40F', '#3498DB', '#27AE60'];
 
-export function BulletinCard({ children, size = 'lg', style }: {
+let pinCounter = 0;
+
+export function BulletinCard({ children, size = 'lg', style, showPin = true }: {
   children: React.ReactNode;
   size?: Size;
   style?: ViewStyle | ViewStyle[];
+  showPin?: boolean;
 }) {
   const { colors } = useTheme();
   const { width } = useResponsive();
 
-  const { borderWidth, offset } = useMemo(() => {
+  const { borderWidth } = useMemo(() => {
     const resp = getBulletinShadow(width);
-    const scaleFactor = resp.offset / 6;
-    return {
-      borderWidth: resp.border,
-      offset: Math.max(2, Math.round(BASE_OFFSET[size] * scaleFactor)),
-    };
-  }, [width, size]);
+    return { borderWidth: resp.border };
+  }, [width]);
 
-  // On iOS: native shadow gives a soft blur — not neobrutalist.
-  // We use a positioned View underneath to create the hard offset shadow
-  // that matches the web's box-shadow approach.
-  // On Android: elevation gives a soft shadow too, so we do the same approach.
+  // Each card gets a deterministic pin color
+  const pinColor = useMemo(() => {
+    const color = PIN_COLORS[pinCounter % PIN_COLORS.length];
+    pinCounter++;
+    return color;
+  }, []);
 
   return (
     <View style={[{ position: 'relative' }, style]}>
-      {/* Hard offset shadow layer — sits behind the card */}
-      <View
-        style={{
-          position: 'absolute',
-          top: offset,
-          left: offset,
-          right: -offset,
-          bottom: -offset,
-          backgroundColor: colors.boardShadow,
-          borderRadius: 0,
-        }}
-        pointerEvents="none"
-      />
-      {/* Card surface */}
+      {/* Card surface with clean bottom/right border accent */}
       <View style={{
         backgroundColor: colors.surface,
         borderWidth,
         borderColor: colors.boardBorder,
+        borderBottomWidth: borderWidth + 1,
+        borderRightWidth: borderWidth + 1,
         borderRadius: 0,
         overflow: 'hidden',
-        // Native shadow as fallback on iOS for accessibility / elevation
-        ...Platform.select({
-          ios: {
-            shadowColor: colors.boardShadow,
-            shadowOffset: { width: offset, height: offset },
-            shadowOpacity: 1,
-            shadowRadius: 0,
-          },
-        }),
       }}>
         {children}
       </View>
+
+      {/* Decorative push-pin tack */}
+      {showPin && (
+        <View
+          style={{
+            position: 'absolute',
+            top: -4,
+            left: 10,
+            width: 10,
+            height: 10,
+            borderRadius: 5,
+            backgroundColor: pinColor,
+            borderWidth: 1.5,
+            borderColor: colors.boardBorder,
+            zIndex: 10,
+            ...Platform.select({
+              ios: {
+                shadowColor: '#000',
+                shadowOffset: { width: 0, height: 1 },
+                shadowOpacity: 0.3,
+                shadowRadius: 1,
+              },
+              android: { elevation: 3 },
+            }),
+          }}
+          pointerEvents="none"
+        />
+      )}
     </View>
   );
 }
