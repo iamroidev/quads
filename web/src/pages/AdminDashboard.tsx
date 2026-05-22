@@ -26,6 +26,7 @@ import orderService from '../services/order.service';
 import { OrderPopulated, ProductPopulated, User } from '../types';
 import { Link } from 'react-router-dom';
 import { BulletinLayout, BulletinSection, BulletinCard } from '../components/layout/BulletinLayout';
+import { getInitial } from '../utils/getInitial';
 
 type AdminTab = 'overview' | 'users' | 'products' | 'orders' | 'disputes' | 'ops' | 'payouts' | 'notifications' | 'id-verification';
 
@@ -660,7 +661,7 @@ const AdminDashboard: React.FC = () => {
                 <div key={user._id} className="p-4 md:p-6 flex flex-col md:flex-row md:items-center justify-between gap-3 md:gap-6 hover:bg-black/5 transition-colors">
                   <div className="flex items-center gap-4">
                     <div className="h-12 w-12 border-4 border-black bg-[#ff6b6b] flex items-center justify-center text-white text-xl font-black">
-                      {user.name[0].toUpperCase()}
+                      {getInitial(user?.name)}
                     </div>
                     <div>
                       <p className="text-[15px] font-black uppercase text-[var(--bulletin-text)]">{user.name}</p>

@@ -6,6 +6,7 @@ import { LoadingSpinner } from '../components/ui';
 import { BulletinLayout } from '../components/layout/BulletinLayout';
 import { useAuth } from '../context/AuthContext';
 import toast from 'react-hot-toast';
+import { getInitial } from '../utils/getInitial';
 
 interface StoreData {
   store: any;
@@ -76,7 +77,7 @@ export default function StorefrontPage() {
           <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
             {/* Avatar */}
             <div className="w-20 h-20 border-4 border-[var(--bulletin-border)] bg-[#ff6b6b] flex items-center justify-center text-white text-3xl font-black flex-shrink-0">
-              {store.avatar ? <img src={store.avatar} className="w-full h-full object-cover" /> : store.name[0]?.toUpperCase()}
+              {store.avatar ? <img src={store.avatar} className="w-full h-full object-cover" /> : getInitial(store?.name)}
             </div>
             <div className="flex-1 text-center md:text-left">
               <div className="flex items-center justify-center md:justify-start gap-3">
