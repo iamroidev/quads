@@ -4,6 +4,40 @@
 
 A full-stack campus marketplace built exclusively for UMaT students — secure escrow payments, real-time chat, student ID verification, and mobile-first design.
 
+**Live:** [quadsmarket.tech](https://quadsmarket.tech) · API: [api.quadsmarket.tech](https://api.quadsmarket.tech)
+
+---
+
+## System Design
+
+QUADS is a **TypeScript monorepo** with three clients (web, mobile, admin) sharing one Express API and MongoDB datastore.
+
+```mermaid
+flowchart TB
+  Web[Vite React Web]
+  Mobile[Expo React Native]
+  API[Express + Socket.io]
+  DB[(MongoDB Atlas)]
+  Pay[Paystack Escrow]
+  Push[Expo + Web Push]
+  CDN[Cloudinary]
+
+  Web --> API
+  Mobile --> API
+  API --> DB
+  API --> Pay
+  API --> Push
+  API --> CDN
+```
+
+| Concern | Design choice |
+|---------|---------------|
+| **Payments** | Paystack escrow → buyer verification → scheduled MoMo payout to sellers |
+| **Auth** | Server-side OTP (Resend) + Google ID token verification — no Supabase |
+| **Realtime** | Socket.io for chat and live notifications |
+| **Jobs** | Seven in-process schedulers (flash sales, disputes, stale orders, …) |
+| **Deploy** | Web on Vercel, API on AWS EC2 (PM2), mobile via EAS |
+
 ---
 
 ## What's Built
@@ -139,3 +173,7 @@ Paystack escrow flow:
 ## Next Steps
 
 See [NEXT.md](./NEXT.md) for the full feature backlog, infrastructure plans, and technical debt list.
+
+---
+
+**Author:** [iamroidev](https://github.com/iamroidev) · Richard Kwaku Opoku
